@@ -1,0 +1,10 @@
+/**
+This notice must be untouched at all times.
+This is the COMPRESSED version of Draw2D
+WebSite: http://www.draw2d.org
+Copyright: 2006 Andreas Herz. All rights reserved.
+Created: 5.11.2006 by Andreas Herz (Web: http://www.freegroup.de )
+LICENSE: LGPL
+**/
+
+Color=function(red,_864,blue){if(typeof _864=="undefined"){var rgb=this.hex2rgb(red);this.red=rgb[0];this.green=rgb[1];this.blue=rgb[2];}else{this.red=red;this.green=_864;this.blue=blue;}};Color.prototype.type="Color";Color.prototype.getHTMLStyle=function(){return "rgb("+this.red+","+this.green+","+this.blue+")";};Color.prototype.getRed=function(){return this.red;};Color.prototype.getGreen=function(){return this.green;};Color.prototype.getBlue=function(){return this.blue;};Color.prototype.getIdealTextColor=function(){var _867=105;var _868=(this.red*0.299)+(this.green*0.587)+(this.blue*0.114);return (255-_868<_867)?new Color(0,0,0):new Color(255,255,255);};Color.prototype.hex2rgb=function(_869){_869=_869.replace("#","");return ({0:parseInt(_869.substr(0,2),16),1:parseInt(_869.substr(2,2),16),2:parseInt(_869.substr(4,2),16)});};Color.prototype.hex=function(){return (this.int2hex(this.red)+this.int2hex(this.green)+this.int2hex(this.blue));};Color.prototype.int2hex=function(v){v=Math.round(Math.min(Math.max(0,v),255));return ("0123456789ABCDEF".charAt((v-v%16)/16)+"0123456789ABCDEF".charAt(v%16));};Color.prototype.darker=function(_86b){var red=parseInt(Math.round(this.getRed()*(1-_86b)));var _86d=parseInt(Math.round(this.getGreen()*(1-_86b)));var blue=parseInt(Math.round(this.getBlue()*(1-_86b)));if(red<0){red=0;}else{if(red>255){red=255;}}if(_86d<0){_86d=0;}else{if(_86d>255){_86d=255;}}if(blue<0){blue=0;}else{if(blue>255){blue=255;}}return new Color(red,_86d,blue);};Color.prototype.lighter=function(_86f){var red=parseInt(Math.round(this.getRed()*(1+_86f)));var _871=parseInt(Math.round(this.getGreen()*(1+_86f)));var blue=parseInt(Math.round(this.getBlue()*(1+_86f)));if(red<0){red=0;}else{if(red>255){red=255;}}if(_871<0){_871=0;}else{if(_871>255){_871=255;}}if(blue<0){blue=0;}else{if(blue>255){blue=255;}}return new Color(red,_871,blue);};

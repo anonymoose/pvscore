@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo "FULL DB REFRESH..."
+psql -U unittest -d unittest -f ./unittest-db/unittest.sql > /tmp/Tfull.log 2>&1
+
+rm -rf ./data
+
+redis-cli flushdb

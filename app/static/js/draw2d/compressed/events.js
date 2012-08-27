@@ -1,0 +1,10 @@
+/**
+This notice must be untouched at all times.
+This is the COMPRESSED version of Draw2D
+WebSite: http://www.draw2d.org
+Copyright: 2006 Andreas Herz. All rights reserved.
+Created: 5.11.2006 by Andreas Herz (Web: http://www.freegroup.de )
+LICENSE: LGPL
+**/
+
+var _errorStack_=[];function pushErrorStack(e,_1243){_errorStack_.push(_1243+"\n");throw e;}AbstractEvent=function(){this.type=null;this.target=null;this.relatedTarget=null;this.cancelable=false;this.timeStamp=null;this.returnValue=true;};AbstractEvent.prototype.initEvent=function(sType,_1245){this.type=sType;this.cancelable=_1245;this.timeStamp=(new Date()).getTime();};AbstractEvent.prototype.preventDefault=function(){if(this.cancelable){this.returnValue=false;}};AbstractEvent.fireDOMEvent=function(_1246,_1247){if(document.createEvent){var evt=document.createEvent("Events");evt.initEvent(_1246,true,true);_1247.dispatchEvent(evt);}else{if(document.createEventObject){var evt=document.createEventObject();_1247.fireEvent("on"+_1246,evt);}}};EventTarget=function(){this.eventhandlers={};};EventTarget.prototype.addEventListener=function(sType,_124a){if(typeof this.eventhandlers[sType]=="undefined"){this.eventhandlers[sType]=[];}this.eventhandlers[sType][this.eventhandlers[sType].length]=_124a;};EventTarget.prototype.dispatchEvent=function(_124b){_124b.target=this;if(typeof this.eventhandlers[_124b.type]!="undefined"){for(var i=0;i<this.eventhandlers[_124b.type].length;i++){this.eventhandlers[_124b.type][i](_124b);}}return _124b.returnValue;};EventTarget.prototype.removeEventListener=function(sType,_124e){if(typeof this.eventhandlers[sType]!="undefined"){var _124f=[];for(var i=0;i<this.eventhandlers[sType].length;i++){if(this.eventhandlers[sType][i]!=_124e){_124f[_124f.length]=this.eventhandlers[sType][i];}}this.eventhandlers[sType]=_124f;}};

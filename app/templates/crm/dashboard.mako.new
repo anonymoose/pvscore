@@ -1,0 +1,70 @@
+<%inherit file="base.mako"/>\
+<%
+    from app.model.core.users import Users
+    from app.lib.plugin import plugin_registry
+    controller = request.environ['pylons.routes_dict']['controller']
+    plugin = None
+    if 'plugin' in request.environ['pylons.routes_dict']:
+        plugin = request.environ['pylons.routes_dict']['plugin']
+%>
+
+${h.stylesheet_link_ex('/public/js/jquery-1.4.2/superfish-1.4.8/css/pvs-superfish.css')}
+${h.javascript_link_ex('/public/js/jquery-1.4.2/superfish-1.4.8/js/superfish.js')}
+ 
+<script> 
+ 
+    $(document).ready(function(){ 
+        $("ul.sf-menu").superfish({ 
+            pathClass:  'current' 
+        }); 
+    }); 
+ 
+</script>
+
+<h1>Dashboard</h1> 
+<div id="dashboard" style="height:500px;"> 
+  <ul class="sf-menu sf-navbar">
+    <li>
+      <a class="sf-with-ul" href="#">Customer<span class="sf-sub-indicator"> &#187;</span></a>
+      <ul>
+        <li><a href="javascript:customer_dashboard_find()">Find</a>
+        % if c.current_user.priv.edit_customer:
+        <li><a href="/crm/customer/new">Add</a>
+        % endif
+      </ul>
+    </li>
+
+    % if c.current_user.priv.barcode_order and len([cmp for cmp in c.companies if cmp.anon_customer_email]) > 0:
+    <li>
+      <a class="sf-with-ul" href="#">Checkout<span class="sf-sub-indicator"> &#187;</span></a>
+      <ul>
+        % for cmp in c.companies:
+          % if cmp.anon_customer_email:
+          <li><a href="/crm/customer/barcode_order_dialog/${cmp.anon_customer_email}/${cmp.company_id}">${cmp.name}</a>
+          % endif
+        % endfor
+      </ul>
+    </li>
+    % endif
+
+    % for plugin_name in plugin_registry:
+      % if len(plugin_registry[plugin_name].dashboard_links) > 0 and c.current_user.type != 'External':
+      <li>
+        <a class="sf-with-ul" href="#">${plugin_registry[plugin_name].display_name_of()}<span class="sf-sub-indicator"> &#187;</span></a>
+        <ul>
+          % for l in plugin_registry[plugin_name].dashboard_links:
+          <li><a href="${l[1]}">${l[0]}</a></li>
+          % endfor
+        </ul>
+      </li>
+      % endif
+    % endfor
+  </ul>
+  
+</div> 
+
+<%def name="draw_body()">\
+${self.draw_body_center_only()}
+</%def>
+
+

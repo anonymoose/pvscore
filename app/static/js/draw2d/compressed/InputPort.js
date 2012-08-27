@@ -1,0 +1,10 @@
+/**
+This notice must be untouched at all times.
+This is the COMPRESSED version of Draw2D
+WebSite: http://www.draw2d.org
+Copyright: 2006 Andreas Herz. All rights reserved.
+Created: 5.11.2006 by Andreas Herz (Web: http://www.freegroup.de )
+LICENSE: LGPL
+**/
+
+InputPort=function(_705){Port.call(this,_705);};InputPort.prototype=new Port();InputPort.prototype.type="InputPort";InputPort.prototype.onDragstart=function(x,y){if(!this.canDrag){return false;}return true;};InputPort.prototype.onDragEnter=function(port){if(port instanceof OutputPort){Port.prototype.onDragEnter.call(this,port);}else{if(port instanceof LineStartResizeHandle){var line=this.workflow.currentSelection;if(line instanceof Connection&&line.getSource() instanceof InputPort){Port.prototype.onDragEnter.call(this,line.getTarget());}}else{if(port instanceof LineEndResizeHandle){var line=this.workflow.currentSelection;if(line instanceof Connection&&line.getTarget() instanceof InputPort){Port.prototype.onDragEnter.call(this,line.getSource());}}}}};InputPort.prototype.onDragLeave=function(port){if(port instanceof OutputPort){Port.prototype.onDragLeave.call(this,port);}else{if(port instanceof LineStartResizeHandle){var line=this.workflow.currentSelection;if(line instanceof Connection&&line.getSource() instanceof InputPort){Port.prototype.onDragLeave.call(this,line.getTarget());}}else{if(port instanceof LineEndResizeHandle){var line=this.workflow.currentSelection;if(line instanceof Connection&&line.getTarget() instanceof InputPort){Port.prototype.onDragLeave.call(this,line.getSource());}}}}};InputPort.prototype.createCommand=function(_70c){if(_70c.getPolicy()==EditPolicy.CONNECT){if(_70c.source.parentNode.id==_70c.target.parentNode.id){return null;}if(_70c.source instanceof OutputPort){return new CommandConnect(_70c.canvas,_70c.source,_70c.target);}return null;}return Port.prototype.createCommand.call(this,_70c);};

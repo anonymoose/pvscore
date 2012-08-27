@@ -1,0 +1,166 @@
+import pdb
+from sqlalchemy import Column, ForeignKey, and_
+from sqlalchemy.types import Integer, String, Date, Numeric, Text, Float
+from sqlalchemy.orm import relation, backref
+from sqlalchemy.sql.expression import text
+from app.model.meta import ORMBase, BaseModel, Session
+from app.model.crm.pricing import ProductPricing
+from app.model.crm.company import Company
+from app.lib.dbcache import FromCache, invalidate
+from app.model.core.attribute import Attribute, AttributeValue
+
+class Campaign(ORMBase, BaseModel):
+    __tablename__ = 'crm_campaign'
+    __pk__ = 'campaign_id'
+
+    campaign_id = Column(Integer, primary_key = True)
+    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
+    name = Column(String(100))
+    create_dt = Column(Date, server_default = text('now()'))
+    delete_dt = Column(Date)
+    type = Column(String(50))
+    default_url = Column(String(50))
+    tax_rate = Column(Float)
+    email = Column(String(50))
+    smtp_server = Column(String(50))
+    smtp_username = Column(String(50))
+    smtp_password = Column(String(50))
+    imap_server = Column(String(50))
+    imap_username = Column(String(50))
+    imap_password = Column(String(50))
+
+    comm_post_purchase_id = Column(Integer, ForeignKey('crm_communication.comm_id'))
+    comm_post_cancel_id = Column(Integer, ForeignKey('crm_communication.comm_id'))
+    comm_packing_slip_id = Column(Integer, ForeignKey('crm_communication.comm_id'))
+    comm_forgot_password_id = Column(Integer, ForeignKey('crm_communication.comm_id'))
+
+    company = relation('Company', lazy='joined')
+
+    def __repr__(self):
+        return '%s : %s' % (self.campaign_id, self.name)
+
+    @staticmethod
+    def create(name, company):
+        c = Campaign()
+        c.company = company
+        c.name = name
+        return c
+
+    @staticmethod
+    def find_all(enterprise_id):
+        return Session.query(Campaign) \
+            .options(FromCache('Campaign.find_all', enterprise_id)) \
+            .join((Company, Campaign.company_id == Company.company_id)).filter(and_(Campaign.delete_dt == None,
+                                                                                    Company.enterprise_id == enterprise_id)) \
+                                                                                    .order_by(Company.default_campaign_id.desc(), Campaign.name).all()
+
+    @staticmethod
+    def find_by_company(company):
+        return Session.query(Campaign) \
+            .filter(and_(Campaign.delete_dt == None,
+                         Campaign.company == company)) \
+                         .order_by(Campaign.name.asc()).all()
+
+
+    """ KB: [2011-03-15]: DEPRECATED. """
+    @staticmethod
+    def find_default_by_company(company):
+        return company.default_campaign
+
+    @staticmethod
+    def search(enterprise_id, name, company_id):
+        n_clause = cid_clause = ''
+        if name:
+            n_clause = "and cam.name like '%s%%'" % name
+        if company_id:
+            cid_clause = "and cam.company_id = %d" % int(company_id)
+
+        sql = """SELECT cam.* FROM crm_campaign cam, crm_company com
+                 where cam.company_id = com.company_id
+                 and com.enterprise_id = {ent_id}
+                 {n} {cid}
+              """.format(n=n_clause, cid=cid_clause, ent_id=enterprise_id)
+        return Session.query(Campaign).from_statement(sql).all()
+
+    def get_products(self):
+        from app.model.crm.product import Product
+        return Product.find_by_campaign(self)
+
+    def get_product_price(self, product):
+        """ KB: [2011-02-02]: Returns the discounted price if there is one, otherwise returns retail price """
+        price = ProductPricing.find(self, product)
+        if price:
+            if price.discount_price:
+                return price.discount_price
+            return price.retail_price
+        else: return -1
+
+    def get_product_retail_price(self, product):
+        """ KB: [2011-02-02]: Returns the retail price regardless of discount """
+        price = ProductPricing.find(self, product)
+        if price:
+            return price.retail_price
+        else: return None
+
+    def get_product_discount_price(self, product):
+        """ KB: [2011-02-02]: Returns the discount price """
+        price = ProductPricing.find(self, product)
+        if price:
+            return price.discount_price
+        else: return None
+
+    def send_post_purchase_comm(self, order, cc_internal=False):
+        if self.comm_post_purchase_id:
+            from app.model.crm.comm import Communication
+            comm = Communication.load(self.comm_post_purchase_id)
+            comm.send_to_customer(self, order.customer, order)
+            if cc_internal:
+                comm.send_internal(self, order.customer, None)
+
+    def send_post_cancel_comm(self, customer, cc_internal=False):
+        if self.comm_post_cancel_id:
+            from app.model.crm.comm import Communication
+            comm = Communication.load(self.comm_post_cancel_id)
+            comm.send_to_customer(self, customer, None)
+            if cc_internal:
+                comm.send_internal(self, customer, None)
+
+    def send_forgot_password_comm(self, customer, cc_internal=False):
+        if self.comm_forgot_password_id:
+            from app.model.crm.comm import Communication
+            comm = Communication.load(self.comm_forgot_password_id)
+            comm.send_to_customer(self, customer, None)
+            if cc_internal:
+                comm.send_internal(self, customer, None)
+
+    def get_product_specials(self):
+        from app.model.crm.product import Product
+        return Product.find_specials_by_campaign(self)
+
+    def get_product_features(self):
+        from app.model.crm.product import Product
+        return Product.find_featured_by_campaign(self)
+
+    def clear_attributes(self):
+        if self.company_id:
+            Attribute.clear_all('Campaign', self.company_id)
+
+    def set_attr(self, name, value):
+        attr = Attribute.find('Campaign', name)
+        if not attr:
+            attr = Attribute.create_new('Campaign', name)
+        attr.set(self, value)
+
+    def get_attr(self, name):
+        attr = Attribute.find('Campaign', name)
+        if attr:
+            return attr.get(self)
+        return None
+
+    def get_attrs(self):
+        return Attribute.find_values(self)
+
+    def invalidate_caches(self, **kwargs):
+        invalidate(self, 'Campaign.find_all', self.company.enterprise_id)
+
+

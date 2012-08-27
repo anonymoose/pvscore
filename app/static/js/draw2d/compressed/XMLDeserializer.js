@@ -1,0 +1,10 @@
+/**
+This notice must be untouched at all times.
+This is the COMPRESSED version of Draw2D
+WebSite: http://www.draw2d.org
+Copyright: 2006 Andreas Herz. All rights reserved.
+Created: 5.11.2006 by Andreas Herz (Web: http://www.freegroup.de )
+LICENSE: LGPL
+**/
+
+XMLDeserializer=function(){alert("do not init this class. Use the static methods instead");};XMLDeserializer.fromXML=function(node,_a35){var _a36=""+node.getAttributes().getNamedItem("type").getNodeValue();var _a37=node.getNodeValue();switch(_a36){case "int":try{return parseInt(""+node.getChildNodes().item(0).getNodeValue());}catch(e){alert("Error:"+e+"\nDataType:"+_a36+"\nXML Node:"+node);}case "string":case "String":try{if(node.getChildNodes().getLength()>0){return ""+node.getChildNodes().item(0).getNodeValue();}return "";}catch(e){alert("Error:"+e+"\nDataType:"+_a36+"\nXML Node:"+node);}case "Number":case "number":try{return parseFloat(""+node.getChildNodes().item(0).getNodeValue());}catch(e){alert("Error:"+e+"\nDataType:"+_a36+"\nXML Node:"+node);}case "Boolean":case "boolean":case "bool":try{return "true"==(""+node.getChildNodes().item(0).getNodeValue()).toLowerCase();}catch(e){alert("Error:"+e+"\nDataType:"+_a36+"\nXML Node:"+node);}case "dateTime":case "Date":case "date":try{return new Date(""+node.getChildNodes().item(0).getNodeValue());}catch(e){alert("Error:"+e+"\nDataType:"+_a36+"\nXML Node:"+node);}case "float":try{return parseFloat(""+node.getChildNodes().item(0).getNodeValue());}catch(e){alert("Error:"+e+"\nDataType:"+_a36+"\nXML Node:"+node);}break;}_a36=_a36.replace("@NAMESPACE"+"@","");var obj=eval("new "+_a36+"()");if(_a35!=undefined&&obj.setModelParent!=undefined){obj.setModelParent(_a35);}var _a39=node.getChildNodes();for(var i=0;i<_a39.length;i++){var _a3b=_a39.item(i);var _a3c=_a3b.getNodeName();if(obj instanceof Array){_a3c=i;}obj[_a3c]=XMLDeserializer.fromXML(_a3b,obj instanceof AbstractObjectModel?obj:_a35);}return obj;};

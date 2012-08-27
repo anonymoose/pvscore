@@ -1,0 +1,10 @@
+/**
+This notice must be untouched at all times.
+This is the COMPRESSED version of Draw2D
+WebSite: http://www.draw2d.org
+Copyright: 2006 Andreas Herz. All rights reserved.
+Created: 5.11.2006 by Andreas Herz (Web: http://www.freegroup.de )
+LICENSE: LGPL
+**/
+
+XMLSerializer=function(){alert("do not init this class. Use the static methods instead");};XMLSerializer.toXML=function(obj,_87f,_880){if(_87f==undefined){_87f="model";}_880=_880?_880:"";var t=XMLSerializer.getTypeName(obj);var s=_880+"<"+_87f+" type=\""+t+"\">";switch(t){case "int":case "number":case "boolean":s+=obj;break;case "string":s+=XMLSerializer.xmlEncode(obj);break;case "date":s+=obj.toLocaleString();break;case "Array":case "array":s+="\n";var _883=_880+"   ";for(var i=0;i<obj.length;i++){s+=XMLSerializer.toXML(obj[i],("element"),_883);}s+=_880;break;default:if(obj!==null){s+="\n";if(obj instanceof ArrayList){obj.trimToSize();}var _885=obj.getPersistentAttributes();var _883=_880+"   ";for(var name in _885){s+=XMLSerializer.toXML(_885[name],name,_883);}s+=_880;}break;}s+="</"+_87f+">\n";return s;};XMLSerializer.isSimpleVar=function(t){switch(t){case "int":case "string":case "String":case "Number":case "number":case "Boolean":case "boolean":case "bool":case "dateTime":case "Date":case "date":case "float":return true;}return false;};XMLSerializer.getTypeName=function(obj){if(obj===null){return "undefined";}if(obj instanceof Array){return "Array";}if(obj instanceof Date){return "Date";}var t=typeof (obj);if(t=="number"){return (parseInt(obj).toString()==obj)?"int":"number";}if(XMLSerializer.isSimpleVar(t)){return t;}return obj.type.replace("@NAMESPACE"+"@","");};XMLSerializer.xmlEncode=function(_88a){var _88b=_88a;var amp=/&/gi;var gt=/>/gi;var lt=/</gi;var quot=/"/gi;var apos=/'/gi;var _891="&#62;";var _892="&#38;#60;";var _893="&#38;#38;";var _894="&#34;";var _895="&#39;";_88b=_88b.replace(amp,_893);_88b=_88b.replace(quot,_894);_88b=_88b.replace(lt,_892);_88b=_88b.replace(gt,_891);_88b=_88b.replace(apos,_895);return _88b;};

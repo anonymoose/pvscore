@@ -1,27 +1,21 @@
-*.py[co]
+# use glob syntax.
+syntax: glob
 
-# Packages
-*.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-
-# Installer logs
-pip-log.txt
-
-# Unit test / coverage reports
+TAGS
+public/err.html
+*.elc
+*.pyc
+*.dat
+*.rdb
+*~
+tmp/*
+data
+.DS_Store
+*\#*\#
+*\#*
+sites
+companies
+dump.rdb
+redis.conf
 .coverage
-.tox
-
-#Translations
-*.mo
-
-#Mr Developer
-.mr.developer.cfg
+.ropeproject
