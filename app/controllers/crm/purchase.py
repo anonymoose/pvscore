@@ -48,8 +48,8 @@ class PurchaseController(BaseController):
         ent = Vendor.load(self.request.POST.get('vendor_id'))
         if not ent:
             ent = Vendor()
-        ent.enterprise_id = self.enterprise_id
         ent.bind(self.request.POST, True)
+        ent.enterprise_id = self.enterprise_id
         ent.save()
         ent.flush()
         self.flash('Successfully saved %s.' % ent.name)
@@ -70,25 +70,27 @@ class PurchaseController(BaseController):
     
     def _edit_impl(self):
         purchase_order_id = self.request.matchdict.get('purchase_order_id')
+        purchase = PurchaseOrder.load(purchase_order_id) if purchase_order_id else PurchaseOrder()
         return {
             'companies' : util.select_list(Company.find_all(self.enterprise_id), 'company_id', 'name'),
             'vendors' : util.select_list(Vendor.find_all(self.enterprise_id), 'vendor_id', 'name', True),
             'products' : Product.find_all(self.enterprise_id),
-            'purchase' : PurchaseOrder.load(purchase_order_id) if purchase_order_id else PurchaseOrder()
+            'purchase' : purchase,
+            'events' : util.select_list(StatusEvent.find_all_applicable(self.enterprise_id, purchase), 'event_id', 'display_name') if purchase.purchase_order_id else []
             }
 
     
     @view_config(route_name='crm.purchase.search', renderer='/crm/purchase.search.mako')
     @authorize(IsLoggedIn())
     def search(self):
-        vendor_id = request.POST.get('vendor_id') 
-        from_dt = request.POST.get('from_dt', util.str_today())
-        to_dt = request.POST.get('to_dt', util.str_today())
+        vendor_id = self.request.POST.get('vendor_id') 
+        from_dt = self.request.POST.get('from_dt', util.str_today())
+        to_dt = self.request.POST.get('to_dt', util.str_today())
         return {
-            'vendor_id' : request.POST.get('vendor_id') ,
-            'from_dt' : request.POST.get('from_dt', util.str_today()),
-            'to_dt' : request.POST.get('to_dt', util.str_today()),
-            'purchases' : PurchaseOrder.search(vendor_id, from_dt, to_dt),
+            'vendor_id' : vendor_id, 
+            'from_dt' : from_dt, 
+            'to_dt' : to_dt, 
+            'purchases' : PurchaseOrder.search(self.enterprise_id, vendor_id, from_dt, to_dt),
             'vendors' : util.select_list(Vendor.find_all(self.enterprise_id), 'vendor_id', 'name')
             }
 
@@ -132,7 +134,9 @@ class PurchaseController(BaseController):
         po.bind(self.request.POST)
         po.save()
         po.flush()
-        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'CREATED' if new else 'MODIFIED'), 'Purchase Order %s' % ('CREATED' if new else 'MODIFIED'))
+        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'CREATED' if new else 'MODIFIED'),
+                   'Purchase Order %s' % ('CREATED' if new else 'MODIFIED'),
+                   self.request.ctx.user)
         self.db_flush()
         self.flash('Successfully saved PO %s.' % po.purchase_order_id)
         return HTTPFound('/crm/purchase/edit/%d' % int(po.purchase_order_id))
@@ -169,7 +173,9 @@ class PurchaseController(BaseController):
         poi.save()
         poi.flush()
         po = poi.purchase_order
-        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'MODIFIED'), 'Purchase Order %s. "%s" added.' % ('MODIFIED', poi.product.name))
+        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'MODIFIED'),
+                   'Purchase Order %s. "%s" added.' % ('MODIFIED', poi.product.name),
+                   self.request.ctx.user)
         self.db_flush()
         return '{"id": %s}' % poi.order_item_id
 
@@ -185,40 +191,14 @@ class PurchaseController(BaseController):
         self.forbid_if(not poi or poi.purchase_order != po)
         prod = poi.product
         poi.delete()
-        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'MODIFIED'), 'Purchase Order %s. "%s" removed.' % ('MODIFIED', prod.name))
+        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'MODIFIED'),
+                   'Purchase Order %s. "%s" removed.' % ('MODIFIED', prod.name),
+                   self.request.ctx.user)
         poi.flush()
         return 'True'
 
 
-    @view_config(route_name='crm.purchase.show_status_dialog', renderer="/crm/purchase.view_status.mako")
-    @authorize(IsLoggedIn())
-    def show_status_dialog(self):
-        purchase_order_id = self.request.matchdict.get('purchase_order_id')
-        status_id = self.request.matchdict.get('status_id')
-        purchase = PurchaseOrder.load(purchase_order_id)
-        self.forbid_if(not purchase or purchase.company.enterprise_id != self.enterprise_id)
-        status = Status.load(status_id)
-        self.forbid_if(not status)
-        return {
-            'purchase' : purchase,
-            'status' : status
-            }
-
-
-    @view_config(route_name='crm.purchase.status_dialog', renderer="/crm/purchase.status.mako")
-    @authorize(IsLoggedIn())
-    def status_dialog(self):
-        purchase_order_id = self.request.matchdict.get('purchase_order_id')
-        order_item_id = self.request.matchdict.get('order_item_id')
-        purchase = PurchaseOrder.load(purchase_order_id)
-        self.forbid_if(not purchase or purchase.company.enterprise_id != self.enterprise_id)
-        return {
-            'purchase' : purchase,
-            'events' : util.select_list(StatusEvent.find_all_applicable(c.purchase), 'event_id', 'display_name')
-            }
-
-
-    @view_config(route_name='crm.purchase.save_status', renderer="string")
+    @view_config(route_name='crm.purchase.save_status')
     @authorize(IsLoggedIn())
     def save_status(self):
         purchase_order_id = self.request.matchdict.get('purchase_order_id')
@@ -227,8 +207,9 @@ class PurchaseController(BaseController):
         event = StatusEvent.load(self.request.POST.get('event_id'))
         self.forbid_if(not event or not self.request.POST.get('event_id') or (not event.is_system and event.enterprise_id != self.enterprise_id))
         note = self.request.POST.get('note')
-        Status.add(None, purchase, event, note)
-        return 'True'
+        Status.add(None, purchase, event, note, self.request.ctx.user)
+        self.flash("Saved status")
+        return HTTPFound('/crm/purchase/edit/%s' % purchase_order_id)
 
 
     @view_config(route_name='crm.purchase.complete', renderer="string")
@@ -244,7 +225,7 @@ class PurchaseController(BaseController):
                 oi.complete_dt = util.today()
                 oi.save()
                 InventoryJournal.create_new(oi.product, 'Item Receipt', oi.quantity)
-        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'COMPLETED'), 'Purchase Order Completed') 
+        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'COMPLETED'), 'Purchase Order Completed', self.request.ctx.user) 
         return 'True'
 
 
@@ -261,5 +242,7 @@ class PurchaseController(BaseController):
         poi.save()
         poi.flush()
         InventoryJournal.create_new(poi.product, 'Item Receipt', poi.quantity)
-        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'COMPLETED'), 'Purchase Order Item "%s" Completed' % poi.product.name) 
+        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'COMPLETED'),
+                   'Purchase Order Item "%s" Completed' % poi.product.name,
+                   self.request.ctx.user) 
         return 'True'

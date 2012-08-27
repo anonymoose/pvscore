@@ -55,7 +55,6 @@ class UsersController(BaseController):
         fname = request.POST.get('fname')
         lname = request.POST.get('lname')
         email = request.POST.get('email')
-        users = Users.search(c.username, c.fname, c.lname, c.email)
         return {
             'username' : username,
             'fname' : fname,
@@ -114,10 +113,7 @@ class UsersController(BaseController):
     def save_password(self):
         username = self.request.POST.get('username')
         u = Users.load(username)
-        if not u:
-            raise Exception('Unable to find username %s' % username)
-        else:
-            self.forbid_if(u.enterprise_id != self.enterprise_id)
+        self.forbid_if(not u or u.enterprise_id != self.enterprise_id)
         u.bind(self.request.POST, False, self.request.GET.get('pfx'))
         u.password = Users.encode_password(u.password)
         u.save()

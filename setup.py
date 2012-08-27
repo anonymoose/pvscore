@@ -26,7 +26,9 @@ requires = [
     'beaker',
     'pyramid_beaker',
     'decorator',
-    'webtest'
+    'webtest',
+    'nose',
+    'nose-exclude'
     ]
 
 setup(name='app',

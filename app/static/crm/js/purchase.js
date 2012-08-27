@@ -143,31 +143,6 @@ purchase_edit_order_item = function(elem, order_item_id, product_id) {
                   });
 };
 
-purchase_status = function() {
-    if ($_('#purchase_order_id')) {
-        pvs.dialog.display({url:pvs.ajax.dialog({root: '/crm/purchase/status_dialog/' + $_('#purchase_order_id')}),
-                            title: 'Status Purchase',
-                            width:590, 
-                            height:380,
-                            on_ok: 
-                            function() {
-                                pvs.form.post('#frm_status', 
-                                              pvs.ajax.api({root: '/crm/customer/save_status/'+$_('#purchase_order_id')}),
-                                              function(response) {
-                                                  if (pvs.is_true(response)) {
-                                                      purchase_show_history();
-                                                  } else {
-                                                      pvs.alert('Unable to status:\n'+response);
-                                                  }
-                                              }
-                                             );
-                           }
-                          });
-    } else {
-        pvs.alert('Save purchase order first');
-    }
-};
-
 purchase_complete = function() {
     if ($_('#purchase_order_id')) {
         var answer = confirm("Complete purchase order?")

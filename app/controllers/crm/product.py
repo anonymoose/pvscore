@@ -41,11 +41,6 @@ class ProductController(BaseController):
         categories = util.select_list(ProductCategory.find_all(self.enterprise_id), 'category_id', 'name', True)
         if product_id:
             product = Product.load(product_id)
-            """ KB: [2011-09-28]: When user times out and the next click is to save a product, this is unfortunate.
-            Redirect them back to the product list.
-            """
-            if not product.company:
-                return HTTPFound('/crm/product/list')
             self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
 
             """ KB: [2011-11-03]: We are allowing them to  """

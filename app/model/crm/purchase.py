@@ -76,6 +76,10 @@ class PurchaseOrder(ORMBase, BaseModel):
         Session.execute('delete from crm_purchase_order where purchase_order_id = %s' % purchase_order_id)
 
 
+    def invalidate_caches(self, **kwargs):
+        invalidate(self, 'PurchaseOrder.find_all_open', self.company.enterprise_id)
+
+
 class PurchaseOrderItem(ORMBase, BaseModel):
     __tablename__ = 'crm_purchase_order_item'
     __pk__ = 'order_item_id'
@@ -96,11 +100,13 @@ class PurchaseOrderItem(ORMBase, BaseModel):
     product = relation('Product')
     purchase_order = relation('PurchaseOrder', lazy='joined', backref=backref('order_items', order_by='PurchaseOrderItem.order_item_id'))
 
+
     def total(self):
         try:
             return self.unit_cost * self.quantity
         except:
             return 0.0
+
 
     @staticmethod
     def find_by_product(product):
@@ -112,6 +118,7 @@ class PurchaseOrderItem(ORMBase, BaseModel):
                          )) \
                          .order_by(PurchaseOrder.create_dt.desc()) \
                          .all()
+
 
     @staticmethod
     def create_new(purchase_order, product, quantity, unit_cost, discount=0.0, note=None):
@@ -151,6 +158,7 @@ class Vendor(ORMBase, BaseModel):
     
     enterprise = relation('Enterprise')
 
+
     @staticmethod
     def find_all(enterprise_id):
         return Session.query(Vendor).options(FromCache('Vendor.find_all', enterprise_id)) \
@@ -160,6 +168,7 @@ class Vendor(ORMBase, BaseModel):
                          .order_by(Vendor.name) \
                          .all()
 
+
     def invalidate_caches(self, **kwargs):
-        invalidate(self, 'Vendor.find_all', BaseModel.get_enterprise_id())
+        invalidate(self, 'Vendor.find_all', self.enterprise_id)
 

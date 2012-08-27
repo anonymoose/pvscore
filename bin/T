@@ -1,0 +1,6 @@
+#!/bin/bash
+
+rm -rf ./data/*
+
+nosetests -v --exclude-dir-file=unittest-exclude.txt $*
+

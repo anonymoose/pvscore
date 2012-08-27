@@ -95,8 +95,6 @@ def crm_routes(config):
     rt('crm.purchase.save_purchase_order_item', '/crm/purchase/save_purchase_order_item/{purchase_order_id}')  #, controller='crm/purchase', action='save_purchase_order_item')
     rt('crm.purchase.delete_purchase_order_item', '/crm/purchase/delete_purchase_order_item/{purchase_order_id}/{order_item_id}')  #, controller='crm/purchase', action='delete_purchase_order_item')
     rt('crm.purchase.show_history', '/crm/purchase/show_history/{purchase_order_id}')  #, controller='crm/purchase', action='show_history')
-    rt('crm.purchase.status_dialog', '/crm/purchase/status_dialog/{purchase_order_id}')  #, controller='crm/purchase', action='status_dialog')
-    rt('crm.purchase.show_status_dialog', '/crm/purchase/show_status_dialog/{purchase_order_id}/{status_id}')  #, controller='crm/purchase', action='show_status_dialog')
     rt('crm.purchase.save_status', '/crm/purchase/save_status/{purchase_order_id}')  #, controller='crm/purchase', action='save_status')
     rt('crm.purchase.complete', '/crm/purchase/complete/{purchase_order_id}')  #, controller='crm/purchase', action='complete')
     rt('crm.purchase.complete_item', '/crm/purchase/complete_item/{purchase_order_id}/{order_item_id}')  #, controller='crm/purchase', action='complete_item')

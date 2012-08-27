@@ -1,8 +1,0 @@
-#!/bin/bash
-
-#redis-cli flushdb
-rm -rf ./data
-
-nosetests -v $*
-
-#redis-cli flushdb

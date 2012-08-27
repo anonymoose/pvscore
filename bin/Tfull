@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "FULL DB REFRESH..."
+psql -U unittest -d unittest -f ./unittest-db/unittest.sql > /tmp/Tfull.log 2>&1
+echo "... done"
+
+rm -rf ./data/*
+
+nosetests -v --exclude-dir-file=unittest-exclude.txt $*

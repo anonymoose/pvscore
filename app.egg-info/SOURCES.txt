@@ -5695,7 +5695,6 @@ app/templates/crm/purchase.history_list.mako
 app/templates/crm/purchase.list.mako
 app/templates/crm/purchase.list_vendors.mako
 app/templates/crm/purchase.search.mako
-app/templates/crm/purchase.status.mako
 app/templates/crm/purchase.view_status.mako
 app/templates/crm/report.base.mako
 app/templates/crm/report.edit.mako

@@ -20,3 +20,5 @@ beaker
 pyramid_beaker
 decorator
 webtest
+nose
+nose-exclude
