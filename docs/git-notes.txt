@@ -10,8 +10,8 @@ git init .
 git add file1 file2
 git commit -m "initial"
 git remote a
-git remote add origin https://kbedwell@bitbucket.org/kbedwell/proj.git
-git push -u origin master
+git remote add github https://kbedwell@bitbucket.org/kbedwell/proj.git
+git push -u github master
 
 
 #
@@ -35,9 +35,9 @@ git tag -a v1.0 -m "initial version in git"
 
 # set up develop branch
 git checkout -b develop
-git push -u origin develop
+git push -u github develop
 git checkout -b work
-git push -u origin work
+git push -u github work
 
 
 # All work done in "work", if a new feature is needed, create another
@@ -55,10 +55,10 @@ git branch
 * work
 
 git commit -am "I changed stuff..."
-git push -u origin work
+git push -u github work
 git checkout develop
 git merge work
-git push -u origin develop
+git push -u github develop
 
 #
 # Doing a release, assuming that "work" is merged to "develop"
@@ -71,6 +71,6 @@ git branch
 git checkout master
 git merge develop
 git tag -a v1.1 -m "v1.1"
-git push -u origin master
+git push -u github master
 deploy.sh wm pvs01
 
