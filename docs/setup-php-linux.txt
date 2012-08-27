@@ -1,0 +1,84 @@
+######
+# getting PHP to work with nginx.
+# http://www.howtoforge.com/installing-nginx-with-php5-and-mysql-support-on-fedora-10
+######
+
+su -
+
+# mysql install optional.  Don't do it if you don't need it.
+yum install mysql mysql-server
+/etc/init.d/mysqld start
+chkconfig mysqld on
+mysqladmin -u root password Zachary234
+#mysqladmin -h server1.example.com -u root password yourrootsqlpassword
+
+# if you want mysql...
+yum install lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP
+
+# if you don't.
+yum install lighttpd-fastcgi php-cli php-gd php-imap php-ldap php-odbc php-pgsql php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP
+
+pear install Mail
+
+vi /etc/php.ini
+>> cgi.fix_pathinfo = 1
+
+vi /etc/rc.local
+>> /usr/bin/spawn-fcgi -a 127.0.0.1 -p 9000 -u nginx -g nginx -f /usr/bin/php-cgi -P /var/run/fastcgi-php.pid
+
+## don't do the rest until you have an app that actually uses php.
+
+## REPLACE $app with the actual directory/app name under /apps
+mkdir -p /apps/$app/app
+mkdir -p /apps/$app/logs
+mkdir -p /apps/$app/db
+
+vi /etc/nginx/sites/$app.conf
+server {
+        listen       80;
+        server_name  $app www.$app;
+
+
+        access_log  /apps/$app/logs/host.access.log  main;
+        error_log  /apps/$app/logs/host.error.log  debug;
+
+        location / {
+            root   /apps/$app/app;
+            index  index.php index.html index.htm;
+        }
+
+        # this is for "clean urls" in drupal working with nginx
+        #if (!-e $request_filename){
+        if ($request_uri !~ (\.js|\.jpg|\.png|\.ico|\.gif|\.css|\.pdf|\.php)) {
+            rewrite ^/(.*)$ /index.php?q=$1 last;
+        }
+
+        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+        #
+        location ~ \.php$ {
+            root           /apps/$app/app;
+            fastcgi_pass   127.0.0.1:9000;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME  /apps/$app/app$fastcgi_script_name;
+            include        fastcgi_params;
+        }
+
+        # deny access to .htaccess files, if Apache's document root
+        # concurs with nginx's one
+        #
+        location ~ /\.ht {
+            deny  all;
+        }
+    }
+
+
+
+# create cron job running every minute that looks for fcgi dying.  memory leaks.
+
+#create ~root/checkfastcgi.sh
+  #!/bin/bash
+  PID=`cat /var/run/fastcgi-php.pid`
+  ISRUNNING=`ps -ef | grep $PID | grep -v grep | wc -l`
+  [ $ISRUNNING -eq 1 ] || /usr/bin/spawn-fcgi -a 127.0.0.1 -p 9000 -u nginx -g nginx -f /usr/bin/php-cgi -P /var/run/fastcgi-php.pid
+
+# Add following line to end of cron.

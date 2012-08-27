@@ -1,0 +1,127 @@
+# get prereqs
+yum install -y erlang
+
+# set up dedicated user
+sudo adduser disco
+sudo passwd disco   # disc0
+sudo usermod -a -G wheel disco
+sudo usermod -a -G web disco
+sudo vi /etc/ssh/sshd_config
+-- AllowUsers kbedwell, disco
+/etc/init.d/sshd restart
+sudo usermod -a -G disco kbedwell
+
+# get disco.tar.gz and put it in ~/src
+
+cd ~/src
+tar zxvf disco.tar.gz
+cd disco
+make
+
+# install the system wide erlang stuff.  It will spray python stuff into the system python.  ignore that.
+sudo make install
+
+# install the virtualenv python stuff.
+cd lib
+source /apps/picker/python/bin/activate
+python setup.py install
+
+cd ~
+
+# set up cli files to get the right virtualenv at runtime.
+sudo vi /usr/local/bin/disco.sh
+-- #!/bin/bash
+-- source /apps/picker/python/bin/activate
+-- export PYTHONPATH=$PYTHONPATH:/apps/picker/app
+-- /usr/local/bin/disco $*
+
+
+sudo vi /usr/local/bin/disco-worker.sh
+-- #!/bin/bash
+-- source /apps/picker/python/bin/activate
+-- export PYTHONPATH=$PYTHONPATH:/apps/picker/app
+-- /usr/local/bin/disco-worker $*
+
+sudo chmod +x /usr/local/bin/disco.sh
+sudo chmod +x /usr/local/bin/disco-worker.sh
+sudo chmod +x /usr/local/bin/ddfs.sh
+
+# setup the firewall to handle disco traffic.
+su -
+cd ~
+curl 'http://www.palmvalleysoftware.com/download/iptables.up.rules' > ~/iptables.up.rules.disco
+vi iptables.up.rules.disco
+
+
+#                  wm01           wm02            blu01           pvs01        pvs02
+-A INPUT -p tcp -s 184.106.240.31,184.106.143.193,173.203.197.243,67.23.27.160,174.143.140.143 -j ACCEPT
+-A INPUT -p tcp --dport 8989 -j ACCEPT  # only on master
+
+/sbin/iptables -F
+/sbin/iptables-restore < ~/iptables.up.rules.disco
+/sbin/service iptables save
+/etc/init.d/sshd reload
+exit # back to kbedwell
+
+# set up the directories to work with your dedicated user.
+sudo mkdir /var/log/disco
+sudo mkdir /var/run/disco
+sudo chown -R disco:disco /var/log/disco
+sudo chown -R disco:disco /srv
+sudo chown -R disco:disco /var/run/disco
+sudo chown -R disco:disco /usr/local/lib/disco/
+
+# modify /etc/disco/settings.py to taste
+DISCO_WORKER = "///usr/local/bin//disco-worker.sh"
+DISCO_MASTER_HOST = "pvs01"
+
+#set up passwordless login for all the servers.
+su - disco
+ssh-keygen -N '' -f ~/.ssh/id_dsa
+ssh-copy-id -i .ssh/id_dsa.pub disco@pvs01
+ssh-copy-id -i .ssh/id_dsa.pub disco@pvs02
+ssh-copy-id -i .ssh/id_dsa.pub disco@blu01
+ssh-copy-id -i .ssh/id_dsa.pub disco@wm01
+ssh-copy-id -i .ssh/id_dsa.pub disco@wm02
+
+# fire up disco on the master node and kill it to establish the erlang cookie.
+su - disco
+disco.sh start
+disco.sh stop
+
+# distribute the master's cookie to all the nodes
+scp .erlang.cookie disco@pvs02:
+scp .erlang.cookie disco@blu01:
+scp .erlang.cookie disco@wm01:
+scp .erlang.cookie disco@wm02:
+
+# fire up master
+su - disco
+disco.sh start
+
+# go to the web app and add the other nodes.  everything gets launched via ssh.
+
+
+#############################################################################################
+# install ta-lib for calculations
+#
+cd ~/src ; cd ~/src
+wget http://wwww.palmvalleysoftware.com/download/ta-lib.tar.gz
+tar zxvf ta-lib.tar.gz
+source /apps/picker/python/bin/activate
+export PYTHONPATH=$PYTHONPATH:/apps/picker/app
+cd ta-lib/trunk/ta-lib/c/make/cmr/linux/g++
+make clean;make
+cd ~/src/ta-lib/trunk/ta-lib/swig/make/python/linux/g++/
+make ; make install
+
+
+#############################################################################################
+# NOTE: re changing hostnames
+#
+If you change hostname on a server (pvs02 -> fud.palmvalleysoftware.com)
+1. Change it everywhere in the host files.
+2. disco only recognizes "fud".  Make sure that is in there.
+3. Change the erlang cookie
+4. Ensure that all nodes can SSH to all other nodes as "disco" to "fud" and "fud.palmvalleysoftware.com"
+5. If you change the hostname of the master, you have to change it to "fud" in all of the /etc/disco/settings.py files on all machines.

@@ -1,0 +1,178 @@
+# dumping just the core/crm/cms tables
+#
+# pg_dump -U wm -T 'wm*' -O -c wm > wm.sql
+#
+# pg_dump -U wm -t 'table_you_want' -O -c wm > table_you_want.sql
+# pg_dump -U wm -t 'wm_prediction' -O -c wm > wm_prediction.sql
+
+# pg_dump -U wm -O -c wm > wm.sql
+# pg_dump -U retail -O -c retail > retail.sql
+# pg_dump -U picker -O -c picker | gzip > /tmp/picker.sql.gz
+
+# quick download of just the pertinent wealthmakers tables.
+# pg_dump -U wm -t 'wm_*' -T 'wm_eod_quote' -O -c wm | gzip > wm2.sql.gz
+
+
+# restoring
+# psql -U retail -d retail -f retail2.sql
+
+# lock detection 1
+select pg_class.relname,pg_locks.* from pg_class,pg_locks where pg_class.relfilenode=pg_locks.relation;
+
+# lock detection 2
+ select
+     pg_stat_activity.datname,pg_class.relname,pg_locks.transactionid, pg_locks.mode, pg_locks.granted,
+     pg_stat_activity.usename,substr(pg_stat_activity.current_query,1,30), pg_stat_activity.query_start,
+     age(now(),pg_stat_activity.query_start) as "age", pg_stat_activity.procpid
+   from pg_stat_activity,pg_locks left
+     outer join pg_class on (pg_locks.relation = pg_class.oid)
+   where pg_locks.pid=pg_stat_activity.procpid order by query_start;
+
+# lock detection 3
+ select
+     pg_stat_activity.datname,pg_class.relname,pg_locks.mode,substr(pg_stat_activity.current_query,1,50),
+     age(now(),pg_stat_activity.query_start) as "age", pg_stat_activity.procpid
+   from pg_stat_activity,pg_locks left
+     outer join pg_class on (pg_locks.relation = pg_class.oid)
+   where pg_locks.pid=pg_stat_activity.procpid order by query_start;
+
+# connections and current activity
+SELECT datname,usename,procpid,client_addr,waiting,query_start,current_query FROM pg_stat_activity;
+
+# current queries
+select * from pg_stat_activity;
+
+# db size
+SELECT pg_size_pretty(pg_database_size('wm'));
+
+# table size
+SELECT pg_size_pretty(pg_total_relation_size('big_table'));
+
+# dump to csv
+\copy (select product_id, sku, name from crm_product where company_id = 5 and
+       delete_dt is null order by product_id) to '/home/kbedwell/test.csv' with csv header
+
+# Cancel all queries in an annoying database
+SELECT pg_cancel_backend(procpid)
+FROM pg_stat_activity
+WHERE procpid = 7341;
+
+# Cancel all queries by an annoying user
+SELECT pg_cancel_backend(procpid)
+FROM pg_stat_activity
+WHERE usename = 'baduser';
+
+# terminate process by annoying database
+SELECT pg_terminate_backend(procpid)
+FROM pg_stat_activity
+WHERE datname = 'baddatabase';
+
+# terminate process by an annoying user
+SELECT pg_terminate_backend(procpid)
+FROM pg_stat_activity
+WHERE usename = 'baduser';
+
+# generate file to update sequences after re-load
+SELECT  'SELECT SETVAL(' ||quote_literal(S.relname)|| ', MAX(' ||quote_ident(C.attname)|| ') ) FROM ' ||quote_ident(T.relname)|| ';'
+FROM pg_class AS S, pg_depend AS D, pg_class AS T, pg_attribute AS C
+WHERE S.relkind = 'S'
+    AND S.oid = D.objid
+    AND D.refobjid = T.oid
+    AND D.refobjid = C.attrelid
+    AND D.refobjsubid = C.attnum
+ORDER BY S.relname;
+
+
+SELECT c.table_schema, c.table_name, c.table_type
+FROM information_schema.tables c
+WHERE  c.table_schema NOT IN('information_schema', 'pg_catalog') AND c.table_type = 'BASE TABLE'
+AND NOT EXISTS(SELECT i.tablename
+				FROM pg_catalog.pg_indexes i
+			WHERE i.schemaname = c.table_schema
+				AND i.tablename = c.table_name AND indexdef LIKE '%UNIQUE%')
+AND
+NOT EXISTS (SELECT cu.table_name
+				FROM information_schema.key_column_usage cu
+				WHERE cu.table_schema = c.table_schema AND
+					cu.table_name = c.table_name)
+ORDER BY c.table_schema, c.table_name;
+
+
+
+####################################################################################
+# postgres 8.4.4 -> 9.1 migration
+
+# stop stuff
+sudo /etc/init.d/crond stop
+sudo /etc/init.d/app.$APP stop
+
+# redeploy everything from source with new 5433 port number in ini file.
+
+# compile 9.1.1
+cd ~/src
+wget http://wwww.palmvalleysoftware.com/download/postgresql-9.1.1.tar.gz
+tar zxvf postgresql-9.1.1.tar.gz
+cd postgresql-9.1.1
+./configure --prefix=/usr/local/pgsql/v9.1.1 --with-python --with-pgport=5433
+make
+
+# move v8.4 out of the way and restart
+su postgres
+pg_ctl -D /usr/local/pgsql/data stop
+su -
+cd /usr/local/
+mv pgsql pgsqlold
+mkdir pgsql
+mv pgsqlold pgsql/v8.4
+exit # back to postgres
+/usr/local/pgsql/v8.4/bin/pg_ctl -D /usr/local/pgsql/v8.4/data start
+
+# install v9.1.1
+exit # back to kbedwell
+cd ~/src/postgresql-9.1.1
+su
+make install
+mkdir /usr/local/pgsql/v9.1.1/data
+chown postgres:root /usr/local/pgsql/v9.1.1/data
+chmod 700 /usr/local/pgsql/v9.1.1/data
+exit # back to kbedwell
+su postgres
+/usr/local/pgsql/v9.1.1/bin/initdb -D /usr/local/pgsql/v9.1.1/data
+/usr/local/pgsql/v9.1.1/bin/pg_ctl -D /usr/local/pgsql/v9.1.1/data start
+
+# do the deed.
+/usr/local/pgsql/v8.4/bin/pg_dumpall -U postgres | /usr/local/pgsql/v9.1.1/bin/psql -d postgres
+
+# add path to .bashrc
+PATH=$PATH:/usr/local/pgsql/v9.1.1/bin
+
+# fix library paths
+su -
+export LD_LIBRARY_PATH=/usr/local/pgsql/v9.1.1/lib:/usr/local/lib64/R/lib:$LD_LIBRARY_PATH
+vi /etc/ld.so.conf
+>> modify /usr/local/pgsql/lib --> /usr/local/pgsql/v9.1.1/lib
+/sbin/ldconfig
+
+# edit /etc/init.d/postgresql
+prefix=/usr/local/pgsql           >>>       prefix=/usr/local/pgsql/v9.1.1
+PGDATA="/usr/local/pgsql/data"    >>>       PGDATA="/usr/local/pgsql/v9.1.1/data"
+
+sudo /etc/init.d/crond start
+sudo /etc/init.d/app.$APP start
+
+
+####################################################################################
+# slony-II installation
+
+cd ~/src
+wget http://slony.info/downloads/2.1/source/slony1-2.1.0.tar.bz2
+bunzip2 slony1-2.1.0.tar.bz2
+tar xvf slony1-2.1.0.tar
+./configure --with-pgconfigdir=/usr/local/pgsql/v9.1.1/bin
+make
+su
+make install
+
+export CLUSTERNAME=pvs
+
+currently working on wm02

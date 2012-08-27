@@ -1,0 +1,191 @@
+###############################################################
+## HADOOP
+# architecture:
+#- pvs01 - namenode jobtracker
+#- pvs02 - secondarynamenode tasktracker datanode
+#- blu01 - tasktracker datanode
+#- wm01  - tasktracker datanode
+#- wm02  - tasktracker datanode
+
+su -
+cd /etc/yum.repos.d
+wget 'http://archive.cloudera.com/redhat/cdh/cloudera-cdh3.repo'
+yum update yum
+cd ~
+# 64bit
+curl 'http://www.palmvalleysoftware.com/download/jdk-6u23-linux-x64-rpm.bin' > jdk-6u23-linux-x64-rpm.bin
+chmod u+x ./jdk-6u23-linux-x64-rpm.bin 
+./jdk-6u12-linux-i586-rpm.bin
+
+yum -y install hadoop-0.20 hadoop-pig hadoop-hive hadoop-hbase
+yum -y install hadoop-0.20-<daemon type> # namenode datanode secondarynamenode jobtracker tasktracker
+
+----------------------------------
+# pvs01 - namenode jobtracker
+# pvs02 - secondarynamenode tasktracker datanode
+# blu01 - tasktracker datanode
+# wm01  - tasktracker datanode
+# wm02  - tasktracker datanode
+
+usermod -a -G hadoop kbedwell
+usermod -a -G hadoop hdfs
+addgroup hadoop -g hadoop
+passwd hadoop
+
+#check in /etc/ssh/sshd_config 
+AllowUsers kbedwell hadoop
+/etc/init.d/sshd restart
+
+# append the following to /etc/hosts
+67.23.27.160    	pvs01
+184.106.240.31  	wm01
+184.106.143.193 	wm02
+173.203.197.243 	blu01 
+174.143.140.143 	pvs02
+
+rm -rf /var/hadoop
+mkdir -p /var/hadoop/mapred/local   # mapred.local.dir
+mkdir -p /var/hadoop/mapred/system  # mapred.system.dir
+mkdir -p /var/hadoop/hdfs/txn       # dfs.name.dir
+mkdir -p /var/hadoop/hdfs/data      # dfs.data.dir
+chown hadoop:hadoop /var/hadoop
+chown -R hdfs:hadoop /var/hadoop/hdfs
+chown -R mapred:hadoop /var/hadoop/mapred
+chmod -R 755 /var/hadoop
+
+cd /etc/hadoop-0.20/
+cp -R conf.empty conf.wm
+cd conf.wm
+alternatives --install /etc/hadoop-0.20/conf hadoop-0.20-conf /etc/hadoop-0.20/conf.wm 50
+
+vi /etc/hadoop-0.20/conf.wm/hadoop-env.sh
+export JAVA_HOME=/usr/java/jdk1.6.0_23
+source /apps/picker/python/bin/activate
+export LD_LIBRARY_PATH=/usr/local/pgsql/lib:/usr/local/lib64/R/lib:$LD_LIBRARY_PATH
+
+vi /etc/hadoop-0.20/conf.wm/core-site.xml
+<property>
+  <name>fs.default.name</name>
+  <value>hdfs://pvs01:54310</value>
+</property>
+
+vi /etc/hadoop-0.20/conf.wm/mapred-site.xml
+<property>
+  <name>mapred.job.tracker</name>
+  <value>pvs01:54311</value>
+</property>
+<property>
+  <name>mapred.local.dir</name>
+  <value>/var/hadoop/mapred/local</value>
+</property>
+<property>
+  <name>mapred.system.dir</name>
+  <value>/var/hadoop/mapred/system</value>
+</property>
+<property>
+  <name>mapred.tasktracker.map.tasks.maximum</name>
+  <value>40</value>
+</property>
+<property>
+  <name>mapred.tasktracker.reduce.tasks.maximum</name>
+  <value>8</value>
+</property>
+
+vi /etc/hadoop-0.20/conf.wm/hdfs-site.xml
+<property>
+  <name>dfs.replication</name>
+  <value>3</value> 
+</property>
+<property>
+  <name>dfs.name.dir</name>
+  <value>/var/hadoop/hdfs/txn</value> 
+</property>
+<property>
+  <name>dfs.data.dir</name>
+  <value>/var/hadoop/hdfs/data</value> 
+</property>
+<property>
+  <name>dfs.secondary.http.address</name>
+  <value>pvs02:50090</value> 
+</property>
+
+
+# on namenode and secondarynamenode?
+vi /etc/hadoop-0.20/conf.wm/masters
+pvs01
+pvs02
+
+# on namenode and secondarynamenode?
+vi /etc/hadoop-0.20/conf.wm/slaves
+pvs02
+blu01
+wm01
+wm02
+
+# on namenode and secondarynamenode
+# set up firewall to handle hadoop traffic.
+cd ~
+curl 'http://www.palmvalleysoftware.com/download/iptables.up.rules' > ~/iptables.up.rules.hadoop
+vi iptables.up.rules.hadoop
+
+## on master:
+# Allow traffic for Hadoop
+#                  wm01           wm02            blu01           pvs01        pvs02
+-A INPUT -p tcp -s 184.106.240.31,184.106.143.193,173.203.197.243,67.23.27.160,174.143.140.143 --dport 54310 -j ACCEPT
+-A INPUT -p tcp -s 184.106.240.31,184.106.143.193,173.203.197.243,67.23.27.160,174.143.140.143 --dport 54311 -j ACCEPT
+-A INPUT -p tcp -s 184.106.240.31,184.106.143.193,173.203.197.243,67.23.27.160,174.143.140.143 --dport 50010 -j ACCEPT
+-A INPUT -p tcp -s 184.106.240.31,184.106.143.193,173.203.197.243,67.23.27.160,174.143.140.143 --dport 50020 -j ACCEPT
+-A INPUT -p tcp --dport 50070 -j ACCEPT
+-A INPUT -p tcp --dport 50075 -j ACCEPT
+-A INPUT -p tcp --dport 50090 -j ACCEPT
+-A INPUT -p tcp --dport 50030 -j ACCEPT
+-A INPUT -p tcp --dport 50060 -j ACCEPT
+-A INPUT -p tcp --dport 50090 -j ACCEPT
+
+/sbin/iptables -F
+/sbin/iptables-restore < ~/iptables.up.rules.hadoop
+/sbin/service iptables save
+/etc/init.d/sshd reload
+
+# On Master, and on initial run only.
+sudo -u hdfs hadoop namenode -format
+sudo service hadoop-0.20-namenode start
+sudo -u hdfs hadoop fs -mkdir /mapred/system
+sudo -u hdfs hadoop fs -chown mapred /mapred
+sudo -u hdfs hadoop fs -chown mapred /mapred/system
+sudo service hadoop-0.20-jobtracker start
+
+# Master normal startup
+sudo service hadoop-0.20-namenode start
+sudo service hadoop-0.20-jobtracker start
+
+# On secondarynamenode start it up
+sudo service hadoop-0.20-secondarynamenode start
+sudo service hadoop-0.20-tasktracker start
+sudo service hadoop-0.20-datanode start
+
+# On data/task nodes, start them all up
+sudo service hadoop-0.20-tasktracker start
+sudo service hadoop-0.20-datanode start
+
+# Handy shutdown all command.
+sudo service hadoop-0.20-namenode stop
+sudo service hadoop-0.20-jobtracker stop
+sudo service hadoop-0.20-secondarynamenode stop
+sudo service hadoop-0.20-tasktracker stop
+sudo service hadoop-0.20-datanode stop
+
+# RUN IT
+dumbo rm /tmp/output -hadoop /usr/lib/hadoop ; dumbo start app/bin/local/wm/hadoop_calc.py -exchange AMEX -input /stock-data/orig/AMEX/*.csv -base /tmp -hadoop /usr/lib/hadoop -pypath /apps/picker/app/
+or
+dumbo rm /tmp/output -hadoop /usr/lib/hadoop ; dumbo start app/bin/local/wm/hadoop_calc.py -exchange AMEX -input /stock-data/orig/AMEX/*.csv -base /tmp -hadoop /usr/lib/hadoop -pypath /apps/picker/app/ -memlimit 68435456 -nummaptasks 8
+
+dumbo rm /tmp/output -hadoop /usr/lib/hadoop ; dumbo start app/bin/local/wm/hadoop_calc.py -exchange AMEX -input /stock-data/orig/AMEX/*.csv -base /tmp -hadoop /usr/lib/hadoop -pypath /apps/picker/app/ -memlimit 68435456 -nummaptasks 8
+
+dumbo rm /tmp/output -hadoop /usr/lib/hadoop ; dumbo start app/bin/local/picker/hadoop_calc2.py -exchange AMEX -input /stock-data/orig/AMEX/2010.11.AMEX.csv -base /tmp -hadoop /usr/lib/hadoop -pypath /apps/picker/app/ 
+
+
+
+
+
+

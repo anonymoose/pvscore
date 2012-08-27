@@ -1,0 +1,76 @@
+http://gitref.org/basic/
+
+#
+# Add new project to bitbucket.
+#
+Create new repo at bitbucket.org
+
+cd proj
+git init .
+git add file1 file2
+git commit -m "initial"
+git remote a
+git remote add origin https://kbedwell@bitbucket.org/kbedwell/proj.git
+git push -u origin master
+
+
+#
+#commiting things:
+#
+git commit -am "this is my message"
+
+
+###################################################################################################
+# branching
+# strategy:  http://nvie.com/posts/a-successful-git-branching-model/
+#
+# work is where work happens.  changes get merged from here to develop
+# develop is where new features get moved to prior to deployment.
+#    changes get merged from here to master
+# master is the canonical last released version.  releases happen from here.
+
+
+# tag it as 1.0
+git tag -a v1.0 -m "initial version in git"
+
+# set up develop branch
+git checkout -b develop
+git push -u origin develop
+git checkout -b work
+git push -u origin work
+
+
+# All work done in "work", if a new feature is needed, create another
+# branch off develop
+git checkout develop
+git checkout -b new-feature
+
+#
+# merging back.   work -> develop
+# Assume you've done work on "work" and want to merge it back.
+#
+git branch
+  develop
+  master
+* work
+
+git commit -am "I changed stuff..."
+git push -u origin work
+git checkout develop
+git merge work
+git push -u origin develop
+
+#
+# Doing a release, assuming that "work" is merged to "develop"
+#
+git branch
+* develop
+  master
+  work
+
+git checkout master
+git merge develop
+git tag -a v1.1 -m "v1.1"
+git push -u origin master
+deploy.sh wm pvs01
+

@@ -1,0 +1,47 @@
+#
+# Setup for a local virtual network, approximating this:
+#   http://blog.sushilsuresh.co.uk/2009/10/highly-available-loadbalnced-solutoin.html
+#
+# but with PVS stack installed.
+#
+
+# Initial setup
+install vbox
+download fedora 13 iso
+install new vm over fedora 13 iso
+1GB RAM, 8GB hdd
+Bridged Network, Promiscuous mode = ALL.
+
+# install fedora 13
+Minimal install
+
+# set up network to connect to outside world.
+Run ifconfig to identify your network interface (typically eth0).
+Bring down the network interface with ifdown eth0.
+Edit the file /etc/sysconfig/network-scripts/ifcfg-eth0 so that it contains only the following lines for eth0:
+              DEVICE=eth0
+              BOOTPROTO=dhcp
+              ONBOOT=yes
+Bring the network interface back up with ifup eth0.
+
+
+# yum it up
+yum -y update
+yum -y groupinstall 'System Tools'
+yum -y groupinstall 'Development Tools'
+
+# setup static IP
+vi /etc/sysconfig/network-scripts/ifcfg-eth0
+    DEVICE=eth0
+    IPADDR=10.0.1.30
+    NETMASK=255.255.255.0
+    BOOTPROTO=static
+    ONBOOT=yes
+
+10.0.1.30   local.lb01
+10.0.1.31   local.lb02
+10.0.1.32   local.blu01  www.healthyustore.net
+10.0.1.33   local.pvs02
+
+
+

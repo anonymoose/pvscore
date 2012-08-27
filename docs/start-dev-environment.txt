@@ -1,0 +1,20 @@
+# startup postgres after a reboot.
+su postgres
+pg_ctl -D /usr/local/pgsql/data start
+
+#
+cd ~
+source pydev wm
+paster serve --reload ../extensions/ext_pvs/pvs/dev.ini  # your ini file may be different.
+
+# start up sphinx
+cd /usr/local/etc/
+/usr/local/bin/indexer --all 
+/usr/local/bin/searchd --nodetach --config ./sphinx.conf       # runs in console
+
+# start up redis (optional)
+redis-server
+
+
+# startup memcached (optional)
+memcached -d -p 11211 -u memcached -m 64 -c 1024 -P /var/run/memcached/memcached.pid

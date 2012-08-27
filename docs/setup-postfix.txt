@@ -1,0 +1,168 @@
+#
+# Entry for setting up a multi domain mail server.  PVS01 is a good place for this service.
+#http://library.linode.com/email/postfix/courier-mysql-fedora-13
+#
+
+# on mail server, set hostname
+sudo vi /etc/sysconfig/network
+HOSTNAME=mail.palmvalleysoftware.com
+
+# set up RDNS entries.  See: http://articles.slicehost.com/2008/9/2/mail-server-slice-setup
+# this needs to be done for the domain that will be sending the mail (adoptmystuff.com)
+
+# add SPF TXT entry.  See: http://articles.slicehost.com/2008/8/8/email-setting-a-sender-policy-framework-spf-record
+# this needs to be done for the domain that will be sending the mail
+v=spf1 mx include:mail.palmvalleysoftware.com -all
+
+# set up vmail user and mailboxes.
+sudo groupadd -g 5000 vmail
+sudo useradd -s /usr/sbin/nologin -g vmail -u 5000 vmail -d /home/vmail -m
+
+# http://fedoraunity.org/solved/server-solutions/postfix-mail-server
+sudo yum install postfix mysql-server spamassassin clamav amavisd-new cyrus-sasl cyrus-sasl-plain clamav-update sqlgrey mailx openssl pam_mysql fprintd-pam
+
+sudo /sbin/chkconfig postfix on
+
+# set up the mysql database.
+sudo /sbin/chkconfig mysqld on
+sudo /sbin/service mysqld start
+
+mysqladmin -u root password 'mail'
+mysqladmin -u root -p create mail
+
+mysql -u root -p
+    mysql> CREATE USER 'mailadmin'@'localhost' IDENTIFIED BY 'mailadmin';
+    Query OK, 0 rows affected (0.00 sec)
+    
+    mysql> flush privileges;
+    Query OK, 0 rows affected (0.00 sec)
+    
+    mysql> GRANT SELECT, INSERT, UPDATE, DELETE ON `mail` . * TO 'mailadmin'@'localhost';
+    Query OK, 0 rows affected (0.00 sec)
+    
+    mysql> flush privileges;
+    Query OK, 0 rows affected (0.00 sec)
+    
+    mysql> use mail
+    Database changed
+    
+    mysql> CREATE TABLE domains (
+        -> domain varchar(50) NOT NULL,
+        -> PRIMARY KEY (domain)) TYPE=MyISAM;
+    Query OK, 0 rows affected, 1 warning (0.33 sec)
+    
+    mysql> CREATE TABLE users (
+        -> email varchar(80) NOT NULL,
+        -> password varchar(20) NOT NULL,
+        -> PRIMARY KEY (email)) TYPE=MyISAM;
+    Query OK, 0 rows affected, 1 warning (0.90 sec)
+    
+    mysql> CREATE TABLE forwards (
+        -> source varchar(80) NOT NULL,
+        -> destination TEXT NOT NULL,
+        -> PRIMARY KEY (source)) TYPE=MyISAM;
+    Query OK, 0 rows affected, 1 warning (0.55 sec)
+    
+    mysql> INSERT INTO `domains` (`domain`) VALUES ('adoptmystuff.com');
+    mysql> INSERT INTO `domains` (`domain`) VALUES ('ziebot.com');
+    mysql> INSERT INTO `users` (`email`, `password`) VALUES ('stuff@adoptmystuff.com', ENCRYPT('stuff'));
+
+    mysql> quit
+    
+#
+# tell postfix to connect to mysql.  
+#
+sudo vi /etc/postfix/mysql-domains.cf
+    user = mailadmin
+    password = mailadmin
+    dbname = mail
+    query = SELECT domain AS virtual FROM domains WHERE domain='%s'
+    hosts = 127.0.0.1
+    
+sudo vi /etc/postfix/mysql-forwards.cf
+    user = mailadmin
+    password = newpassword
+    dbname = mail
+    query = SELECT destination FROM forwards WHERE source='%s'
+    hosts = 127.0.0.1
+
+sudo vi /etc/postfix/mysql-mailboxes.cf
+    user = mailadmin
+    password = mailadmin
+    dbname = mail
+    query = SELECT CONCAT(SUBSTRING_INDEX(email,'@',-1),'/',SUBSTRING_INDEX(email,'@',1),'/') FROM users WHERE email='%s'
+    hosts = 127.0.0.1
+
+sudo vi /etc/postfix/mysql-email.cf
+    user = mailadmin
+    password = mailadmin
+    dbname = mail
+    query = SELECT email FROM users WHERE email='%s'
+    hosts = 127.0.0.1
+    
+sudo chmod o= /etc/postfix/mysql-*
+sudo chgrp postfix /etc/postfix/mysql-*
+
+#
+# Create a self signed cert for now.
+# See: http://fedoraunity.org/solved/server-solutions/postfix-mail-server #3.2
+#
+cd /etc/postfix
+openssl req -new -x509 -nodes -out cert.pem -keyout key.pem -days 3650
+chmod 600 *.pem
+
+# edit the main conf file to ensure it is pointing to our new fils and new user.
+sudo vi /etc/postfix/main.cf
+    myhostname = mail.palmvalleysoftware.com
+    inet_interfaces = all
+    mynetworks = 127.0.0.0/8
+    message_size_limit = 30720000
+    virtual_alias_domains =
+    virtual_alias_maps = proxy:mysql:/etc/postfix/mysql-forwards.cf, mysql:/etc/postfix/mysql-email.cf
+    virtual_mailbox_domains = proxy:mysql:/etc/postfix/mysql-domains.cf
+    virtual_mailbox_maps = proxy:mysql:/etc/postfix/mysql-mailboxes.cf
+    virtual_mailbox_base = /home/vmail
+    virtual_uid_maps = static:5000
+    virtual_gid_maps = static:5000
+    smtpd_sasl_auth_enable = yes
+    broken_sasl_auth_clients = yes
+    smtpd_sasl_authenticated_header = yes
+    smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+    smtpd_use_tls = yes
+    smtpd_tls_cert_file = /etc/postfix/cert.pem
+    smtpd_tls_key_file = /etc/postfix/key.pem
+    virtual_create_maildirsize = yes
+    virtual_maildir_extended = yes
+    proxy_read_maps = $local_recipient_maps $mydestination $virtual_alias_maps $virtual_alias_domains $virtual_mailbox_maps $virtual_mailbox_domains $relay_recipient_maps $relay_domains $canonical_maps $sender_canonical_maps $recipient_canonical_maps $relocated_maps $transport_maps $mynetworks $virtual_mailbox_limit_maps
+        
+#
+# Ensure SASL is set up to ensure secure SMTP connections.
+# See (primarily): http://fedoraunity.org/solved/server-solutions/postfix-mail-server #3
+#
+sudo /sbin/chkconfig saslauthd on
+sudo mkdir -p /var/run/saslauthd
+sudo chown root:saslauth /var/run/saslauthd/
+sudo vi /etc/sysconfig/saslauthd
+    SOCKETDIR=/var/run/saslauthd
+    MECH=pam
+    FLAGS="-r"
+    
+sudo vi /usr/lib64/sasl2/smtpd.conf
+    pwcheck_method: saslauthd
+    mech_list: plain login
+    allow_plaintext: true
+    auxprop_plugin: mysql
+    sql_hostnames: 127.0.0.1
+    sql_user: mail_admin
+    sql_passwd: mail_admin_password
+    sql_database: mail
+    sql_select: select password from users where email = '%u'
+        
+sudo usermod -a -G saslauth postfix
+
+sudo /etc/init.d/postfix restart
+sudo /etc/init.d/saslauthd restart
+
+# test out authentication.
+testsaslauthd -u stuff@adoptmystuff.com -s smtp -p stuff
+

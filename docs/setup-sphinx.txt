@@ -1,0 +1,22 @@
+##############################################################
+# set up sphinx on a fedora linux server.
+
+cd ~/src
+wget 'http://wwww.palmvalleysoftware.com/download/sphinx-2.0.1-beta.tar.gz'
+tar zxvf sphinx-2.0.1-beta.tar.gz
+cd sphinx-2.0.1-beta
+./configure --with-pgsql --without-mysql
+make
+sudo make install
+
+sudo curl 'http://wwww.palmvalleysoftware.com/download/sphinx.conf' > /usr/local/etc/sphinx.conf
+sudo curl 'http://wwww.palmvalleysoftware.com/download/sphinx.startup' > /etc/init.d/sphinx
+sudo chkconfig --add sphinx
+sudo /etc/init.d/sphinx start
+
+
+
+# development startup
+cd /usr/local/etc/
+/usr/local/bin/indexer --all 
+/usr/local/bin/searchd --nodetach --config ./sphinx.conf       # runs in console

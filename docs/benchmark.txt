@@ -1,0 +1,69 @@
+*** NO CACHING HOME PAGE.
+ab -kc 1 -t 30 -n 50 'http://ukvid.com/'
+
+Concurrency Level:      1
+Time taken for tests:   26.842 seconds
+Complete requests:      50
+Failed requests:        0
+Write errors:           0
+Keep-Alive requests:    50
+Total transferred:      857300 bytes
+HTML transferred:       841900 bytes
+Requests per second:    1.86 [#/sec] (mean)
+Time per request:       536.843 [ms] (mean)
+Time per request:       536.843 [ms] (mean, across all concurrent requests)
+Transfer rate:          31.19 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.0      0       0
+Processing:   452  537  52.1    522     658
+Waiting:      452  537  52.2    522     658
+Total:        452  537  52.1    522     658
+
+Percentage of the requests served within a certain time (ms)
+  50%    522
+  66%    536
+  75%    553
+  80%    599
+  90%    630
+  95%    641
+  98%    
+658
+  99%    658
+ 100%    658 (longest request)
+
+
+*** initial caching in page.py
+
+Concurrency Level:      1
+Time taken for tests:   27.020 seconds
+Complete requests:      50
+Failed requests:        0
+Write errors:           0
+Keep-Alive requests:    50
+Total transferred:      855150 bytes
+HTML transferred:       841900 bytes
+Requests per second:    1.85 [#/sec] (mean)
+Time per request:       540.398 [ms] (mean)
+Time per request:       540.398 [ms] (mean, across all concurrent requests)
+Transfer rate:          30.91 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.0      0       0
+Processing:   384  540  63.9    517     698
+Waiting:      384  540  63.9    517     698
+Total:        384  540  63.9    517     698
+
+Percentage of the requests served within a certain time (ms)
+  50%    517
+  66%    544
+  75%    572
+  80%    605
+  90%    648
+  95%    665
+  98%    
+698
+  99%    698
+ 100%    698 (longest request)

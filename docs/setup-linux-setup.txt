@@ -1,0 +1,331 @@
+########################################################################
+# At the end of this you get...
+# A secure linux via iptables
+# a python web server via nginx@80 proxying for pylons@5000
+#   static content served via nginx
+# a postgresql server running a populated database.
+#
+# Fedora 13 64 Bit
+# 1024 GB slice recommended
+
+# change root passwd
+passwd
+
+########################################################################
+# allow everybody in "wheel" group to run sudo commands
+visudo
+# uncomment the following line and save the file.
+%wheel  ALL=(ALL)       ALL
+
+########################################################################
+# add an admin user.  kbedwell to start.  Add him to the wheel group
+adduser web
+passwd web
+usermod -a -G wheel web
+adduser kbedwell
+passwd kbedwell
+usermod -a -G wheel kbedwell
+usermod -a -G web kbedwell
+
+########################################################################
+# prevent root from SSH'ing to the box
+vi /etc/ssh/sshd_config
+# ensure the following settings are in the file and save it
+Protocol 2
+PermitRootLogin no
+AllowUsers kbedwell
+
+########################################################################
+# IPTABLES setup
+# flush iptables
+/sbin/iptables -F
+curl 'http://wwww.palmvalleysoftware.com/download/iptables.up.rules' > /etc/iptables.up.rules
+
+# save everything
+/sbin/iptables-restore < /etc/iptables.up.rules
+/sbin/service iptables save
+
+# Reload SSH and make sure everything works
+/etc/init.d/sshd reload
+
+# log back in as kbedwell to make sure all is well
+local>  ssh kbedwell@<this slice>
+
+# ensure that /dev/shm is set up for parallel processing in python
+# http://stackoverflow.com/questions/2009278/python-multiprocessing-permission-denied
+sudo chmod 777 /dev/shm
+sudo vi /etc/fstab
+> none /dev/shm tmpfs rw,nosuid,nodev,noexec 0 0
+
+# fix the linker for postgres and R libraries
+sudo curl 'http://wwww.palmvalleysoftware.com/download/ld.so.conf' >> /etc/ld.so.conf
+sudo /sbin/ldconfig
+
+# setup the init.d script for the python app
+curl 'http://wwww.palmvalleysoftware.com/download/apps.pvs' > /etc/init.d/apps.$APP
+/sbin/chkconfig apps.$APP on
+/sbin/chkconfig --list apps.$APP
+
+## CLOSE OUT ROOT SESSION AND LOG BACK IN AS KBEDWELL
+
+# seed DB.  If you are creating new DB, do this now as it will take a few minutes.
+local> scp backup.sql.tgz kbedwell@wm01:/home/kbedwell
+
+###########################################################################
+## .bashrc
+curl 'http://wwww.palmvalleysoftware.com/download/bashrc.txt' >> ~/.bashrc
+
+############################################################################
+# update YUM
+sudo yum -y groupremove 'GNOME Desktop Environment'  # only if necessary.
+sudo yum -y update
+sudo yum -y groupinstall 'Development Tools'
+sudo yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack.x86_64 lapack-devel.x86_64 atlas.x86_64 atlas.x86_64 blas.x86_64 blas-devel.x86_64 freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam
+sudo updatedb
+
+# for 32 bit.
+sudo yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack lapack-devel atlas atlas blas blas-devel freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam
+
+################################################################
+## nginx  (http://articles.slicehost.com/2008/12/17/centos-installing-nginx-via-yum)
+sudo yum -y install nginx
+sudo /sbin/chkconfig nginx on
+sudo /sbin/chkconfig --list nginx
+sudo usermod -a -G web nginx
+su
+curl 'http://wwww.palmvalleysoftware.com/download/nginx.conf' > /etc/nginx/nginx.conf
+mkdir /etc/nginx/sites
+curl 'http://wwww.palmvalleysoftware.com/download/nginx-pvs.conf' > /etc/nginx/sites/$APP.conf
+## fix location in /etc/nginx/sites/$APP.conf to reflect /apps/$APP/app/app/public/
+exit       # back to kbedwell
+sudo /etc/init.d/nginx start
+
+################################################################
+## fail2ban
+sudo yum -y install fail2ban
+sudo /sbin/chkconfig fail2ban on
+-- Modify /etc/fail2ban/fail2ban.conf
+--    change:  logtarget = /var/log/fail2ban.log
+sudo /etc/init.d/fail2ban start
+
+################################################################
+## memcached - only do this if you are NOT using REDIS as backend.
+sudo /sbin/chkconfig memcached on
+sudo /sbin/chkconfig --list memcached
+sudo /etc/init.d/memcached start
+
+################################################################
+## atd
+sudo /sbin/chkconfig atd on
+sudo /sbin/chkconfig --list atd
+sudo /etc/init.d/atd start
+
+################################################################
+## other tools
+cd ~
+
+mkdir src ; cd src
+# mercurial
+sudo easy_install docutils    # this is needed by mercurial
+wget 'http://mercurial.selenic.com/release/mercurial-1.6.3.tar.gz'
+tar zxvf mercurial-1.6.3.tar.gz
+cd mercurial-1.6.3
+sudo make PREFIX=/usr install
+
+# emacs
+cd ~
+wget 'http://wwww.palmvalleysoftware.com/download/emacs-unix.tar.gz'
+tar zxvf emacs-unix.tar.gz
+
+################################################################
+## Redis - 2.2.11
+cd ~/src
+wget http://redis.googlecode.com/files/redis-2.2.11.tar.gz
+tar xzf redis-2.2.11.tar.gz
+cd redis-2.2.11
+make
+sudo make install
+su -
+adduser redis
+passwd redis
+curl 'http://wwww.palmvalleysoftware.com/download/redis.conf' > /etc/redis.conf
+curl 'http://wwww.palmvalleysoftware.com/download/redis.init.d' > /etc/init.d/redis
+chmod +x /etc/init.d/redis
+touch /var/log/redis.log
+chown redis:redis /var/log/redis.log
+mkdir /var/redis
+chown redis:redis /var/redis
+chkconfig --add redis
+chkconfig redis on
+
+################################################################
+## postgresql 8.4.4
+cd ~/src
+wget http://wwww.palmvalleysoftware.com/download/postgresql-9.1.1.tar.gz
+tar zxvf postgresql-9.1.1.tar.gz
+cd postgresql-9.1.1
+./configure --prefix=/usr/local/pgsql/v9.1.1 --with-python --with-pgport=5433
+make
+su
+make install
+adduser postgres
+passwd postgres
+mkdir -p /usr/local/pgsql/v9.1.1/data
+chown postgres /usr/local/pgsql/v9.1.1/data
+su - postgres
+/usr/local/pgsql/v9.1.1/bin/initdb -D /usr/local/pgsql/v9.1.1/data
+/usr/local/pgsql/v9.1.1/bin/pg_ctl -D /usr/local/pgsql/v9.1.1/data start
+/usr/local/pgsql/v9.1.1/bin/createdb pvs
+/usr/local/pgsql/v9.1.1/bin/psql pvs
+>> create user pvs with password 'pvs';
+>> \q
+exit  #  back to root
+/usr/local/pgsql/v9.1.1/bin/psql -U postgres
+>> alter database pvs owner to pvs;
+>> \q
+cp contrib/start-scripts/linux /etc/init.d/postgresql
+chmod +x /etc/init.d/postgresql
+/sbin/chkconfig postgresql on
+/sbin/chkconfig --list postgresql
+exit
+
+# restore DB.  You should have already uploaded the file.
+cd ~
+tar zxvf backup.sql.tgz ; rm backup.sql.tgz
+psql -U wm -d wm -f backup.sql
+
+###############################################################
+## R
+cd ~/src
+wget 'http://mirrors.ibiblio.org/pub/mirrors/CRAN/src/base/R-2/R-2.11.1.tar.gz'
+tar zxvf R-2.11.1.tar.gz
+cd R-2.11.1
+./configure --with-x=no --enable-R-shlib=yes
+make
+sudo make install
+su
+/usr/local/bin/R
+R
+>> install.packages(c("TTR"))
+-- >> << specify a CRAN mirror in the US.  USA (AZ) works well >>
+-- exit  #back to kbedwell
+
+# ensure the following library is set prior to launching python that needs R (paste)
+export LD_LIBRARY_PATH=/usr/local/pgsql/v9.1.1/lib:/usr/local/lib64/R/lib:$LD_LIBRARY_PATH
+python -m 'rpy2.tests'
+
+################################################################
+## setup runtime environment directories
+sudo mkdir -p /apps/$APP
+sudo mkdir -p /apps/$APP/extensions
+sudo mkdir -p /apps/$APP/db
+sudo chmod -R g+w /apps
+sudo chown -R root:web /apps
+
+###############################################################
+## setup pylons (http://pylonshq.com/docs/en/1.0/gettingstarted )
+cd /apps/$APP
+export LD_LIBRARY_PATH=/usr/local/pgsql/v9.1.1/lib:/usr/local/lib64/R/lib:$LD_LIBRARY_PATH
+wget 'http://www.pylonshq.com/download/1.0/go-pylons.py'
+python go-pylons.py python    # may have to do this:   virtualenv --python=/usr/bin/python2.7 python
+source python/bin/activate
+
+wget 'http://wwww.palmvalleysoftware.com/download/pylons-1.0.tar.gz'
+tar zxvf pylons-1.0.tar.gz
+cd pylons
+python setup.py develop
+easy_install sqlalchemy
+easy_install psycopg2
+easy_install python-memcached
+easy_install redis
+easy_install html5lib
+easy_install lxml
+easy_install pip
+pip install git+git://github.com/bbangert/beaker_extensions.git
+### open /apps/${app}/python/lib/python2.6/site-packages/beaker_extensions/redis_.py
+### add the following at the end of set_value()
+### self.db_conn.expire(key, 3600)
+
+#install RPY2 to talk to R
+cd ~/src
+wget 'http://wwww.palmvalleysoftware.com/download/rpy2-2.1.4.tar.gz'
+tar zxvf rpy2-2.1.4.tar.gz
+cd rpy2-2.1.4
+
+python setup.py build
+python setup.py install
+
+# install numpy, scipy, panda, and matplotlib
+cd ~/src
+wget 'http://wwww.palmvalleysoftware.com/download/numpy.tar.gz'
+tar zxvf numpy.tar.gz
+cd numpy
+python setup.py build
+sudo python setup.py install
+cd ~/src
+wget 'http://wwww.palmvalleysoftware.com/download/scipy.tar.gz'
+tar zxvf scipy.tar.gz
+cd scipy
+python setup.py build
+sudo python setup.py install
+cd ~/src
+wget 'http://wwww.palmvalleysoftware.com/download/python-dateutil-1.5.tar.gz'
+python setup.py install
+cd ~/src
+easy_install pandas
+easy_install tweepy
+easy_install http://wwww.palmvalleysoftware.com/download/matplotlib-1.0.0.tar.gz
+easy_install turbomail
+easy_install dumbo
+easy_install suds
+easy_install pyevolve
+easy_install pygeoip
+easy_install prettytable
+pip install --index-url https://code.stripe.com --upgrade stripe
+
+# install geoip database and api
+#cd ~/src
+#wget 'http://wwww.palmvalleysoftware.com/download/geoip-api.tar.gz'
+#tar zxvf geoip-api.tar.gz
+#cd GeoIP-Python-1.2.4
+
+# setup logrotate
+sudo curl 'http://wwww.palmvalleysoftware.com/download/apps.logrotate' > /etc/logrotate.d/apps
+sudo vi /etc/logrotate.d/apps
+## change "pvs" path as appropriate
+
+cd ..
+** unzip the app **
+sudo chown -R kbedwell:web app
+sudo chmod -R g+wx app
+cd app
+rm -rf data/sessions/container_file/*
+rm -rf data/sessions/container_file_lock/*
+rm -rf data/templates/*
+find . -name ".hg" -type d -exec rm -rf {} \;
+find . -name "*DS_Store" -exec rm {} \;
+
+sudo /etc/init.d/apps.$APP start
+
+#
+# SSL setup (works with godaddy)
+#
+# http://nginx.groups.wuyasea.com/articles/how-to-setup-godaddy-ssl-certificate-on-nginx/2
+#
+openssl genrsa -out www.wealthmakers.com.key 2048
+openssl req -new -key www.wealthmakers.com.key -out www.wealthmakers.com.csr
+    You are about to be asked to enter information that will be incorporated
+    into your certificate request.
+    What you are about to enter is what is called a Distinguished Name or a DN.
+    There are quite a few fields but you can leave some blank
+    For some fields there will be a default value,
+    If you enter '.', the field will be left blank.
+    -----
+    Country Name (2 letter code) [XX]:US
+    State or Province Name (full name) []:California
+    Locality Name (eg, city) [Default City]:Redlands
+    Organization Name (eg, company) [Default Company Ltd]:Wealthmakers
+    Organizational Unit Name (eg, section) []:IT
+    Common Name (eg, your name or your server's hostname) []:www.wealthmakers.com
+    Email Address []:kenneth.bedwell@gmail.com
+

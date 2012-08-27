@@ -1,0 +1,341 @@
+# http://nagios.sourceforge.net/docs/3_0/quickstart-fedora.html
+
+su -
+
+# install pre-req's
+yum install httpd php gcc glibc glibc-common gd gd-devel
+
+# ON THE MONITORING BOX, configure firewall to allow 8080 to apache
+curl 'http://wwww.palmvalleysoftware.com/download/iptables.up.rules' > ~/iptables.up.rules
+/sbin/iptables-restore < /etc/iptables.up.rules
+/sbin/service iptables save
+
+# configure apache to listen on 8080
+vi /etc/httpd/conf/httpd.conf
+edit: Listen 8080
+/etc/init.d/httpd start
+/sbin/chkconfig httpd on
+/sbin/chkconfig --list httpd
+
+# configure nagios user and nagios command group
+useradd -m nagios
+passwd nagios
+groupadd nagcmd
+usermod -a -G nagcmd nagios
+usrmod -a -G nagcmd apache
+htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+
+# get the source and build it.
+cd ~/src
+wget http://wwww.palmvalleysoftware.com/download/nagios-3.4.1.tar.gz
+tar zxvf nagios-3.4.1.tar.gz
+cd nagios
+make all && make install && make install-init && make install-config && make install-commandmode && make install-webconf
+
+
+# initial configuration for nagios
+cd /usr/local/nagios/etc/objects
+vi contacts.cfg
+edit: nagios@localhost to suitable email addr
+/etc/init.d/httpd restart
+
+
+# install nagios plugins
+cd ~/src
+wget http://wwww.palmvalleysoftware.com/download/nagios-plugins-1.4.16.tar.gz
+tar zxvf nagios-plugins-1.4.16.tar.gz
+cd nagios-plugins-1.4.16
+./configure --with-nagios-user=nagios --with-nagios-group=nagios
+make && make install
+
+# start up nagios
+/etc/init.d/nagios start
+/sbin/chkconfig nagios on
+/sbin/chkconfig --list nagios
+go to http://{server}/nagios
+
+
+
+# http://www.kernelhardware.org/nagios-nrpe-to-monitor-remote-linux-server/
+# ON EVERY BOX TO BE MONITORED: build NRPE.  Do this on all boxes.
+yum -y install openssl-devel xinetd
+useradd -m nagios
+groupadd nagcmd
+usermod -a -G nagcmd nagios
+passwd nagios
+
+cd ~/src
+wget http://wwww.palmvalleysoftware.com/download/nagios-plugins-1.4.16.tar.gz
+tar zxvf nagios-plugins-1.4.16.tar.gz
+cd nagios-plugins-1.4.16
+./configure --with-nagios-user=nagios --with-nagios-group=nagios
+make && make install
+
+cd ~/src
+wget http://wwww.palmvalleysoftware.com/download/nrpe-2.13.tar.gz
+tar zxvf nrpe-2.13.tar.gz
+cd nrpe-2.13
+./configure --enable-ssl --enable-command-args && make all && make install-plugin && make install-daemon && make install-daemon-config && make install-xinetd
+
+
+# Edit Xinetd NRPE entry.  Add Nagios Monitoring server to the “only_from” directive
+vi /etc/xinetd.d/nrpe
+edit: only_from = 127.0.0.1 <nagios_backend_ip_address>
+
+vi /etc/services
+add: nrpe      5666/tcp    # NRPE
+
+curl http://wwww.palmvalleysoftware.com/download/nrpe_cfg.txt > /usr/local/nagios/etc/nrpe.cfg
+vi /usr/local/nagios/etc/nrpe.cfg
+edit: server_address=<backend IP of this machine>
+
+cd ~
+curl 'http://wwww.palmvalleysoftware.com/download/iptables.up.rules' > ~/iptables.up.rules
+/sbin/iptables-restore < /etc/iptables.up.rules
+/sbin/service iptables save
+
+/sbin/chkconfig xinetd on
+/sbin/chkconfig --list xinetd
+/etc/init.d/xinetd restart               <<-- This is how you restart nrpe
+
+netstat -at | grep nrpe
+# from the monitoring server
+/usr/local/nagios/libexec/check_nrpe -H <ip you just set up>
+
+# on the monitoring server
+cd /usr/local/nagios/etc/objects
+vi commands.cfg
+add:
+    ###############################################################################
+    # NRPE CHECK COMMAND
+    #
+    # Command to use NRPE to check remote host systems
+    ###############################################################################
+
+    define command{
+            command_name check_nrpe
+            command_line $USER1$/check_nrpe -H $HOSTADDRESS$ -c $ARG1$
+            }
+
+# create a linux box to monitor
+vi linux-remote.cfg
+add:
+define host{
+          name                  linux-box-remote             ; Name of this template
+          use                   generic-host          ; Inherit default values
+          check_period          24x7
+          check_interval        5
+          retry_interval        1
+          max_check_attempts    10
+          check_command         check-host-alive
+          notification_period   24x7
+          notification_interval 30
+          notification_options  d,r
+          contact_groups        admins
+          register              0          ; DONT REGISTER THIS - ITS A TEMPLATE
+          }
+
+define host{
+          use       linux-box-remote     ; Inherit default values from a template
+          host_name Centos5              ; The name we're giving to this server
+          alias     Centos5              ; A longer name for the server
+          address   192.168.0.5          ; IP address of the server
+          }
+
+define service{
+          use                 generic-service
+          host_name           Centos5
+          service_description CPU Load
+          check_command       check_nrpe!check_load
+          }
+define service{
+          use                 generic-service
+          host_name           Centos5
+          service_description Current Users
+          check_command       check_nrpe!check_users
+          }
+define service{
+          use                 generic-service
+          host_name           Centos5
+          service_description /dev/hda1 Free Space
+          check_command       check_nrpe!check_hda1
+          }
+define service{
+          use                 generic-service
+          host_name           Centos5
+          service_description Total Processes
+          check_command       check_nrpe!check_total_procs
+          }
+define service{
+          use                 generic-service
+          host_name           Centos5
+          service_description Zombie Processes
+          check_command       check_nrpe!check_zombie_procs
+          }
+
+vi /usr/local/nagios/etc/nagios.cfg
+add:
+cfg_file=/usr/local/nagios/etc/objects/linux-remote.cfg
+
+# check config for warnings
+/usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+
+
+
+#
+# Nagios Graph.  On the monitoring machine
+# http://nagiosgraph.svn.sourceforge.net/viewvc/nagiosgraph/trunk/nagiosgraph/INSTALL
+#
+cd ~/src
+wget http://wwww.palmvalleysoftware.com/download/nagiosgraph-1.4.4.tar.gz
+tar nagiosgraph-1.4.4.tar.gz
+cd nagiosgraph-1.4.4.tar.gz
+
+yum -y install perl-CGI perl-rrdtool perl-GD
+
+mkdir /etc/nagiosgraph
+cp etc/* /etc/nagiosgraph
+
+- Copy the contents of etc into your preferred configuration location:
+     mkdir /etc/nagiosgraph
+     cp etc/* /etc/nagiosgraph
+
+- Edit the perl scripts in the cgi and lib directories, modifying the
+   "use lib" line to point to the directory from the previous step.
+     vi cgi/*.cgi lib/insert.pl
+
+ - Copy insert.pl to a location from which it can be executed:
+     cp lib/insert.pl /usr/local/nagios/libexec
+
+ - Copy CGI scripts to a script directory served by the web server:
+     cp cgi/*.cgi /usr/local/nagios/sbin
+
+ - Copy CSS and JavaScript files to a directory served by the web server:
+     cp share/nagiosgraph.css /usr/local/nagios/share
+     cp share/nagiosgraph.js /usr/local/nagios/share
+
+ - Edit /etc/nagiosgraph/nagiosgraph.conf.  Set at least the following:
+     logfile           = /var/log/nagiosgraph.log
+     cgilogfile        = /var/log/nagiosgraph-cgi.log
+     perflog           = /var/nagios/perfdata.log
+     rrddir            = /var/nagios/rrd
+     mapfile           = /etc/nagiosgraph/map
+     nagiosgraphcgiurl = /nagios/cgi-bin
+     javascript        = /nagios/nagiosgraph.js
+     stylesheet        = /nagios/nagiosgraph.css
+
+ - Set permissions of "rrddir" (as defined in nagiosgraph.conf) so that
+   the *nagios* user can write to it and the *www* user can read it:
+     mkdir /var/nagios/rrd
+     chown nagios /var/nagios/rrd
+     chmod 755 /var/nagios/rrd
+
+ - Set permissions of "logfile" so that the *nagios* user can write to it:
+     touch /var/log/nagiosgraph.log
+     chown nagios /var/log/nagiosgraph.log
+     chmod 644 /var/log/nagiosgraph.log
+
+ - Set permissions of "cgilogfile" so that the *www* user can write to it:
+     touch /var/log/nagiosgraph-cgi.log
+     chown www /var/log/nagiosgraph-cgi.log
+     chmod 644 /var/log/nagiosgraph-cgi.log
+
+ - Ensure that the *nagios* user can create and delete perfdata files:
+     chown nagios /var/nagios
+     chmod 755 /var/nagios
+
+ - In the Nagios configuration file (nagios.cfg) add this:
+
+     process_performance_data=1
+     service_perfdata_file=/var/nagios/perfdata.log
+     service_perfdata_file_template=$LASTSERVICECHECK$||$HOSTNAME$||$SERVICEDESC$||$SERVICEOUTPUT$||$SERVICEPERFDATA$
+     service_perfdata_file_mode=a
+     service_perfdata_file_processing_interval=30
+     service_perfdata_file_processing_command=process-service-perfdata
+
+ - In the Nagios commands file (commands.cfg) add this:
+
+     define command {
+       command_name  process-service-perfdata
+       command_line  /usr/local/nagios/libexec/insert.pl
+     }
+
+ - Check the nagios configuration
+
+     /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+
+ - Restart nagios
+
+     /etc/init.d/nagios restart
+
+ - Verify that nagiosgraph is working by running showconfig.cgi
+
+     http://server/nagios/cgi-bin/showconfig.cgi
+
+ - Try graphing some data by running show.cgi
+
+     http://server/nagios/cgi-bin/show.cgi
+
+ - In the Nagios configuration, add a template for graphed services:
+
+     define service {
+       name graphed-service
+       action_url /nagiosgraph/cgi-bin/show.cgi?host=$HOSTNAME$&service=$SERVICEDESC$' onMouseOver='showGraphPopup(this)' onMouseOut='hideGraphPopup()' rel='/nagiosgraph/cgi-bin/showgraph.cgi?host=$HOSTNAME$&service=$SERVICEDESC$&period=week&rrdopts=-w+450+-j
+       register 0
+     }
+
+ - Enable graph links for services by appending the graphed-service to existing
+   service definitions in the Nagios configuration:
+
+KB - Not Done
+
+     define service {
+       use local-service,graphed-service
+       ...
+     }
+
+ - Replace the Nagios action icon with the nagiosgraph graph icon:
+     mv /usr/local/nagios/share/images/action.gif /usr/local/nagios/share/images/action.gif-orig
+     cp share/graph.gif /usr/local/nagios/share/images/action.gif
+
+ - In the nagiosgraph SSI file, set the URL for nagiosgraph.js:
+     vi share/nagiosgraph.ssi
+     src="/nagiosgraph/nagiosgraph.js"   ->    src="/nagios/nagiosgraph.js"
+
+ - Install the nagiosgraph SSI file:
+     cp share/nagiosgraph.ssi /usr/local/nagios/share/ssi/common-header.ssi
+
+ - Add links to graphs in the Nagios sidebar (side.php or side.html):
+
+<ul>
+<li><a href="/nagios/cgi-bin/show.cgi" target="main">Graphs</a></li>
+<li><a href="/nagios/cgi-bin/showhost.cgi" target="main">Graphs by Host</a></li>
+<li><a href="/nagios/cgi-bin/showservice.cgi" target="main">Graphs by Service</a></li>
+<li><a href="/nagios/cgi-bin/showgroup.cgi" target="main">Graphs by Group</a></li>
+</ul>
+
+ - Check the nagios configuration
+
+     /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+
+ - Restart nagios
+
+     /etc/init.d/nagios restart
+
+
+
+#
+# Check Postgres
+#
+su -
+cd ~/src
+wget http://wwww.palmvalleysoftware.com/download/check_postgres.tar.gz
+tar zxvf check_postgres.tar.gz
+cd check_postgres-2.19.0
+cp check_postgres.pl /usr/local/nagios/libexec/
+cd /usr/local/nagios/libexec/
+chmod +x check_postgres.pl
+mkdir postgres
+cd postgres
+perl ../check_postgres.pl --symlinks
+

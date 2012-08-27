@@ -1,0 +1,87 @@
+# pound setup.
+http://www.cyberciti.biz/faq/linux-http-https-reverse-proxy-load-balancer/
+http://www.apsis.ch/pound/index_html
+
+su -
+mkdir src
+cd src
+wget http://www.apsis.ch/pound/Pound-2.6.tgz
+tar zxvf Pound-2.6.tgz
+cd Pound-2.6
+./configure
+make
+make install
+
+    #
+    # http://www.cyberciti.biz/faq/linux-http-https-reverse-proxy-load-balancer/
+    #
+    # edit /usr/local/etc/pound.cfg
+    User            "web"
+    Group           "web"
+    LogLevel        1
+    Alive           30
+    # Main listening ports
+    ListenHTTP
+      Address 174.143.144.43
+      Port    80
+      Client  10
+      Service
+         Redirect "https://www.xyz.com/"
+      End
+    End
+
+    ListenHTTPS
+      Address 174.143.144.43
+      Port    443
+      Cert    "/usr/local/etc/ssl/xyz.com.pem"
+      Client  20
+    End
+
+    # healthyustore.net
+    Service
+      BackEnd
+        # backend internal IP.
+        Address 10.177.72.230
+        Port    80
+        Priority 5
+      End
+      Session
+        Type    COOKIE
+        ID      "_trak"
+        TTL     180
+      End
+    End
+
+
+
+#
+# How to get a godaddy SSL cert to work.
+#
+0. Create keys on the server where the cert will live.
+    openssl genrsa -out www.xyz.com.key 2048
+    openssl req -new -key www.xyz.com.key -out www.xyz.com.csr
+        You are about to be asked to enter information that will be incorporated
+        into your certificate request.
+        What you are about to enter is what is called a Distinguished Name or a DN.
+        There are quite a few fields but you can leave some blank
+        For some fields there will be a default value,
+        If you enter '.', the field will be left blank.
+        -----
+        Country Name (2 letter code) [XX]:US
+        State or Province Name (full name) []:California
+        Locality Name (eg, city) [Default City]:Redlands
+        Organization Name (eg, company) [Default Company Ltd]:Wealthmakers
+        Organizational Unit Name (eg, section) []:IT
+        Common Name (eg, your name or your server's hostname) []:www.xyz.com
+        Email Address []:kenneth.bedwell@gmail.com
+    # you end up with www.xyz.com.key and www.xyz.com.csr
+
+1. Buy it.
+2. Go through the approval process.
+3. Download it.  You get a zip file xyz.com.zip with 2 files:  xyz.com.crt gd_bundle.crt
+4. Pound needs a PEM file, which is a correctly ordered bunch of keys.
+   cat www.xyz.com.key xyz.com.crt gd_bundle.crt > xyz.com.pem
+5. put PEM file in a place that matches the Cert directive in the Pound
+   configuration file.
+6. bounce and test
+

@@ -1,0 +1,19 @@
+#
+# on dev system.
+#
+
+# Ensure python 2.7.x installed on local system.
+
+cd ~/dev/pydev/pvs
+easy_install virtualenv
+wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
+
+python virtualenv.py --no-site-packages python
+source python/bin/activate
+easy_install pyramid
+
+pcreate -t alchemy app
+cd app
+python setup.py develop
+poplate_app development.ini
+pserve development.ini

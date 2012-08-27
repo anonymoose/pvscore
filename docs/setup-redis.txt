@@ -1,0 +1,17 @@
+wget http://redis.googlecode.com/files/redis-2.2.11.tar.gz
+tar xzf redis-2.2.11.tar.gz
+cd redis-2.2.11
+make
+#The binaries that are now compiled are available in the src directory. Run Redis with:
+src/redis-server
+
+src/redis-cli
+redis> set foo bar
+OK
+redis> get foo
+"bar"
+
+sudo make install
+
+su -
+touch /var/redis

@@ -1,0 +1,19 @@
+# mplayer
+
+cd
+cd src
+
+# download src
+svn checkout svn://svn.mplayerhq.hu/mplayer/trunk mplayer
+
+# download codec (Mac OS)
+wget http://www.mplayerhq.hu/MPlayer/releases/codecs/essential-macosx-x86-20060611.zip
+
+# download codec (Linux)
+wget http://www.mplayerhq.hu/MPlayer/releases/codecs/essential-20071007.tar.bz2
+
+# UNZIP CODEX INTO /usr/local/lib/codecs (may not even need this)
+
+./configure
+make
+sudo make install
