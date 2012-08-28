@@ -136,7 +136,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
               <input type="text" class="pad10" placeholder="Customer Search"/>
             </form>
           </li>
-          <li><a href="/crm/customer/advanced_search">Advanced Search</a></li>
+          <li><a href="/crm/customer/show_search">Search</a></li>
             % if request.ctx.user.priv.edit_customer:
           <li><a href="/crm/customer/new">Add</a></li>
             % endif

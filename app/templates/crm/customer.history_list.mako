@@ -1,17 +1,10 @@
 
 <%inherit file="customer.edit.base.mako"/>\
 
-<%
-c.offset = int(request.GET.get('offset')) if 'offset' in request.GET else 0
-%>
-
 <h3>Customer History</h3>
 
-<table>
-  <tr valign="top">
-    <td>
       <div id="result_list">
-        <table width="100%" class="sortable">
+        <table width="100%" class="sortable results table-striped">
           <thead>
           <tr>
             <td>&nbsp;</td>
@@ -21,7 +14,7 @@ c.offset = int(request.GET.get('offset')) if 'offset' in request.GET else 0
             <th>Note</th>
           </tr>
           </thead>
-        % for s in c.history[c.offset:c.offset+50]:
+        % for s in history[offset:offset+50]:
           <tr>
             <td><img src="/public/images/icons/silk/page_edit.png" border="0" onclick="customer_show_status(${s.status_id})"></td>
             <td nowrap>${s.fk_type} ${s.event.display_name}</td>
@@ -32,15 +25,12 @@ c.offset = int(request.GET.get('offset')) if 'offset' in request.GET else 0
         % endfor
           <tr>
             <td>&nbsp;</td>
-            <td nowrap><a href="javascript:customer_show_history(${c.offset-50 if c.offset > 0 else 0})">&lt;&lt; prev</a>&nbsp;&nbsp;
-            <a href="javascript:customer_show_history(${c.offset+50})">next &gt;&gt;</a></td>
+            <td nowrap><a href="javascript:customer_show_history(${offset-50 if offset > 0 else 0})">&lt;&lt; prev</a>&nbsp;&nbsp;
+            <a href="javascript:customer_show_history(${offset+50})">next &gt;&gt;</a></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           </tr>
         </table>
       </div>
-    </td>
-  </tr>
-</table>
 

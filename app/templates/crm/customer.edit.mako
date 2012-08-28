@@ -4,7 +4,7 @@
 <div>
   <div class="container">
     
-    <form id="frm_customer" action="/crm/customer/save" id="customer_form">
+    <form id="frm_customer" method="POST" action="/crm/customer/save">
       ${h.hidden('customer_id', value=customer.customer_id)}
       <div class="row">
         <div class="span7">
@@ -104,6 +104,31 @@
           </div>
         </div>
       </div>
+
+      <div class="row">
+        <div class="span6">
+          <h3>Customer Attributes</h3>
+          <table>
+            <%
+               attrs = customer.get_attrs()
+               idx = 0
+               %>
+            % for attr_name in attrs:
+            <tr>
+              <td>${h.text('attr_name[%d]' % idx, size=30, value=attr_name)}</td><td>${h.text('attr_value[%d]' % idx, size=30, value=attrs[attr_name])}</td>
+            </tr>
+            <% idx = idx + 1 %>
+            % endfor
+            % for i in range(idx,10):
+            <tr>
+              <td>${h.text('attr_name[%d]' % i, size=30)}</td><td>${h.text('attr_value[%d]' % i, size=30)}</td>
+            </tr>
+            <% idx = idx + 1 %>
+            % endfor
+          </table>
+        </div>
+      </div>
+
       % if request.ctx.user.priv.edit_customer:
       <div class="row">
         <div class="span2 offset7">

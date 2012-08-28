@@ -3503,4 +3503,14 @@ c.campaign_id = cm.campaign_id
 
 
 
-select * from crm_vendor where vendor_id = 42;
+select * from crm_customer where customer_id = 1077;
+
+
+select cust.customer_id, cust.lname from
+                                                 crm_customer cust, crm_campaign cam, crm_company com, crm_enterprise ent
+                                                 where (lower(cust.lname) like '%b%' or cust.email = 'b')
+                                                 and cust.delete_dt is null
+                                                 and cust.campaign_id = cam.campaign_id
+                                                 and cam.company_id = com.company_id
+                                                 and com.enterprise_id = 3
+                                                 order by cust.lname limit 10;

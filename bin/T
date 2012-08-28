@@ -1,6 +1,9 @@
 #!/bin/bash
 
-rm -rf ./data/*
+rm -f .coverage
 
-nosetests -v --exclude-dir-file=unittest-exclude.txt $*
+rm -rf ./data/cache ./data/sessions #./data/templates/crm/*
+
+nosetests -x -v --exclude-dir-file=unittest-exclude.txt --cover-package=app.model --cover-package=app.controllers --cover-package=app.lib --cover-package=app.config $*
+#nosetests -v $*
 

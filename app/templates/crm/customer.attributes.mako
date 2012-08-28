@@ -3,11 +3,8 @@
 
 <h1>Customer Attributes</h1>
 
-<%
-   attrs = c.customer.get_attrs()
-   %>
 <div id="result_list">
-  <table width="100%" class="sortable">
+  <table width="100%" class="sortable results table-striped">
     <thead>
       <tr>
         <th>Name</th>

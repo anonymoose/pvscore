@@ -16,6 +16,7 @@ from app.model.crm.orderitem import OrderItem, OrderItemTermsAcceptance
 from app.model.core.status import Status
 from app.model.core.statusevent import StatusEvent
 from app.model.cms.site import Site
+import simplejson as json
 import app.lib.util as util
 from app.model.crm.company import Company
 from app.lib.billing_api import BaseBillingApi
@@ -23,62 +24,6 @@ from app.lib.billing_api import BaseBillingApi
 log = logging.getLogger(__name__)
 
 class CustomerController(BaseController):
-    """ KB: [2010-10-20]: Callback for handling the API when it's completed processing. """
-    def cc_response_handler(self, api, response_dict, history_record, order, billing):
-        if api.is_declined(response_dict):
-            Status.add(order.customer, order, Status.find_event(order, 'BILLING_DECLINED'),
-                       'Billing Declined: %s' % history_record.notes).commit()
-            return False
-        else:
-            Status.add(order.customer, order, Status.find_event(order, 'BILLING_SUCCESS'),
-                       'Billing Succeeded: %s' % history_record.notes).commit()
-            j = Journal.create_new(order.total_payments_due(), order.customer, order, None,
-                                   'FullPayment', 'Credit Card', None)
-            if j:
-                j.commit()
-            return True
-
-
-    def _prep_add_order_dialog(self, customer_id):
-        customer = Customer.load(customer_id)
-        self.forbid_if(not c.customer or c.customer.campaign.company.enterprise_id != BaseController.get_enterprise_id())
-        return {
-            'customer' : customer,
-            'products' : Product.find_by_campaign(customer.campaign)
-            }
-
-
-    def _add_order_impl(self, customer_id, product_ids, prices, user, discount_id, campaign_id, incl_tax=True):
-        cust = Customer.load(customer_id)
-        self.forbid_if(not cust or cust.campaign.company.enterprise_id != BaseController.get_enterprise_id())
-        cart = Cart()
-        campaign_id = campaign_id if campaign_id else cust.campaign_id
-        cart.discount_id = discount_id
-        for id in product_ids.keys():
-            quantity = product_ids[id]
-            price = prices[id] if prices and id in prices else None
-            cart.add_item(Product.load(id), campaign_id, quantity, price)
-
-        order = cust.add_order(cart, user, Site.load(self.session['site_id']), Campaign.load(campaign_id), incl_tax)
-        order.flush()
-        return order.order_id
-
-
-    """ KB: [2012-02-12]: Cancel the order internally and make calls to billing
-    if there is a recurring product to cancel """
-    def _cancel_order_impl(self, customer_id, order_id, reason, by_customer=False):
-        co = CustomerOrder.load(order_id)
-        self.forbid_if(not co)
-        cust = co.customer
-        bill = cust.billing
-        api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
-        if api:
-            if api.cancel_order(co, bill):
-                Status.add(cust, cust, Status.find_event(cust, 'NOTE'), 'Billing Cancelled at gateway')
-        co.cancel(reason, by_customer)
-        self.db_flush()
-
-
     @view_config(route_name='crm.customer.edit', renderer='/crm/customer.edit.mako')
     @authorize(IsLoggedIn())
     def edit(self):
@@ -106,34 +51,94 @@ class CustomerController(BaseController):
             }
 
 
+    @view_config(route_name='crm.customer.save')
+    @authorize(IsLoggedIn())
+    @validate((('fname', 'string'),
+               ('fname', 'required'),
+               ('lname', 'string'),
+               ('lname', 'required')))
+    def save(self):
+        return self._save(self.request.POST['customer_id'])
+
+
+    def _save(self, customer_id=None, do_redir=True):
+        username = self.request.ctx.user.username
+        kv_map = self.request.POST
+        cust = Customer.load(customer_id)
+        if not cust:
+            cust = Customer()
+            cust.user_created = cust.user_assigned = username
+        else:
+            self.forbid_if(cust.campaign.company.enterprise_id != self.enterprise_id)
+        cust.bind(kv_map)
+        cust.save()
+        cust.flush()
+        cust.clear_attributes()
+        for i in range(10):
+            attr_name = self.request.POST.get('attr_name[%d]' % i)
+            attr_value = self.request.POST.get('attr_value[%d]' % i)
+            if attr_name and attr_value:
+                cust.set_attr(attr_name, attr_value)
+
+        self.flash('Successfully saved %s %s.' % (cust.fname, cust.lname))
+        if do_redir:
+            redir = self.request.POST.get('redir')
+            return HTTPFound(redir if redir else '/crm/customer/edit/%s' % cust.customer_id)
+        else:
+            return cust
+
+
     @view_config(route_name='crm.customer.autocomplete.name', renderer='string')
     @authorize(IsLoggedIn())
     def autocomplete(self):
-        u = self.request.ctx.user
-        if not 'q' in self.request.GET or not self.request.GET.get('q'): return
-        lnames = Customer.find_last_names_autocomplete(self.request.GET.get('q'), self.request.GET.get('limit', 10))
-        out = ''
-        for l in lnames:
-            out += '%s\n' % l
-        return out
+        if not 'search_key' in self.request.GET or not self.request.GET.get('search_key'): return
+        q = self.request.GET.get('search_key')
+        lnames = Customer.find_last_names_autocomplete(self.enterprise_id, q, self.request.GET.get('limit', 10))
+        return json.dumps(lnames)
+
+
+    @view_config(route_name='crm.customer.show_search', renderer='/crm/customer.search.mako')
+    @authorize(IsLoggedIn())
+    def show_search(self):
+        return {
+            'company_name' : None,
+            'fname' : None,
+            'lname' : None,
+            'email' : None,
+            'phone' : None,
+            'external_cart_id' : None,
+            'customers' : None
+            }
 
 
     @view_config(route_name='crm.customer.search', renderer='/crm/customer.search.mako')
     @authorize(IsLoggedIn())
     def search(self):
         external_cart_id = self.request.POST.get('external_cart_id', self.request.GET.get('external_cart_id'))
-        ret = {}
+        ret = {
+            'company_name' : None,
+            'fname' : None,
+            'lname' : None,
+            'email' : None,
+            'phone' : None,
+            'external_cart_id' : external_cart_id,
+            'customers' : None
+            }
+
         if not external_cart_id:
             ret['company_name'] = self.request.POST.get('company_name', self.request.GET.get('company_name'))
             ret['fname'] = self.request.POST.get('fname', self.request.GET.get('fname'))
             ret['lname'] = self.request.POST.get('lname', self.request.GET.get('lname'))
             ret['email'] = self.request.POST.get('email', self.request.GET.get('email'))
             ret['phone'] = self.request.POST.get('phone', self.request.GET.get('phone'))
-            ret['customers'] = Customer.search(company_name, fname, lname, email, phone)
+            ret['customers'] = Customer.search(self.enterprise_id, ret['company_name'], ret['fname'], ret['lname'], ret['email'], ret['phone'])
         else:
             order = CustomerOrder.find_by_external_cart_id(external_cart_id)
             if order:
                 ret['customers'] = [order.customer]
+
+        if 'customers' in ret and len(ret['customers']) == 1:
+            ret = HTTPFound('/crm/customer/edit/%s' % ret['customers'][0].customer_id)
         return ret
 
 
@@ -171,7 +176,8 @@ class CustomerController(BaseController):
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         return {
             'customer' : customer,
-            'history' : Status.find_by_customer(c.customer)
+            'history' : Status.find_by_customer(customer),
+            'offset' : self.offset
             }
 
     
@@ -183,7 +189,8 @@ class CustomerController(BaseController):
         customer = Customer.load(customer_id)
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         return {
-            'customer' : customer
+            'customer' : customer,
+            'attrs' : customer.get_attrs()
             }
 
     @view_config(route_name='crm.customer.show_billings', renderer='/crm/customer.billings_list.mako')
@@ -194,7 +201,8 @@ class CustomerController(BaseController):
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         return {
             'customer' : customer,
-            'billings' : Journal.find_all_by_customer(customer)
+            'billings' : Journal.find_all_by_customer(customer),
+            'offset' : self.offset
             }
 
 
@@ -627,45 +635,6 @@ class CustomerController(BaseController):
     """
 
 
-    @view_config(route_name='crm.customer.save')
-    @authorize(IsLoggedIn())
-    def save(self):
-        self.forbid_if('customer_id' not in self.request.POST)
-        return self._save(self.request.POST['customer_id'])
-
-
-    @validate((('fname', 'string'),
-               ('fname', 'required'),
-               ('lname', 'string'),
-               ('lname', 'required')))
-    def _save(self, customer_id, do_redir=True):
-        username = util.get(self.session, 'username')
-        kv_map = self.request.POST
-        cust = Customer.load(customer_id)
-        if not cust:
-            cust = Customer()
-            cust.user_created = cust.user_assigned = username
-        else:
-            self.forbid_if(cust.campaign.company.enterprise_id != self.enterprise_id)
-        cust.bind(kv_map)
-        cust.save()
-
-        cust.clear_attributes()
-        for i in range(10):
-            attr_name = self.request.POST.get('attr_name[%d]' % i)
-            attr_value = self.request.POST.get('attr_value[%d]' % i)
-            if attr_name and attr_value:
-                cust.set_attr(attr_name, attr_value)
-
-        self.flash('Successfully saved %s %s.' % (cust.fname, cust.lname))
-        if do_redir:
-            if self.request.POST.get('redir'):
-                return HTTPFound(self.request.POST.get('redir'))
-            else:
-                return HTTPFound('/crm/customer/edit/%s' % cust.customer_id)
-        else:
-            return cust
-
     """ KB: [2012-01-31]: Called from end site customer self-edit section. """
     @authorize(IsCustomerLoggedIn())
     @validate((('password', 'required'),
@@ -918,4 +887,59 @@ class CustomerController(BaseController):
         site = Site.load(self.session['site_id'])
         cust = Customer.find(email, site.company)
         return 'True' if cust else 'False'
+
+    """ KB: [2010-10-20]: Callback for handling the API when it's completed processing. """
+    def cc_response_handler(self, api, response_dict, history_record, order, billing):
+        if api.is_declined(response_dict):
+            Status.add(order.customer, order, Status.find_event(order, 'BILLING_DECLINED'),
+                       'Billing Declined: %s' % history_record.notes).commit()
+            return False
+        else:
+            Status.add(order.customer, order, Status.find_event(order, 'BILLING_SUCCESS'),
+                       'Billing Succeeded: %s' % history_record.notes).commit()
+            j = Journal.create_new(order.total_payments_due(), order.customer, order, None,
+                                   'FullPayment', 'Credit Card', None)
+            if j:
+                j.commit()
+            return True
+
+
+    def _prep_add_order_dialog(self, customer_id):
+        customer = Customer.load(customer_id)
+        self.forbid_if(not c.customer or c.customer.campaign.company.enterprise_id != BaseController.get_enterprise_id())
+        return {
+            'customer' : customer,
+            'products' : Product.find_by_campaign(customer.campaign)
+            }
+
+
+    def _add_order_impl(self, customer_id, product_ids, prices, user, discount_id, campaign_id, incl_tax=True):
+        cust = Customer.load(customer_id)
+        self.forbid_if(not cust or cust.campaign.company.enterprise_id != BaseController.get_enterprise_id())
+        cart = Cart()
+        campaign_id = campaign_id if campaign_id else cust.campaign_id
+        cart.discount_id = discount_id
+        for id in product_ids.keys():
+            quantity = product_ids[id]
+            price = prices[id] if prices and id in prices else None
+            cart.add_item(Product.load(id), campaign_id, quantity, price)
+
+        order = cust.add_order(cart, user, Site.load(self.session['site_id']), Campaign.load(campaign_id), incl_tax)
+        order.flush()
+        return order.order_id
+
+
+    """ KB: [2012-02-12]: Cancel the order internally and make calls to billing
+    if there is a recurring product to cancel """
+    def _cancel_order_impl(self, customer_id, order_id, reason, by_customer=False):
+        co = CustomerOrder.load(order_id)
+        self.forbid_if(not co)
+        cust = co.customer
+        bill = cust.billing
+        api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
+        if api:
+            if api.cancel_order(co, bill):
+                Status.add(cust, cust, Status.find_event(cust, 'NOTE'), 'Billing Cancelled at gateway')
+        co.cancel(reason, by_customer)
+        self.db_flush()
 

@@ -285,7 +285,8 @@ class ProductController(BaseController):
         self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
         return {'product' : product,
                 'events' : util.select_list(StatusEvent.find_all_applicable(self.enterprise_id, product), 'event_id', 'display_name'),
-                'history' : Status.find(product)}
+                'history' : Status.find(product)
+                }
 
 
     @view_config(route_name='crm.product.show_returns', renderer='/crm/product.returns_list.mako')

@@ -125,18 +125,22 @@ class Customer(ORMBase, BaseModel):
                          Campaign.company_id == campaign.company_id,
                          Customer.email.ilike(email))).first()
 
+
     @staticmethod
-    def find_last_names_autocomplete(user_input, enterprise_id, limit):
-        return db.get_raw_value_list('lname', """select distinct(cust.lname) from
-                                                 crm_customer cust, crm_campaign cam, crm_company com, crm_enterprise ent
-                                                 where (lower(cust.lname) like '%{l}%' or cust.email = '{l}')
+    def find_last_names_autocomplete(enterprise_id, user_input, limit):
+        return db.get_result_dict(['customer_id', 'name'],
+                                  """select cust.customer_id,
+                                            cust.lname || ', ' || cust.fname as "name"
+                                                 from crm_customer cust, crm_campaign cam, crm_company com, crm_enterprise ent
+                                                 where (lower(cust.lname) like '%%{l}%%' or cust.email = '{l}')
                                                  and cust.delete_dt is null
                                                  and cust.campaign_id = cam.campaign_id
                                                  and cam.company_id = com.company_id
                                                  and com.enterprise_id = {ent_id}
-                                                 order by cust.lname limit {lim}""".format(l=user_input.lower(),
+                                                 order by cust.lname, cust.fname limit {lim}""".format(l=user_input.lower(),
                                                                                            lim=limit,
                                                                                            ent_id=enterprise_id))
+
 
     """ KB: [2010-12-15]: Find another customer that is in the same company. """
     @staticmethod
@@ -147,6 +151,7 @@ class Customer(ORMBase, BaseModel):
                          Campaign.company_id == company.company_id,
                          Customer.email.ilike(email))).first()
 
+
     @staticmethod
     def find_by_third_party_id(tpid, company):
         from app.model.crm.campaign import Campaign
@@ -154,6 +159,7 @@ class Customer(ORMBase, BaseModel):
             .filter(and_(Customer.delete_dt == None,
                          Campaign.company_id == company.company_id,
                          Customer.third_party_id == tpid)).first()
+
 
     @staticmethod
     def search(enterprise_id, company_name, fname, lname, email, phone):
@@ -230,7 +236,7 @@ class Customer(ORMBase, BaseModel):
     Customer.delete_newest_customer()
     """
     @staticmethod
-    def full_delete(customer_id, commit=True):
+    def full_delete(customer_id):
         Session.execute('delete from core_asset where status_id in (select status_id from core_status where customer_id = %s)' % customer_id)
         Session.execute('delete from crm_billing_history where customer_id = %s' % customer_id)
         Session.execute('delete from crm_product_inventory_journal where return_id in (select return_id from crm_product_return where journal_id in (select journal_id from crm_journal where customer_id = %s))' % customer_id)
@@ -248,8 +254,7 @@ class Customer(ORMBase, BaseModel):
         Session.execute('delete from crm_billing_history where customer_id = %s' % customer_id)
         Session.execute('delete from crm_billing where billing_id = (select billing_id from crm_customer where customer_id = %s)' % customer_id)
         Session.execute('delete from core_status where customer_id = %s' % customer_id)
-        if commit:
-            Session.commit()
+        
 
     @staticmethod
     def delete_newest_customer():

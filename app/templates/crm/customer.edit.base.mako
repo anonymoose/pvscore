@@ -57,7 +57,13 @@ ${next.body()}
     <li><hr></li>
     <li><a href="/crm/customer/new">New Customer</a></li>
     % endif
-    <li>${h.text('lname_complete', size=20, value="   Last Name Search", onclick="$('#lname_complete').val('');")}</li>
+    <li>
+      <form id="frm_lname_complete" class="form-inline">
+        <input name="lname_complete" type="text"
+               placeholder="Last Name Search" 
+               id="lname_complete" data-provide="typeahead" data-source="[]" maxlength="30" autocomplete="off"/>
+      </form>
+    </li>
   </ul>
 </div>
 </%def>

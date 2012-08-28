@@ -857,21 +857,37 @@ pvs.onload.push(function () {
 });
 
 pvs.onload.push(function() {
-    if ($('#lname_complete').autocomplete && $('#lname_complete').result) {
-        $("#lname_complete").autocomplete('/crm/customer/autocomplete', {
-            matchContains: true,
-            minChars: 0
-        });
-
-        $("#lname_complete").result(function(event, data, formatted) {
-            pvs.browser.goto_url(pvs.ajax.url({root:'/crm/customer/search', lname: data}));
-        });
-    }
+    $('#lname_complete').typeahead({
+        source: function(typeahead, query) {
+            $.ajax({
+                url: "/crm/customer/autocomplete",
+                dataType: "json",
+                type: "GET",
+                data: {
+                    max_rows: 15,
+                    search_key: query,
+                    ajax: 1
+                },
+                success: function(data) {
+                    var return_list = [], i = data.length;
+                    while (i--) {
+                        return_list[i] = {id: data[i].customer_id, value: data[i].name};
+                    }
+                    typeahead.process(return_list);
+                }
+            });
+        },
+        onselect: function(obj) {
+            pvs.browser.goto_url('/crm/customer/edit/'+obj.id);
+        }
+    });
 });
+
 
 customer_show_edit = function() {
     pvs.browser.goto_url('/crm/customer/edit/'+$_('#customer_id'));
 };
+
 
 customer_show_orders = function() {
     pvs.browser.goto_url('/crm/customer/show_orders/'+$_('#customer_id'));
