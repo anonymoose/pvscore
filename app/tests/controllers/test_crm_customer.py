@@ -8,6 +8,8 @@ from app.model.crm.customer import Customer
 
 # T app.tests.controllers.test_crm_customer
 
+TEST_CUSTOMER_ID = 220
+
 class TestCrmCustomer(TestController):
     @secure
     def test_show_new(self):
@@ -51,6 +53,39 @@ class TestCrmCustomer(TestController):
     def test_create_new(self):
         customer_id = self._create_new()
         self._delete_new(customer_id)
+
+
+    @secure
+    def test_show_history(self):
+        customer_id = TEST_CUSTOMER_ID
+        R = self.get('/crm/customer/edit/%s' % customer_id)
+        self.assertEqual(R.status_int, 200)
+        R = self.get('/crm/customer/show_history/%s' % customer_id)
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('Customer History')
+        R.mustcontain('CustomerOrder Payment Applied')
+
+
+    @secure
+    def test_show_billing(self):
+        customer_id = TEST_CUSTOMER_ID
+        R = self.get('/crm/customer/edit/%s' % customer_id)
+        self.assertEqual(R.status_int, 200)
+        R = self.get('/crm/customer/show_billings/%s' % customer_id)
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('Customer Billing Activity')
+        R.mustcontain('FullPayment')
+        R.mustcontain('CreditDecrease')
+
+
+    @secure
+    def test_show_attributes(self):
+        customer_id = TEST_CUSTOMER_ID
+        R = self.get('/crm/customer/edit/%s' % customer_id)
+        self.assertEqual(R.status_int, 200)
+        R = self.get('/crm/customer/show_attributes/%s' % customer_id)
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('Customer Attributes')
 
 
     @secure

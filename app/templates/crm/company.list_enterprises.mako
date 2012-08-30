@@ -5,7 +5,7 @@
 
 % if enterprises:
 <div id="result_list">
-  <table width="100%" class="results sortable table-striped">
+  <table width="100%" class="results sortable table table-striped">
     <thead>
     % for cmp in enterprises:
     <tr>

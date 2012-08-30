@@ -4,7 +4,7 @@
 <h1>User List</h3>
 % if users:
 <div id="result_list">
-  <table class="results sortable table-striped" width="100%">
+  <table class="results sortable table table-striped" width="100%">
     <thead>
       <tr>
         <td>Username</td>

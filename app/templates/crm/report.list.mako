@@ -4,7 +4,7 @@
 
 % if reports:
 <div id="result_list">
-  <table width="100%" class="results sortable table-striped">
+  <table width="100%" class="results sortable table table-striped">
     <thead>
       <tr>
         <td>Report</td>

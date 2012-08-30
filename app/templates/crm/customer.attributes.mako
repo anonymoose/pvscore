@@ -4,7 +4,7 @@
 <h1>Customer Attributes</h1>
 
 <div id="result_list">
-  <table width="100%" class="sortable results table-striped">
+  <table width="100%" class="sortable results table table-striped">
     <thead>
       <tr>
         <th>Name</th>

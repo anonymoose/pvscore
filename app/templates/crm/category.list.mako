@@ -5,7 +5,7 @@
 
 % if categories:
 <div id="result_list">
-  <table class="results sortable table-striped" width="100%">
+  <table class="results sortable table table-striped" width="100%">
     <thead>
       <tr>
         <td>ID</td>

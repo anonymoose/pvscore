@@ -57,7 +57,7 @@ product_picture_edit_image = function() {
                                     $('#uploaded_image').append('<img id="up_pi_'+_asset_id+'" src="/cms/asset/show/'+_asset_id+'" border="0"/>');
                                 },
                                 'onError'      : function (event,ID,fileObj,errorObj) {
-                                    alert(errorObj.type + ' Error: ' + errorObj.info);
+                                    pvs.alert(errorObj.type + ' Error: ' + errorObj.info);
                                 }
                             });
                         },

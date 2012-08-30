@@ -15,26 +15,50 @@ pvs = function(){
             return (val === true || val === 'True' || val == 'true' || val === 'Y' || val === 'y');
         },
 
-        alert : function(msg, width, height) {
-            if ($.fancybox) {
-                $.fancybox(msg, {
-                    'autoDimensions' : false,
-    	            'width' : (width ? width : 'auto'),
-    	            'height' : 'auto',
-                    'overlayShow' : true,
-    	            'transitionIn' : 'elastic',
-    	            'transitionOut' : 'elastic'
-                });
-            } else {
-                alert(msg);
+        confirm : function(msg, title, onclick) {
+            if (!title) title = 'Confirm';
+            window.pvs_alert_yes = function() {
+                onclick();
+                $('#modal-confirm').modal('hide');
             }
+            $('#modal-confirm').remove();
+            $('body').append('<div id="modal-confirm" class="modal hide fade">' + 
+                             '    <div class="modal-header">' + 
+                             '      <a href="#" class="close" onclick="$(\'#modal-confirm\').modal(\'hide\')">&times;</a>' + 
+                             '      <h3>'+title+'</h3>' + 
+                             '    </div>' + 
+                             '    <div class="modal-body">' + 
+                             '      <p>'+msg+'</p>' + 
+                             '      <p>Do you want to proceed?</p>' + 
+                             '    </div>' + 
+                             '    <div class="modal-footer">' + 
+                             '      <a href="#" onclick="pvs_alert_yes()" class="btn danger">Yes</a>' + 
+                             '      <a href="javascript:$(\'#modal-confirm\').modal(\'hide\')" class="btn secondary">No</a>' + 
+                             '    </div>' + 
+                             '</div>');
+            $('#modal-confirm').modal({ backdrop: true });
+            $('#modal-confirm').modal('show');
         },
 
-        /*
-          $.each([52, 97], function(index, value) {
-              alert(index + ': ' + value);
-          });
-         */
+        alert : function(msg, title, onclick) {
+            if (!title) title = "Alert";
+            $('#modal-alert').remove();
+            $('body').append('<div id="modal-alert" class="modal hide fade">' + 
+                             '    <div class="modal-header">' + 
+                             '      <a href="#" class="close" onclick="$(\'#modal-alert\').modal(\'hide\')">&times;</a>' + 
+                             '      <h3>'+title+'</h3>' + 
+                             '    </div>' + 
+                             '    <div class="modal-body">' + 
+                             '      <p>'+msg+'</p>' + 
+                             '    </div>' + 
+                             '    <div class="modal-footer">' + 
+                             '      <a href="#" onclick="$(\'#modal-alert\').modal(\'hide\')" class="btn secondary">Ok</a>' + 
+                             '    </div>' + 
+                             '</div>');
+            $('#modal-alert').modal({ backdrop: true });
+            $('#modal-alert').modal('show');
+        },
+
         each : function(arr, func) {
             $.each(arr, func);
         }

@@ -145,18 +145,19 @@ purchase_edit_order_item = function(elem, order_item_id, product_id) {
 
 purchase_complete = function() {
     if ($_('#purchase_order_id')) {
-        var answer = confirm("Complete purchase order?")
-        if (answer) {
-            pvs.ajax.call(pvs.ajax.api({root: '/crm/purchase/complete/'+$_('#purchase_order_id')}),
-                          function(response) {
-                              if (pvs.is_true(response)) {
-                                  pvs.alert('Purchase Order Completed.');
-                                  pvs.browser.goto_url('/crm/purchase/edit/'+$_('#purchase_order_id'));
-                              } else {
-                                  pvs.alert('Unable to save order:\n'+response);
-                              }
-                          });
-        }
+        pvs.confirm("Complete purchase order?", "Purchase",
+                    function() {
+                        pvs.ajax.call(pvs.ajax.api({root: '/crm/purchase/complete/'+$_('#purchase_order_id')}),
+                                      function(response) {
+                                          if (pvs.is_true(response)) {
+                                              pvs.alert('Purchase Order Completed.');
+                                              pvs.browser.goto_url('/crm/purchase/edit/'+$_('#purchase_order_id'));
+                                          } else {
+                                              pvs.alert('Unable to save order:\n'+response);
+                                          }
+                                      });
+                        
+                    });
     } else {
         pvs.alert('Save purchase order first');
     }
@@ -164,18 +165,18 @@ purchase_complete = function() {
 
 purchase_complete_order_item = function(elem, order_item_id) {
     if ($_('#purchase_order_id')) {
-        var answer = confirm("Complete purchase order item?")
-        if (answer) {
-            pvs.ajax.call(pvs.ajax.api({root: '/crm/purchase/complete_item/'+$_('#purchase_order_id')+'/'+order_item_id}),
-                          function(response) {
-                              if (pvs.is_true(response)) {
-                                  pvs.alert('Purchase Order Item Completed.');
-                                  pvs.browser.goto_url('/crm/purchase/edit/'+$_('#purchase_order_id'));
-                              } else {
-                                  pvs.alert('Unable to complete order item:\n'+response);
-                              }
-                          });
-        }
+        pvs.confirm("Complete purchase order item?", "Purchase",
+                    function() {
+                        pvs.ajax.call(pvs.ajax.api({root: '/crm/purchase/complete_item/'+$_('#purchase_order_id')+'/'+order_item_id}),
+                                      function(response) {
+                                          if (pvs.is_true(response)) {
+                                              pvs.alert('Purchase Order Item Completed.');
+                                              pvs.browser.goto_url('/crm/purchase/edit/'+$_('#purchase_order_id'));
+                                          } else {
+                                              pvs.alert('Unable to complete order item:\n'+response);
+                                          }
+                                      });
+                    });
     } else {
         pvs.alert('Save purchase order first');
     }

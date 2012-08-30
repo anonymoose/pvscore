@@ -3,7 +3,6 @@
 
 <div>
   <div class="container">
-    
     <form id="frm_customer" method="POST" action="/crm/customer/save">
       ${h.hidden('customer_id', value=customer.customer_id)}
       <div class="row">

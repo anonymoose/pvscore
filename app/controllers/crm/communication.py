@@ -49,25 +49,25 @@ class CommunicationController(BaseController):
     def list(self):
         return {'comms' : Communication.find_all(self.enterprise_id)}
 
-
-    """
     
-    @view_config(route_name='crm.communication.view_comm_dialog', renderer='string')
+    @view_config(route_name='crm.communication.view_comm_dialog', renderer='/crm/passthru.mako')
     @authorize(IsLoggedIn())
     def view_comm_dialog(self):
         customer_id = self.request.matchdict.get('customer_id')
         comm_id = self.request.matchdict.get('comm_id')
         cust = Customer.load(customer_id)
-        self.forbid_if(not cust or cust.campaign.company.enterprise_id != BaseController.get_enterprise_id())
+        self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
         comm = Communication.load(comm_id)
-        self.forbid_if(not comm or comm.enterprise_id != BaseController.get_enterprise_id())
+        self.forbid_if(not comm or comm.enterprise_id != self.enterprise_id)
         order = None
         if self.request.GET.get('order_id'):
             order = CustomerOrder.load(self.request.GET.get('order_id'))
-            self.forbid_if(not cust or cust.campaign.company.enterprise_id != BaseController.get_enterprise_id())
-        return comm.render(cust, order, self.request.POST.get('msg'))
+            self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
+
+        return { 'content' : comm.render(cust, order, self.request.POST.get('msg')) }
 
 
+    """
     @view_config(route_name='crm.communication.send_comm_dialog', renderer='/crm/communication.send.mako')
     @authorize(IsLoggedIn())
     def send_comm_dialog(self):

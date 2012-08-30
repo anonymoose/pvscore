@@ -31,7 +31,7 @@
 
 % if purchases:
 <div id="result_list">
-  <table width="100%" class="results sortable table-striped">
+  <table width="100%" class="results sortable table table-striped">
     <thead>
       <tr>
         <td>Name</td>        

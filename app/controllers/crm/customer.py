@@ -26,6 +26,8 @@ log = logging.getLogger(__name__)
 class CustomerController(BaseController):
     @view_config(route_name='crm.customer.edit', renderer='/crm/customer.edit.mako')
     @authorize(IsLoggedIn())
+    @validate((('customer_id', 'int'),
+               ('customer_id', 'required')))
     def edit(self):
         return self._edit_impl()
 
@@ -36,12 +38,19 @@ class CustomerController(BaseController):
         return self._edit_impl()
 
 
+    def _add_to_recent(self, customer):
+        if not 'recent_customers' in self.session:
+            self.session['recent_customers'] = {}
+        self.session['recent_customers'][customer.customer_id] = "%s, %s" % (customer.lname, customer.fname)
+
+
     def _edit_impl(self):
         customer_id = self.request.matchdict.get('customer_id')
         customer = None
         if customer_id:
             customer = Customer.load(customer_id)
             self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
+            self._add_to_recent(customer)
         else:
             customer = Customer()
             customer.campaign = self.request.ctx.site.company.get_default_campaign()
@@ -193,6 +202,7 @@ class CustomerController(BaseController):
             'attrs' : customer.get_attrs()
             }
 
+
     @view_config(route_name='crm.customer.show_billings', renderer='/crm/customer.billings_list.mako')
     @authorize(IsLoggedIn())
     def show_billings(self):
@@ -220,6 +230,7 @@ class CustomerController(BaseController):
             'billing_types' : billing_types
             }
 
+
     @view_config(route_name='crm.customer.edit_billing', renderer='string')
     @authorize(IsLoggedIn())
     def edit_billing(self):
@@ -230,9 +241,9 @@ class CustomerController(BaseController):
             cust.billing = Billing.create(cust)
             if user:
                 cust.billing.user_created = user.username
-        if kv_map.has_key('cc_num'):
+        if self.request.POST.has_key('cc_num'):
             cust.billing._cc_num = kv_map['cc_num']
-        cust.billing.bind(kv_map)
+        cust.billing.bind(self.request.POST)
         cust.billing.save()
         return 'True'
 
@@ -348,7 +359,10 @@ class CustomerController(BaseController):
         return {
             'order' : order,
             'comm_packing_slip_id' : order.campaign.comm_packing_slip_id,
-            'customer' : customer
+            'customer' : customer,
+            'total_price' : order.total_price(),
+            'total_payments_applied' : order.total_payments_applied(),
+            'total_discounts_applied' : order.total_discounts_applied()
         }
 
 
@@ -410,20 +424,27 @@ class CustomerController(BaseController):
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         order = customer.get_order(order_id)
         self.forbid_if(not order)
+        total_due = order.total_payments_due()
+        pre_order_balance = customer.get_current_balance()
         return {
             'customer' : customer,
             'order' : order,
             'payment_methods' : Journal.get_payment_methods(),
-            'discount' : self.request.GET.get('discount', None)
+            'total_applied' : order.total_payments_applied(),
+            'total_discounts' : order.total_discounts_applied(),
+            'total_due' : total_due,
+            'pre_order_balance' : pre_order_balance,
+            'total_due_after_balance' : total_due+pre_order_balance if (total_due+pre_order_balance) > 0 else 0
             }
 
 
-    @view_config(route_name='crm.customer.apply_payment', renderer='string')
+    @view_config(route_name='crm.customer.apply_payment')
     @authorize(IsLoggedIn())
     def apply_payment(self, pmt_type_param=None, pmt_method_param=None, pmt_amt_param=None):
         customer_id = self.request.matchdict.get('customer_id')
         order_id = self.request.matchdict.get('order_id')
-        return self._apply_payment(customer_id, order_id, pmt_type_param, pmt_method_param, pmt_amt_param)
+        self._apply_payment(customer_id, order_id, pmt_type_param, pmt_method_param, pmt_amt_param)
+        return HTTPFound('/crm/customer/edit_order_dialog/%s/%s' % (customer_id, order_id))
 
 
     def _apply_payment(self, customer_id, order_id, pmt_type_param=None, pmt_method_param=None, pmt_amt_param=None):
@@ -431,13 +452,12 @@ class CustomerController(BaseController):
         Create a journal entry for the order for the amount and type specified in the UI
         Create a status noting the type and amount of the payment applied.
         """
+        pdb.set_trace()
         customer = Customer.load(customer_id)
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         order = customer.get_order(order_id)
         self.forbid_if(not order)
-        user = None
-        if 'user_id' in self.session:
-            user = Users.load(self.session['user_id'])
+        user = self.request.ctx.user
         pmt_type = self.request.POST.get('pmt_type', pmt_type_param)
         self.forbid_if(pmt_type not in Journal.get_types())
 
@@ -447,13 +467,14 @@ class CustomerController(BaseController):
         pmt_amt = float(self.request.POST.get('pmt_amount', pmt_amt_param))
         pmt_method = self.request.POST.get('pmt_method', pmt_method_param)
         Journal.create_new(pmt_amt, customer, order, user, pmt_type, pmt_method, self.request.POST.get('pmt_note')) # either FullPayment or PartialPayment
-        Status.add(customer, order, Status.find_event(order, 'PAYMENT_APPLIED'),
+        Status.add(customer, order, Status.find_event(self.enterprise_id, order, 'PAYMENT_APPLIED'),
                    '%s applied: %s' % (pmt_type, util.money(pmt_amt)))
 
+        pdb.set_trace()
         pre_order_balance = float(self.request.POST.get('pre_order_balance', 0))
         if pre_order_balance > 0:
             Journal.create_new(pre_order_balance, customer, order, user, 'CreditDecrease') # either FullPayment or PartialPayment
-            Status.add(customer, order, Status.find_event(order, 'PAYMENT_APPLIED'),
+            Status.add(customer, order, Status.find_event(self.enterprise_id, order, 'PAYMENT_APPLIED'),
                    '%s applied: %s' % ('CreditDecrease', util.money(pre_order_balance)))
         return 'True'
 
@@ -906,7 +927,7 @@ class CustomerController(BaseController):
 
     def _prep_add_order_dialog(self, customer_id):
         customer = Customer.load(customer_id)
-        self.forbid_if(not c.customer or c.customer.campaign.company.enterprise_id != BaseController.get_enterprise_id())
+        self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         return {
             'customer' : customer,
             'products' : Product.find_by_campaign(customer.campaign)

@@ -4,7 +4,7 @@
 <h3>Returns</h3>
 
 <div id="result_list">
-  <table width="100%" class="results sortable table-striped">
+  <table width="100%" class="results sortable table table-striped">
     <thead>
       <tr>
         <th>Date</th>

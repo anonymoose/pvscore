@@ -29,17 +29,21 @@ class Journal(ORMBase, BaseModel):
     creator = relation('Users')
     order = relation('CustomerOrder')
 
+
     def cancel(self):
         self.delete_dt = util.today()
         self.save()
+
 
     @staticmethod
     def get_types():
         return ['FullPayment', 'PartialPayment', 'Refund', 'CreditIncrease', 'CreditDecrease', 'Discount']
 
+
     @staticmethod
     def get_payment_methods():
-        return ['Credit Card (offline)', 'Credit Card', 'Cash', 'Check', 'Wire', 'Discount'] # , 'Credit Card (on-file)' is added if there is one on file.
+        return ['Credit Card (offline)', 'Credit Card', 'Cash', 'Apply Balance', 'Check', 'Wire', 'Discount'] # , 'Credit Card (on-file)' is added if there is one on file.
+
 
     @staticmethod
     def create_new(amount, customer, order, creator, t='FullPayment', payment_method='Credit Card', note=None):
@@ -53,6 +57,7 @@ class Journal(ORMBase, BaseModel):
         j.method = payment_method
         j.save()
         return j
+
 
     @staticmethod
     def find_all_by_customer(customer):

@@ -137,6 +137,13 @@ def yesterday():
 def now():
     return datetime.datetime.today()
 
+def str_now():
+    d = datetime.datetime.today()
+    fmt="%Y-%m-%d %H:%M:%S"
+    if d == '' or d == None:
+        return ''
+    return d.strftime(fmt)
+
 def today_date():
     return datetime.date.today()
 

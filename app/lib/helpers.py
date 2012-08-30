@@ -87,6 +87,11 @@ def date_time(d, fmt="%Y-%m-%d %H:%M:%S"):
         return ''
     return d.strftime(fmt)
 
+def date_(d, fmt="%Y-%m-%d"):
+    if d == '' or d == None:
+        return ''
+    return d.strftime(fmt)
+
 def format_date(d, fmt="%Y-%m-%d"):
     if d == '' or d == None:
         return ''

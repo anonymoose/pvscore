@@ -26,7 +26,6 @@ ${self.pre_process()}
   ${h.stylesheet_link('/static/js/jquery/jqgrid/css/ui.jqgrid.css')}
   ${h.stylesheet_link('/static/js/jquery/jquery-ui/css/ui-lightness/jquery-ui-1.8.23.custom.css')}
   ${h.stylesheet_link('/static/css/pvs.css')}
-
   
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
   <%include file="style_override.mako"/>
@@ -131,150 +130,156 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
           Customer
           <b class="caret"></b></a>
         <ul class="dropdown-menu">
-          <li>
-            <form id="frm_customer_search" class="form-inline">
-              <input type="text" class="pad10" placeholder="Customer Search"/>
-            </form>
+          <li><a href="/crm/customer/show_search">Advanced Search</a></li>
+          % if request.ctx.user.priv.edit_customer:
+          <li><a href="/crm/customer/new">Add New Customer</a></li>
+          % endif
+          % if 'recent_customers' in request.session:
+          <li class="dropdown-submenu">
+            <a tabindex="-1" href="#">Recent Customers</a>
+            <ul class="dropdown-menu">
+              % for recent_customer_id in request.session['recent_customers'].keys():
+              <li><a href="/crm/customer/edit/${recent_customer_id}">${request.session['recent_customers'][recent_customer_id]}</a></li>
+              % endfor
+            </ul>
           </li>
-          <li><a href="/crm/customer/show_search">Search</a></li>
-            % if request.ctx.user.priv.edit_customer:
-          <li><a href="/crm/customer/new">Add</a></li>
-            % endif
+          % endif
         </ul>
+      </li>
+      <li>
+        <form id="frm_lname_complete" class="navbar-form pull-left">
+          <input name="lname_complete" type="text"
+                 placeholder="Last Name Search" 
+                 id="lname_complete" data-provide="typeahead" data-source="[]" maxlength="30" autocomplete="off"/>
+        </form>
       </li>
       % endif
 
-      % if request.ctx.user.priv.view_users or request.ctx.user.priv.edit_users:
-      <li><a href="/crm/users/edit_current">My Account</a></li>
-      % endif
+    <li class="divider-vertical"></li>
 
-      % if request.ctx.user.priv.cms:
-      <li><a href="/cms/siteedit/list">Website</a></li>
-      % endif
-
-      <li class="divider-vertical"></li>
-
-      % if request.ctx.user.priv.view_product or request.ctx.user.priv.edit_product:
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-          Product
-          <b class="caret"></b></a>
-        <ul class="dropdown-menu">
-          % if request.ctx.user.priv.edit_product:
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        Administration
+        <b class="caret"></b></a>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+        % if request.ctx.user.priv.cms:
+        <li><a href="/cms/siteedit/list">Website</a></li>
+        % endif
+        
+        % if request.ctx.user.priv.view_product or request.ctx.user.priv.edit_product:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Products</a>
+          <ul class="dropdown-menu">
+            % if request.ctx.user.priv.edit_product:
             <li><a href="/crm/product/new">Add New Product</a></li>
             <li><a href="/crm/product/show_inventory">Edit Inventory</a></li>
-          % endif
-          <li><a href="/crm/product/list">List All Products</a></li>
-          % if request.ctx.user.priv.edit_category:
-            <li><a href="/crm/product/category/new">Add Product Category</a></li>
-          % endif
-          <li><a href="/crm/product/category/list">List Product Categories</a></li>
-        </ul>
-      </li>
-      % endif
-
-      % if request.ctx.user.priv.edit_company or request.ctx.user.priv.view_company or request.ctx.user.priv.view_campaign or request.ctx.user.priv.edit_campaign or request.ctx.user.priv.view_enterprise or request.ctx.user.priv.edit_enterprise:
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle"
-           data-toggle="dropdown">Company
-          <b class="caret"></b></a>
-        <ul class="dropdown-menu">
-          % if request.ctx.user.priv.edit_company:
-          <li><a href="/crm/company/new">Add New Company</a></li>
-          % endif
-          <li><a href="/crm/company/list">List All Companies</a></li>
-          % if request.ctx.user.priv.edit_campaign:
-          <li><a href="/crm/campaign/new">Add New Campaign</a></li>
-          % endif
-          <li><a href="/crm/campaign/list">List All Campaigns</a></li>
-          % if request.ctx.user.priv.edit_enterprise:
-          <li><a href="/crm/company/enterprise/new">Add New Enterprise</a></li>
-          % endif
-          <li><a href="/crm/company/enterprise/list">List All Enterprises</a></li>
-        </ul>
-      </li>
-      % endif
-
-      % if request.ctx.user.priv.edit_purchasing or request.ctx.user.priv.view_purchasing:
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle"
-           data-toggle="dropdown">Suppliers
-          <b class="caret"></b></a>
-        <ul class="dropdown-menu">
-          <li><a href="/crm/purchase/show_search">Find Supplier Order</a></li>
-          % if request.ctx.user.priv.edit_purchasing:
-          <li><a href="/crm/purchase/new">Add Supplier Order</a></li>
-          % endif
-          <li><a href="/crm/purchase/list">List Supplier Orders</a></li>
-          % if request.ctx.user.priv.edit_purchasing:
-          <li><a href="/crm/purchase/vendor/new">Add Supplier</a></li>
-          <li><a href="/crm/purchase/vendor/list">List Suppliers</a></li>
-          % endif
-        </ul>
-      </li>
-      % endif
-
-      % if request.ctx.user.priv.edit_event or request.ctx.user.priv.view_event:
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle"
-           data-toggle="dropdown">Workflow
-          <b class="caret"></b></a>
-        <ul class="dropdown-menu">
-          % if request.ctx.user.priv.edit_event:
-          <li><a href="/crm/event/new">Add Workflow Event</a></li>
-          % endif
-          <li><a href="/crm/event/list">List All Workflow Events</a> </li>
-        </ul>
-      </li>
-      % endif
-
-      % if request.ctx.user.priv.view_communication or request.ctx.user.priv.edit_communication:
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle"
-           data-toggle="dropdown">Email
-          <b class="caret"></b></a>
-        <ul class="dropdown-menu">
-          % if request.ctx.user.priv.edit_communication:
-          <li><a href="/crm/communication/new">Add Template</a></li>
-          % endif
-          <li><a href="/crm/communication/list">List Templates</a> </li>
-        </ul>
-      </li>
-      % endif
-
-      % if request.ctx.user.priv.view_report:
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle"
-           data-toggle="dropdown">Reports
-          <b class="caret"></b></a>
-        <ul class="dropdown-menu">
-          % if request.ctx.user.priv.edit_report or request.ctx.user.priv.edit_users:
-          <li><a href="/crm/report/new">Add New Report</a></li>
             % endif
-          <li><a href="/crm/report/list">List All Reports</a></li>
-        </ul>
-      </li>
-      % endif
+            <li><a href="/crm/product/list">List All Products</a></li>
+            % if request.ctx.user.priv.edit_category:
+            <li><a href="/crm/product/category/new">Add Product Category</a></li>
+            % endif
+            <li><a href="/crm/product/category/list">List Product Categories</a></li>
+          </ul>
+        </li>
+        % endif
 
-      % if request.ctx.user.priv.view_users or request.ctx.user.priv.edit_users:
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle"
-           data-toggle="dropdown">Users
-          <b class="caret"></b></a>
-        <ul class="dropdown-menu">
-          % if request.ctx.user.priv.edit_users:
-          <li><a href="/crm/users/new">Add New User</a></li>
-          % endif
-          <li><a href="/crm/users/list">List All Users</a> </li>
-        </ul>
-      </li>
-      % endif
+
+        % if request.ctx.user.priv.edit_company or request.ctx.user.priv.view_company or request.ctx.user.priv.view_campaign or request.ctx.user.priv.edit_campaign or request.ctx.user.priv.view_enterprise or request.ctx.user.priv.edit_enterprise:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Company</a>
+          <ul class="dropdown-menu">
+            % if request.ctx.user.priv.edit_company:
+            <li><a href="/crm/company/new">Add New Company</a></li>
+            % endif
+            <li><a href="/crm/company/list">List All Companies</a></li>
+            % if request.ctx.user.priv.edit_campaign:
+            <li><a href="/crm/campaign/new">Add New Campaign</a></li>
+            % endif
+            <li><a href="/crm/campaign/list">List All Campaigns</a></li>
+            % if request.ctx.user.priv.edit_enterprise:
+            <li><a href="/crm/company/enterprise/new">Add New Enterprise</a></li>
+            % endif
+            <li><a href="/crm/company/enterprise/list">List All Enterprises</a></li>
+          </ul>
+        </li>
+        % endif
+
+        % if request.ctx.user.priv.edit_purchasing or request.ctx.user.priv.view_purchasing:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Suppliers</a>
+          <ul class="dropdown-menu">
+            <li><a href="/crm/purchase/show_search">Find Supplier Order</a></li>
+            % if request.ctx.user.priv.edit_purchasing:
+            <li><a href="/crm/purchase/new">Add Supplier Order</a></li>
+            % endif
+            <li><a href="/crm/purchase/list">List Supplier Orders</a></li>
+            % if request.ctx.user.priv.edit_purchasing:
+            <li><a href="/crm/purchase/vendor/new">Add Supplier</a></li>
+            <li><a href="/crm/purchase/vendor/list">List Suppliers</a></li>
+            % endif
+          </ul>
+        </li>
+        % endif
+        
+        % if request.ctx.user.priv.edit_event or request.ctx.user.priv.view_event:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Workflow</a>
+          <ul class="dropdown-menu">
+            % if request.ctx.user.priv.edit_event:
+            <li><a href="/crm/event/new">Add Workflow Event</a></li>
+            % endif
+            <li><a href="/crm/event/list">List All Workflow Events</a> </li>
+          </ul>
+        </li>
+        % endif
+        
+        % if request.ctx.user.priv.view_communication or request.ctx.user.priv.edit_communication:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Email</a>
+          <ul class="dropdown-menu">
+            % if request.ctx.user.priv.edit_communication:
+            <li><a href="/crm/communication/new">Add Template</a></li>
+            % endif
+            <li><a href="/crm/communication/list">List Templates</a> </li>
+          </ul>
+        </li>
+        % endif
+        
+        % if request.ctx.user.priv.view_report:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Reports</a>
+          <ul class="dropdown-menu">
+            % if request.ctx.user.priv.edit_report or request.ctx.user.priv.edit_users:
+            <li><a href="/crm/report/new">Add New Report</a></li>
+            % endif
+            <li><a href="/crm/report/list">List All Reports</a></li>
+          </ul>
+        </li>
+        % endif
+        
+        % if request.ctx.user.priv.view_users or request.ctx.user.priv.edit_users:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Users</a>
+          <ul class="dropdown-menu">
+            % if request.ctx.user.priv.edit_users:
+            <li><a href="/crm/users/new">Add New User</a></li>
+            % endif
+            <li><a href="/crm/users/list">List All Users</a> </li>
+          </ul>
+        </li>
+        % endif
+      </ul>
+    </li>
 
 </%def>
 
 
 <%def name="top_bar_right()">\
 ## a <ul> that will make up the menu.
+  % if request.ctx.user.priv.view_users or request.ctx.user.priv.edit_users:
+  <li><a href="/crm/users/edit_current">My Account</a></li>
+  % endif
+
   <li><a href="/crm/dashboard">Dashboard</a></li>
   <li><a href="/crm/logout">Logout</a></li>
 </%def>

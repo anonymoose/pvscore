@@ -5,7 +5,7 @@
 
 % if products:
 <div id="result_list">
-  <table class="results sortable table-striped">
+  <table class="results sortable table table-striped">
     <thead>
       <tr>
         <td>&nbsp;</td>
