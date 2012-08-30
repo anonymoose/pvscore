@@ -3,6 +3,7 @@ development.ini
 production.ini
 setup.cfg
 setup.py
+unittest-exclude.txt
 unittest-web.ini
 unittest.ini
 app/__init__.py
@@ -5672,6 +5673,7 @@ app/templates/crm/event.list.mako
 app/templates/crm/local_base.mako
 app/templates/crm/login.mako
 app/templates/crm/login.pick_enterprise.mako
+app/templates/crm/passthru.mako
 app/templates/crm/product.all_barcodes.mako
 app/templates/crm/product.barcode.mako
 app/templates/crm/product.base.mako
@@ -5713,6 +5715,7 @@ app/tests/controllers/test_crm_campaign.py
 app/tests/controllers/test_crm_category.py
 app/tests/controllers/test_crm_comm.py
 app/tests/controllers/test_crm_company.py
+app/tests/controllers/test_crm_customer.py
 app/tests/controllers/test_crm_dashboard.py
 app/tests/controllers/test_crm_event.py
 app/tests/controllers/test_crm_login.py

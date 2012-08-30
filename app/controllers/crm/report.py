@@ -1,11 +1,11 @@
-import pdb, logging
-import logging, math
+#import pdb
+import logging
+import math
 from app.controllers.base import BaseController
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from app.lib.validate import validate
 from app.lib.decorators.authorize import authorize
-from app.lib.auth_conditions import AllMet, OneMet, IsLoggedIn
+from app.lib.auth_conditions import IsLoggedIn
 from app.model.crm.report import Report
 from app.model.core.users import Users
 from app.model.crm.company import Company
@@ -140,11 +140,14 @@ class ReportController(BaseController):
             total_pages = math.ceil(int(count)/int(limit))
             total_pages = total_pages if total_pages > 1 else 1
 
-        if int(page) > int(total_pages): page = total_pages
+        if int(page) > int(total_pages):
+            page = total_pages
 
         start = int(limit)*int(page)-int(limit)  # // do not put $limit*($page - 1)
-        if not limit: limit = 'all'
-        if start < 0: start = 0
+        if not limit:
+            limit = 'all'
+        if start < 0:
+            start = 0
         results = db.get_list(sql +
                               (' ORDER BY %s %s ' % (sidx, sord) if sidx else '') +
                               ' LIMIT {limit} offset {start}'.format(limit=limit,
@@ -169,8 +172,6 @@ class ReportController(BaseController):
         report_id = self.request.matchdict.get('report_id')
         rep = Report.load(report_id)
         enterprise_id = self.enterprise_id
-        page = self.request.GET.get('page')
-        limit = self.request.GET.get('rows') # get how many rows we want to have into the grid
         sidx = self.request.GET.get('sidx')  # get index row - i.e. user click to sort
         sord = self.request.GET.get('sord')  # get the direction
 

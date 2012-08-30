@@ -1,19 +1,18 @@
-import pdb, re, logging
+#import pdb
+import re, logging
 from app.lib.validate import validate
 from app.controllers.base import BaseController
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from app.lib.decorators.authorize import authorize
-from app.lib.auth_conditions import AllMet, OneMet, IsLoggedIn, IsInternalReferrer
-from app.model.core.users import Users
+from app.lib.auth_conditions import IsLoggedIn
 from app.model.crm.campaign import Campaign
-from app.model.crm.company import Company, Enterprise
+from app.model.crm.company import Company
 from app.model.crm.product import Product, ProductReturn, InventoryJournal, ProductCategory
 from app.model.core.statusevent import StatusEvent
 from app.model.core.status import Status
 from app.model.crm.purchase import Vendor
 import app.lib.util as util
-import app.lib.db as db
 import simplejson as json
 
 log = logging.getLogger(__name__)
@@ -42,8 +41,6 @@ class ProductController(BaseController):
         if product_id:
             product = Product.load(product_id)
             self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
-
-            """ KB: [2011-11-03]: We are allowing them to  """
             product_categories = ProductCategory.find_by_product(product)
         else:
             product = Product()
@@ -52,14 +49,14 @@ class ProductController(BaseController):
         children = product.get_children()
         other_products = product.find_eligible_children()
         non_children = []
-        for p in other_products:
+        for prod in other_products:
             found = False
             for kid in children:
-                if kid.child_id == p.product_id:
+                if kid.child_id == prod.product_id:
                     found = True
                     break
             if found == False:
-                non_children.append(p)
+                non_children.append(prod)
 
         return  {
             'product' : product,
@@ -88,8 +85,7 @@ class ProductController(BaseController):
     @view_config(route_name='crm.product.inventory_list', renderer='string')
     @authorize(IsLoggedIn())
     def inventory_list(self):
-        products = Product.find_by_vendor(self.request.ctx.user.vendor) \
-            if self.request.ctx.user and self.request.ctx.user.is_vendor_user() else Product.find_all(self.enterprise_id)
+        products = Product.find_by_vendor(self.request.ctx.user.vendor) if self.request.ctx.user and self.request.ctx.user.is_vendor_user() else Product.find_all(self.enterprise_id) #pylint: disable-msg=E1120
 
         campaigns = Campaign.find_all(self.enterprise_id)
 
@@ -100,24 +96,24 @@ class ProductController(BaseController):
 
         rows = []
 
-        for i,p in enumerate(products):
+        for prod in products:
             #log.debug('%s %s/%s' % (p.product_id, i+1, len(products)))
             # blank spot at the beginning of the row is to make room for the
             # action buttons.  don't remove it.
-            cells = ['', unicode(p.product_id),
-                     util.nvl(p.name),
-                     util.nvl(p.sku),
-                     util.nvl(p.manufacturer),
-                     util.nvl(unicode(p.inventory)),
-                     util.nvl(unicode(p.inventory_par)),
-                     util.nvl(unicode(p.unit_cost))]
+            cells = ['', unicode(prod.product_id),
+                     util.nvl(prod.name),
+                     util.nvl(prod.sku),
+                     util.nvl(prod.manufacturer),
+                     util.nvl(unicode(prod.inventory)),
+                     util.nvl(unicode(prod.inventory_par)),
+                     util.nvl(unicode(prod.unit_cost))]
             # the column ordering in the UI is dependant on the order of the
             # campaigns that comes back from Campaign.find_all().  We use the
             # same ordering here so we are fine not adding some campaign ID here.
-            for cmp in campaigns:
-                cells.append(util.nvl(util.money(p.get_retail_price(cmp))))
+            for camp in campaigns:
+                cells.append(util.nvl(util.money(prod.get_retail_price(camp))))
 
-            rows.append({'id': str(p.product_id),
+            rows.append({'id': str(prod.product_id),
                          'cell': cells})
 
         response['rows'] = rows
@@ -154,9 +150,9 @@ class ProductController(BaseController):
         # save all the prices, prefixed by "cmp_"
         for k in self.request.POST.keys():
             if k.startswith('cmp_'):
-                m = re.search(r'^.*_(.*)', k)
-                if m:
-                    campaign = Campaign.load(m.group(1))
+                match = re.search(r'^.*_(.*)', k)
+                if match:
+                    campaign = Campaign.load(match.group(1))
                     price = self.request.POST.get(k)
                     if price:
                         price = util.float_(price)
@@ -173,73 +169,61 @@ class ProductController(BaseController):
     def save(self):
         product_id = self.request.POST.get('product_id')
         if product_id:
-            p = Product.load(product_id)
+            prod = Product.load(product_id)
         else:
-            p = Product()
-        p.bind(self.request.POST, True)
-        p.mod_dt = util.now()
-        p.clear_children()
-        p.save()
+            prod = Product()
+        prod.bind(self.request.POST, True)
+        prod.mod_dt = util.now()
+        prod.clear_children()
+        prod.save()
         self.db_flush()
 
         for k in self.request.POST.keys():
             if k.startswith('campaign_price'):
-                m = re.search(r'^.*\[(.*)\]', k)
-                if m:
-                    log.debug('loading campaign %s %s' % (k, m.group(1)))
-                    campaign = Campaign.load(m.group(1))
+                match = re.search(r'^.*\[(.*)\]', k)
+                if match:
+                    campaign = Campaign.load(match.group(1))
                     price = self.request.POST.get(k)
                     discount = self.request.POST.get('campaign_discount[%d]' % campaign.campaign_id)
                     if price:
                         price = util.float_(price)
                         discount = util.float_(discount)
-                        p.set_price(campaign, price, discount)
+                        prod.set_price(campaign, price, discount)
                     else:
-                        p.remove_price(campaign)
+                        prod.remove_price(campaign)
 
             if k.startswith('child_incl'):
                 child_product_id = self.request.POST.get(k)
                 child_product_quantity = self.request.POST.get('child_quantity_%d' % int(child_product_id))
-                p.add_child(child_product_id, child_product_quantity)
+                prod.add_child(child_product_id, child_product_quantity)
 
-        p.save()
+        prod.save()
         self.db_flush()
 
         inventory = str(self.request.POST.get('prod_inventory', '0'))
-        if inventory and str(round(float(inventory), 2)) != str(round(util.nvl(InventoryJournal.total(p), 0), 2)):
-            InventoryJournal.create_new(p, 'Inventory Adjust', inventory)
+        if inventory and str(round(float(inventory), 2)) != str(round(util.nvl(InventoryJournal.total(prod), 0), 2)):
+            InventoryJournal.create_new(prod, 'Inventory Adjust', inventory)
             self.db_flush()
             self.flash('Inventory Adjusted to %s' % inventory)
 
-        p.clear_attributes()
+        prod.clear_attributes()
         for i in range(30):
             attr_name = self.request.POST.get('attr_name[%d]' % i)
             attr_value = self.request.POST.get('attr_value[%d]' % i)
             if attr_name and attr_value:
-                p.set_attr(attr_name, attr_value)
+                prod.set_attr(attr_name, attr_value)
 
-        """ KB: [2011-11-03]: We are only handling the one-to-one product-to-category relationship in the product manager screen.
-        Anything more complex has to be handled elsewhere.
-        So, if category_id is in the post, then we know that the UI detected that there was only one category before.
-        Thus, we are safe to delete here.
-
-        if 'category_id' in self.request.POST:
-            ProductCategory.clear_by_product(p)
-            pc = ProductCategory.load(self.request.POST.get('category_id'))
-            if pc:
-                pc.add_product(p.product_id)
-        """
-        
-        self.flash('Successfully saved %s.' % p.name)
-        return HTTPFound('/crm/product/edit/%s' % p.product_id)
+        self.flash('Successfully saved %s.' % prod.name)
+        return HTTPFound('/crm/product/edit/%s' % prod.product_id)
 
 
     @view_config(route_name='crm.product.ac.name', renderer='string')
     @authorize(IsLoggedIn())
     def autocomplete_by_name(self):
-        if not 'search_key' in self.request.GET or not self.request.GET.get('search_key'): return
-        q = self.request.GET.get('search_key')
-        lnames = Product.find_names_by_name(self.enterprise_id, q, self.request.GET.get('max_rows', 10))
+        if not 'search_key' in self.request.GET or not self.request.GET.get('search_key'):
+            return
+        srch = self.request.GET.get('search_key')
+        lnames = Product.find_names_by_name(self.enterprise_id, srch, self.request.GET.get('max_rows', 10))
         return json.dumps(lnames)
 
 
@@ -251,7 +235,8 @@ class ProductController(BaseController):
         self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
         return {'product' : product,
                 'events' : util.select_list(StatusEvent.find_all_applicable(self.enterprise_id, product), 'event_id', 'display_name'),
-                'orders' : product.get_orders_report()}
+                'orders' : product.get_orders_report()
+                }
 
 
     @view_config(route_name='crm.product.show_sales', renderer='/crm/product.sales_list.mako')
@@ -262,7 +247,8 @@ class ProductController(BaseController):
         self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
         return {'sales' : product.get_sales_report(),
                 'events' : util.select_list(StatusEvent.find_all_applicable(self.enterprise_id, product), 'event_id', 'display_name'),
-                'product' : product}
+                'product' : product
+                }
 
 
     @view_config(route_name='crm.product.show_purchases', renderer='/crm/product.purchases_list.mako')
@@ -274,7 +260,8 @@ class ProductController(BaseController):
         self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
         return {'product' : product,
                 'events' : util.select_list(StatusEvent.find_all_applicable(self.enterprise_id, product), 'event_id', 'display_name'),
-                'purchase_order_items' : PurchaseOrderItem.find_by_product(product)}
+                'purchase_order_items' : PurchaseOrderItem.find_by_product(product)
+                }
 
 
     @view_config(route_name='crm.product.show_history', renderer='/crm/product.history_list.mako')
@@ -315,33 +302,33 @@ class ProductController(BaseController):
         return HTTPFound('/crm/product/show_history/%s' % product_id)
 
 
-    """
-    @view_config(route_name='crm.product.json', renderer='/crm/product.json.mako')
-    @authorize(IsLoggedIn())
-    def json(self):
-        product_id = self.request.matchdict['product_id']
-        campaign_id = self.request.matchdict['campaign_id']
-        product = Product.load(product_id)
-        if not product: return 'False'
-        self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
-        return {'unit_price' : product.get_unit_price(campaign_id),
-                'product' : product}
+
+    # @view_config(route_name='crm.product.json', renderer='/crm/product.json.mako')
+    # @authorize(IsLoggedIn())
+    # def json(self):
+    #     product_id = self.request.matchdict['product_id']
+    #     campaign_id = self.request.matchdict['campaign_id']
+    #     product = Product.load(product_id)
+    #     if not product: return 'False'
+    #     self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
+    #     return {'unit_price' : product.get_unit_price(campaign_id),
+    #             'product' : product}
 
 
-    def show_barcode(self, product_id):
-        c.product_id = product_id
-        return self.render('/crm/product.barcode.mako')
+    # def show_barcode(self, product_id):
+    #     c.product_id = product_id
+    #     return self.render('/crm/product.barcode.mako')
 
 
-    def barcodes(self):
-        e = Enterprise.load(self.enterprise_id)
-        self.forbid_if(not e)
-        c.products = []
+    # def barcodes(self):
+    #     e = Enterprise.load(self.enterprise_id)
+    #     self.forbid_if(not e)
+    #     c.products = []
 
-        for cmp in e.companies:
-            for p in cmp.get_all_active_products():
-                c.products.append(p)
+    #     for cmp in e.companies:
+    #         for p in cmp.get_all_active_products():
+    #             c.products.append(p)
 
-        return self.render('/crm/product.all_barcodes.mako')
-    """
+    #     return self.render('/crm/product.all_barcodes.mako')
+
      

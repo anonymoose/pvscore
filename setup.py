@@ -28,7 +28,8 @@ requires = [
     'decorator',
     'webtest',
     'nose',
-    'nose-exclude'
+    'nose-exclude',
+    'pylint'
     ]
 
 setup(name='app',

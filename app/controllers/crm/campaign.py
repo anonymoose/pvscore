@@ -1,11 +1,10 @@
-import pdb
+#import pdb
 import logging
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from app.controllers.base import BaseController
-from app.lib.validate import validate
 from app.lib.decorators.authorize import authorize
-from app.lib.auth_conditions import AllMet, OneMet, IsLoggedIn
+from app.lib.auth_conditions import IsLoggedIn
 from app.model.crm.campaign import Campaign
 from app.model.crm.comm import Communication
 from app.model.crm.company import Company

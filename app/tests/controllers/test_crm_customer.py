@@ -139,7 +139,7 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_autocomplete(self):
-        product_id = self._create_new()
+        customer_id = self._create_new()
         R = self.get('/crm/customer/autocomplete',
                       {'search_key': 'Bedw'})
         R.mustcontain('Bedwell, Ken')
@@ -157,6 +157,15 @@ class TestCrmCustomer(TestController):
         R = self.get('/crm/customer/autocomplete',
                       {'search_key': 'brookewell@gmail.com'})
         R.mustcontain('Bedwell, Zach')
-        self._delete_new(product_id)
+        self._delete_new(customer_id)
 
 
+    @secure
+    def test_add_order(self):
+        customer_id = self._create_new()
+        R = self.get('/crm/customer/add_order_dialog/%s' % customer_id)
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('Add Order')
+        self._delete_new(customer_id)
+
+        
