@@ -1,14 +1,10 @@
-import logging, pdb, random
+import logging
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from app.controllers.base import BaseController
-from app.lib.validate import validate, validate_session
+from app.lib.validate import validate
 import app.lib.util as util
 from app.model.core.users import Users
-from app.model.crm.customer import Customer
-from app.model.crm.campaign import Campaign
-from app.model.crm.company import Enterprise
-from app.model.cms.site import Site
 
 log = logging.getLogger(__name__)
 

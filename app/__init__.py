@@ -1,4 +1,4 @@
-import pdb, logging
+import logging
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 from app.model import init_model
@@ -26,7 +26,7 @@ def _config_impl(cfg):
     cfg.scan()
 
 
-def main(global_config, **settings):
+def main(global_config, **settings):   #pylint: disable-msg=W0613
     engine = engine_from_config(settings, 'sqlalchemy.')
     init_model(engine, **settings)
     cfg = Configurator(settings=settings)
@@ -36,7 +36,7 @@ def main(global_config, **settings):
     return cfg.make_wsgi_app()
 
 
-def command_line_main(settings):
+def command_line_main(**settings):
     engine = engine_from_config(settings, 'sqlalchemy.')
     init_model(engine, **settings)
     cfg = Configurator(settings=settings)

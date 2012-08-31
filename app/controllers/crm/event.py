@@ -1,12 +1,10 @@
-import pdb
+#import pdb
 import logging
 from app.controllers.base import BaseController
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from app.lib.validate import validate
 from app.lib.decorators.authorize import authorize 
-from app.lib.auth_conditions import AllMet, OneMet, IsLoggedIn
-from app.model.core.users import Users
+from app.lib.auth_conditions import IsLoggedIn
 from app.model.core.statusevent import StatusEvent
 
 log = logging.getLogger(__name__)
@@ -59,16 +57,13 @@ class EventController(BaseController):
         self.flash('Successfully saved %s.' % evt.short_name)
         return HTTPFound('/crm/event/edit/%s' % evt.event_id)
 
-
-    """
-    @view_config(route_name='crm.event.search', renderer='/crm/event.search.mako')
-    @authorize(IsLoggedIn())
-    def search(self):
-        display_name = self.request.POST.get('username') 
-        short_name = self.request.POST.get('fname')
-        return {
-            'display_name' : display_name,
-            'short_name' : short_name,
-            'events' : StatusEvent.search(display_name,short_name)
-            }
-    """
+    # @view_config(route_name='crm.event.search', renderer='/crm/event.search.mako')
+    # @authorize(IsLoggedIn())
+    # def search(self):
+    #     display_name = self.request.POST.get('username') 
+    #     short_name = self.request.POST.get('fname')
+    #     return {
+    #         'display_name' : display_name,
+    #         'short_name' : short_name,
+    #         'events' : StatusEvent.search(display_name,short_name)
+    #         }

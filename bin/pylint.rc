@@ -33,7 +33,7 @@ load-plugins=
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
-disable=I0011,C0301,C0111,R0904,R0914
+disable=I0011,C0301,C0111,R0904,R0914,R0201,W0703,R0902
 
 
 [REPORTS]
@@ -134,7 +134,7 @@ notes=FIXME,XXX,TODO
 [SIMILARITIES]
 
 # Minimum lines number of a similarity.
-min-similarity-lines=4
+min-similarity-lines=10
 
 # Ignore comments when computing similarities.
 ignore-comments=yes

@@ -1,13 +1,12 @@
-import pdb
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Float
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.types import Integer, String, Date, Float
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
 from app.model.crm.pricing import ProductPricing
 from app.model.crm.company import Company
 from app.lib.dbcache import FromCache, invalidate
-from app.model.core.attribute import Attribute, AttributeValue
+from app.model.core.attribute import Attribute
 
 class Campaign(ORMBase, BaseModel):
     __tablename__ = 'crm_campaign'
@@ -41,13 +40,14 @@ class Campaign(ORMBase, BaseModel):
 
     @staticmethod
     def create(name, company):
-        c = Campaign()
-        c.company = company
-        c.name = name
-        return c
+        camp = Campaign()
+        camp.company = company
+        camp.name = name
+        return camp
 
     @staticmethod
     def find_all(enterprise_id):
+        #pylint: disable-msg=E1101
         return Session.query(Campaign) \
             .options(FromCache('Campaign.find_all', enterprise_id)) \
             .join((Company, Campaign.company_id == Company.company_id)).filter(and_(Campaign.delete_dt == None,
@@ -56,16 +56,12 @@ class Campaign(ORMBase, BaseModel):
 
     @staticmethod
     def find_by_company(company):
+        #pylint: disable-msg=E1101
         return Session.query(Campaign) \
             .filter(and_(Campaign.delete_dt == None,
                          Campaign.company == company)) \
                          .order_by(Campaign.name.asc()).all()
 
-
-    """ KB: [2011-03-15]: DEPRECATED. """
-    @staticmethod
-    def find_default_by_company(company):
-        return company.default_campaign
 
     @staticmethod
     def search(enterprise_id, name, company_id):
@@ -80,7 +76,7 @@ class Campaign(ORMBase, BaseModel):
                  and com.enterprise_id = {ent_id}
                  {n} {cid}
               """.format(n=n_clause, cid=cid_clause, ent_id=enterprise_id)
-        return Session.query(Campaign).from_statement(sql).all()
+        return Session.query(Campaign).from_statement(sql).all()  #pylint: disable-msg=E1101
 
     def get_products(self):
         from app.model.crm.product import Product

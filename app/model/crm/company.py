@@ -1,6 +1,6 @@
-import pdb
+#pylint: disable-msg=E1101,R0801
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text
+from sqlalchemy.types import Integer, String, Date, Text
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
@@ -10,7 +10,7 @@ import app.lib.util as util
 import os, shutil
 from app.lib.dbcache import FromCache, invalidate
 import app.lib.db as db
-from app.model.core.attribute import Attribute, AttributeValue
+from app.model.core.attribute import Attribute
 
 class Company(ORMBase, BaseModel):
     __tablename__ = 'crm_company'
@@ -26,6 +26,7 @@ class Company(ORMBase, BaseModel):
 
     anon_customer_email = Column(String(75))
 
+    
     addr1 = Column(String(50))
     addr2 = Column(String(50))
     city = Column(String(50))
@@ -49,15 +50,19 @@ class Company(ORMBase, BaseModel):
     enterprise = relation('Enterprise', backref=backref('companies', order_by='Company.name'))
     status = relation('Status')
 
+
     def __repr__(self):
         return '%s : %s' % (self.company_id, self.name)
+
 
     def get_all_active_products(self):
         from app.model.crm.product import Product
         return Product.find_all_active(self)
 
+
     def is_email_ready(self):
         return (self.smtp_server and self.smtp_server.find(':') >= 0)
+
 
     @property
     def default_campaign(self):
@@ -69,9 +74,9 @@ class Company(ORMBase, BaseModel):
 
     @staticmethod
     def create(name):
-        c = Company()
-        c.name = name
-        return c
+        comp = Company()
+        comp.name = name
+        return comp
 
 
     @staticmethod
@@ -122,16 +127,13 @@ class Company(ORMBase, BaseModel):
         invalidate(self, 'Company.find_all', self.enterprise_id)
         invalidate(self, 'Company.find_by_name', self.name)
         invalidate(self, 'Company.default_campaign', self.company_id)
-        for s in Site.find_all():
-            s.invalidate_caches()
+        for i in Site.find_all():
+            i.invalidate_caches()
 
-    """ KB: [2011-03-15]: DEPRECATED """
-    def get_default_campaign(self):
-        return self.default_campaign
 
     @staticmethod
     def search(name):
-        n_clause = cid_clause = ''
+        n_clause = ''
         if name:
             n_clause = "and com.name like '%s%%'" % name
 
@@ -161,12 +163,12 @@ class Company(ORMBase, BaseModel):
         """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
         return "/companies/{dirname}/{subdir}".format(dirname=self.web_directory, subdir=subdir)
 
-    """ KB: [2010-11-18]:
-    called from app.controllers.cms.asset::upload_to_company()
-
-    http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
-    """
     def store_asset(self, asset_data, folder, fk_type, fk_id):
+        """ KB: [2010-11-18]:
+        called from app.controllers.cms.asset::upload_to_company()
+        http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
+        """
+
         fs_path = os.path.join(
             '%s%s' % (self.web_full_directory, folder),
             asset_data.filename.replace(os.sep, '_')
@@ -177,13 +179,12 @@ class Company(ORMBase, BaseModel):
         permanent_file.close()
         # at this point everything is saved to disk. Create an asset object in
         # the DB to remember it.
-        a = Asset.create_new(asset_data.filename,
+        return Asset.create_new(asset_data.filename,
                              fs_path,
                              '{base}/{f}'.format(base=self.company_web_directory('images'),
                                                  f=asset_data.filename),
-                             fk_type, fk_id)
-        a.commit()
-        return a
+                             fk_type, fk_id).flush()
+
 
 class Enterprise(ORMBase, BaseModel):
     __tablename__ = 'crm_enterprise'
@@ -192,9 +193,7 @@ class Enterprise(ORMBase, BaseModel):
     enterprise_id = Column(Integer, primary_key = True)
     name = Column(String(50))
     crm_style = Column(Text)
-    """ KB: [2011-12-04]: If this enterprise is created because of a customer relationship in
-    another enterprise, put that FK here.
-    """
+    # KB: [2011-12-04]: If this enterprise is created because of a customer relationship in another enterprise, put that FK here.
     customer_id = Column(Integer) # if this enterprise is created because of a
                                   # customer in another enterprise, put the FK here.
     order_item_id = Column(Integer) # if this enterprise is created because of a
@@ -213,47 +212,55 @@ class Enterprise(ORMBase, BaseModel):
     def __repr__(self):
         return '%s : %s' % (self.enterprise_id, self.name)
 
+
     @staticmethod
     def get_billing_methods():
         return ['PayPal', 'CCEAccounts', 'Stripe', 'Invoice', 'Offline']
 
-    """ KB: [2012-01-15]: If we are in one enterprise (the root [ie: wealthmakers]) and we want to find the customer's enterprise
-    call this method
-    """
+
     @staticmethod
     def find_by_customer(customer):
+        """ KB: [2012-01-15]: If we are in one enterprise (the root [ie: wealthmakers]) and we want to find the customer's enterprise
+        call this method
+        """
         return Session.query(Enterprise)\
             .filter(and_(Enterprise.customer_id == customer.customer_id,
                          Enterprise.delete_dt == None)).first()
+
 
     @property
     def customer(self):
         from app.model.crm.customer import Customer
         return Customer.load(self.customer_id)
 
+
     @property
     def order_item(self):
         from app.model.crm.orderitem import OrderItem
         return OrderItem.load(self.order_item_id)
 
+
     @property
     def is_purchased(self):
         return bool((self.order_item_id or self.customer_id))
+
 
     @property
     def terms_required(self):
         return (self.order_item_id is not None and self.terms_link is not None)
 
+
     @property
     def terms_accepted(self):
         from app.model.crm.orderitem import OrderItemTermsAcceptance
-        v  =  OrderItemTermsAcceptance.is_order_item_id_accepted(self.order_item_id)
-        return v
+        return OrderItemTermsAcceptance.is_order_item_id_accepted(self.order_item_id)
+
 
     @staticmethod
     def find_all():
         return Session.query(Enterprise) \
             .filter(Enterprise.delete_dt == None).order_by(Enterprise.name).all()
+
 
     @staticmethod
     def find_all_non_customer():
@@ -261,15 +268,18 @@ class Enterprise(ORMBase, BaseModel):
             .filter(and_(Enterprise.delete_dt == None,
                          Enterprise.customer_id == None)).order_by(Enterprise.name).all()
 
+
     @staticmethod
     def find_by_name(name):
         return Session.query(Enterprise) \
             .filter(and_(Enterprise.delete_dt == None,
                          Enterprise.name == name)).first()
 
+
     def clear_attributes(self):
         if self.enterprise_id:
             Attribute.clear_all('Enterprise', self.enterprise_id)
+
 
     def set_attr(self, name, value):
         attr = Attribute.find('Enterprise', name)
@@ -277,19 +287,21 @@ class Enterprise(ORMBase, BaseModel):
             attr = Attribute.create_new('Enterprise', name)
         attr.set(self, value)
 
+
     def get_attr(self, name):
         attr = Attribute.find('Enterprise', name)
         if attr:
             return attr.get(self)
         return None
 
+
     def get_attrs(self):
         return Attribute.find_values(self)
 
-    @staticmethod
-    def full_delete(enterprise_id, do_commit=True):
-        from app.model.crm.customer import Customer
 
+    @staticmethod
+    def full_delete(enterprise_id):
+        from app.model.crm.customer import Customer
         company_ids = db.get_list('select company_id from crm_company where enterprise_id = %s' % enterprise_id)
         campaign_ids = db.get_list("""select campaign_id from crm_campaign where
                                       company_id in (select company_id from crm_company where enterprise_id = %s)""" % enterprise_id)
@@ -300,11 +312,11 @@ class Enterprise(ORMBase, BaseModel):
         product_ids = db.get_list("""select product_id from crm_product where
                                      company_id in (select company_id from crm_company where enterprise_id = %s)""" % enterprise_id)
 
-        for id in customer_ids:
-            Customer.full_delete(id[0])
+        for cid in customer_ids:
+            Customer.full_delete(cid[0])
 
-        for id in product_ids:
-            product_id = id[0]
+        for pid in product_ids:
+            product_id = pid[0]
             Session.execute('delete from crm_product_return where product_id = %s' % product_id)
             Session.execute('delete from crm_product_category_join where product_id = %s' % product_id)
             Session.execute('delete from crm_product_child where parent_id = %s' % product_id)
@@ -315,12 +327,12 @@ class Enterprise(ORMBase, BaseModel):
             Session.execute('delete from crm_order_item where product_id = %d' % product_id)
             Session.execute('delete from crm_product where product_id = %d' % product_id)
 
-        for id in campaign_ids:
-            campaign_id = id[0]
+        for cid in campaign_ids:
+            campaign_id = cid[0]
             Session.execute('delete from crm_product_pricing where campaign_id = %s' % campaign_id)
 
-        for id in company_ids:
-            company_id = id[0]
+        for cid in company_ids:
+            company_id = cid[0]
             Session.execute('delete from crm_product_category where company_id = %s' % company_id)
             Session.execute('delete from crm_report where company_id = %s' % company_id)
             Session.execute("""delete from cms_content
@@ -342,6 +354,4 @@ class Enterprise(ORMBase, BaseModel):
         Session.execute('delete from core_user where enterprise_id = %s' % enterprise_id)
         Session.execute('delete from crm_vendor where enterprise_id = %s' % enterprise_id)
         Session.execute('delete from crm_enterprise where enterprise_id = %s' % enterprise_id)
-        if do_commit:
-            Session.commit()
 

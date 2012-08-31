@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.types import Integer, String, Date, Numeric, Text
+from sqlalchemy.types import Integer, String, Date
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel

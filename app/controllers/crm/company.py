@@ -1,11 +1,10 @@
-import pdb
+#import pdb
 import logging, os
-from app.lib.validate import validate
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from app.controllers.base import BaseController
 from app.lib.decorators.authorize import authorize
-from app.lib.auth_conditions import AllMet, OneMet, IsLoggedIn
+from app.lib.auth_conditions import IsLoggedIn
 from app.model.crm.campaign import Campaign
 from app.model.crm.company import Company, Enterprise
 from app.model.core.users import Users
@@ -61,25 +60,25 @@ class CompanyController(BaseController):
     @view_config(route_name="crm.company.save")
     @authorize(IsLoggedIn())
     def save(self):
-        c = Company.load(self.request.POST.get('company_id'))
-        if not c:
-            c = Company()
-        c.bind(self.request.POST)
-        c.save()
-        c.flush()
+        comp = Company.load(self.request.POST.get('company_id'))
+        if not comp:
+            comp = Company()
+        comp.bind(self.request.POST)
+        comp.save()
+        comp.flush()
 
-        if not os.path.isdir(c.web_full_directory):
-            c.create_dir_structure()
+        if not os.path.isdir(comp.web_full_directory):
+            comp.create_dir_structure()
 
-        c.clear_attributes()
+        comp.clear_attributes()
         for i in range(10):
             attr_name = self.request.POST.get('attr_name[%d]' % i)
             attr_value = self.request.POST.get('attr_value[%d]' % i)
             if attr_name and attr_value:
-                c.set_attr(attr_name, attr_value)
+                comp.set_attr(attr_name, attr_value)
 
-        self.request.session.flash('Successfully saved %s.' % c.name)
-        return HTTPFound('/crm/company/edit/%d' % int(c.company_id))
+        self.request.session.flash('Successfully saved %s.' % comp.name)
+        return HTTPFound('/crm/company/edit/%d' % int(comp.company_id))
 
 
     @view_config(route_name="crm.company.enterprise.quickstart", renderer="/crm/company.quick_start.mako")
@@ -153,7 +152,7 @@ class CompanyController(BaseController):
 
     @view_config(route_name='crm.company.enterprise.edit', renderer='/crm/company.edit_enterprise.mako')
     @authorize(IsLoggedIn())
-    def edit_enterprise(self, enterprise_id=None):
+    def edit_enterprise(self):
         return self._edit_enterprise_impl()
     
 
@@ -202,20 +201,16 @@ class CompanyController(BaseController):
 
     
 
-    """ KB: [2012-08-21]: When we are testing, the app has its own cache
-    and own redis.  When we delete something in the testing scaffolding,
-    it doesn't clear out the caches in the app context.  Call this
-    method after each test in tearDown to make sure you've got
-    everything.
-    Only add items here if they give you an issue in Tfull for full
-    regression testing. So dumb.
-    """
+    # KB: [2012-08-21]: When we are testing, the app has its own cache
+    # and own redis.  When we delete something in the testing scaffolding,
+    # it doesn't clear out the caches in the app context.  Call this
+    # method after each test in tearDown to make sure you've got
+    # everything.
+    # Only add items here if they give you an issue in Tfull for full
+    # regression testing. So dumb.
     @view_config(route_name='crm.company.enterprise.clearcache', renderer='string')
     @authorize(IsLoggedIn())
     def clear_caches(self):
-        from app.model.crm.campaign import Campaign
-
-        for c in Campaign.find_all(self.enterprise_id):
-            c.invalidate_caches()
-
+        for camp in Campaign.find_all(self.enterprise_id):
+            camp.invalidate_caches()
         return "ok"

@@ -1,12 +1,10 @@
-import pdb
 import logging
-from app.controllers.base import BaseController
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from app.lib.validate import validate, validate_session
+from app.lib.validate import validate
 from app.controllers.base import BaseController
 from app.lib.decorators.authorize import authorize 
-from app.lib.auth_conditions import AllMet, OneMet, IsLoggedIn
+from app.lib.auth_conditions import IsLoggedIn
 from app.model.core.users import Users, UserPriv
 from app.model.crm.purchase import Vendor
 import app.lib.util as util
@@ -51,16 +49,16 @@ class UsersController(BaseController):
     @view_config(route_name='crm.users.search', renderer='/crm/users.search.mako')
     @authorize(IsLoggedIn())
     def search(self):
-        username = request.POST.get('username') 
-        fname = request.POST.get('fname')
-        lname = request.POST.get('lname')
-        email = request.POST.get('email')
+        username = self.request.POST.get('username') 
+        fname = self.request.POST.get('fname')
+        lname = self.request.POST.get('lname')
+        email = self.request.POST.get('email')
         return {
             'username' : username,
             'fname' : fname,
             'lname' : lname,
             'email' : email,
-            'users' : Users.search(username, fname, lname, email)
+            'users' : Users.search(self.enterprise_id, username, fname, lname, email)
             }
 
 
@@ -81,29 +79,29 @@ class UsersController(BaseController):
                ('email', 'email'),
                ('password', 'equals', 'confirm')))
     def save(self):
-        u = Users.load(self.request.POST.get('username'))
-        if not u:
-            u = Users()
-            u.enterprise_id = self.enterprise_id
+        usr = Users.load(self.request.POST.get('username'))
+        if not usr:
+            usr = Users()
+            usr.enterprise_id = self.enterprise_id
 
-        if not u.priv:
-            u.priv = UserPriv()
-        u.priv.bind(self.request.POST, True, 'pv')
-        u.priv.save()
-        u.priv.flush()
+        if not usr.priv:
+            usr.priv = UserPriv()
+        usr.priv.bind(self.request.POST, True, 'pv')
+        usr.priv.save()
+        usr.priv.flush()
         
-        orig_pass = u.password
-        bogus_pass = ''.join(['-' for i in range(u.password_len)]) if u.password_len else '-'
-        u.bind(self.request.POST)
-        if u.password != bogus_pass:
-            u.password_len = len(u.password)
-            u.password = Users.encode_password(u.password)
+        orig_pass = usr.password
+        bogus_pass = ''.join(['-' for _ in range(usr.password_len)]) if usr.password_len else '-'
+        usr.bind(self.request.POST)
+        if usr.password != bogus_pass:
+            usr.password_len = len(usr.password)
+            usr.password = Users.encode_password(usr.password)
         else:
-            u.password = orig_pass
-        u.save()
+            usr.password = orig_pass
+        usr.save()
 
-        self.request.session.flash('Saved user %s' % u.username)
-        return HTTPFound('/crm/users/edit/%s' % u.username)
+        self.request.session.flash('Saved user %s' % usr.username)
+        return HTTPFound('/crm/users/edit/%s' % usr.username)
 
 
     @view_config(route_name='crm.users.save_password', renderer='string')
@@ -112,11 +110,11 @@ class UsersController(BaseController):
                ('password', 'required')))
     def save_password(self):
         username = self.request.POST.get('username')
-        u = Users.load(username)
-        self.forbid_if(not u or u.enterprise_id != self.enterprise_id)
-        u.bind(self.request.POST, False, self.request.GET.get('pfx'))
-        u.password = Users.encode_password(u.password)
-        u.save()
+        usr = Users.load(username)
+        self.forbid_if(not usr or usr.enterprise_id != self.enterprise_id)
+        usr.bind(self.request.POST, False, self.request.GET.get('pfx'))
+        usr.password = Users.encode_password(usr.password)
+        usr.save()
         return 'True'
 
 

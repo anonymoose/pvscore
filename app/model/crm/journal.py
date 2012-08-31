@@ -1,13 +1,10 @@
-import pdb
-import datetime
+#pylint: disable-msg=E1101
+#pylint: disable-msg=C0103
 from sqlalchemy import Column, ForeignKey, and_, or_
 from sqlalchemy.types import Integer, String, Date, Float, Text
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
-from app.model.crm.orderitem import OrderItem
-from app.model.crm.product import Product
-from app.model.core.status import Status
 import app.lib.util as util
 
 class Journal(ORMBase, BaseModel):
@@ -46,17 +43,17 @@ class Journal(ORMBase, BaseModel):
 
 
     @staticmethod
-    def create_new(amount, customer, order, creator, t='FullPayment', payment_method='Credit Card', note=None):
-        j = Journal()
-        j.type = t
-        j.note = note
-        j.customer = customer
-        j.creator = creator
-        j.order = order
-        j.amount = amount
-        j.method = payment_method
-        j.save()
-        return j
+    def create_new(amount, customer, order, creator, typ='FullPayment', payment_method='Credit Card', note=None):   #pylint: disable-msg=R0913
+        jrnl = Journal()
+        jrnl.type = typ
+        jrnl.note = note
+        jrnl.customer = customer
+        jrnl.creator = creator
+        jrnl.order = order
+        jrnl.amount = amount
+        jrnl.method = payment_method
+        jrnl.save()
+        return jrnl
 
 
     @staticmethod
@@ -65,12 +62,14 @@ class Journal(ORMBase, BaseModel):
                                                   Journal.delete_dt == None))\
                                                   .order_by(Journal.create_dt.desc()).all()
 
+
     @staticmethod
     def find_all_by_order(order):
         return Session.query(Journal).filter(and_(Journal.customer==order.customer,
                	                                  Journal.order==order,
                                                   Journal.delete_dt == None))\
                                                   .order_by(Journal.create_dt.desc()).all()
+
 
     @staticmethod
     def find_total_applied_to_order(order):
@@ -92,6 +91,7 @@ class Journal(ORMBase, BaseModel):
             if j.type in ('FullPayment', 'PartialPayment', 'CreditIncrease', 'Discount'):
                 total += j.amount
         return total
+
 
     @staticmethod
     def find_total_refunds_applied_to_order(order):
@@ -116,6 +116,7 @@ class Journal(ORMBase, BaseModel):
                                                   Journal.type=='Discount'))\
                                                   .order_by(Journal.create_dt.desc()).all()
 
+
     @staticmethod
     def find_total_discounts_applied_to_order(order):
         jes = Journal.find_discounts_by_order(order)
@@ -123,6 +124,7 @@ class Journal(ORMBase, BaseModel):
         for j in jes:
             total += j.amount
         return total
+
 
     @staticmethod
     def find_total_credits_applied_to_order(order):
@@ -136,6 +138,7 @@ class Journal(ORMBase, BaseModel):
             total += j.amount
         return total
 
+
     @staticmethod
     def find_total_applied_to_customer(customer):
         jes = Session.query(Journal).filter(and_(Journal.customer==customer,
@@ -148,6 +151,7 @@ class Journal(ORMBase, BaseModel):
             else:
                 total -= j.amount
         return total
+
 
     @staticmethod
     def find_balance_for_customer(customer):

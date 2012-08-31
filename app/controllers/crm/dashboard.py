@@ -1,8 +1,8 @@
-import logging, pdb
+#import pdb
+import logging
 from app.lib.decorators.authorize import authorize 
-from app.lib.auth_conditions import AllMet, OneMet, IsLoggedIn
+from app.lib.auth_conditions import IsLoggedIn
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPFound
 from app.controllers.base import BaseController
 from app.model.crm.company import Company
 from app.model.crm.customerorder import PeriodOrderSummary, MTDSalesByVendor

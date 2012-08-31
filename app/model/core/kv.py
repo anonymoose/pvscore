@@ -1,6 +1,5 @@
-from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text
-from sqlalchemy.orm import relation, backref
+from sqlalchemy import Column, and_
+from sqlalchemy.types import Integer, String, Date, Text
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
 
@@ -20,7 +19,9 @@ class KeyValue(ORMBase, BaseModel):
 
     @staticmethod
     def find(key, obj):
-        """ KB: [2011-02-10]: Find the most recently added item. """
+
+        # KB: [2011-02-10]: Find the most recently added item.
+        #pylint: disable-msg=E1101
         return Session.query(KeyValue).filter(and_(KeyValue.key == key,
                                                    KeyValue.fk_type == type(obj).__name__,
                                                    KeyValue.fk_id == getattr(obj, obj.__pk__))) \
@@ -29,13 +30,13 @@ class KeyValue(ORMBase, BaseModel):
 
     @staticmethod
     def create_new(key, value, obj):
-        kv = KeyValue()
-        kv.key = key
-        kv.value = value
-        kv.fk_type = type(obj).__name__
-        kv.fk_id = getattr(obj, obj.__pk__)
-        kv.save()
-        return kv
+        kvl = KeyValue()
+        kvl.key = key
+        kvl.value = value
+        kvl.fk_type = type(obj).__name__
+        kvl.fk_id = getattr(obj, obj.__pk__)
+        kvl.save()
+        return kvl
     
 
     

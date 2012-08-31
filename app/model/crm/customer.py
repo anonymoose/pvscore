@@ -1,7 +1,8 @@
-import pdb, hashlib, math
+#pylint: disable-msg=E1101
+import math
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Float, DateTime, Boolean
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.types import Integer, String, Date, Text, Float, DateTime
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session, BaseAnalytic
 from app.model.crm.customerorder import CustomerOrder
@@ -70,44 +71,50 @@ class Customer(ORMBase, BaseModel):
     def __repr__(self):
         return '%s : %s %s %s' % (self.customer_id, self.email, self.fname, self.lname)
 
-    """ KB: [2011-06-28]: This is suitable for passing back into /portal/login/login_to_link
-    This is so lame I can't even contain my guilt.  There has to be a better way with
-    hashlib.md5(...).hexdigest()
-    """
+
     def account_key(self):
+        """ KB: [2011-06-28]: This is suitable for passing back into /portal/login/login_to_link
+        This is so lame I can't even contain my guilt.  There has to be a better way with
+        hashlib.md5(...).hexdigest()
+        """
         return db.get_value("select md5('%s%s')" % (self.email, self.password))
+
 
     def api_key(self):
         return db.get_value("select md5('%s%s')" % (self.email, self.customer_id))
+
 
     @staticmethod
     def find_by_attr(attr_name, attr_value):
         customer_id = AttributeValue.find_fk_id_by_value('Customer', attr_name, attr_value)
         if customer_id:
-            return Customer.load(listing_id)
+            return Customer.load(customer_id)
+
 
     @staticmethod
     def find_all_by_channel(cid_0, cid_1=None):
         return Session.query(Customer)\
             .filter(and_(Customer.cid_0==cid_0, cid_1==cid_1)).all()
 
+
     @staticmethod
     def find_by_key(key):
         return Session.query(Customer)\
             .from_statement("""select * from crm_customer where '%s' = md5(email||password)
-                            """ % key)\
-            .first()
+                            """ % key).first()
+
 
     @staticmethod
     def find_by_api_key(key):
         return Session.query(Customer)\
             .from_statement("""select * from crm_customer where '%s' = md5(email||customer_id)
-                            """ % key.lower())\
-            .first()
+                            """ % key.lower()).first()
+
 
     def ready_to_purchase(self):
         return (self.fname and self.lname and self.phone and self.addr1
                 and self.city and self.state and self.zip and self.country)
+
 
     @staticmethod
     def find_all_by_campaign(campaign):
@@ -116,9 +123,10 @@ class Customer(ORMBase, BaseModel):
             .filter(and_(Customer.delete_dt == None,
                          Campaign.company_id == campaign.company_id)).all()
 
-    """ KB: [2010-12-15]: Find another customer that is in the same company. """
+
     @staticmethod
     def find(email, campaign):
+        """ KB: [2010-12-15]: Find another customer that is in the same company. """
         from app.model.crm.campaign import Campaign
         return Session.query(Customer).join((Campaign, Campaign.campaign_id == Customer.campaign_id)) \
             .filter(and_(Customer.delete_dt == None,
@@ -142,9 +150,9 @@ class Customer(ORMBase, BaseModel):
                                                                                            ent_id=enterprise_id))
 
 
-    """ KB: [2010-12-15]: Find another customer that is in the same company. """
     @staticmethod
     def find_by_company(email, company):
+        """ KB: [2010-12-15]: Find another customer that is in the same company. """
         from app.model.crm.campaign import Campaign
         return Session.query(Customer).join((Campaign, Campaign.campaign_id == Customer.campaign_id)) \
             .filter(and_(Customer.delete_dt == None,
@@ -162,7 +170,7 @@ class Customer(ORMBase, BaseModel):
 
 
     @staticmethod
-    def search(enterprise_id, company_name, fname, lname, email, phone):
+    def search(enterprise_id, company_name, fname, lname, email, phone):   #pylint: disable-msg=R0913
         cn_clause = f_clause = l_clause = e_clause = p_clause = ''
         if company_name:
             cn_clause = "and lower(cc.company_name) like '%{desc}%'".format(desc=company_name.lower())
@@ -183,15 +191,20 @@ class Customer(ORMBase, BaseModel):
               """.format(cn=cn_clause, f=f_clause, l=l_clause, e=e_clause, p=p_clause, ent_id=enterprise_id)
         return Session.query(Customer).from_statement(sql).all()
 
-    def add_order(self, cart, user_created, site, campaign=None, incl_tax=True):
-        if not campaign: campaign = self.campaign
+
+    def add_order(self, cart, user_created, site, campaign=None, incl_tax=True):     #pylint: disable-msg=R0913
+        if not campaign:
+            campaign = self.campaign
         return CustomerOrder.create_new(cart, self, site, campaign, user_created, incl_tax)
+
 
     def has_purchased_product(self, product):
         return CustomerOrder.has_customer_purchased_product(self, product)
 
+
     def get_order(self, order_id):
         return CustomerOrder.find_by_customer(self, order_id)
+
 
     @staticmethod
     def authenticate(username, pwd, company):
@@ -205,38 +218,41 @@ class Customer(ORMBase, BaseModel):
                          Campaign.company_id == company.company_id,
                          Customer.email.ilike(username),
                          Customer.password == pwd)).first()
-
-#                             Customer.password == Customer.encode_password(pwd))).first()
+                         #                             Customer.password == Customer.encode_password(pwd))).first()
 
     @staticmethod
     def encode_password(password):
         # return md5(password).hexdigest()
         return password
 
+
     def get_active_orders(self):
-        os = []
-        for o in self.orders:
-            if o.delete_dt == None and o.cancel_dt == None:
-                os.append(o)
-        return os
+        ords = []
+        for order in self.orders:
+            if order.delete_dt == None and order.cancel_dt == None:
+                ords.append(order)
+        return ords
+
 
     def get_current_balance(self):
         from app.model.crm.journal import Journal
         return Journal.find_balance_for_customer(self)
 
+
     def get_total_order_value(self):
         total = 0.0
-        for o in self.get_active_orders():
-            if o.delete_dt == None:
-                total += o.total_price()
+        for order in self.get_active_orders():
+            if order.delete_dt == None:
+                total += order.total_price()
         return total
 
-    """ KB: [2010-10-21]: this is mostly for testing purposes and typically from paster shell.  Use with caution.
-    from app.model.crm.customer import Customer
-    Customer.delete_newest_customer()
-    """
+
     @staticmethod
     def full_delete(customer_id):
+        """ KB: [2010-10-21]: this is mostly for testing purposes and typically from paster shell.  Use with caution.
+        from app.model.crm.customer import Customer
+        Customer.delete_newest_customer()
+        """
         Session.execute('delete from core_asset where status_id in (select status_id from core_status where customer_id = %s)' % customer_id)
         Session.execute('delete from crm_billing_history where customer_id = %s' % customer_id)
         Session.execute('delete from crm_product_inventory_journal where return_id in (select return_id from crm_product_return where journal_id in (select journal_id from crm_journal where customer_id = %s))' % customer_id)
@@ -246,7 +262,6 @@ class Customer(ORMBase, BaseModel):
         Session.execute('delete from crm_oi_terms_acceptance where order_id in (select order_id from crm_customer_order where customer_id = %s)' % customer_id)
         Session.execute('delete from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id = %s)' % customer_id)
         Session.execute('delete from crm_customer_order where customer_id = %s' % customer_id)
-        """ TODO: KB: [2012-01-15]: Fix this with plugins. """
         #Session.execute('delete from wm_portfolio where customer_id = %s' % customer_id)
         #Session.execute('delete from pvs_listing where customer_id = %s' % customer_id)
         Session.execute('delete from crm_customer where customer_id = %s' % customer_id)
@@ -261,15 +276,18 @@ class Customer(ORMBase, BaseModel):
         maxid = Session.query("m").from_statement("SELECT max(customer_id) m FROM crm_customer").one()
         Customer.full_delete(maxid)
 
+        
     def clear_attributes(self):
         if self.customer_id:
             Attribute.clear_all('Customer', self.customer_id)
 
+            
     def set_attr(self, name, value):
         attr = Attribute.find('Customer', name)
         if not attr:
             attr = Attribute.create_new('Customer', name)
         attr.set(self, value)
+
 
     def get_attr(self, name):
         attr = Attribute.find('Customer', name)
@@ -277,15 +295,20 @@ class Customer(ORMBase, BaseModel):
             return attr.get(self)
         return None
 
+
     def get_attrs(self):
         return Attribute.find_values(self)
 
-""" KB: [2011-11-02]: Google charts report for customer count over a period """
+
 class PeriodCustomerCountSummary(BaseAnalytic):
+    """ KB: [2011-11-02]: Google charts report for customer count over a period """
+
     def __init__(self, request, days=7):
+        super(PeriodCustomerCountSummary, self).__init__()
         self.request = request
         self.days = days
         self.run()
+
 
     def link(self, height, width, i):
         return "http://{i}.chart.apis.google.com/chart?chxl=1:{google_y_labels}&chxr={google_range}&chxt=y,x&chbh=a,10&chs={height}x{width}&cht=bvs&chco=A2C180,3D7930&chds={google_scale}&chd=t:{google_data}&chma=10,10,10,10&chtt=New+Customers+by+Day&chts=006699,12.167"\
@@ -296,30 +319,36 @@ class PeriodCustomerCountSummary(BaseAnalytic):
                     height=height,
                     width=width, i=i)
 
+
     @property
     def google_range(self):
-        mx = self.col_max('cnt')
-        interval = math.floor(mx/10)
-        return '0,%s,%s' % (interval, int(mx+(2*interval)))
+        max_ = self.col_max('cnt')
+        interval = math.floor(max_/10)
+        return '0,%s,%s' % (interval, int(max_+(2*interval)))
+
 
     @property
     def google_data(self):
-        return ','.join([str(r.cnt) for r in self.results])
+        return ','.join([str(res.cnt) for res in self.results])
 
+    
     @property
     def google_y_labels(self):
-        return '|%s|' % '|'.join([util.format_date(r.create_dt)[5:] for r in self.results])
+        return '|%s|' % '|'.join([util.format_date(res.create_dt)[5:] for res in self.results])
+
 
     @property
     def google_scale(self):
-        mx = self.col_max('cnt')
-        interval = int(math.floor(mx/10))
-        s = '%s,%s' % (interval, int(mx+(2*interval)))
-        return '%s,%s' % (s,s)
+        max_ = self.col_max('cnt')
+        interval = int(math.floor(max_/10))
+        scale = '%s,%s' % (interval, int(max_+(2*interval)))
+        return '%s,%s' % (scale, scale)
+
 
     @property
     def columns(self):
         return ("cnt", "create_dt")
+
 
     @property
     def query(self):

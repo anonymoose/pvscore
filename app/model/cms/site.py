@@ -1,17 +1,23 @@
-import pdb
-import os, shutil
-from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Boolean
-from sqlalchemy.orm import relation, backref
+#pylint: disable-msg=E1101
+#import shutil
+#from app.model.core.asset import Asset
+import os
+from sqlalchemy import Column, ForeignKey, or_
+from sqlalchemy.types import Integer, String, Date, Text, Boolean
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
 import app.lib.util as util
 from app.model.core.users import Users
 from app.model.crm.company import Company
+
 from hashlib import md5
 from app.lib.dbcache import FromCache, invalidate
-import simplejson as json
 import ConfigParser
+import logging
+
+log = logging.getLogger(__name__)
+
 
 class Site(ORMBase, BaseModel):
     __tablename__ = 'cms_site'
@@ -51,19 +57,19 @@ class Site(ORMBase, BaseModel):
         #dir = '/Users/kbedwell/dev/pydev/wm/app/sites/' + self.site_directory
         #cache_key = 'site.config.%s' % self.site_id
         #if not util.cache_has_key(cache_key):
-        dir = self.site_full_directory
-        cfgfile = dir + '/site.config'
+        directory = self.site_full_directory
+        cfgfile = directory + '/site.config'
         if os.path.exists(cfgfile):
             config = ConfigParser.ConfigParser()
             config.read(cfgfile)
             return config
 
-    def get_shipping(self):
-        from app.lib.plugin import plugin_registry
-        cfg = self.get_config()
-        shipping_type = cfg.get('SHIPPING', 'type')
-        pe = plugin_registry[shipping_type]
-        return pe.obj
+#    def get_shipping(self):
+#        from app.lib.plugin import plugin_registry
+#        cfg = self.get_config()
+#        shipping_type = cfg.get('SHIPPING', 'type')
+#        pe = plugin_registry[shipping_type]
+#        return pe.obj
 
     @staticmethod
     def get_shipping_methods():
@@ -106,14 +112,6 @@ class Site(ORMBase, BaseModel):
         invalidate(self, 'Site.find_by_host', 'www.'+self.domain)
         invalidate(self, 'Site.find_all', self.company.enterprise_id)
 
-    def add_page(self, user_created):
-        return Page.create_new(self, user_created)
-
-    def get_page(self, page_id):
-        return Page.find_by_site(self, page_id)
-
-    def get_root_page(self):
-        return Page.find_site_root(self)
 
     @property
     def site_full_directory(self):
@@ -135,27 +133,25 @@ class Site(ORMBase, BaseModel):
         """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
         return "/sites/{dirname}/{subdir}".format(dirname=self.site_directory, subdir=subdir)
 
-    """ KB: [2010-11-18]:
-    called from app.controllers.cms.asset::upload()
-
-    http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
-    """
-    def store_asset(self, asset_data, folder):
-        fs_path = os.path.join(
-            '%s%s' % (self.site_full_directory, folder),
-            asset_data.filename.replace(os.sep, '_')
-            )
-        permanent_file = open(fs_path, 'wb')
-        shutil.copyfileobj(asset_data.file, permanent_file)
-        asset_data.file.close()
-        permanent_file.close()
-        # at this point everything is saved to disk. Create an asset object in
-        # the DB to remember it.
-        a = Asset.create_new(asset_data.filename,
-                             fs_path,
-                             '{base}/{f}'.format(base=self.site_web_directory('images'),
-                                                 f=asset_data.filename),
-                             self)
-        a.commit()
-        return a
+#    def store_asset(self, asset_data, folder):
+#        """ KB: [2010-11-18]:
+#        called from app.controllers.cms.asset::upload()
+#        http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
+#        """
+#
+#        fs_path = os.path.join(
+#            '%s%s' % (self.site_full_directory, folder),
+#            asset_data.filename.replace(os.sep, '_')
+#            )
+#        permanent_file = open(fs_path, 'wb')
+#        shutil.copyfileobj(asset_data.file, permanent_file)
+#        asset_data.file.close()
+#        permanent_file.close()
+#        # at this point everything is saved to disk. Create an asset object in
+#        # the DB to remember it.
+#        return Asset.create_new(asset_data.filename,
+#                             fs_path,
+#                             '{base}/{f}'.format(base=self.site_web_directory('images'),
+#                                                 f=asset_data.filename),
+#                             self).flush()
 

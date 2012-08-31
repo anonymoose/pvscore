@@ -1,10 +1,12 @@
-import pdb
-from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import Integer, String, Date, Float, Text, DateTime
+#pylint: disable-msg=E1101
+from sqlalchemy import Column, ForeignKey, and_
+from sqlalchemy.types import Integer, String, Date, Float, DateTime
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
-from app.model.core.users import Users
+import logging
+
+log = logging.getLogger(__name__)
 
 class OrderItem(ORMBase, BaseModel):
     __tablename__ = 'crm_order_item'
@@ -30,26 +32,31 @@ class OrderItem(ORMBase, BaseModel):
     product = relation('Product')
     status = relation('Status')
     order = relation('CustomerOrder', backref=backref('items', order_by='asc(OrderItem.order_item_id)'))
-    children = relation('OrderItem')
+
 
     def total(self):
         try:
             return self.unit_price * self.quantity
-        except:
+        except Exception as exc:
+            log.debug(exc)
             return 0.0
+
 
     @staticmethod
     def find_by_order(order):
         return Session.query(OrderItem).filter(OrderItem.order_id == order.order_id).order_by(OrderItem.create_dt.asc())
 
+
     @property
     def children(self):
         return Session.query(OrderItem).filter(OrderItem.parent_id == self.order_item_id).all()
+
 
     def has_status(self, event):
         from app.model.core.status import Status
         sts = Status.find_by_event(self.order.customer, self, event)
         return (sts and len(sts) > 0)
+
 
 class OrderItemTermsAcceptance(ORMBase, BaseModel):
     __tablename__ = 'crm_oi_terms_acceptance'
@@ -62,15 +69,18 @@ class OrderItemTermsAcceptance(ORMBase, BaseModel):
     delete_dt = Column(Date)
     signature = Column(String(100))
 
+
     @staticmethod
     def find_all_by_order_id(order_id):
         return Session.query(OrderItemTermsAcceptance)\
             .filter(and_(OrderItemTermsAcceptance.order_id == order_id,
                          OrderItemTermsAcceptance.delete_dt == None)).all()
 
+
     @staticmethod
     def find_by_order_item_id(order_item_id):
-        if not order_item_id: return None
+        if not order_item_id:
+            return None
         return Session.query(OrderItemTermsAcceptance)\
             .filter(and_(OrderItemTermsAcceptance.order_item_id == order_item_id,
                          OrderItemTermsAcceptance.delete_dt == None)).first()
@@ -79,3 +89,4 @@ class OrderItemTermsAcceptance(ORMBase, BaseModel):
     @staticmethod
     def is_order_item_id_accepted(order_item_id):
         return OrderItemTermsAcceptance.find_by_order_item_id(order_item_id) != None
+

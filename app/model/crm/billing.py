@@ -1,10 +1,9 @@
-import pdb
-from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Boolean
-from sqlalchemy.orm import relation, backref
+#pylint: disable-msg=R0902,E1002
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy.types import Integer, String, Date, Boolean
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
-from app.model.crm.customerorder import CustomerOrder
 from app.model.core.users import Users
 
 class Billing(ORMBase, BaseModel):
@@ -42,42 +41,26 @@ class Billing(ORMBase, BaseModel):
 
     @staticmethod
     def create(cust, save=True):
-        b = Billing()
-        b.type = 'Credit Card'
-        b.account_holder = '%s %s' % (cust.fname, cust.lname)
-        b.account_addr = cust.addr1
-        b.account_city = cust.city
-        b.account_state = cust.state
-        b.account_country = cust.country
-        b.account_zip = cust.zip
-        cust.billing = b
+        bill = Billing()
+        bill.type = 'Credit Card'
+        bill.account_holder = '%s %s' % (cust.fname, cust.lname)
+        bill.account_addr = cust.addr1
+        bill.account_city = cust.city
+        bill.account_state = cust.state
+        bill.account_country = cust.country
+        bill.account_zip = cust.zip
+        cust.billing = bill
         if save:
             cust.save()
-            b.save()
-        return b
+            bill.save()
+        return bill
 
     def bind(self, dic, clear=False, prefix=None):
         super(Billing, self).bind(dic, clear, prefix)
-        """ KB: [2010-10-20]: If the user has provided a credit card number, go to the billing api and set up the new CC """
+        # KB: [2010-10-20]: If the user has provided a credit card number, go to the billing api and set up the new CC 
         if self._cc_num:
             self.cc_last_4 = self._cc_num[-4:]
 
-    """ KB: [2011-08-25]:
-    def billing_api_create_account_handler(self, api, response_dict, history_record, order, billing):
-        if api.is_declined(response_dict):
-            Status.add(order.customer, order, Status.find_event(order, 'BILLING_DECLINED'),
-                       'Billing Declined: %s' % history_record.notes).commit()
-            return False
-        else:
-            Status.add(order.customer, order, Status.find_event(order, 'BILLING_SUCCESS'),
-                       'Billing Succeeded: %s' % history_record.notes).commit()
-            return True
-
-    def post_save(self, customer):
-        if self.type != 'Credit Card': return
-        api = BaseBillingApi.create_api()
-        return api.create_account(customer, self, self.billing_api_create_account_handler)
-    """
     def save(self):
         return super(Billing, self).save()
 
@@ -88,6 +71,7 @@ class Billing(ORMBase, BaseModel):
         return self._cc_cvv
 
     def delete_billing(self, customer):
+        #pylint: disable-msg=E1101
         customer.billing = None
         customer.save()
         Session.execute('delete from crm_billing_history where billing_id = %s' % self.billing_id)

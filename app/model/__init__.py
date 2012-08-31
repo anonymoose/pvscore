@@ -46,19 +46,18 @@ def init_model(engine, **settings):
             #print 'load_model(%s)' % plugin.model_package_name
             exec 'import %s' % plugin.model_package_name
     """
-    """Call me before using any of the tables or classes in the model"""
-    """ KB: [2011-09-05]: We make this check because when running under Nose,
-    It nags us that this has already been done.  This just eliminates the nag message.
-    """
+
+    # KB: [2011-09-05]: We make this check because when running under Nose,
+    # It nags us that this has already been done.  This just eliminates the nag message.
     if Session.registry and not Session.registry.has():
         Session.configure(bind=engine)
         db.init()
 
     #load everything from the pvs.* keys in the config file into redis
-    for s in settings:
-        log.debug('%s = %s' % (s, settings[s]))
-        if s.startswith('pvs.'):
-            util.cache_set(s, settings[s])
+    for setting in settings:
+        log.debug('%s = %s' % (setting, settings[setting]))
+        if setting.startswith('pvs.'):
+            util.cache_set(setting, settings[setting])
             
             
 

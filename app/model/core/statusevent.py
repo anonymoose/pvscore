@@ -1,8 +1,10 @@
+#pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Boolean
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.types import Integer, String, Date, Boolean
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
+
 
 class StatusEvent(ORMBase, BaseModel):
     __tablename__ = 'core_status_event'
@@ -30,6 +32,7 @@ class StatusEvent(ORMBase, BaseModel):
 
     enterprise = relation('Enterprise')
 
+
     @staticmethod
     def get_status_types():
         return ['Customer', 
@@ -40,6 +43,7 @@ class StatusEvent(ORMBase, BaseModel):
                 'Company', 
                 'Product',
                 'PurchaseOrder']
+
     
     @staticmethod
     def search(enterprise_id, display_name, short_name):
@@ -52,6 +56,7 @@ class StatusEvent(ORMBase, BaseModel):
                  where se.enterprise_id = {ent_id}
                  {dn} {sn}""".format(dn=dn_clause, sn=sn_clause, ent_id=enterprise_id)
         return Session.query(StatusEvent).from_statement(sql).all()
+
 
     @staticmethod
     def find(enterprise_id, event_type, short_name):

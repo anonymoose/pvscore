@@ -1,5 +1,5 @@
-import time, pdb
-from pyramid.settings import asbool
+#pylint: disable-msg=W0613
+import time
 import logging
 from app.model.crm.campaign import Campaign
 from app.model.crm.company import Enterprise
@@ -26,17 +26,14 @@ def timing_tween_factory(handler, registry):
     #return handler
 
 
-
-""" KB: [2012-08-10]: Figure out what site we are on. Make sure that the
-enterprise we are on matches the site we are on.
-
-End result is that there is a site, campaign, and enterprise in
-request.ctx, and site_id, campaign_id, and enterprise_id in session
-
-Make sure we are not doing this for static content.
-"""
 def request_context_tween_factory(handler, registry):
-    # if timing support is enabled, return a wrapper
+    """ KB: [2012-08-10]: Figure out what site we are on. Make sure that the
+    enterprise we are on matches the site we are on.
+    End result is that there is a site, campaign, and enterprise in
+    request.ctx, and site_id, campaign_id, and enterprise_id in session
+    Make sure we are not doing this for static content.
+    """
+
     def request_context_tween(request):
         if request.url.find('/static/') == -1:
             log.debug("URL: %s" % request.url)
@@ -44,37 +41,16 @@ def request_context_tween_factory(handler, registry):
                 request.ctx = util.DataObj({})
     
             if not request.ctx.site:
-                if 'site_id' in request.session:
-                    request.ctx.site = Site.load(request.session['site_id'])
-                else:
-                    if '__sid' in request.params:
-                        request.ctx.site = Site.find_by_host(request.params['__sid'])
-                    else:
-                        request.ctx.site = Site.find_by_host(request.host)
-                    if not request.ctx.site:
-                        return HTTPFound("http://www.google.com")
-                    request.session['site_id'] = request.ctx.site.site_id
+                _remember_site(request)
                 
             if not request.ctx.campaign:
-                if 'campaign_id' in request.session:
-                    request.ctx.campaign = Campaign.load(request.session['campaign_id'])
-                else:
-                    if '__cid' in request.params:
-                        request.ctx.campaign = Campaign.load(request.params['campaign_id'])
-                    else:
-                        request.ctx.campaign = Campaign.load(request.ctx.site.company.default_campaign_id)
-                    request.session['campaign_id'] = request.ctx.campaign.campaign_id
+                _remember_campaign(request)
     
             if not request.ctx.enterprise:
-                if 'enterprise_id' in request.session:
-                    request.ctx.enterprise = Enterprise.load(request.session['enterprise_id'])
-                else:
-                    request.ctx.enterprise = request.ctx.site.company.enterprise
-                    request.session['enterprise_id'] = request.ctx.enterprise.enterprise_id
-
+                _remember_enterprise(request)
+                
             if not request.ctx.user:
-                if 'user_id' in request.session:
-                    request.ctx.user = Users.load(request.session['user_id'])
+                _remember_user(request)
 
             request.tmpl_context.site = request.ctx.site
             request.tmpl_context.enterprise = request.ctx.enterprise
@@ -83,3 +59,39 @@ def request_context_tween_factory(handler, registry):
     
         return handler(request)
     return request_context_tween
+
+def _remember_user(request):
+    if 'user_id' in request.session:
+        request.ctx.user = Users.load(request.session['user_id'])
+
+
+def _remember_enterprise(request):
+    if 'enterprise_id' in request.session:
+        request.ctx.enterprise = Enterprise.load(request.session['enterprise_id'])
+    else:
+        request.ctx.enterprise = request.ctx.site.company.enterprise
+        request.session['enterprise_id'] = request.ctx.enterprise.enterprise_id
+
+
+def _remember_campaign(request):
+    if 'campaign_id' in request.session:
+        request.ctx.campaign = Campaign.load(request.session['campaign_id'])
+    else:
+        if '__cid' in request.params:
+            request.ctx.campaign = Campaign.load(request.params['campaign_id'])
+        else:
+            request.ctx.campaign = Campaign.load(request.ctx.site.company.default_campaign_id)
+        request.session['campaign_id'] = request.ctx.campaign.campaign_id
+
+
+def _remember_site(request):
+    if 'site_id' in request.session:
+        request.ctx.site = Site.load(request.session['site_id'])
+    else:
+        if '__sid' in request.params:
+            request.ctx.site = Site.find_by_host(request.params['__sid'])
+        else:
+            request.ctx.site = Site.find_by_host(request.host)
+        if not request.ctx.site:
+            return HTTPFound("http://www.google.com")
+        request.session['site_id'] = request.ctx.site.site_id

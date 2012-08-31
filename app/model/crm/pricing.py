@@ -1,8 +1,8 @@
-import pdb
+#pylint: disable-msg=E1101
 import datetime
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Float, Text
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.types import Integer, String, Date, Float
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
 from app.lib.dbcache import FromCache, invalidate

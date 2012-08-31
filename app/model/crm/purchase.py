@@ -1,16 +1,15 @@
-import pdb, math
-from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Float, Boolean
+#pylint: disable-msg=E1101,R0913
+from sqlalchemy import Column, ForeignKey, and_
+from sqlalchemy.types import Integer, String, Date, Text, Float, Boolean
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
-from app.model.crm.pricing import ProductPricing
 from app.model.crm.company import Company
-from app.model.core.attribute import Attribute, AttributeValue
-from app.model.core.asset import Asset
-import app.lib.db as db
 from app.lib.dbcache import FromCache, invalidate
-import app.lib.util as util
+import logging
+
+log = logging.getLogger(__name__)
+
 
 class PurchaseOrder(ORMBase, BaseModel):
     __tablename__ = 'crm_purchase_order'
@@ -52,10 +51,10 @@ class PurchaseOrder(ORMBase, BaseModel):
 
 
     def total(self):
-        t = 0
+        tot = 0
         for poi in self.order_items:
-            t += poi.total()
-        return t
+            tot += poi.total()
+        return tot
 
 
     @staticmethod
@@ -104,9 +103,9 @@ class PurchaseOrderItem(ORMBase, BaseModel):
     def total(self):
         try:
             return self.unit_cost * self.quantity
-        except:
+        except Exception as exc:
+            log.debug(exc)
             return 0.0
-
 
     @staticmethod
     def find_by_product(product):

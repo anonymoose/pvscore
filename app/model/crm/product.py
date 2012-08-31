@@ -1,6 +1,7 @@
-import pdb, math
+#pylint: disable-msg=E1101,C0103,R0913
+import math
 from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Float, Boolean, DateTime
+from sqlalchemy.types import Integer, String, Date, Text, Float, Boolean, DateTime
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text, exists
 from app.model.meta import ORMBase, BaseModel, Session
@@ -133,7 +134,7 @@ class Product(ORMBase, BaseModel):
                              Company.enterprise_id == product.company.enterprise_id,
                              Product.product_id != product.product_id)).order_by(Product.name).all()
         else:
-            return Product.find_all()
+            return Product.find_all(product.company.enterprise_id)
 
 
     def find_eligible_children(self):
@@ -218,28 +219,9 @@ class Product(ORMBase, BaseModel):
                          .all()
 
 
-    """ KB: [2011-09-28]: Stupid hack just for Amy. Has description, and a picture, but may or may not have a price."""
-    @staticmethod
-    def find_web_ready_unpriced_by_campaign(campaign):
-        enterprise_id = campaign.company.enterprise_id
-        return Session.query(Product) \
-            .options(FromCache('Product.WebReadyUnpriced', campaign.campaign_id)) \
-            .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
-            .filter(and_(Product.delete_dt == None,
-                         Product.enabled == True,
-                         Company.enterprise_id == enterprise_id,
-                         ProductPricing.delete_dt == None,
-                         ProductPricing.campaign == campaign,
-                         Product.web_visible == True,
-                         Product.detail_description != None,
-                         exists().where(and_(Asset.fk_type == 'Product', Asset.fk_id == Product.product_id)))) \
-                         .order_by(Product.name) \
-                         .all()
-
-
-    """ KB: [2011-09-28]: Just has a picture.  Fuck it. """
     @staticmethod
     def find_products_with_pictures_by_campaign(campaign):
+        """ KB: [2011-09-28]: Just has a picture.  Fuck it. """
         enterprise_id = campaign.company.enterprise_id
         return Session.query(Product) \
             .options(FromCache('Product.HasPicture', campaign.campaign_id)) \
@@ -298,9 +280,8 @@ class Product(ORMBase, BaseModel):
 
     @staticmethod
     def find_manufacturers_by_campaign(enterprise_id, campaign, for_web=True):
-        eid=campaign.company.enterprise_id
-        cid=campaign.campaign_id
-        cache_key = 'Product.find_manufacturers_by_campaign::%s' % cid
+        eid = enterprise_id
+        cid = campaign.campaign_id
         mfrs = db.get_raw_value_list('mfr', """SELECT distinct(manufacturer) mfr
                                                          FROM crm_product_pricing pp,
                                                          crm_product p, crm_company c
@@ -347,9 +328,9 @@ class Product(ORMBase, BaseModel):
         invalidate(self, 'Product.find_by_sku', '%s/%s' % (self.manufacturer, self.company.enterprise_id))
         if kwargs and 'vendor_id' in kwargs:
             invalidate(self, 'Product.find_by_vendor', '%s/%s' % (self.company.enterprise_id, kwargs['vendor_id']))
-        for p in self.prices:
-            p.invalidate_caches()
-            campaign_id = p.campaign_id
+        for pri in self.prices:
+            pri.invalidate_caches()
+            campaign_id = pri.campaign_id
             invalidate(self, 'Product.Campaign_Featured', campaign_id)
             invalidate(self, 'Product.Campaign_Specials', campaign_id)
             invalidate(self, 'Product.Campaign', campaign_id)
@@ -433,7 +414,7 @@ class Product(ORMBase, BaseModel):
 
 
     @staticmethod
-    def catalog_search(enterprise_id, search, company_id):
+    def catalog_search(enterprise_id, search):
         srch = '%'+search.lower().replace("\'", '').replace("\\", '')+'%'
         res = Session.query(Product)\
             .join((Company, Product.company_id == Company.company_id))\
@@ -500,8 +481,9 @@ class Product(ORMBase, BaseModel):
         return ''
 
 
-    """ KB: [2011-03-02]: daily sales total by product. """
+
     def get_sales_report(self):
+        """ KB: [2011-03-02]: daily sales total by product. """
         return db.get_result_set(('create_dt', 'campaign', 'quantity', 'revenue', 'cost', 'profit'),
             """select o.create_dt, cmp.name as campaign,
                                sum(oi.quantity) as quantity,
@@ -525,7 +507,7 @@ class Product(ORMBase, BaseModel):
 
 
     def get_orders_report(self):
-        return db.get_result_set(('order_id', 'create_dt', 'customer_id', 'email', 'campaign', 'quantity','revenue', 'cost', 'profit'),
+        return db.get_result_set(('order_id', 'create_dt', 'customer_id', 'email', 'campaign', 'quantity', 'revenue', 'cost', 'profit'),
                   """select o.order_id, o.create_dt, cust.customer_id, cust.email, cmp.name as campaign,
                      oi.quantity,
                      oi.unit_price*oi.quantity as revenue,
@@ -555,8 +537,8 @@ class Product(ORMBase, BaseModel):
 
 
     def get_max_retail_price(self):
-        pp = ProductPricing.find_max_retail_price(self)
-        return pp.retail_price if pp else 0.0
+        ppri = ProductPricing.find_max_retail_price(self)
+        return ppri.retail_price if ppri else 0.0
 
 
     def _init_pricing(self, campaign):
@@ -596,40 +578,35 @@ class Product(ORMBase, BaseModel):
         return 0.0
 
 
-    def get_unit_cost(self, campaign):
-        # KB: [2010-09-10]: TODO
-        return self.unit_cost
-
-
     def set_price(self, campaign, price, discount=None):
-        p = ProductPricing.find(campaign, self)
-        if p == None:
-            p = ProductPricing()
-        p.campaign = campaign
-        p.product = self
-        p.retail_price = price
-        p.discount_price = discount
-        p.save()
-        p.invalidate_caches()
+        ppri = ProductPricing.find(campaign, self)
+        if ppri == None:
+            ppri = ProductPricing()
+        ppri.campaign = campaign
+        ppri.product = self
+        ppri.retail_price = price
+        ppri.discount_price = discount
+        ppri.save()
+        ppri.invalidate_caches()
 
 
-    """ KB: [2011-08-27]: Set price, but dont bother with discount """
     def set_price_only(self, campaign, price):
-        p = ProductPricing.find(campaign, self)
-        if p == None:
-            p = ProductPricing()
-        p.campaign = campaign
-        p.product = self
-        p.retail_price = price
-        p.save()
+        """ KB: [2011-08-27]: Set price, but dont bother with discount """
+        ppri = ProductPricing.find(campaign, self)
+        if ppri == None:
+            ppri = ProductPricing()
+        ppri.campaign = campaign
+        ppri.product = self
+        ppri.retail_price = price
+        ppri.save()
 
 
     def remove_price(self, campaign):
-        p = ProductPricing.find(campaign, self)
-        if p:
-            p.invalidate_caches()
-            p.delete()
-            p.save()
+        ppri = ProductPricing.find(campaign, self)
+        if ppri:
+            ppri.invalidate_caches()
+            ppri.delete()
+            ppri.save()
 
 
     def clear_attributes(self):
@@ -712,12 +689,12 @@ class ProductChild(ORMBase, BaseModel):
 
     @staticmethod
     def create_new(parent_id, child_id, child_quantity=1):
-        pc = ProductChild()
-        pc.parent_id = parent_id
-        pc.child_id = child_id
-        pc.child_quantity = child_quantity if child_quantity else 1
-        pc.save()
-        return pc
+        prdc = ProductChild()
+        prdc.parent_id = parent_id
+        prdc.child_id = child_id
+        prdc.child_quantity = child_quantity if child_quantity else 1
+        prdc.save()
+        return prdc
 
 
     def invalidate_caches(self):
@@ -753,13 +730,8 @@ class ProductCategory(ORMBase, BaseModel):
 
     @property
     def products(self):
-        #return Session.query(Product).from_statement(""" select p.*
-        #                from crm_product p, crm_product_category pc, crm_product_category_join pcj, crm_company c
-        #                    where p.product_id = pcj.product_id
-        #                    and pcj.category_id = pc.category_id
-        #                    and pc.company_id = c.company_id
-        #                    and pc.category_id = %s""" % self.category_id).all()
-        if not self.category_id: return []
+        if not self.category_id:
+            return []
         return Session.query(Product)\
             .join((ProductCategoryJoin, Product.product_id == ProductCategoryJoin.product_id),
                   (ProductCategory, ProductCategoryJoin.category_id == ProductCategory.category_id),
@@ -814,7 +786,7 @@ class ProductCategory(ORMBase, BaseModel):
 
 
 class ProductCategoryJoin(ORMBase, BaseModel):
-    __tablename__= 'crm_product_category_join'
+    __tablename__ = 'crm_product_category_join'
     __pk__ = 'pcj_id'
 
     pcj_id = Column(Integer, primary_key = True)
@@ -826,11 +798,11 @@ class ProductCategoryJoin(ORMBase, BaseModel):
 
     @staticmethod
     def create_new(category_id, product_id):
-        pc = ProductCategoryJoin()
-        pc.category_id = category_id
-        pc.product_id = product_id
-        pc.save()
-        return pc
+        pcj = ProductCategoryJoin()
+        pcj.category_id = category_id
+        pcj.product_id = product_id
+        pcj.save()
+        return pcj
 
 
     @staticmethod
@@ -873,15 +845,15 @@ class ProductReturn(ORMBase, BaseModel):
 
     @staticmethod
     def create_new(product, order, quantity, credit_amount, journal_entry, user):
-        pr = ProductReturn()
-        pr.product = product
-        pr.order = order
-        pr.quantity = quantity
-        pr.credit_amount = credit_amount
-        pr.creator = user
-        pr.journal_entry = journal_entry
-        pr.save()
-        return pr
+        pret = ProductReturn()
+        pret.product = product
+        pret.order = order
+        pret.quantity = quantity
+        pret.credit_amount = credit_amount
+        pret.creator = user
+        pret.journal_entry = journal_entry
+        pret.save()
+        return pret
 
 
 class InventoryJournal(ORMBase, BaseModel):
@@ -918,7 +890,8 @@ class InventoryJournal(ORMBase, BaseModel):
     @staticmethod
     def total(product):
         ret = Session.query("c").from_statement("SELECT sum(quantity) c FROM crm_product_inventory_journal where product_id = %s" % product.product_id).one()
-        if ret != None: return ret[0]
+        if ret != None:
+            return ret[0]
         return 0.0
 
 
@@ -929,27 +902,27 @@ class InventoryJournal(ORMBase, BaseModel):
 
     @staticmethod
     def create_new(product, tipe, quantity, order_item=None, note=None, creator=None, ret=None):
-        j = InventoryJournal()
-        j.type = tipe
-        j.note = note
-        j.product = product
-        j.creator = creator
-        j.order_item = order_item
-        j.ret = ret
+        jrnl = InventoryJournal()
+        jrnl.type = tipe
+        jrnl.note = note
+        jrnl.product = product
+        jrnl.creator = creator
+        jrnl.order_item = order_item
+        jrnl.ret = ret
         if 'Sale' == tipe:
-            j.quantity = -1*math.fabs(float(quantity))
+            jrnl.quantity = -1*math.fabs(float(quantity))
         elif 'Inventory Adjust' == tipe:
             # user just manually adjusted inventory.  Add or subtract the difference.
             current = util.nvl(InventoryJournal.total(product), 0)
             #     -10  = 20      - 30
             #      10  = 30      - 20
-            j.quantity = float(quantity)-float(current)
+            jrnl.quantity = float(quantity)-float(current)
         else:
-            j.quantity = math.fabs(float(quantity))
-        j.save()
-        j.flush()
+            jrnl.quantity = math.fabs(float(quantity))
+        jrnl.save()
+        jrnl.flush()
         # while we are here, update the cached inventory column.
         product.inventory = InventoryJournal.total(product)
         product.save()
-        return j
+        return jrnl
 

@@ -1,11 +1,14 @@
-import pdb
+#pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Boolean
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.types import Integer, String, Date, Text, Boolean
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
-from app.model.crm.pricing import ProductPricing
 from app.model.crm.company import Company
+from app.model.crm.campaign import Campaign
+import logging
+
+log = logging.getLogger(__name__)
 
 class Report(ORMBase, BaseModel):
     __tablename__ = 'crm_report'
@@ -68,20 +71,11 @@ class Report(ORMBase, BaseModel):
               """.format(n=n_clause, cid=cid_clause, v=v_clause)
         return Session.query(Report).from_statement(sql).all()
 
+
     def clear_companies(self):
         if self.report_id:
             ReportCompanyJoin.clear_by_report(self)
 
-    @property
-    def companies(self):
-        return []
-        """
-        if not self.report_id: return []
-        return Session.query(Company)\
-            .join((ReportCompanyJoin, Report.report_id == ReportCompanyJoin.report_id),
-                  (Company, ReportCompanyJoin.company_id == Company.company_id))\
-                  .filter(Report.report_id == self.report_id).all()
-        """
 
     def add_company(self, company_id):
         return ReportCompanyJoin.create_new(self.report_id, company_id)
@@ -92,7 +86,7 @@ class Report(ORMBase, BaseModel):
         Session.execute('delete from crm_report where report_id = %s' % report_id)
 
 class ReportCompanyJoin(ORMBase, BaseModel):
-    __tablename__= 'crm_report_company_join'
+    __tablename__ = 'crm_report_company_join'
     __pk__ = 'rcj_id'
 
     rcj_id = Column(Integer, primary_key = True)
@@ -104,11 +98,11 @@ class ReportCompanyJoin(ORMBase, BaseModel):
 
     @staticmethod
     def create_new(report_id, company_id):
-        pc = ReportCompanyJoin()
-        pc.report_id = report_id
-        pc.company_id = company_id
-        pc.save()
-        return pc
+        rcj = ReportCompanyJoin()
+        rcj.report_id = report_id
+        rcj.company_id = company_id
+        rcj.save()
+        return rcj
 
     @staticmethod
     def clear_by_company(company):

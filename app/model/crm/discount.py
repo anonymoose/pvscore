@@ -1,15 +1,9 @@
-import pdb, math
+#pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Float, Boolean, DateTime
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.types import Integer, String, Date, Text, Float, Boolean, DateTime
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
-from app.model.crm.pricing import ProductPricing
-from app.model.crm.company import Company
-from app.model.core.attribute import Attribute, AttributeValue
-from app.model.core.asset import Asset
-import app.lib.db as db
-from app.lib.dbcache import FromCache, invalidate
 import app.lib.util as util
 
 class Discount(ORMBase, BaseModel):
@@ -37,12 +31,14 @@ class Discount(ORMBase, BaseModel):
     vendor = relation('Vendor')
     product = relation('Product')
 
+
     @staticmethod
     def get_which_item_types():
         return ['All Items', 'First Item', 'Most Expensive Item', 'Least Expensive Item']
 
+
     @staticmethod
-    def find_all_active(enterprise_id, company):
+    def find_all_active(enterprise_id):
         return Session.query(Discount) \
             .filter(and_(Discount.delete_dt == None, 
                          Discount.enterprise_id == enterprise_id,
@@ -51,25 +47,13 @@ class Discount(ORMBase, BaseModel):
                          .order_by(Discount.name) \
                      .all() 
 
+
     @staticmethod
-    def find_all(enterprise_id, for_web=False):
+    def find_all(enterprise_id):
         return Session.query(Discount) \
             .filter(and_(Discount.delete_dt == None, 
                          Discount.enterprise_id == enterprise_id))\
                          .order_by(Discount.name) \
                      .all() 
 
-    def invalidate_caches(self, **kwargs):
-        pass
 
-    @staticmethod
-    def search(enterprise_id, name, description, company_id, sku, current_user):
-        n_clause = cid_clause = d_clause = s_clause = v_clause = ''
-        if name:
-            n_clause = "and lower(p.name) like '%{name}%'".format(name=name.lower())
-
-        sql = """SELECT d.* FROM crm_discount d, crm_company com
-                 where
-                 d.enterprise_id = {ent_id}
-                 {n} order by p.name""".format(n=n_clause, ent_id=enterprise_id)
-        return Session.query(Discount).from_statement(sql).all()

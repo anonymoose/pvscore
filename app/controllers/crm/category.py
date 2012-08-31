@@ -1,14 +1,12 @@
-import pdb, re, logging
-from app.lib.validate import validate
-from app.controllers.base import BaseController
+#import pdb
+import logging
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from app.controllers.base import BaseController
 from app.lib.decorators.authorize import authorize 
-from app.lib.auth_conditions import AllMet, OneMet, IsLoggedIn, IsInternalReferrer
-from app.model.crm.campaign import Campaign
+from app.lib.auth_conditions import IsLoggedIn
 from app.model.crm.company import Company
-from app.model.crm.product import Product, ProductCategory, ProductCategoryJoin
+from app.model.crm.product import Product, ProductCategory
 import app.lib.util as util
 
 log = logging.getLogger(__name__)
@@ -48,21 +46,21 @@ class CategoryController(BaseController):
     @view_config(route_name='crm.product.category.save', renderer='/crm/category.edit.mako')
     @authorize(IsLoggedIn())
     def save(self):
-        pc = ProductCategory.load(self.request.POST.get('category_id'))
-        if not pc:
-            pc = ProductCategory()
-        pc.bind(self.request.POST)
-        pc.mod_dt = util.now()
-        pc.save()
-        pc.flush()
+        pcat = ProductCategory.load(self.request.POST.get('category_id'))
+        if not pcat:
+            pcat = ProductCategory()
+        pcat.bind(self.request.POST)
+        pcat.mod_dt = util.now()
+        pcat.save()
+        pcat.flush()
         
-        pc.clear_products()
-        pc.flush()
+        pcat.clear_products()
+        pcat.flush()
         for k in self.request.POST.keys():
             if k.startswith('child_incl'):
                 child_product_id = self.request.POST.get(k)
-                pc.add_product(child_product_id)
+                pcat.add_product(child_product_id)
 
-        self.request.session.flash('Successfully saved %s.' % pc.name)
-        return HTTPFound('/crm/product/category/edit/%s' % pc.category_id)
+        self.request.session.flash('Successfully saved %s.' % pcat.name)
+        return HTTPFound('/crm/product/category/edit/%s' % pcat.category_id)
 

@@ -1,11 +1,12 @@
+#pylint: disable-msg=E1101
 # Zachary234 = 4476212f8f185ba416fc0708bebcc91b
-import pdb
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Boolean
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.types import Integer, String, Date, Boolean
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
 from hashlib import md5
+
 
 class Users(ORMBase, BaseModel):
     __tablename__ = 'core_user'
@@ -46,7 +47,7 @@ class Users(ORMBase, BaseModel):
     def get_user_types():
         return ["Internal", "External", "Reporting", "API", "Admin"]
 
-    """ KB: [2011-04-14]: Make sure there is a priv object and that it is populated. """ 
+    # KB: [2011-04-14]: Make sure there is a priv object and that it is populated.
     def post_load(self):
         if not self.priv:
             self.priv = UserPriv()
@@ -61,13 +62,13 @@ class Users(ORMBase, BaseModel):
 
     @staticmethod
     def create(fname, lname, email, username, password):
-        u = Users()
-        u.fname = fname
-        u.lname = lname
-        u.email = email
-        u.username = username
-        u.password = password
-        return u
+        usr = Users()
+        usr.fname = fname
+        usr.lname = lname
+        usr.email = email
+        usr.username = username
+        usr.password = password
+        return usr
 
     @staticmethod
     def authenticate(username, pwd):
@@ -79,7 +80,7 @@ class Users(ORMBase, BaseModel):
                  Users.password == Users.encode_password(pwd))).first()
 
     @staticmethod
-    def load(uid, nada=False):
+    def load(uid, pkey=False, cache=True):
         return Users.find_by_uid(uid)
 
     @staticmethod

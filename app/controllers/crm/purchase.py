@@ -1,15 +1,11 @@
-import pdb
-import logging, os
-from app.lib.validate import validate
+import logging
 from app.controllers.base import BaseController
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from app.lib.decorators.authorize import authorize 
-from app.lib.auth_conditions import AllMet, OneMet, IsLoggedIn
-from app.model.crm.campaign import Campaign
-from app.model.crm.company import Company, Enterprise
+from app.lib.auth_conditions import IsLoggedIn
+from app.model.crm.company import Company
 from app.model.crm.product import Product, InventoryJournal
-from app.model.core.users import Users
 from app.model.core.status import Status
 from app.model.core.statusevent import StatusEvent
 import app.lib.util as util
@@ -126,20 +122,20 @@ class PurchaseController(BaseController):
     @view_config(route_name='crm.purchase.save')
     @authorize(IsLoggedIn())
     def save(self):
-        po = PurchaseOrder.load(self.request.POST.get('purchase_order_id'))
+        porder = PurchaseOrder.load(self.request.POST.get('purchase_order_id'))
         new = False
-        if not po:
+        if not porder:
             new = True
-            po = PurchaseOrder()
-        po.bind(self.request.POST)
-        po.save()
-        po.flush()
-        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'CREATED' if new else 'MODIFIED'),
+            porder = PurchaseOrder()
+        porder.bind(self.request.POST)
+        porder.save()
+        porder.flush()
+        Status.add(None, porder, Status.find_event(self.enterprise_id, porder, 'CREATED' if new else 'MODIFIED'),
                    'Purchase Order %s' % ('CREATED' if new else 'MODIFIED'),
                    self.request.ctx.user)
         self.db_flush()
-        self.flash('Successfully saved PO %s.' % po.purchase_order_id)
-        return HTTPFound('/crm/purchase/edit/%d' % int(po.purchase_order_id))
+        self.flash('Successfully saved PO %s.' % porder.purchase_order_id)
+        return HTTPFound('/crm/purchase/edit/%d' % int(porder.purchase_order_id))
 
 
     @view_config(route_name='crm.purchase.order_item_json', renderer="string")
@@ -147,10 +143,10 @@ class PurchaseController(BaseController):
     def order_item_json(self):
         purchase_order_id = self.request.matchdict.get('purchase_order_id')
         order_item_id = self.request.matchdict.get('order_item_id')
-        po = PurchaseOrder.load(purchase_order_id)
-        self.forbid_if(not po)
+        porder = PurchaseOrder.load(purchase_order_id)
+        self.forbid_if(not porder)
         poi = PurchaseOrderItem.load(order_item_id)
-        self.forbid_if(not poi or poi.purchase_order != po)
+        self.forbid_if(not poi or poi.purchase_order != porder)
         return json.dumps({'order_item_id':poi.order_item_id, 
                            'note':poi.note,
                            'quantity':poi.quantity, 
@@ -172,8 +168,8 @@ class PurchaseController(BaseController):
         poi.note = self.request.POST.get('order_note')
         poi.save()
         poi.flush()
-        po = poi.purchase_order
-        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'MODIFIED'),
+        porder = poi.purchase_order
+        Status.add(None, porder, Status.find_event(self.enterprise_id, porder, 'MODIFIED'),
                    'Purchase Order %s. "%s" added.' % ('MODIFIED', poi.product.name),
                    self.request.ctx.user)
         self.db_flush()
@@ -185,13 +181,13 @@ class PurchaseController(BaseController):
     def delete_purchase_order_item(self):
         purchase_order_id = self.request.matchdict.get('purchase_order_id')
         order_item_id = self.request.matchdict.get('order_item_id')
-        po = PurchaseOrder.load(purchase_order_id)
-        self.forbid_if(not po)
+        porder = PurchaseOrder.load(purchase_order_id)
+        self.forbid_if(not porder)
         poi = PurchaseOrderItem.load(order_item_id)
-        self.forbid_if(not poi or poi.purchase_order != po)
+        self.forbid_if(not poi or poi.purchase_order != porder)
         prod = poi.product
         poi.delete()
-        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'MODIFIED'),
+        Status.add(None, porder, Status.find_event(self.enterprise_id, porder, 'MODIFIED'),
                    'Purchase Order %s. "%s" removed.' % ('MODIFIED', prod.name),
                    self.request.ctx.user)
         poi.flush()
@@ -216,16 +212,17 @@ class PurchaseController(BaseController):
     @authorize(IsLoggedIn())
     def complete(self):
         purchase_order_id = self.request.matchdict.get('purchase_order_id')
-        po = PurchaseOrder.load(purchase_order_id)
-        self.forbid_if(not po or po.company.enterprise_id != self.enterprise_id)
-        po.complete_dt = util.today()
-        po.save()
-        for oi in po.order_items:
-            if not oi.complete_dt:
-                oi.complete_dt = util.today()
-                oi.save()
-                InventoryJournal.create_new(oi.product, 'Item Receipt', oi.quantity)
-        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'COMPLETED'), 'Purchase Order Completed', self.request.ctx.user) 
+        porder = PurchaseOrder.load(purchase_order_id)
+        self.forbid_if(not porder or porder.company.enterprise_id != self.enterprise_id)
+        porder.complete_dt = util.today()
+        porder.save()
+        for oitem in porder.order_items:
+            if not oitem.complete_dt:
+                oitem.complete_dt = util.today()
+                oitem.save()
+                InventoryJournal.create_new(oitem.product, 'Item Receipt', oitem.quantity)
+        Status.add(None, porder, Status.find_event(self.enterprise_id, porder, 'COMPLETED'),
+                   'Purchase Order Completed', self.request.ctx.user) 
         return 'True'
 
 
@@ -234,15 +231,15 @@ class PurchaseController(BaseController):
     def complete_item(self):
         purchase_order_id = self.request.matchdict.get('purchase_order_id')
         order_item_id = self.request.matchdict.get('order_item_id')
-        po = PurchaseOrder.load(purchase_order_id)
-        self.forbid_if(not po)
+        porder = PurchaseOrder.load(purchase_order_id)
+        self.forbid_if(not porder)
         poi = PurchaseOrderItem.load(order_item_id)
-        self.forbid_if(not poi or poi.purchase_order != po or poi.complete_dt)
+        self.forbid_if(not poi or poi.purchase_order != porder or poi.complete_dt)
         poi.complete_dt = util.today()
         poi.save()
         poi.flush()
         InventoryJournal.create_new(poi.product, 'Item Receipt', poi.quantity)
-        Status.add(None, po, Status.find_event(self.enterprise_id, po, 'COMPLETED'),
+        Status.add(None, porder, Status.find_event(self.enterprise_id, porder, 'COMPLETED'),
                    'Purchase Order Item "%s" Completed' % poi.product.name,
                    self.request.ctx.user) 
         return 'True'

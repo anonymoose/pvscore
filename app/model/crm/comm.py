@@ -1,24 +1,19 @@
-import pdb
-import datetime
+#pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Float, Text, Boolean
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.types import Integer, String, Date, Text, Boolean
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
-from app.model.core.status import Status
-from app.model.crm.company import Company
 from webhelpers.html import literal
-from app.lib.dbcache import FromCache, invalidate
+from app.lib.dbcache import invalidate
+import logging
+
+log = logging.getLogger(__name__)
 
 class Communication(ORMBase, BaseModel):
     __tablename__ = 'crm_communication'
     __pk__ = 'comm_id'
 
-    """ KB: [2010-10-22]: Communications can be either HTML based with tokenization or they can be
-    URL based, where at send time a URL is called to do the rendering of the text that gets sent out.
-    if it's HTML based, then data contains the HTML
-    if it's URL based, then URL contains the URL that takes ?customer_id={cid}
-    """
     comm_id = Column(Integer, primary_key = True)
     enterprise_id = Column(Integer, ForeignKey('crm_enterprise.enterprise_id'))
     name = Column(String(50))
@@ -37,13 +32,14 @@ class Communication(ORMBase, BaseModel):
 
     _other_tokens = {}
 
+
     @staticmethod
-    def create(name, company):
-        c = Communication()
-        c.company = company
-        c.name = name
-        c.save()
-        return c
+    def create(name):
+        com = Communication()
+        com.name = name
+        com.save()
+        return com
+
 
     @staticmethod
     def find_all(enterprise_id, user_sendable_only=False):
@@ -58,6 +54,7 @@ class Communication(ORMBase, BaseModel):
                 .filter(and_(Communication.delete_dt == None,
                              Communication.enterprise_id == enterprise_id)) \
                              .order_by(Communication.name).all()
+
 
     @staticmethod
     def find_by_company(name, company, user_sendable_only=False):
@@ -74,6 +71,7 @@ class Communication(ORMBase, BaseModel):
                              Communication.name == name,
                              Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).first()
 
+
     @staticmethod
     def find_all_by_company(company, user_sendable_only=False):
         if user_sendable_only:
@@ -86,13 +84,15 @@ class Communication(ORMBase, BaseModel):
                 .filter(and_(Communication.delete_dt == None,
                              Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).all()
 
+
     def invalidate_caches(self, **kwargs):
         invalidate(self, 'Communication.find_all', BaseModel.get_enterprise_id())
         invalidate(self, 'Communication.find_all_by_company', self.company_id)
 
+
     @staticmethod
-    def search(enterprise_id, name, company_id):
-        n_clause = cid_clause = ''
+    def search(enterprise_id, name):
+        n_clause = ''
         if name:
             n_clause = "and comm.name like '%s%%'" % name
 
@@ -101,21 +101,22 @@ class Communication(ORMBase, BaseModel):
                  and com.enterprise_id = {ent_id} {n}""".format(n=n_clause, ent_id=enterprise_id)
         return Session.query(Communication).from_statement(sql).all()
 
+
     @staticmethod
     def get_types():
         return ["html", "url"]
 
+
     def render(self, customer, order, extra_message=None):
         if self.data:
             if 'html' == self.type:
-                """ KB: [2010-10-21]: Just show the stored HTML. """
-                d = self.data
+                dat = self.data
                 if extra_message:
-                    d = d.replace('{message}', extra_message)
-                d = self.tokenize(d, customer, order)
-                for ot in self._other_tokens.keys():
-                    d = d.replace(ot, self._other_tokens[ot])
-                return literal(d)
+                    dat = dat.replace('{message}', extra_message)
+                dat = self.tokenize(dat, customer, order)
+                for otok in self._other_tokens.keys():
+                    dat = dat.replace(otok, self._other_tokens[otok])
+                return literal(dat)
             elif 'url' == self.type:
                 pass
             else:
@@ -123,45 +124,45 @@ class Communication(ORMBase, BaseModel):
         else:
             return ''
 
-    def tokenize(self, d, customer, order):
+    def tokenize(self, dat, customer, order):
+        #pylint: disable-msg=W0612,W0613
         campaign = customer.campaign
         company = campaign.company
         enterprise = company.enterprise
-        for t in Communication.get_tokens():
-            eval_str = t.replace('{', '').replace('}', '').replace('__', '.')
+        for tok in Communication.get_tokens():
+            eval_str = tok.replace('{', '').replace('}', '').replace('__', '.')
             try:
                 replacement = eval(eval_str)
-            except:
-                pass
-            d = d.replace(t, str(replacement if replacement else ''))
-        return d
+            except Exception as ex:
+                log.debug(ex)
+            dat = dat.replace(tok, str(replacement if replacement else ''))
+        return dat
 
     def add_token(self, key, value):
         self._other_tokens[key] = value
 
-    def send_to_customer(self, sender, customer, order=None, extra_message=None, subject=None):
-        pass
-        """
-        output = self.render(customer, order, extra_message)
-        subject = subject if subject else self.tokenize(self.subject, customer, order)
-        mail = UserMail(sender)
-        mail.send(customer.email, subject, output)
-        Status.add(customer, self, Status.find_event(self, 'SENT'), 'Sent %s (%s)' % (self.name, subject)).commit()
-        return True
-        """
-
-    def send_internal(self, sender, customer, order=None, extra_message=None, subject=None):
-        pass
-        """
-        if not sender.email: return
-        output = self.render(customer, order, extra_message)
-        subject = subject if subject else self.tokenize(self.subject, customer, order)
-        mail = UserMail(sender)
-        mail.send_internal(customer.email,
-                           sender.email,
-                           subject, output)
-        return True
-        """
+#    def send_to_customer(self, sender, customer, order=None, extra_message=None, subject=None):
+#        pass
+#        """
+#        output = self.render(customer, order, extra_message)
+#        subject = subject if subject else self.tokenize(self.subject, customer, order)
+#        mail = UserMail(sender)
+#        mail.send(customer.email, subject, output)
+#        Status.add(customer, self, Status.find_event(self, 'SENT'), 'Sent %s (%s)' % (self.name, subject)).commit()
+#        return True
+#        """
+#
+#    def send_internal(self, sender, customer, order=None, extra_message=None, subject=None):
+#        pass
+#        """
+#        if not sender.email: return
+#        output = self.render(customer, order, extra_message)
+#        subject = subject if subject else self.tokenize(self.subject, customer, order)
+#        mail = UserMail(sender)
+#        mail.send_internal(customer.email,
+#                           sender.email,
+#                           subject, output)
+#        return True
 
     @staticmethod
     def get_tokens():
