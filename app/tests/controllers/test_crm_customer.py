@@ -1,10 +1,6 @@
-import pdb
-from pyramid import testing
-from app.tests import *
-from app.tests import Session
-import simplejson as json
-from app.controllers.crm.login import LoginController
+from app.tests import TestController, secure
 from app.model.crm.customer import Customer
+from app.model.crm.customerorder import CustomerOrder
 
 # T app.tests.controllers.test_crm_customer
 
@@ -166,6 +162,18 @@ class TestCrmCustomer(TestController):
         R = self.get('/crm/customer/add_order_dialog/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Add Order')
+
+        R = self.post('/crm/customer/add_order/%s' % str(customer_id),
+                      {'products[1451]' : '1.0',
+                       'products[1450]' : '2.0',
+                       'products[2090]' : '1.0'})  # <-- this one has inventory = 0
+        self.assertEqual(R.status_int, 200)
+        order_id = R.body
+        order = CustomerOrder.load(order_id)
+        self.assertNotEqual(order, None)
+        for item in order.items:
+            self.assertEqual(item.product_id in (1451, 1450, 2090), True)
+
         self._delete_new(customer_id)
 
         

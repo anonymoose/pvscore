@@ -1,9 +1,5 @@
-import pdb
-from pyramid import testing
-from app.tests import *
-from app.tests import Session
+from app.tests import TestController, secure
 import simplejson as json
-from app.controllers.crm.login import LoginController
 from app.model.crm.report import Report
 
 # T app.tests.controllers.test_crm_report
@@ -165,9 +161,9 @@ if (id)  {
 
 
     def _delete_new(self, report_id):
-        c = Report.load(report_id)
-        self.assertNotEqual(c, None)
-        c.delete()
+        rep = Report.load(report_id)
+        self.assertNotEqual(rep, None)
+        rep.delete()
         self.commit()
 
         

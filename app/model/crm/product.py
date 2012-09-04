@@ -547,35 +547,30 @@ class Product(ORMBase, BaseModel):
         return self._pricing != None
 
 
-    def get_default_unit_price(self):
+    def get_price(self, campaign):
+        """ KB: [2011-02-02]: Returns the discounted price if there is one, otherwise returns retail price """
+        if not campaign.campaign_id in self.campaign_prices:
+            return -1
+        pri = self.campaign_prices[campaign.campaign_id]
+        return pri.discount_price if pri.discount_price else pri.retail_price
+
+
+    def get_retail_price(self, campaign):
+        """ KB: [2011-02-02]: Returns the retail price regardless of discount """
+        if not campaign.campaign_id in self.campaign_prices:
+            return -1
+        return self.campaign_prices[campaign.campaign_id].retail_price
+
+
+    def get_discount_price(self, campaign):
+        """ KB: [2011-02-02]: Returns the discount price """
+        if not campaign.campaign_id in self.campaign_prices:
+            return -1
+        return self.campaign_prices[campaign.campaign_id].discount_price
+
+
+    def get_default_price(self):
         return self.get_unit_price(self.company.default_campaign)
-
-
-    def get_unit_price(self, campaign):
-        if type(campaign) == str or type(campaign) == unicode:
-            from app.model.crm.campaign import Campaign
-            campaign = Campaign.load(campaign) # cause its really the ID.
-        if self._init_pricing(campaign):
-            return self._pricing.discount_price if self._pricing.discount_price else self._pricing.retail_price
-        return 0.0
-
-
-    def get_unit_retail_price(self, campaign):
-        if type(campaign) == str or type(campaign) == unicode:
-            from app.model.crm.campaign import Campaign
-            campaign = Campaign.load(campaign)
-        if self._init_pricing(campaign):
-            return self._pricing.retail_price
-        return 0.0
-
-
-    def get_unit_discount_price(self, campaign):
-        if type(campaign) == str or type(campaign) == unicode:
-            from app.model.crm.campaign import Campaign
-            campaign = Campaign.load(campaign)
-        if self._init_pricing(campaign):
-            return self._pricing.discount_price
-        return 0.0
 
 
     def set_price(self, campaign, price, discount=None):

@@ -1,59 +1,36 @@
-"""Helper functions
-
-Consists of functions to typically be used within templates, but also
-available to Controllers. This module is available to templates as 'h'.
-"""
-# Import helpers as desired, or define your own, ie:
-#from webhelpers.html.tags import checkbox, password
-import pdb
-
-import datetime, os, errno
 from webhelpers.html import literal
-from webhelpers.html.tags import *
-import app.lib.util as util
-import random as rnd
+from webhelpers.html.tags import * #pylint: disable-msg=W0614,W0401,W0602,W0622
 
-def button(id, display, **kwargs):
-    append = ''
-    for k in kwargs.keys():
-        append = '%s %s="%s"' % (append, k if k != 'class_' else 'class', kwargs.get(k))
-    return literal('<input id="%s" name="%s" type="button" value="%s" %s>' % (id, id, display, append))
 
-#def hidden(id, value, **kwargs):
-#    append = ''
-#    for k in kwargs.keys():
-#        append = '%s %s="%s"' % (append, k, kwargs.get(k))
-#    return literal('<input id="%s" name="%s" type="hidden" value="%s" %s>' % (id, id, value, append))
-#
+def nvl(val, default=''):
+    if val == '' or val == None or val == 'None':
+        return default
+    return val
 
-def nvl(s, default=''):
-    if s == '' or s == None or s == 'None':
-        return default;
-    return s;
 
 def is_dialog(request):
     return (request.GET.get('dialog') == '1')
 
+
 def is_api(request):
     return request.path.startswith('/api') or request.GET.get('api') == '1'
 
-def is_mobile():
-    return MobileDetector.is_mobile(request)
-
-def is_logged_in_site():
-    return ('customer_id' in session and session['customer_id'] and 'customer_logged_in' in session and session['customer_logged_in'] == True)
 
 def money(dbl):
-    if type(dbl) == float and round(dbl, 2) == -0.00: dbl = 0.00
+    if type(dbl) == float and round(dbl, 2) == -0.00:
+        dbl = 0.00
     if dbl or type(dbl) == float:
         return '%.2f' % float(dbl)
     else: return ''
 
+
 def flt(dbl):
     return money(dbl)
 
-def google_analytics(site, script_tags=True, version=None):
-    if not site: return ''
+
+def google_analytics(site, script_tags=True):
+    if not site:
+        return ''
     if site.google_analytics_id:
         return literal("""
     {st_start}
@@ -74,71 +51,64 @@ def google_analytics(site, script_tags=True, version=None):
         return ''
 
 
-paypal_url = 'https://www.paypal.com/cgi-bin/webscr'
-
-def last_flash():
-    flashes = flash.pop_messages()
-    if flashes:
-        return flashes.pop()
-    return ''
-
-def date_time(d, fmt="%Y-%m-%d %H:%M:%S"):
-    if d == '' or d == None:
+def date_time(d8e, fmt="%Y-%m-%d %H:%M:%S"):
+    if d8e == '' or d8e == None:
         return ''
-    return d.strftime(fmt)
+    return d8e.strftime(fmt)
 
-def date_(d, fmt="%Y-%m-%d"):
-    if d == '' or d == None:
+
+def date_(d8e, fmt="%Y-%m-%d"):
+    if d8e == '' or d8e == None:
         return ''
-    return d.strftime(fmt)
+    return d8e.strftime(fmt)
 
-def format_date(d, fmt="%Y-%m-%d"):
-    if d == '' or d == None:
+
+def format_date(d8e, fmt="%Y-%m-%d"):
+    if d8e == '' or d8e == None:
         return ''
-    return d.strftime(fmt)
+    return d8e.strftime(fmt)
 
-def words_date_time(d):
-    if d == '' or d == None:
+
+def words_date_time(d8e):
+    if d8e == '' or d8e == None:
         return ''
-    return d.strftime("%B %d, %Y at %I:%M %p")
+    return d8e.strftime("%B %d, %Y at %I:%M %p")
 
-def slash_date(d):
-    if d == '' or d == None:
+
+def slash_date(d8e):
+    if d8e == '' or d8e == None:
         return ''
-    return d.strftime("%m/%d/%Y")
+    return d8e.strftime("%m/%d/%Y")
 
-def words_date(d):
-    if d == '' or d == None:
+
+def words_date(d8e):
+    if d8e == '' or d8e == None:
         return ''
-    return d.strftime("%B %d, %Y")
+    return d8e.strftime("%B %d, %Y")
 
-def is_production():
-    return util.is_production()
 
-def request_ip():
-    from pylons import request
-    return request.headers['X-Real-Ip']
+#def request_ip():
+#    from pylons import request
+#    return request.headers['X-Real-Ip']
 
-""" KB: [2011-08-01]: If you are on /About and you really want to use content from /Home, do it like so...
-${h.duplicate_content(c.site, 'Home', 'left')}
-"""
-def duplicate_content(site, pagename, content_name, **kwargs):
-    p = Page.find_by_name(site, pagename)
-    cnt = Content.find_by_name_and_type(p, content_name, 'html')
-    if cnt:
-        return cnt.render(**kwargs)
-    return ''
 
 def javascript_link_ex(url, request):
-    return javascript_link(url+'?rnd='+str(session['_creation_time']))
+    return javascript_link(url+'?rnd='+str(request.session['_creation_time']))
+
 
 def stylesheet_link_ex(url, request):
-    return stylesheet_link(url+'?rnd='+str(session['_creation_time']))
+    return stylesheet_link(url+'?rnd='+str(request.session['_creation_time']))
 
-def nl2br(s):
-    return s.replace('\n','<br>\n')
 
-def get(o, attr, default=''):
-    if not o: return default
-    return getattr(o, attr, default)
+def nl2br(val):
+    return val.replace('\n','<br>\n')
 
+
+def get(obj, attr, default=''):
+    if not obj:
+        return default
+    return getattr(obj, attr, default)
+
+def chkbox(ident, **kwargs):
+    # we wrap this so that bootstrap can format our checkboxes properly
+    return literal('<label class="checkbox">%s</label>' % checkbox(ident, **kwargs))

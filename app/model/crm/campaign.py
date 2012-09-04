@@ -82,28 +82,6 @@ class Campaign(ORMBase, BaseModel):
         from app.model.crm.product import Product
         return Product.find_by_campaign(self)
 
-    def get_product_price(self, product):
-        """ KB: [2011-02-02]: Returns the discounted price if there is one, otherwise returns retail price """
-        price = ProductPricing.find(self, product)
-        if price:
-            if price.discount_price:
-                return price.discount_price
-            return price.retail_price
-        else: return -1
-
-    def get_product_retail_price(self, product):
-        """ KB: [2011-02-02]: Returns the retail price regardless of discount """
-        price = ProductPricing.find(self, product)
-        if price:
-            return price.retail_price
-        else: return None
-
-    def get_product_discount_price(self, product):
-        """ KB: [2011-02-02]: Returns the discount price """
-        price = ProductPricing.find(self, product)
-        if price:
-            return price.discount_price
-        else: return None
 
     def send_post_purchase_comm(self, order, cc_internal=False):
         if self.comm_post_purchase_id:

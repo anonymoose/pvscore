@@ -1,17 +1,22 @@
 import pygeoip
+import logging
+import app.lib.util as util
 
-""" KB: [2011-03-28]: 
-http://code.google.com/p/pygeoip/wiki/Usage
-"""
+log = logging.getLogger(__name__)
+
 class Geo:
+    """ KB: [2011-03-28]: 
+    http://code.google.com/p/pygeoip/wiki/Usage
+    """
     def __init__(self):
         self.gic = None
         try:
-            path = config['app_conf']['pvs.geoip.dat.file.path']
+            path = util.cache_get('pvs.geoip.dat.file.path')   #pylint: disable-msg=E1111
             if path:
                 self.gic = pygeoip.GeoIP(path)
-        except:
-            pass
+        except Exception as exc:
+            log.debug(exc)
+
         
     def by_request(self, req):
         """ KB: [2011-03-28]: 
@@ -28,8 +33,10 @@ class Geo:
         """
         return self.by_ip(req.remote_addr)
 
-    def by_ip(self, ip):
-        if ip == '127.0.0.1': ip = '98.231.77.218' # only happens in dev
+
+    def by_ip(self, ipaddr):
+        if ipaddr == '127.0.0.1':
+            ipaddr = '98.231.77.218' # only happens in dev
         if self.gic:
-            return self.gic.record_by_addr(ip)
+            return self.gic.record_by_addr(ipaddr)
 

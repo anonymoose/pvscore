@@ -34,10 +34,12 @@ class CustomerOrder(ORMBase, BaseModel):
     handling_total = Column(Float)
     external_cart_id = Column(String(100))
 
-    customer = relation('Customer', backref=backref('orders'))
+    customer = relation('Customer')
     campaign = relation('Campaign')
     creator = relation('Users')
-    status = relation('Status')
+    status = relation('Status', lazy="joined")
+    items = relation('OrderItem', lazy="joined", backref=backref('order'), order_by='asc(OrderItem.order_item_id)')
+    journal_entries = relation('Journal', lazy="joined", backref=backref('order'), order_by='asc(Journal.journal_id)')
 
     @staticmethod
     def create_new(cart, customer, site, campaign, user_created, incl_tax=True):
@@ -56,13 +58,13 @@ class CustomerOrder(ORMBase, BaseModel):
             item.order = cord
             item.product = prd
             item.creator = user_created
-            discount = prd.get_unit_discount_price(campaign)
+            discount = prd.get_discount_price(campaign)
             retail = cart_item['unit_price'] if 'unit_price' in cart_item else prd.get_unit_price(campaign)
             item.quantity = float(cart_item['quantity'])
             item.unit_price = (discount if discount else retail)
             if campaign.tax_rate and incl_tax:
                 item.tax = (item.unit_price * item.quantity) * campaign.tax_rate
-            item.unit_cost = prd.get_unit_cost(campaign)
+            item.unit_cost = prd.unit_cost
             item.unit_discount_price = (discount if discount else 0.0)
             item.unit_retail_price = retail
 
@@ -82,10 +84,9 @@ class CustomerOrder(ORMBase, BaseModel):
                         child_item.unit_price = 0.0
                         child_item.unit_discount_price = 0.0
                         child_item.unit_retail_price = 0.0
-                        child_item.unit_cost = prd.get_unit_cost(campaign)
+                        child_item.unit_cost = prd.unit_cost
                         child_item.quantity = kid.child_quantity
                         InventoryJournal.create_new(kid.child, 'Sale', child_item.quantity, child_item)
-
         Status.add(customer, cord, Status.find_event(enterprise_id, cord, 'CREATED'), 'Order created ')
         cord.save()
         cord.flush()
@@ -103,7 +104,7 @@ class CustomerOrder(ORMBase, BaseModel):
         item.unit_price = (discount if discount else retail)
         if campaign.tax_rate and incl_tax:
             item.tax = (item.unit_price * item.quantity) * campaign.tax_rate
-        item.unit_cost = product.get_unit_cost(campaign)
+        item.unit_cost = product.unit_cost
         item.unit_discount_price = (discount if discount else 0.0)
         item.unit_retail_price = retail
         item.quantity = quantity
@@ -122,10 +123,9 @@ class CustomerOrder(ORMBase, BaseModel):
                     child_item.creator = user_created
                     child_item.unit_price = 0.0
                     child_item.unit_discount_price = 0.0
-                    child_item.unit_cost = product.get_unit_cost(campaign)
+                    child_item.unit_cost = product.unit_cost
                     child_item.quantity = kid.child_quantity
                     InventoryJournal.create_new(kid.child, 'Sale', child_item.quantity, child_item)
-
         Status.add(customer, self, Status.find_event(enterprise_id, self, 'MODIFIED'), 'Order Modified ')
         self.save()
         self.commit()
@@ -172,11 +172,6 @@ class CustomerOrder(ORMBase, BaseModel):
 
 
     @property
-    def payments_applied(self):
-        return len(Journal.find_all_by_order(self)) > 0
-
-
-    @property
     def has_subscription(self):
         for oitem in self.active_items:
             if oitem.product.subscription:
@@ -186,12 +181,12 @@ class CustomerOrder(ORMBase, BaseModel):
 
     @property
     def active_items(self):
-        #return [oi for oi in self.items if oi.delete_dt is None]
-        aitems = []
-        for oitem in self.items:
-            if oitem.delete_dt is None:
-                aitems.append(oitem)
-        return aitems
+        return [oitem for oitem in self.items if oitem.delete_dt is None]
+
+
+    @property
+    def payments_applied(self):
+        return len(Journal.filter_payments(self)) > 0
 
 
     def apply_discount(self, amount, note=None):
@@ -202,20 +197,19 @@ class CustomerOrder(ORMBase, BaseModel):
 
     @property
     def discounts(self):
-        return Journal.find_discounts_by_order(self)
+        return Journal.filter_discounts(self)
 
 
     def total_payments_applied(self):
-        return round(Journal.find_total_applied_to_order(self) + Journal.find_total_credits_applied_to_order(self)\
-            - Journal.find_total_refunds_applied_to_order(self) - Journal.find_total_discounts_applied_to_order(self), 2)
+        return Journal.total_applied(self)
 
 
     def total_discounts_applied(self):
-        return Journal.find_total_discounts_applied_to_order(self)
+        return Journal.total_discounts(self)
 
 
     def total_payments_due(self):
-        return round(self.total_price()-self.total_payments_applied()-self.total_discounts_applied(), 2)
+        return Journal.total_due(self)
 
 
     def total_price(self):

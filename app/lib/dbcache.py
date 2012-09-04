@@ -1,3 +1,4 @@
+#pylint: disable-msg=W0212,W0231,C0103,W0107,E1101
 """
 KB: [2011-02-07]: This is lifted directly from the SQLAlchemy examples.  Props to them.
 
@@ -19,7 +20,7 @@ The rest of what's here are standard SQLAlchemy and
 Beaker constructs.
 
 """
-import time, pdb
+import time
 from beaker import cache
 from sqlalchemy.orm.interfaces import MapperOption
 from sqlalchemy.orm.query import Query
@@ -82,9 +83,9 @@ class CachingQuery(Query):
 
     def invalidate(self):
         """Invalidate the value represented by this Query."""
-        cache, cache_key = _get_cache_parameters(self)
+        cache_, cache_key = _get_cache_parameters(self)
         #cache.clear()
-        cache.remove(cache_key)
+        cache_.remove(cache_key)
 
     def get_value(self, merge=True, createfunc=None):
         """Return the value from the cache for this query.
@@ -93,8 +94,8 @@ class CachingQuery(Query):
         createfunc specified.
 
         """
-        cache, cache_key = _get_cache_parameters(self)
-        ret = cache.get_value(cache_key, createfunc=createfunc)
+        cache_, cache_key = _get_cache_parameters(self)
+        ret = cache_.get_value(cache_key, createfunc=createfunc)
         if merge:
             ret = self.merge_result(ret, load=False)
         return ret
@@ -102,8 +103,8 @@ class CachingQuery(Query):
     def set_value(self, value):
         """Set the value in the cache for this query."""
 
-        cache, cache_key = _get_cache_parameters(self)
-        cache.put(cache_key, value)
+        cache_, cache_key = _get_cache_parameters(self)
+        cache_.put(cache_key, value)
 
 def query_callable(manager):
     def query(*arg, **kw):
@@ -129,13 +130,13 @@ def _get_cache_parameters(query):
         cache_key = " ".join([str(x) for x in args])
 
     # get cache
-    cache = query.cache_manager.get_cache_region(namespace, region)
+    cache_ = query.cache_manager.get_cache_region(namespace, region)
 
     # optional - hash the cache_key too for consistent length
     # import uuid
     # cache_key= str(uuid.uuid5(uuid.NAMESPACE_DNS, cache_key))
 
-    return cache, cache_key
+    return cache_, cache_key
 
 def _namespace_from_query(namespace, query):
     # cache namespace - the token handed in by the
@@ -253,7 +254,7 @@ def _params_from_query(query):
     would return [5, 7].
 
     """
-    v = []
+    vals = []
     def visit_bindparam(bind):
         value = query._params.get(bind.key, bind.value)
 
@@ -263,10 +264,10 @@ def _params_from_query(query):
         if callable(value):
             value = value()
 
-        v.append(value)
+        vals.append(value)
     if query._criterion is not None:
         visitors.traverse(query._criterion, {}, {'bindparam':visit_bindparam})
-    return v
+    return vals
 
 
 # Beaker CacheManager.  A home base for cache configurations.

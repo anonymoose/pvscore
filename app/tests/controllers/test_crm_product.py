@@ -1,15 +1,9 @@
-import pdb
-from pyramid import testing
-from app.tests import *
-from app.tests import Session
-import simplejson as json
-from app.controllers.crm.login import LoginController
-from app.model.crm.company import Company, Enterprise
+from app.tests import TestController, secure
+from app.model.crm.company import Enterprise, Company
 from app.model.crm.campaign import Campaign
+from app.model.crm.product import Product, InventoryJournal
 from app.model.core.statusevent import StatusEvent
-import transaction
-from zope.sqlalchemy import mark_changed
-from app.model.crm.product import Product, InventoryJournal, ProductCategory
+import simplejson as json
 
 # T app.tests.controllers.test_crm_product
 
@@ -25,10 +19,8 @@ class TestCrmProduct(TestController):
     """
 
     def _create_new(self):
-        # probably a better way to get the preferred enterprise here.
         ent = Enterprise.find_all()[0]
         comp = Company.find_all(ent.enterprise_id)[0]
-
         R = self.get('/crm/product/new')
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Edit Product')
@@ -44,9 +36,9 @@ class TestCrmProduct(TestController):
         f.set('attr_name[1]', 'attr1key')
         f.set('attr_value[1]', 'attr1val')
 
-        for c in Campaign.find_by_company(comp):
-            f.set('campaign_price[%s]' % c.campaign_id, c.campaign_id)
-            f.set('campaign_discount[%s]' % c.campaign_id, round(float(c.campaign_id * 0.50), 2))
+        for camp in Campaign.find_by_company(comp):
+            f.set('campaign_price[%s]' % camp.campaign_id, camp.campaign_id)
+            f.set('campaign_discount[%s]' % camp.campaign_id, round(float(camp.campaign_id * 0.50), 2))
 
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
@@ -138,9 +130,9 @@ class TestCrmProduct(TestController):
     def test_inventory_list(self):
         R = self.get('/crm/product/inventory_list')
         self.assertEqual(R.status_int, 200)
-        ps = json.loads(R.body)
-        self.assertGreater(ps['records'], 100)
-        self.assertEqual(ps['records'], len(ps['rows']))
+        prods = json.loads(R.body)
+        self.assertGreater(prods['records'], 100)
+        self.assertEqual(prods['records'], len(prods['rows']))
 
 
     @secure
@@ -151,31 +143,31 @@ class TestCrmProduct(TestController):
 
         R = self.get('/crm/product/inventory_list')
         self.assertEqual(R.status_int, 200)
-        ps = json.loads(R.body)
-        self.assertGreater(ps['records'], 100)
-        self.assertEqual(ps['records'], len(ps['rows']))
+        prods = json.loads(R.body)
+        self.assertGreater(prods['records'], 100)
+        self.assertEqual(prods['records'], len(prods['rows']))
         # get the first product ID
-        p = ps['rows'][0]['cell']         # ['', '1451', '5-HTP 100 mg- Pharmax', 'SUP-1003', 'Seroyal', '123', '8.0', '15.0', '25.00', '', '25.00', '25.00']
-        pid = p[1]
-        name = p[2]
-        sku = p[3]
-        manu = p[4]
-        inventory = int(p[5])
-        inventory_par = p[6]
-        uc = p[7]
+        prod = prods['rows'][0]['cell']         # ['', '1451', '5-HTP 100 mg- Pharmax', 'SUP-1003', 'Seroyal', '123', '8.0', '15.0', '25.00', '', '25.00', '25.00']
+        pid = prod[1]
+        name = prod[2]
+        #sku = prod[3]
+        #manu = prod[4]
+        inventory = int(prod[5])
+        inventory_par = prod[6]
+        unitcost = prod[7]
         R = self.post('/crm/product/save_inventory',
                       {'id' : pid,
                        'inventory' : inventory + 10,
                        'inventory_par' : inventory_par,
                        'name' : name + ' xxx',
-                       'unit_cost' : uc,
+                       'unit_cost' : unitcost,
                        'cmp_%s' % cmpn.campaign_id : '999'})
 
         self.assertEquals(R.body, 'True')
-        pr = Product.load(pid)
-        tot = InventoryJournal.total(pr)
+        prod = Product.load(pid)
+        tot = InventoryJournal.total(prod)
         self.assertEqual(tot, inventory + 10)
-        self.assertEqual(999, pr.campaign_prices[cmpn.campaign_id].retail_price)
+        self.assertEqual(999, prod.campaign_prices[cmpn.campaign_id].retail_price)
 
         R = self.get('/crm/product/edit/%s' % pid)
         self.assertEqual(R.status_int, 200)
@@ -187,11 +179,6 @@ class TestCrmProduct(TestController):
     
     @secure
     def test_save_existing(self):
-        ent = Enterprise.find_all()[0]
-        comp = Company.find_all(ent.enterprise_id)[0]
-        c = Campaign.find_by_company(comp)[0]
-        test_price = round(float(c.campaign_id * 0.50), 2)
-
         product_id = self._create_new()
         R = self.get('/crm/product/list')
         self.assertEqual(R.status_int, 200)
@@ -208,9 +195,9 @@ class TestCrmProduct(TestController):
         f.set('name', 'Test Product New')
         f.set('seo_keywords', 'SEO Test New')
 
-        for p in Product.find_all_except(Product.load(product_id))[:3]:
-            f.set('child_incl_%s' % p.product_id, p.product_id)
-            f.set('child_quantity_%s' % p.product_id, p.product_id)
+        for prod in Product.find_all_except(Product.load(product_id))[:3]:
+            f.set('child_incl_%s' % prod.product_id, prod.product_id)
+            f.set('child_quantity_%s' % prod.product_id, prod.product_id)
 
         f.set('prod_inventory', 25)
 
@@ -232,8 +219,8 @@ class TestCrmProduct(TestController):
         prod = Product.load(product_id)
         self.assertEqual(25, InventoryJournal.total(prod))
 
-        for p in Product.find_all_except(Product.load(product_id))[:3]:
-            self.assertEqual(int(f['child_quantity_%s' % p.product_id].value), p.product_id)
+        for prod in Product.find_all_except(Product.load(product_id))[:3]:
+            self.assertEqual(int(f['child_quantity_%s' % prod.product_id].value), prod.product_id)
 
         self._delete_new(product_id)
 

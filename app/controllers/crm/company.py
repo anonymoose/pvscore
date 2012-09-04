@@ -124,7 +124,6 @@ class CompanyController(BaseController):
             user.bind(self.request.POST, True, 'u')
             user.password = Users.encode_password('password')
             user.enterprise_id = ent.enterprise_id
-            user.allow_cms = True
             user.type = 'Admin'
             user.save()
             user.flush()

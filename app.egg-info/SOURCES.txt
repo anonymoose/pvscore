@@ -37,7 +37,6 @@ app/controllers/crm/purchase.py
 app/controllers/crm/report.py
 app/controllers/crm/users.py
 app/lib/__init__.py
-app/lib/app_globals.py
 app/lib/billing_api.py
 app/lib/db.py
 app/lib/dbcache.py
@@ -5647,8 +5646,6 @@ app/templates/crm/customer.add_order.mako
 app/templates/crm/customer.add_order_item.mako
 app/templates/crm/customer.apply_payment.mako
 app/templates/crm/customer.attributes.mako
-app/templates/crm/customer.barcode_order.mako
-app/templates/crm/customer.barcode_select_company.mako
 app/templates/crm/customer.base.mako
 app/templates/crm/customer.billings_list.mako
 app/templates/crm/customer.cancel_order.mako

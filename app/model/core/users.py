@@ -79,21 +79,25 @@ class Users(ORMBase, BaseModel):
             and_(Users.username == username, 
                  Users.password == Users.encode_password(pwd))).first()
 
-    @staticmethod
-    def load(uid, pkey=False, cache=True):
-        return Users.find_by_uid(uid)
+    #@staticmethod
+    #def load(uid, pkey=False, cache=True):
+    #    return Users.find_by_uid(uid)
+
 
     @staticmethod
     def find_by_uid(uid):
         return Session.query(Users).filter(Users.username == uid).first()
 
+
     @staticmethod
     def is_unique_username(username):
         return None == Session.query(Users).filter(Users.username == username).first()
 
+
     @staticmethod
     def encode_password(password):
         return md5(password).hexdigest()
+
 
     @staticmethod
     def search(enterprise_id, username, fname, lname, email):
@@ -115,14 +119,17 @@ class Users(ORMBase, BaseModel):
                                                          entid=enterprise_id)
         return Session.query(Users).from_statement(sql).all()
 
+
     @staticmethod
     def find_all(enterprise_id):
         return Session.query(Users).filter(and_(Users.delete_dt == None,
                                                 Users.enterprise_id == enterprise_id)).order_by(Users.lname).all()
 
+
     @staticmethod
     def full_delete(username):
         Session.execute("delete from core_user where username = '%s'" % username)
+
 
 class UserPriv(ORMBase, BaseModel):
     __tablename__ = 'core_user_priv'

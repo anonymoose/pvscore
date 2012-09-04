@@ -1,250 +1,229 @@
-import pdb
-import unicodedata
+#import smtplib
+#import mimetypes
+#from email.MIMEMultipart import MIMEMultipart
+#from email.MIMEBase import MIMEBase
+#from email.MIMEText import MIMEText
+#from email.MIMEAudio import MIMEAudio
+#from email.MIMEImage import MIMEImage
+#from email.Encoders import encode_base64
+#import email, string, re
+#from email.parser import HeaderParser
+#import imaplib, email, string
+import redis
 import socket
 import calendar
 import datetime, os, errno
 from webhelpers.html import literal
-from datetime import date, timedelta
-import datetime
-#from pylons import request, session, tmpl_context as c, config
-#from paste.deploy.converters import asbool
-import smtplib
-import mimetypes
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEBase import MIMEBase
-from email.MIMEText import MIMEText
-from email.MIMEAudio import MIMEAudio
-from email.MIMEImage import MIMEImage
-from email.Encoders import encode_base64
-import email, string, re
-from email.parser import HeaderParser
-import imaplib, email, string
+from datetime import date
+import re
 from operator import itemgetter
+import logging
 
-"""
-temp_enterprise_id = None
+log = logging.getLogger(__name__)
 
-def get_enterprise():
-    from app.model.crm.company import Enterprise
-    return Enterprise.load(get_enterprise_id())
-
-def get_enterprise_id():
-    #KB: [2010-11-05]: Enterprise ID segments the application.  All objects need to know it
-    #so that they can segment accordingly.
-    #TODO: KB: [2010-11-05]: What do we do for command line programs and first time site visitors?
-    from app.model.core.users import Users
-    try:
-        if temp_enterprise_id:
-            return temp_enterprise_id
-        elif 'enterprise_id' in request.GET:
-            return request.GET.get('enterprise_id')
-        elif 'enterprise_id' in session:
-            return session['enterprise_id']
-        elif 'user_id' in session:
-            from app.model.core.users import Users
-            u = Users.load(session['user_id'])
-            if u:
-                if u.enterprise_id:
-                    return u.enterprise_id
-                if 'enterprise_id' in os.environ:
-                    return int(os.environ['enterprise_id'])
-                return None
-            else:
-                return None
-        elif 'customer_id' in session:
-            from app.model.crm.customer import Customer
-            cust = Customer.load(session['customer_id'])
-            return cust.campaign.company.enterprise_id
-        elif 'site_id' in session:
-            from app.model.cms.site import Site
-            return Site.load(session['site_id']).company.enterprise_id
-    except:
-        if 'enterprise_id' in os.environ:
-            return int(os.environ['enterprise_id'])
-"""
 
 def index_of_max(lst):
     return max(enumerate(lst), key=itemgetter(1))[0]
 
+
 def index_of_min(lst):
     return min(enumerate(lst), key=itemgetter(1))[0]
 
-""" KB: [2011-08-08]: Get a single value from sqlite cursor.
-conn = sqlite.connect(...)
-c = conn.cursor()
-v = util.s_val(c, "select asdf from ... ? and ?", (a, b, c))
-"""
-def s_val(cur, sql, args=None):
-    if args:
-        cur.execute(sql, args)
-    else:
-        cur.execute(sql)
-    v = cur.fetchone()
-    if v: return v[0]
 
-"""
-def is_production():
-    if 'is_development' in config['app_conf']:
-        if asbool(config['app_conf']['is_development']):
-            return False
-    return True
+#def is_production():
+#    if 'is_development' in config['app_conf']:
+#        if asbool(config['app_conf']['is_development']):
+#            return False
+#    return True
 
-def config_get(key):
-    return config[key] if key in config else None
-"""
 
 def get_first_day(dt, d_years=0, d_months=0):
     # d_years, d_months are "deltas" to apply to dt
-    y, m = dt.year + d_years, dt.month + d_months
-    a, m = divmod(m-1, 12)
-    return date(y+a, m+1, 1)
+    year, mon = dt.year + d_years, dt.month + d_months
+    aaa, mon = divmod(mon - 1, 12)
+    return date(year + aaa, mon + 1, 1)
+
 
 def get_last_day(dt, d_years=0, d_months=0):
     # d_years, d_months are "deltas" to apply to dt
-    y, m = dt.year + d_years, dt.month + d_months
-    a, m = divmod(m-1, 12)
-    return date(y+a, m+1, calendar.monthrange(y+a, m+1)[1])
+    year, mon = dt.year + d_years, dt.month + d_months
+    aaa, mon = divmod(mon - 1, 12)
+    return date(year + aaa, mon + 1, calendar.monthrange(year + aaa, mon + 1)[1])
+
 
 def parse_date(strdt, fmt='%Y-%m-%d'):
     return datetime.datetime.strptime(strdt, fmt)
+
 
 def parse_date_as_date(strdt, fmt='%Y-%m-%d'):
     dt = parse_date(strdt, fmt)
     return datetime.date(dt.year, dt.month, dt.day)
 
+
 def format_date(d, fmt="%Y-%m-%d"):
     return d.strftime(fmt)
+
 
 #<pubDate>Wed, 02 Oct 2002 08:00:00 EST</pubDate>
 def format_rss_date(d):
     return format_date(d, "%a, %d %b %Y %H:%M:%S EST")
 
+
 def slash_date(d):
     return d.strftime("%m/%d/%Y")
+
 
 def words_date(d):
     return d.strftime("%B %d, %Y")
 
+
 def str_today():
     return datetime.datetime.today().strftime("%Y-%m-%d")
+
 
 def today():
     return datetime.datetime.today()
 
+
 def yesterday():
     return today() - datetime.timedelta(days=1)
+
 
 def now():
     return datetime.datetime.today()
 
+
 def str_now():
     d = datetime.datetime.today()
-    fmt="%Y-%m-%d %H:%M:%S"
+    fmt = "%Y-%m-%d %H:%M:%S"
     if d == '' or d == None:
         return ''
     return d.strftime(fmt)
 
+
 def today_date():
     return datetime.date.today()
+
 
 def hostname():
     return socket.gethostname()
 
-""" KB: [2011-05-26]: Build a list of dates from start_dt to end_dt inclusive. """
+
 def date_list(start_dt, end_dt=str_today()):
+    """ KB: [2011-05-26]: Build a list of dates from start_dt to end_dt inclusive. """
     ret = []
     d = parse_date(start_dt)
     end_dt = parse_date(end_dt)
     delta = datetime.timedelta(days=1)
     while True:
         ret.append(d)
-        d+=delta
-        if end_dt and d >= end_dt: break
-        if d >= util.today(): break
+        d += delta
+        if end_dt and d >= end_dt:
+            break
+        if d >= today():
+            break
     return ret
 
+
 def is_today(dt):
-    today = datetime.datetime.today()
-    return (today.year == dt.year and today.month == dt.month and today.day == dt.day)
+    today_ = datetime.datetime.today()
+    return (today_.year == dt.year and today_.month == dt.month and today_.day == dt.day)
+
 
 def is_empty(val):
-    if val == None: return True
-    if len(val.strip()) == 0: return True
+    if val == None:
+        return True
+    if len(val.strip()) == 0:
+        return True
     return False
+
 
 def is_number(val):
     return (is_int(val) or is_float(val))
 
+
 def is_float(val):
     try:
-        x = float(val)
+        _ = float(val)
         return True
-    except:
+    except Exception as exc:
+        log.debug(exc)
         return False
+
 
 def is_int(val):
     try:
-        x = int(val)
+        _ = int(val)
         return True
-    except:
+    except Exception as exc:
+        log.debug(exc)
         return False
 
 
 def is_string(val):
     return not is_number(val)
 
-""" KB: [2010-08-27]: Given an array of homogenous objects,
-create an array of those values specified by attr_name
-"""
+
 def single_attr_array(obj_array, attr_name):
-    a = []
-    for o in obj_array:
-        a.append(getattr(o, attr_name, None))
-    return a
+    """ KB: [2010-08-27]: Given an array of homogenous objects,
+    create an array of those values specified by attr_name
+    """
+    arr = []
+    for obj in obj_array:
+        arr.append(getattr(obj, attr_name, None))
+    return arr
+
 
 def single_key_array(dict_array, attr_name):
     """ KB: [2010-08-27]: Given an array of homogenous objects,
     create an array of those values specified by attr_name
     """
-    a = []
-    for o in dict_array:
-        if type(o) == tuple and type(attr_name) == int:
-            a.append(o[attr_name])
+    arr = []
+    for obj in dict_array:
+        if type(obj) == tuple and type(attr_name) == int:
+            arr.append(obj[attr_name])
         else:
-            if o.has_key(attr_name):
-                a.append(o[attr_name])
+            if obj.has_key(attr_name):
+                arr.append(obj[attr_name])
             else:
-                o.append(None)
-    return a
+                arr.append(None)
+    return arr
+
 
 def select_list(obj_array, id_attr, disp_attr, blank=False):
-    a = []
-    if blank: a.append(["",""])
-    for o in obj_array:
-        a.append([getattr(o, id_attr, None), getattr(o, disp_attr, None)])
-    return a
+    arr = []
+    if blank:
+        arr.append(["",""])
+    for obj in obj_array:
+        arr.append([getattr(obj, id_attr, None), getattr(obj, disp_attr, None)])
+    return arr
 
-def quickmail(subject, text, from_addr='kenneth.bedwell@gmail.com', to_addr='kenneth.bedwell@gmail.com'):
-    return sendmail(from_addr, to_addr, subject, text, 'kenneth.bedwell@gmail.com', 'Zachary345', 'smtp.gmail.com', '587')
 
-def sendmail(from_addr, to_addr, subject, text, username, password, server, port):
-    msg = MIMEMultipart()
-    msg['From'] = from_addr
-    msg['To'] = to_addr
-    msg['Subject'] = subject
-    msg.attach(MIMEText(text, 'html'))
-    m = smtplib.SMTP(server, int(port))
-    m.ehlo()
-    try:
-        m.starttls()
-    except: pass
-    m.ehlo()
-    m.login(username, password)
-    m.sendmail(from_addr, to_addr, msg.as_string())
-    m.close()
+#def quickmail(subject, text, from_addr='kenneth.bedwell@gmail.com', to_addr='kenneth.bedwell@gmail.com'):
+#    return sendmail(from_addr, to_addr, subject, text, 'kenneth.bedwell@gmail.com', 'Zachary345', 'smtp.gmail.com', '587')
 
-def nl2br(s):
-    return s.replace('\n','<br>\n')
+
+#def sendmail(from_addr, to_addr, subject, text, username, password, server, port):
+#    msg = MIMEMultipart()
+#    msg['From'] = from_addr
+#    msg['To'] = to_addr
+#    msg['Subject'] = subject
+#    msg.attach(MIMEText(text, 'html'))
+#    conn = smtplib.SMTP(server, int(port))
+#    conn.ehlo()
+#    try:
+#        conn.starttls()
+#    except Exception as exc:
+#        log.debug(exc)
+#    conn.ehlo()
+#    conn.login(username, password)
+#    conn.sendmail(from_addr, to_addr, msg.as_string())
+#    conn.close()
+
+
+def nl2br(val):
+    return val.replace('\n','<br>\n')
+
 
 def month_list():
     return [['1', 'January'],
@@ -260,8 +239,10 @@ def month_list():
             ['11', 'November'],
             ['12', 'December']]
 
+
 def month_list_simple():
     return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
 
 def hours_list():
     return [['00:00', '12:00 am'],
@@ -313,119 +294,91 @@ def hours_list():
             ['23:00', '11:00 pm'],
             ['23:30', '11:30 pm']]
 
+
 def year_list():
-    a = []
-    today = datetime.date.today()
-    for y in range(today.year, today.year + 10):
-        a.append([y, y])
+    arr = []
+    today_ = datetime.date.today()
+    for year in range(today_.year, today_.year + 10):
+        arr.append([year, year])
+    return arr
 
-    return a
 
-""" KB: [2010-09-23]: Recursively traverse trees of objects to attach dicts in order
-in order for them to be converted to a JSON string.
-"""
 def to_dict(obj, maxlevel=2, level=0, data=None):
-    if level > maxlevel: return
-    if level == 0 and data == None: data = {}
-    keys = [m for m in dir(obj) if not m.startswith('_')
-            and (isinstance(getattr(obj, m), list)
-                 or isinstance(getattr(obj, m), int)
-                 or isinstance(getattr(obj, m), str)
-                 or isinstance(getattr(obj, m), unicode)
-                 or isinstance(getattr(obj, m), float)
-                 or hasattr(getattr(obj, m), 'to_dict'))]
+    """ KB: [2010-09-23]: Recursively traverse trees of objects to attach dicts in order
+    in order for them to be converted to a JSON string.
+    """
+    if level > maxlevel:
+        return
+    if level == 0 and data == None:
+        data = {}
+    keys = [mbr for mbr in dir(obj) if not mbr.startswith('_')
+            and (isinstance(getattr(obj, mbr), list)
+                 or isinstance(getattr(obj, mbr), int)
+                 or isinstance(getattr(obj, mbr), str)
+                 or isinstance(getattr(obj, mbr), unicode)
+                 or isinstance(getattr(obj, mbr), float)
+                 or hasattr(getattr(obj, mbr), 'to_dict'))]
     data = {}
-    for k in keys:
-        v = getattr(obj, k)
-        if isinstance(v, list):
-            data[k] = []
-            for j in v:
+    for key in keys:
+        val = getattr(obj, key)
+        if isinstance(val, list):
+            data[key] = []
+            for j in val:
                 if hasattr(j, 'to_dict'):
-                    d = j.to_dict(maxlevel, level+1)
-                    if d and len(d) > 0: data[k].append(d)
+                    dat = j.to_dict(maxlevel, level+1)
+                    if dat and len(dat) > 0:
+                        data[key].append(dat)
                 else:
-                    data[k] = j
+                    data[key] = j
         else:
-            if hasattr(v, 'to_dict'):
-                d = v.to_dict(maxlevel, level+1)
-                if d and len(d) > 0: data[k] = d
+            if hasattr(val, 'to_dict'):
+                dat = val.to_dict(maxlevel, level+1)
+                if dat and len(dat) > 0:
+                    data[key] = dat
             else:
-                data[k] = v
+                data[key] = val
     return data
 
+
 def cache_get(key):
-    #from app.model.meta import Redis
-    #return Redis.get(key)
-    pass
+    red = redis.StrictRedis(host='localhost', port=6379, db=0)
+    red.get(key)
+    red.connection_pool.disconnect()
+
 
 def cache_set(key, value):
-    #from app.model.meta import Redis
-    #return Redis.set(key, value)
-    pass
-
-globals()['_local_cache'] = dict()
-
-def local_cache_get(key, value=None):
-    lc = globals()['_local_cache']
-    if key in lc:
-        return lc[key]
-    else:
-        return value
-
-def local_cache_set(key, value):
-    lc = globals()['_local_cache']
-    lc[key] = value
-
-def local_cache_has_key(key):
-    lc = globals()['_local_cache']
-    return (key in lc)
-
-def local_cache_del(key):
-    if local_cache_has_key(key):
-        lc = globals()['_local_cache']
-        del lc[key]
-
-def local_cache_clear():
-    del globals()['_local_cache']
-    globals()['_local_cache'] = dict()
-
-def is_testing():
-    return 'paste.testing' in request.environ
-
-def test_set_var(val, key='PVS_TEST'):
-    if 'paste.testing' in request.environ:
-        local_cache_set(key, val)
-
-def test_get_var(val, key='PVS_TEST'):
-    if 'paste.testing' in request.environ:
-        return local_cache_get(key, val)
+    red = redis.StrictRedis(host='localhost', port=6379, db=0)
+    red.set(key, value)
+    red.connection_pool.disconnect()
 
 
-""" KB: [2010-10-25]: Given an array of objects, pull out a dict that flattens the object into a dict.
-qs = EodQuote.find_by_date_diff(yhoo, -30, date(2010, 01, 31))
-vals = util.points_2d(qs, 'quote_dt', 'close')
-# now do something with numpy to map close to quote_dt...
-"""
 def points_2d(obj_array, lhs_key, rhs_key):
+    """ KB: [2010-10-25]: Given an array of objects, pull out a dict that flattens the object into a dict.
+    qs = EodQuote.find_by_date_diff(yhoo, -30, date(2010, 01, 31))
+    vals = util.points_2d(qs, 'quote_dt', 'close')
+    # now do something with numpy to map close to quote_dt...
+    """
     lhs = []
     rhs = []
-    for o in obj_array:
-        lhs.append(getattr(o, lhs_key))
-        rhs.append(getattr(o, rhs_key))
+    for obj in obj_array:
+        lhs.append(getattr(obj, lhs_key))
+        rhs.append(getattr(obj, rhs_key))
     return (lhs, rhs)
 
 
-""" KB: [2010-11-15]:
-similar to mkdir -p in unix
-http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
-"""
 def mkdir_p(path):
+    """ KB: [2010-11-15]:
+    similar to mkdir -p in unix
+    http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
+    """
     try:
         os.makedirs(path)
     except OSError as exc: # Python >2.5
         if exc.errno == errno.EEXIST:
             pass
-        else: raise
+        else:
+            raise
+
 
 def float_(flt):
     if type(flt) == str or type(flt) == unicode and len(flt) == 0:
@@ -433,10 +386,12 @@ def float_(flt):
     else:
         return float(flt)
 
+
 def fltrnd2(flt):
     if flt:
         return float('%.2f' % flt)
     else: return ''
+
 
 def money(dbl, zero=False):
     if dbl:
@@ -445,24 +400,28 @@ def money(dbl, zero=False):
         return '0.00'
     else: return ''
 
-def datestamp(dt, sep=None):
-    return '{year}{sep}{month}{sep}{day}'.format(year = dt.year,
-                                                 month = dt.month if dt.month > 9 else '0'+str(dt.month),
-                                                 day = dt.day if dt.day > 9 else '0'+str(dt.day),
+def datestamp(d, sep=None):
+    return '{year}{sep}{month}{sep}{day}'.format(year = d.year,
+                                                 month = d.month if d.month > 9 else '0'+str(d.month),
+                                                 day = d.day if d.day > 9 else '0'+str(d.day),
                                                  sep=sep if sep else '')
 
-def list_get_selected(ar, indices):
+
+def list_get_selected(arr, indices):
     out = []
     for i in indices:
-        out.append(ar[i])
+        out.append(arr[i])
     return out
+
 
 def contains(lst, val):
     try:
         lst.index(val)
         return True
-    except ValueError:
+    except ValueError as exc:
+        log.debug(exc)
         return False
+
 
 def get(arry, key, default=None):
     if key in arry:
@@ -470,10 +429,8 @@ def get(arry, key, default=None):
     else:
         return default
 
+
 def unique(seq, idfun=None):
-    # order preserving
-    if idfun is None:
-        def idfun(x): return x
     seen = {}
     result = []
     for item in seq:
@@ -481,47 +438,44 @@ def unique(seq, idfun=None):
         # in old Python versions:
         # if seen.has_key(marker)
         # but in new ones:
-        if marker in seen: continue
+        if marker in seen:
+            continue
         seen[marker] = 1
         result.append(item)
     return result
 
 
-
 #http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python
 # or equivalently and much more efficiently
-control_chars = ''.join(map(unichr, range(0,32) + range(127,160)))
-control_char_re = re.compile('[%s]' % re.escape(control_chars))
-
-#def strip_unicode(s):
-#    return control_char_re.sub('', s)
-
-def strip_unicode(s):
-    return ''.join(filter(lambda x:x in string.printable, s))
-
-def nvl(s, default=''):
-    if s == '' or s == None or s == 'None':
-        return default;
-    return s;
+CONTROL_CHARS = ''.join(map(unichr, range(0, 32) + range(127, 160)))   #pylint:disable-msg=W0141
+CONTROL_CHAR_RE = re.compile('[%s]' % re.escape(CONTROL_CHARS))
 
 
+#def strip_unicode(val):
+#    return ''.join(filter(lambda x:x in string.printable, val))
 
-def in_test_mode():
-    from pylons import request
-    try:
-        return 'paste.testing_variables' in request.environ
-    except:
-        return False
 
-def page_list(ar, offset, limit):
+def nvl(val, default=''):
+    if val == '' or val == None or val == 'None':
+        return default
+    return val
+
+
+#def in_test_mode():
+#    from pylons import request
+#    try:
+#        return 'paste.testing_variables' in request.environ
+#    except Exception as exc:
+#        log.debug(exc)
+#        return False
+
+
+def page_list(arr, offset, limit):
     if offset is not None and limit is not None and limit:
-        if ar and len(ar) > 10:
-            return ar[offset:offset+limit]
-    return ar
+        if arr and len(arr) > 10:
+            return arr[offset:offset+limit]
+    return arr
 
-def request_ip():
-    from pylons import request
-    return request.headers['X-Real-Ip']
 
 def state_abbrev_to_state_dict():
     return {'AL' : 'Alabama',
@@ -576,17 +530,20 @@ def state_abbrev_to_state_dict():
             'WI' : 'Wisconsin',
             'WY' : 'Wyoming'}
 
+
 def state_abbrev_to_state(abbrev):
     states = state_abbrev_to_state_dict()
-    if abbrev in states: return states[abbrev]
+    if abbrev in states:
+        return states[abbrev]
+
 
 def state_select_list(selected_st=None):
     states = state_abbrev_to_state_dict()
     ret = ''
-    for s in sorted(states.keys()):
-        ret += '\t<option value="{key}" {selected}>{name}</option>\n'.format(key=s,
-                                                                             selected='selected' if s == selected_st else '',
-                                                                             name=states[s])
+    for st8 in sorted(states.keys()):
+        ret += '\t<option value="{key}" {selected}>{name}</option>\n'.format(key=st8,
+                                                                             selected='selected' if st8 == selected_st else '',
+                                                                             name=states[st8])
     return literal(ret)
 
 
@@ -837,7 +794,8 @@ def country_select_list():
 """)
 
 
-class DataObj(object):
+
+class DataObj(object):    #pylint: disable-msg=R0903
     def __init__(self, obj):
         self.__dict__['_obj'] = obj
 

@@ -18,6 +18,7 @@
   <form id="frm_edit_order">
     <input type="hidden" id="oi_order_id" value="${order.order_id}">
     <input type="hidden" id="total_price" value="${total_price}">
+    <input type="hidden" id="order_dirty" value="0">
     <div class="row">
       <div class="span9">
         <div class="well">
@@ -27,9 +28,9 @@
                 <dt>Total</dt>
                 <dd id="oi_total_price">$${h.money(total_price)}</dd>
                 <dt>Payments Applied</dt>
-                <dd id="oi_payments_applied">$${h.money(total_payments_applied)}</dd>
+                <dd id="oi_payments_applied">$${h.nvl(h.money(total_payments_applied), '0.00')}</dd>
                 <dt>Discounts Applied</dt>
-                <dd id="oi_discounts_applied">$${h.money(total_discounts_applied)}</dd>
+                <dd id="oi_discounts_applied">$${h.nvl(h.money(total_discounts_applied), '0.00')}</dd>
                 <dt>Creator</dt>
                 <dd>${order.user_created if order.user_created else 'Customer'}</dd>
               </dl>
@@ -38,7 +39,7 @@
               <div class="row" style="margin-top: 32px;">
                 <div class="span3">
                 % if order.order_id and total_payments_applied < total_price:
-                  <a href="/crm/customer/apply_payment_dialog/${customer.customer_id}/${order.order_id}"><h2>Pay</h2></a>
+                  <a href="javascript:customer_order_apply_payment()"><h2>Pay</h2></a>
                 % endif
                 </div>
               </div>
@@ -108,9 +109,9 @@
               <td><img src="/static/icons/silk/arrow_refresh.png" title="Return Item" alt="Return Item" border="0" 
                        onclick="customer_return_order_item('${order.order_id}', '${oi.order_item_id}', ${oi.quantity}, ${oi.total()})" class="img_return"></td>
               <td width="40%">${oi.product.name}</td>
-              <td>${h.text('unit_price[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.unit_price), onblur='customer_order_recalc()', disabled=True)}</td>
+              <td>$${h.text('unit_price[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.unit_price), onblur='customer_order_recalc()', disabled=True)}</td>
               <td style="text-align:right;" >${h.text('quantity[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.quantity), onblur='customer_order_recalc()', disabled=True)}</td>
-              <td style="text-align:right;" id="oi_total_${oi.order_item_id}">${h.money(oi.total())}</td>
+              <td style="text-align:right;" id="oi_total_${oi.order_item_id}">$${h.money(oi.total())}</td>
             % else:
               <td><img src="/static/icons/silk/delete.png" title="Delete Item" alt="Delete Item" border="0" 
                        onclick="customer_delete_order_item('${oi.order_item_id}')" class="img_delete"></td>
@@ -123,9 +124,9 @@
                        onclick="customer_return_order_item('${order.order_id}', '${oi.order_item_id}', ${oi.quantity}, ${oi.total()})" class="img_return"
                        style="display:none;"></td>
               <td width="40%">${oi.product.name}</td>
-              <td>${h.text('unit_price[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.unit_price), onblur='customer_order_recalc()')}</td>
+              <td>$${h.text('unit_price[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.unit_price), onblur='customer_order_recalc()')}</td>
               <td style="text-align:right;" >${h.text('quantity[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.quantity), onblur='customer_order_recalc()')}</td>
-              <td style="text-align:right;" id="oi_total_${oi.order_item_id}">${h.money(oi.total())}</td>
+              <td style="text-align:right;" id="oi_total_${oi.order_item_id}">$${h.money(oi.total())}</td>
             % endif
           </tr>
           % endfor
@@ -155,8 +156,8 @@
 
     <div class="row">
       <div class="span2 offset7">
-        <button class="btn btn-primary btn-large" onclick="customer_edit_order_submit()">Save</button>
-        <a href="/crm/customer/show_orders/${customer.customer_id}" class="btn btn-link btn-large">Cancel</button>
+        <a href="#" class="btn btn-primary btn-large" onclick="customer_edit_order_submit()">Save</a>
+        <a href="/crm/customer/show_orders/${customer.customer_id}" class="btn btn-link btn-large">Cancel</a>
       </div>
     </div>
   </form>

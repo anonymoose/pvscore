@@ -29,7 +29,8 @@ requires = [
     'webtest',
     'nose',
     'nose-exclude',
-    'pylint'
+    'pylint',
+    'pyflakes'
     ]
 
 setup(name='app',

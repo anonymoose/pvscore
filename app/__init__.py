@@ -36,9 +36,9 @@ def main(global_config, **settings):   #pylint: disable-msg=W0613
     return cfg.make_wsgi_app()
 
 
-def command_line_main(**settings):
+def command_line_main(settings):
     engine = engine_from_config(settings, 'sqlalchemy.')
-    init_model(engine, **settings)
+    init_model(engine, **settings)  #pylint:disable-msg=W0142
     cfg = Configurator(settings=settings)
     _config_impl(cfg)
     config.init_settings(settings)

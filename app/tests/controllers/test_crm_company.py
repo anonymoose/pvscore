@@ -1,12 +1,6 @@
-import pdb
-from pyramid import testing
-from app.tests import *
-from app.tests import Session
-import simplejson as json
-from app.controllers.crm.login import LoginController
+from app.tests import TestController, secure
 from app.model.crm.company import Company, Enterprise
-import transaction
-from zope.sqlalchemy import mark_changed
+from app.model.core.users import Users
 
 # T app.tests.controllers.test_crm_company:TestCrmCompany.test_quickstart
 
@@ -102,9 +96,9 @@ class TestCrmCompany(TestController):
 
 
     def _delete_new(self, company_id):
-        c = Company.load(company_id)
-        self.assertNotEqual(c, None)
-        c.delete()
+        comp = Company.load(company_id)
+        self.assertNotEqual(comp, None)
+        comp.delete()
         self.commit()
 
         
@@ -146,9 +140,9 @@ class TestCrmCompany(TestController):
 
 
     def _delete_new_enterprise(self, enterprise_id):
-        c = Enterprise.load(enterprise_id)
-        self.assertNotEqual(c, None)
-        c.delete()
+        ent = Enterprise.load(enterprise_id)
+        self.assertNotEqual(ent, None)
+        ent.delete()
         self.commit()
 
 
@@ -162,7 +156,7 @@ class TestCrmCompany(TestController):
 
 
     @secure
-    def test_save_existing(self):
+    def test_save_existing_enterprise(self):
         enterprise_id = self._create_new_enterprise()
         R = self.get('/crm/company/enterprise/list')
         self.assertEqual(R.status_int, 200)
@@ -211,9 +205,9 @@ class TestCrmCompany(TestController):
 
         f = R.forms['frm_quick']
         enterprise_id = f['enterprise_id'].value
-        Enterprise.full_delete(enterprise_id, False)
+        Enterprise.full_delete(enterprise_id)
 
         Users.full_delete('xxuser@testing.com')
-        transaction.commit()
+        self.commit()
 
 

@@ -51,7 +51,6 @@ def init_model(engine, **settings):
     # It nags us that this has already been done.  This just eliminates the nag message.
     if Session.registry and not Session.registry.has():
         Session.configure(bind=engine)
-        db.init()
 
     #load everything from the pvs.* keys in the config file into redis
     for setting in settings:

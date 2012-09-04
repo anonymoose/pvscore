@@ -222,14 +222,18 @@ pvs.onload.push(function() {
         onselect: function(obj) {
             var product_id = obj.id;
             $('#chk_'+product_id).attr('checked', true);
-            customer_add_product_oncheck(product_ids[data]);
+            customer_add_product_oncheck(obj.id);
             $("#prod_complete1").val('');
-            $("#chk_"+product_id).parent().parent().parent().insertAfter($('#add_product_header'));
+            $("#chk_"+product_id).parent().parent().parent().parent().insertAfter($('#add_product_header'));
         }
     });
 });
 
 customer_add_order_submit = function() {
+    if (!$('.product_chk:checked').length) {
+        pvs.alert("Please select products to add to the order.");
+        return;
+    }
     pvs.dialog.wait();
     var obj = {};
     $('.product_chk:checked').each(function(i) {
@@ -569,7 +573,6 @@ customer_edit_order_submit = function() {
                         product_id : $_('#product_id'+oid+'')};
         }
     }
-
     pvs.ajax.post_array(pvs.ajax.api({root: '/crm/customer/edit_order/'+$_('#customer_id')+'/'+$_('#oi_order_id')}),
                         function(response) {
                             if (pvs.is_true(response)) {
@@ -647,6 +650,19 @@ customer_order_recalc = function() {
             total += parseFloat($_('#shipping_total'));
         }
         pvs.ui.set('#oi_total_price', '$' + total.toFixed(2));
+        $('#order_dirty').val(1);
+    }
+};
+
+customer_order_apply_payment = function() {
+    var url = '/crm/customer/apply_payment_dialog/'+$('#customer_id').val()+'/'+$('#oi_order_id').val()
+    if ($('#order_dirty').val() == '1') {
+        pvs.confirm('You made changes to this order that have not been saved.\nIf you continue, your order will not reflect the changes you made.', null, 
+                    function() {
+                        pvs.browser.goto_url(url); 
+                    });
+    } else {
+        pvs.browser.goto_url(url); 
     }
 };
 
@@ -663,6 +679,7 @@ customer_delete_order_item = function(order_item_id) {
             $('#oi_'+order_item_id).remove();
         });
         customer_order_recalc();
+        $('#order_dirty').val(1);
     } else {
         pvs.alert("You can't delete the last item in an order.");
     }

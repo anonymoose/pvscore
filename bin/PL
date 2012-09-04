@@ -2,6 +2,5 @@
 
 # http://turbogears.org/1.0/docs/UsingPylint.html
 
-pylint --ignore=tests --rcfile=bin/pylint.rc $*
-
+pylint --ignore=bin --rcfile=bin/pylint.rc $*
 

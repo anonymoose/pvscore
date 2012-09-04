@@ -8,6 +8,7 @@ from app.model.meta import ORMBase, BaseModel, Session, BaseAnalytic
 from app.model.crm.customerorder import CustomerOrder
 from app.model.core.users import Users
 from app.model.core.attribute import Attribute, AttributeValue
+from app.model.crm.journal import Journal
 import app.lib.db as db
 import app.lib.util as util
 
@@ -64,7 +65,8 @@ class Customer(ORMBase, BaseModel):
 
     creator = relation('Users', primaryjoin=Users.username == user_created)
     assigned_to = relation('Users', primaryjoin=Users.username == user_assigned)
-    campaign = relation('Campaign')
+    orders = relation('CustomerOrder', lazy="joined", order_by="desc(CustomerOrder.order_id)")
+    campaign = relation('Campaign', lazy="joined")
     status = relation('Status')
     billing = relation('Billing')
 
@@ -235,8 +237,7 @@ class Customer(ORMBase, BaseModel):
 
 
     def get_current_balance(self):
-        from app.model.crm.journal import Journal
-        return Journal.find_balance_for_customer(self)
+        return Journal.total_balance_for_customer(self)
 
 
     def get_total_order_value(self):

@@ -1,7 +1,7 @@
 #pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String, Date, Float, DateTime
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
 import logging
@@ -29,10 +29,8 @@ class OrderItem(ORMBase, BaseModel):
     tax = Column(Float, default=0.0)
 
     creator = relation('Users')
-    product = relation('Product')
+    product = relation('Product', lazy="joined")
     status = relation('Status')
-    order = relation('CustomerOrder', backref=backref('items', order_by='asc(OrderItem.order_item_id)'))
-
 
     def total(self):
         try:

@@ -1,9 +1,4 @@
-import pdb
-from pyramid import testing
-from app.tests import *
-from app.tests import Session
-import simplejson as json
-from app.controllers.crm.login import LoginController
+from app.tests import TestController, secure
 from app.model.crm.campaign import Campaign
 
 # T app.tests.controllers.test_crm_campaign
@@ -110,9 +105,9 @@ class TestCrmCampaign(TestController):
 
 
     def _delete_new(self, campaign_id):
-        c = Campaign.load(campaign_id)
-        self.assertNotEqual(c, None)
-        c.delete()
+        camp = Campaign.load(campaign_id)
+        self.assertNotEqual(camp, None)
+        camp.delete()
         self.commit()
 
         

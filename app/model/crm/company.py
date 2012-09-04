@@ -50,7 +50,6 @@ class Company(ORMBase, BaseModel):
     enterprise = relation('Enterprise', backref=backref('companies', order_by='Company.name'))
     status = relation('Status')
 
-
     def __repr__(self):
         return '%s : %s' % (self.company_id, self.name)
 

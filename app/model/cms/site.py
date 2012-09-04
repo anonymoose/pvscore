@@ -89,8 +89,8 @@ class Site(ORMBase, BaseModel):
 
     @staticmethod
     def find_by_host(host):
-        www_host = 'www.%s' % host
-        short_host = host.replace('www.', '')
+        www_host = (host if host.startswith('www.') else 'www.%s' % host).replace(':80', '')
+        short_host = host.replace('www.', '').replace(':80', '')
         return Session.query(Site) \
             .options(FromCache('Site.find_by_host', host)) \
             .filter(or_(

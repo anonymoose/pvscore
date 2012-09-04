@@ -1,3 +1,4 @@
+#pylint:disable-msg=C0103
 import pdb, os, transaction
 from unittest import TestCase
 from webtest import TestApp
@@ -18,8 +19,9 @@ from app.model.cms.site import Site
 import ConfigParser
 import paste.deploy
 from pyramid import testing
+import logging
 
-#__all__ = ['environ', 'url', 'TestController', 'secure', 'quiet']
+logger = logging.getLogger(__name__)
 
 # Invoke websetup with the current config file
 os.environ['PVS_TESTING'] = 'TRUE'
@@ -35,11 +37,11 @@ T_PRODUCT = 'Test Product for Nose'
 SITEDOMAIN = 'healthyustore.net'
 
 class TestController(TestCase):
+
     def setUp(self):
         from app import command_line_main
         settings = paste.deploy.appconfig('config:unittest.ini', relative_to='.')
         app = command_line_main(settings)
-        from webtest import TestApp
         self.app = TestApp(app)
         self.site = Site.find_by_host(SITEDOMAIN)
 
@@ -49,8 +51,8 @@ class TestController(TestCase):
 
 
     def quiet(self):
-        self.old_stdout = sys.stdout
-        self.old_stderr = sys.stderr
+        self.old_stdout = sys.stdout #pylint: disable-msg=W0201
+        self.old_stderr = sys.stderr #pylint: disable-msg=W0201
         sys.stdout = StringIO()
         sys.stderr = StringIO()
 
@@ -71,25 +73,13 @@ class TestController(TestCase):
                                         }
 
 
-    """ KB: [2011-09-02]: To send something back up the chain from deep in the app...
-    util.local_cache_set('PVS_TEST', something_important)
-    or
-    util.test_set_var(something_important)
-    """
-    def get_message(self, key='PVS_TEST'):
-        v = util.local_cache_get(key)
-        util.local_cache_del(key)
-        return v
-
-
-    def login_crm(self, enterprise_id=None, username='kenneth.bedwell@gmail.com', password='Zachary234'):
+    def login_crm(self, username='kenneth.bedwell@gmail.com', password='Zachary234'):
         # this sets the site it.
-        R = self.get('/crm')
+        self.get('/crm')
 
         # this logs us into that site.
-        R = self.post('/crm/login', {'username': username,
-                                     'password': password})
-
+        self.post('/crm/login', {'username': username,
+                                 'password': password})
         assert self.site
         os.environ['enterprise_id'] = str(self.site.company.enterprise_id)
 
@@ -104,8 +94,8 @@ class TestController(TestCase):
             R.mustcontain('ok')
             R = self.get('/crm/logout')
             self.site = None
-        except:
-            pass
+        except Exception as exc:
+            logger.debug(exc)
         self.app.reset()
         return True
 
@@ -119,7 +109,9 @@ class TestController(TestCase):
         return resp
 
 
-    def post(self, url, params={}, headers=None):
+    def post(self, url, params=None, headers=None):
+        if params == None:
+            params = {}
         resp = self.app.post(url, params=params, headers=self._get_headers(headers))
         if resp.status_int in [302, 301]:
             resp = resp.follow()
@@ -132,116 +124,9 @@ class TestController(TestCase):
         transaction.commit()
 
 
-    def rollback(self):
-        transaction.rollback()
-
-    
-    def _get_a_product(self, idx=0):
-        l = Product.find_all_active(self.site.company)
-        assert len(l) > 0
-        return l[idx]
-
-
-    def _create_test_product(self):
-        com = self.site.company
-        p = Product()
-        p.name = T_PRODUCT
-        p.company = com
-        p.description = 'Description'
-        p.detail_description = 'Description Description Description'
-        p.manufacturer = 'Test Manufacturer'
-        p.sku = 'SKUSKU'
-        p.web_visible=True
-        p.enabled = True
-        p.save()
-        p.commit()
-        p.set_price(com.default_campaign, 111, 111)
-        p.commit()
-        return p
-
-
-    def _delete_test_product(self):
-        com = self.site.company
-        p = Product.find_by_name(com.default_campaign, T_PRODUCT)
-        assert p
-        Product.full_delete(p.product_id)
-        p = Product.find_by_name(com.default_campaign, T_PRODUCT)
-        assert not p
-
-
-    def _create_test_customer(self):
-        com = self.site.company
-        c = Customer()
-        c.campaign = com.default_campaign
-        c.fname = 'Test'
-        c.lname = 'Tester'
-        c.phone = '9047167487'
-        c.addr1 = '123 Elm St.'
-        c.company_name = 'Fud Factor'
-        c.city = 'Ponte Vedra'
-        c.state = 'FL'
-        c.zip = '32082'
-        c.country = 'USA'
-        c.email = TEST_UID
-        c.password = TEST_UID_PASSWORD
-        c.save()
-        c.commit()
-        assert c.customer_id
-        return c
-
-
-    def _delete_test_customer(self):
-        com = self.site.company
-        cust = Customer.find(TEST_UID, com.default_campaign)
-        Customer.full_delete(cust.customer_id, True)
-        cust = Customer.find(TEST_UID, com.default_campaign)
-        assert cust == None
-
-
-    """
-    def _create_order(self, cust):
-        cmp = self.site.company.default_campaign
-        ps = Product.find_all_active(self.site.company)
-        assert ps and len(ps) > 2
-        p0 = ps[0]
-        price0 = cmp.get_product_price(p0)
-        p1 = ps[1]
-        price1 = cmp.get_product_price(p1)
-        p2 = ps[2]
-
-        c = Cart()
-        c.add_item(p0, cmp.campaign_id)
-        assert c.get_total() == price0
-        assert c.get_product_total() == price0
-
-        c.add_item(p1, cmp.campaign_id, 2)
-        tot = (price0 + (price1*2))
-        assert c.get_total() == tot
-        assert c.get_product_total() == tot
-        assert c.has_product_id(p0.product_id)
-        assert c.has_product_id(p1.product_id)
-
-        o = cust.add_order(c, None, self.site, cmp)
-        assert o
-        assert o.total_payments_due() == tot
-        assert o.total_price() == tot
-        assert o.total_shipping_price() == 0
-        assert o.total_handling_price() == 0
-
-        assert cust.has_purchased_product(p0)
-        assert cust.has_purchased_product(p1)
-        assert not cust.has_purchased_product(p2)
-
-        o2 = cust.get_order(o.order_id)
-        assert o2
-        assert o2.order_id == o.order_id
-        return o
-    """
-
-
-def secure(func, enterprise_id=None, username='kenneth.bedwell@gmail.com', password='Zachary234'):
+def secure(func, username='kenneth.bedwell@gmail.com', password='Zachary234'):
     def wrap(self):
-        self.login_crm(enterprise_id, username, password)
+        self.login_crm(username, password)
         ret = func(self)
         self.logout_crm()
         return ret

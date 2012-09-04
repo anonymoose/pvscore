@@ -3514,3 +3514,7 @@ select cust.customer_id, cust.lname from
                                                  and cam.company_id = com.company_id
                                                  and com.enterprise_id = 3
                                                  order by cust.lname limit 10;
+
+
+
+select count(0) from crm_journal where amount < 0;

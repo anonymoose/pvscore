@@ -1,25 +1,11 @@
-import pdb
-from pyramid import testing
-from app.tests import *
-from app.tests import Session
-import simplejson as json
-from app.controllers.crm.login import LoginController
-from app.model.crm.company import Company, Enterprise
-from app.model.crm.campaign import Campaign
+from app.tests import TestController, secure
 from app.model.crm.comm import Communication
-import transaction
-from zope.sqlalchemy import mark_changed
-from app.model.core.statusevent import StatusEvent
 
 # T app.tests.controllers.test_crm_comm
 
 class TestCrmCommunication(TestController):
     
     def _create_new(self):
-        # probably a better way to get the preferred enterprise here.
-        ent = Enterprise.find_all()[0]
-        comp = Company.find_all(ent.enterprise_id)[0]
-
         R = self.get('/crm/communication/new')
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Edit Email Template')
@@ -73,9 +59,6 @@ class TestCrmCommunication(TestController):
 
     @secure
     def test_save_existing(self):
-        ent = Enterprise.find_all()[0]
-        comp = Company.find_all(ent.enterprise_id)[0]
-
         comm_id = self._create_new()
         R = self.get('/crm/communication/list')
         self.assertEqual(R.status_int, 200)

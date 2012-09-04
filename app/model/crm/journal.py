@@ -6,8 +6,54 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
 import app.lib.util as util
+from app.lib.dbcache import FromCache, invalidate
 
 class Journal(ORMBase, BaseModel):
+    """ KB: [2012-09-03]: 
+        Scenario 1
+            Buy Something
+            -------------------
+            Item A = 10
+            Item B = 20
+            Order Tot = 30
+
+            Customer Balance Pre Txn = 50
+
+            Discount = 5
+            **PartialPayment = 20
+    
+            Total Applied = Payments + Discount + CreditDecreases = (20 + 5 + 0) = 25
+            Total Due = Order Total - Total Applied = 5
+
+            Customer Balance = -1 * (Total Due - TotalCreditIncrease) = -5
+
+    
+            Return Item A
+            -------------------
+            Total Due = 5
+            Refund Amount = Item A Price - Total Due = 5
+
+        Scenario 2
+            Buy Something
+            -------------------
+            Item A = 10
+            Item B = 20
+            Order Tot = 30
+
+            Customer Balance Pre Txn = 50
+    
+            Discount = 0
+            **Apply CreditDecrease = 30
+    
+            Total Applied = Payments + Discount + CreditDecreases = 0 + 0 + 30 = 30
+            Total Due = Order Total - Total Applied = 0
+    
+            Return Item A
+            -------------------
+            Total Due = 0
+            Refund Amount = Item A Price - Total Due = 10
+
+    """
     __tablename__ = 'crm_journal'
     __pk__ = 'journal_id'
 
@@ -24,7 +70,6 @@ class Journal(ORMBase, BaseModel):
 
     customer = relation('Customer')
     creator = relation('Users')
-    order = relation('CustomerOrder')
 
 
     def cancel(self):
@@ -57,8 +102,84 @@ class Journal(ORMBase, BaseModel):
 
 
     @staticmethod
+    def total_balance_for_customer(customer):
+        entries = Journal.find_all_by_customer(customer)
+        total_entries = sum([ent.amount if ent.type in ('FullPayment', 'PartialPayment', 'CreditIncrease') else -ent.amount for ent in entries])
+        total_price = customer.get_total_order_value()
+        bal = total_price - total_entries
+        return bal if bal == 0.0 else -1*(bal)
+
+
+    @staticmethod
+    def total_due(order):
+        return order.total_price() - Journal.total_applied(order)
+
+
+    @staticmethod
+    def total_applied(order):
+        return Journal.total_payments(order) + Journal.total_discounts(order) + Journal.total_credit_decreases(order)
+
+
+    @staticmethod
+    def total_discounts(order):
+        return sum([ent.amount for ent in Journal.filter_discounts(order)])
+
+
+    @staticmethod
+    def filter_discounts(order):
+        return Journal._filter_by_types(order, ['Discount'])
+    
+
+    @staticmethod
+    def total_credit_decreases(order):
+        return sum([ent.amount for ent in Journal.filter_credit_decreases(order)])
+
+
+    @staticmethod
+    def filter_credit_decreases(order):
+        return Journal._filter_by_types(order, ['CreditDecrease'])
+
+
+    @staticmethod
+    def total_credit_increases(order):
+        return sum([ent.amount for ent in Journal.filter_credit_increases(order)])
+
+
+    @staticmethod
+    def filter_credit_increases(order):
+        return Journal._filter_by_types(order, ['CreditIncrease'])
+
+
+    @staticmethod
+    def total_payments(order):
+        return sum([ent.amount for ent in Journal.filter_payments(order)])
+
+
+    @staticmethod
+    def filter_payments(order):
+        return Journal._filter_by_types(order, ['PartialPayment', 'FullPayment'])
+
+
+    @staticmethod
+    def total_refunds(order):
+        return sum([ent.amount for ent in Journal.filter_refunds(order)])
+
+
+    @staticmethod
+    def filter_refunds(order):
+        return Journal._filter_by_types(order, ['Refund'])
+
+
+    @staticmethod
+    def _filter_by_types(order, types):
+        return [entry for entry in order.journal_entries if entry.type in types and entry.delete_dt is None]
+
+
+    @staticmethod
     def find_all_by_customer(customer):
-        return Session.query(Journal).filter(and_(Journal.customer==customer,
+        return Session.query(Journal)\
+            .options(FromCache('Journal.find_all_by_customer', customer.campaign.company.enterprise_id)) \
+            .filter(and_(Journal.customer==customer,
                                                   Journal.delete_dt == None))\
                                                   .order_by(Journal.create_dt.desc()).all()
 
@@ -72,41 +193,23 @@ class Journal(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_total_applied_to_order(order):
-        """ KB: [2011-03-08]: This could be done in the DB but we may want to have different handling by type,
-        which is easier to express in python.
-        """
-
-        jes = Session.query(Journal).filter(and_(Journal.customer==order.customer,
-                                                 Journal.order==order,
-                                                 Journal.delete_dt == None,
-                                                 or_(Journal.type=='PartialPayment',
-                                                     Journal.type=='FullPayment',
-                                                     Journal.type=='Discount',
-                                                     Journal.type=='Refund')))\
+    def find_refunds_by_order(order):
+        return Session.query(Journal).filter(and_(Journal.customer==order.customer,
+                                                  Journal.order==order,
+                                                  Journal.delete_dt == None,
+                                                  Journal.type=='Refund'))\
                                                  .order_by(Journal.create_dt.desc()).all()
-        total = 0.0
-
-        for j in jes:
-            if j.type in ('FullPayment', 'PartialPayment', 'CreditIncrease', 'Discount'):
-                total += j.amount
-        return total
 
 
     @staticmethod
-    def find_total_refunds_applied_to_order(order):
-        """ KB: [2011-03-08]: This could be done in the DB but we may want to have different handling by type,
-        which is easier to express in python.
-        """
-        jes = Session.query(Journal).filter(and_(Journal.customer==order.customer,
+    def find_payments_by_order(order):
+        return Session.query(Journal).filter(and_(Journal.customer==order.customer,
                                                  Journal.order==order,
                                                  Journal.delete_dt == None,
-                                                 Journal.type=='Refund'))\
+                                                 or_(Journal.type=='PartialPayment',
+                                                     Journal.type=='FullPayment')))\
                                                  .order_by(Journal.create_dt.desc()).all()
-        total = 0.0
-        for j in jes:
-            total += j.amount
-        return total
+
 
     @staticmethod
     def find_discounts_by_order(order):
@@ -118,46 +221,15 @@ class Journal(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_total_discounts_applied_to_order(order):
-        jes = Journal.find_discounts_by_order(order)
-        total = 0.0
-        for j in jes:
-            total += j.amount
-        return total
-
-
-    @staticmethod
-    def find_total_credits_applied_to_order(order):
-        jes = Session.query(Journal).filter(and_(Journal.customer==order.customer,
-                                                 Journal.order==order,
-                                                 Journal.delete_dt == None,
-                                                 Journal.type=='CreditDecrease'))\
-                                                 .order_by(Journal.create_dt.desc()).all()
-        total = 0.0
-        for j in jes:
-            total += j.amount
-        return total
-
-
-    @staticmethod
-    def find_total_applied_to_customer(customer):
-        jes = Session.query(Journal).filter(and_(Journal.customer==customer,
-                                                  Journal.delete_dt == None))\
+    def find_credits_by_order(order):
+        return Session.query(Journal).filter(and_(Journal.customer==order.customer,
+                                                  Journal.order==order,
+                                                  Journal.delete_dt == None,
+                                                  Journal.type=='CreditDecrease'))\
                                                   .order_by(Journal.create_dt.desc()).all()
-        total = 0.0
-        for j in jes:
-            if 'FullPayment' == j.type or 'PartialPayment' == j.type or 'CreditIncrease' == j.type:
-                total += j.amount
-            else:
-                total -= j.amount
-        return total
 
 
-    @staticmethod
-    def find_balance_for_customer(customer):
-        total_payments = Journal.find_total_applied_to_customer(customer)
-        total_price = customer.get_total_order_value()
-        bal = total_price - total_payments
-        return bal if bal == 0.0 else -1*(bal)
+    def invalidate_caches(self, **kwargs):
+        invalidate(self, 'Journal.find_all_by_customer', self.customer.campaign.company.enterprise_id)
 
 

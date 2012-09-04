@@ -20,7 +20,7 @@ class Status(ORMBase, BaseModel):
     create_dt = Column(DateTime, server_default=text('now()'))
 
     user = relation('Users')
-    event = relation('StatusEvent')
+    event = relation('StatusEvent', lazy="joined")
 
 
     @staticmethod

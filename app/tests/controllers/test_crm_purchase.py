@@ -1,13 +1,9 @@
-import pdb
-from pyramid import testing
-from app.tests import *
-from app.tests import Session
-import simplejson as json
-from app.controllers.crm.login import LoginController
-from app.model.crm.purchase import PurchaseOrder, PurchaseOrderItem, Vendor
-from app.model.crm.company import Company, Enterprise
-from app.model.crm.campaign import Campaign
+from app.tests import TestController, secure
+from app.model.crm.company import Enterprise
+from app.model.crm.product import Product
+from app.model.crm.purchase import Vendor, PurchaseOrder
 from app.model.core.statusevent import StatusEvent
+import simplejson as json
 
 # T app.tests.controllers.test_crm_purchase
 
@@ -66,10 +62,6 @@ class TestCrmPurchase(TestController):
 
 
     def _create_new_vendor(self):
-        ent = Enterprise.find_all()[0]
-        comp = Company.find_all(ent.enterprise_id)[0]
-        vendors = Vendor.find_all(ent.enterprise_id)
-
         R = self.get('/crm/purchase/vendor/new')
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Edit Vendor')
@@ -92,9 +84,9 @@ class TestCrmPurchase(TestController):
 
 
     def _delete_new_vendor(self, vendor_id):
-        c = Vendor.load(vendor_id)
-        self.assertNotEqual(c, None)
-        c.delete()
+        ven = Vendor.load(vendor_id)
+        self.assertNotEqual(ven, None)
+        ven.delete()
         self.commit()
 
 
@@ -162,18 +154,18 @@ class TestCrmPurchase(TestController):
                       {'order_note' : 'Note Note',
                        'quantity' : 10,
                        'unit_cost' : 123})
-        oi = json.loads(R.body)
+        oitem = json.loads(R.body)
         self.assertEqual(R.status_int, 200)
-        order_item_id = oi['id']
+        order_item_id = oitem['id']
         
         # get the json from it
         R = self.get('/crm/purchase/order_item_json/%s/%s' % (purchase_order_id, order_item_id))
         self.assertEqual(R.status_int, 200)
-        oi = json.loads(R.body)
-        self.assertEqual(oi['order_item_id'], order_item_id)
-        self.assertEqual(oi['note'], 'Note Note')
-        self.assertEqual(int(oi['unit_cost']), 123)
-        self.assertEqual(int(oi['quantity']), 10)
+        oitem = json.loads(R.body)
+        self.assertEqual(oitem['order_item_id'], order_item_id)
+        self.assertEqual(oitem['note'], 'Note Note')
+        self.assertEqual(int(oitem['unit_cost']), 123)
+        self.assertEqual(int(oitem['quantity']), 10)
 
         # complete the item
         R = self.get('/crm/purchase/complete_item/%s/%s' % (purchase_order_id, order_item_id))
@@ -189,7 +181,7 @@ class TestCrmPurchase(TestController):
         self.assertEqual(R.status_int, 200)
         R.mustcontain('True')
         
-	self._delete_new(purchase_order_id)
+        self._delete_new(purchase_order_id)
 
 
     @secure
@@ -205,9 +197,8 @@ class TestCrmPurchase(TestController):
                       {'order_note' : 'Note Note',
                        'quantity' : 10,
                        'unit_cost' : 123})
-        oi = json.loads(R.body)
+        json.loads(R.body)
         self.assertEqual(R.status_int, 200)
-        order_item_id = oi['id']
 
         R = self.get('/crm/purchase/complete/%s' % purchase_order_id)
         self.assertEqual(R.status_int, 200)
@@ -221,11 +212,11 @@ class TestCrmPurchase(TestController):
     @secure
     def test_save_status(self):
         ent = Enterprise.find_all()[0]
-        e = StatusEvent.find(ent.enterprise_id, 'PurchaseOrder', 'TESTEVENT_PO')
+        evt = StatusEvent.find(ent.enterprise_id, 'PurchaseOrder', 'TESTEVENT_PO')
         purchase_order_id = self._create_new()
 
         R = self.post(str('/crm/purchase/save_status/%s' % purchase_order_id),
-                      {'event_id' : e.event_id,
+                      {'event_id' : evt.event_id,
                        'note' : 'Note Note'})
         self.assertEqual(R.status_int, 200)
         self._delete_new(purchase_order_id)
@@ -263,16 +254,15 @@ class TestCrmPurchase(TestController):
 
     def _create_new(self):
         ent = Enterprise.find_all()[0]
-        comp = Company.find_all(ent.enterprise_id)[0]
         vendors = Vendor.find_all(ent.enterprise_id)
-        v = vendors[0]
+        ven = vendors[0]
 
         R = self.get('/crm/purchase/new')
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Edit Supplier Order')
         f = R.forms['frm_purchase']
         self.assertEqual(f['purchase_order_id'].value, '')
-        f.set('vendor_id', v.vendor_id)
+        f.set('vendor_id', ven.vendor_id)
         f.set('shipping_cost', 123.45)
         f.set('note', 'Test Purchase Order')
         
@@ -288,9 +278,9 @@ class TestCrmPurchase(TestController):
 
 
     def _delete_new(self, purchase_order_id):
-        c = PurchaseOrder.load(purchase_order_id)
-        self.assertNotEqual(c, None)
-        c.delete()
+        pord = PurchaseOrder.load(purchase_order_id)
+        self.assertNotEqual(pord, None)
+        pord.delete()
         self.commit()
 
         

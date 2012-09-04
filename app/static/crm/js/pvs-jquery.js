@@ -24,7 +24,7 @@ pvs = function(){
             $('#modal-confirm').remove();
             $('body').append('<div id="modal-confirm" class="modal hide fade">' + 
                              '    <div class="modal-header">' + 
-                             '      <a href="#" class="close" onclick="$(\'#modal-confirm\').modal(\'hide\')">&times;</a>' + 
+                             '      <a href="#" class="close">&times;</a>' + 
                              '      <h3>'+title+'</h3>' + 
                              '    </div>' + 
                              '    <div class="modal-body">' + 
@@ -33,9 +33,13 @@ pvs = function(){
                              '    </div>' + 
                              '    <div class="modal-footer">' + 
                              '      <a href="#" onclick="pvs_alert_yes()" class="btn danger">Yes</a>' + 
-                             '      <a href="javascript:$(\'#modal-confirm\').modal(\'hide\')" class="btn secondary">No</a>' + 
+                             '      <a href="#" class="btn btn-link close">No</a>' + 
                              '    </div>' + 
                              '</div>');
+
+            $('.close').click(function() {
+                $('#modal-confirm').modal('hide');
+            });
             $('#modal-confirm').modal({ backdrop: true });
             $('#modal-confirm').modal('show');
         },
@@ -45,16 +49,19 @@ pvs = function(){
             $('#modal-alert').remove();
             $('body').append('<div id="modal-alert" class="modal hide fade">' + 
                              '    <div class="modal-header">' + 
-                             '      <a href="#" class="close" onclick="$(\'#modal-alert\').modal(\'hide\')">&times;</a>' + 
+                             '      <a href="#" class="close">&times;</a>' + 
                              '      <h3>'+title+'</h3>' + 
                              '    </div>' + 
                              '    <div class="modal-body">' + 
                              '      <p>'+msg+'</p>' + 
                              '    </div>' + 
                              '    <div class="modal-footer">' + 
-                             '      <a href="#" onclick="$(\'#modal-alert\').modal(\'hide\')" class="btn secondary">Ok</a>' + 
+                             '      <a href="#" class="btn btn-link close">Ok</a>' + 
                              '    </div>' + 
                              '</div>');
+            $('.close').click(function() {
+                $('#modal-alert').modal('hide');
+            });
             $('#modal-alert').modal({ backdrop: true });
             $('#modal-alert').modal('show');
         },
@@ -1390,7 +1397,7 @@ pvs.ui = function(){
                 field = field[0];
                 if (field.tagName == 'SELECT') {
                     //ax_set_select_value(field, val);
-                } else if (field.tagName == 'DIV' || field.tagName == 'TD' || field.tagName == 'SPAN') {
+                } else if (field.tagName == 'DIV' || field.tagName == 'TD' || field.tagName == 'SPAN' || field.tagName == 'DD') {
                     $(id).empty();
                     $(id).append((val ? val : ''));
                 } else if (field.type == 'checkbox') {

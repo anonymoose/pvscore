@@ -41,7 +41,8 @@ def request_context_tween_factory(handler, registry):
                 request.ctx = util.DataObj({})
     
             if not request.ctx.site:
-                _remember_site(request)
+                if not _remember_site(request):
+                    return HTTPFound("http://www.google.com")
                 
             if not request.ctx.campaign:
                 _remember_campaign(request)
@@ -60,17 +61,19 @@ def request_context_tween_factory(handler, registry):
         return handler(request)
     return request_context_tween
 
-def _remember_user(request):
-    if 'user_id' in request.session:
-        request.ctx.user = Users.load(request.session['user_id'])
 
-
-def _remember_enterprise(request):
-    if 'enterprise_id' in request.session:
-        request.ctx.enterprise = Enterprise.load(request.session['enterprise_id'])
+def _remember_site(request):
+    if 'site_id' in request.session:
+        request.ctx.site = Site.load(request.session['site_id'])
     else:
-        request.ctx.enterprise = request.ctx.site.company.enterprise
-        request.session['enterprise_id'] = request.ctx.enterprise.enterprise_id
+        if '__sid' in request.params:
+            request.ctx.site = Site.find_by_host(request.params['__sid'])
+        else:
+            request.ctx.site = Site.find_by_host(request.host)
+        if not request.ctx.site:
+            return False
+        request.session['site_id'] = request.ctx.site.site_id
+    return True
 
 
 def _remember_campaign(request):
@@ -84,14 +87,16 @@ def _remember_campaign(request):
         request.session['campaign_id'] = request.ctx.campaign.campaign_id
 
 
-def _remember_site(request):
-    if 'site_id' in request.session:
-        request.ctx.site = Site.load(request.session['site_id'])
+def _remember_enterprise(request):
+    if 'enterprise_id' in request.session:
+        request.ctx.enterprise = Enterprise.load(request.session['enterprise_id'])
     else:
-        if '__sid' in request.params:
-            request.ctx.site = Site.find_by_host(request.params['__sid'])
-        else:
-            request.ctx.site = Site.find_by_host(request.host)
-        if not request.ctx.site:
-            return HTTPFound("http://www.google.com")
-        request.session['site_id'] = request.ctx.site.site_id
+        request.ctx.enterprise = request.ctx.site.company.enterprise
+        request.session['enterprise_id'] = request.ctx.enterprise.enterprise_id
+
+
+def _remember_user(request):
+    if 'user_id' in request.session:
+        request.ctx.user = Users.load(request.session['user_id'])
+
+
