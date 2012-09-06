@@ -33,7 +33,7 @@ pvs = function(){
                              '    </div>' + 
                              '    <div class="modal-footer">' + 
                              '      <a href="#" onclick="pvs_alert_yes()" class="btn danger">Yes</a>' + 
-                             '      <a href="#" class="btn btn-link close">No</a>' + 
+                             '      <a href="#" class="btn btn-primary close">No</a>' + 
                              '    </div>' + 
                              '</div>');
 
@@ -46,6 +46,12 @@ pvs = function(){
 
         alert : function(msg, title, onclick) {
             if (!title) title = "Alert";
+            window.pvs_alert_ok = function() {
+                if (onclick) {
+                    onclick();
+                }
+                window.pvs_alert_ok = null;
+            }
             $('#modal-alert').remove();
             $('body').append('<div id="modal-alert" class="modal hide fade">' + 
                              '    <div class="modal-header">' + 
@@ -56,7 +62,7 @@ pvs = function(){
                              '      <p>'+msg+'</p>' + 
                              '    </div>' + 
                              '    <div class="modal-footer">' + 
-                             '      <a href="#" class="btn btn-link close">Ok</a>' + 
+                             '      <a href="#" class="btn btn-primary close" onclick="pvs_alert_ok()">Ok</a>' + 
                              '    </div>' + 
                              '</div>');
             $('.close').click(function() {
@@ -333,7 +339,7 @@ pvs.dom = function(){
                 try {
                     if (el && el.length > 0) {
                         el = el[0]
-                        if (el.tagName == 'DIV' || el.tagName == 'SPAN') {
+                        if (el.tagName == 'DIV' || el.tagName == 'SPAN' || el.tagName == 'DD') {
                             return el.innerHTML;
                         } else {
                             if (el.options) {
@@ -1216,10 +1222,6 @@ pvs.dialog = function() {
         */
         display : function(params) {
             pvs.dialog.wait();
-	    if (!params.dialog_id) {
-		params.dialog_id = 'dialog0';
-	    }
-
             create_dialog(params.dialog_id, params.title);
             params.render && params.render(params.dialog_id);
             if (params.url) {
@@ -1571,6 +1573,32 @@ pvs.map = function(){
     return pub;
 }();
 
+pvs.button = function(){
+    pub = {
+
+        init : function(val) {
+            //http://twitter.github.com/bootstrap/javascript.html#buttons
+            $('.btn[data-loading-text]').on('click', function () {
+                $(this).button('loading')
+            });
+        },
+
+        reset : function(msg, title, onclick) {
+            $('.btn[data-loading-text]').on('click', function () {
+                $(this).button('reset')
+            });
+        }
+    };
+
+    return pub;
+}();
+
+
+$(document).ready(function() {
+    pvs.button.init();
+});
+
+
 /* KB: [2010-08-16]:
    Append to this to get stuff to run at the end.
    pvs.onload.push(function() { pvs.popup.alert('kenny'); })
@@ -1581,6 +1609,8 @@ $(document).ready(function() {
              pvs.onload[i]();
           }
 });
+
+
 
 /*
 // CSS Browser Selector   v0.2.5

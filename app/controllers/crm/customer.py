@@ -357,13 +357,14 @@ class CustomerController(BaseController):
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         order = customer.get_order(order_id)
         return {
+            'customer' : customer,
             'order' : order,
             'comm_packing_slip_id' : order.campaign.comm_packing_slip_id,
-            'customer' : customer,
             'total_price' : order.total_price(),
             'total_payments_applied' : order.total_payments_applied(),
-            'total_discounts_applied' : order.total_discounts_applied()
-        }
+            'total_discounts_applied' : order.total_discounts_applied(),
+            'total_due' : order.total_payments_due()
+            }
 
 
     @view_config(route_name='crm.customer.return_item_dialog', renderer='/crm/customer.return_item.mako')
@@ -397,22 +398,27 @@ class CustomerController(BaseController):
         self.forbid_if(not order)
         order_item = OrderItem.load(order_item_id)
         self.forbid_if(not order_item or str(order_item.order.order_id) != str(order.order_id))
-        user = Users.load(self.session['user_id'])
+        user = self.request.ctx.user
 
-        return_type = 'Refund' if 'T' == self.request.POST.get('rt_refund') else 'CreditIncrease'
+        return_type = self.request.POST.get('rt_refund_type')
         quantity_returned = float(self.request.POST.get('quantity_returned'))
         credit_amount = float(self.request.POST.get('credit_amount'))
 
         jrnl = Journal.create_new(credit_amount, customer, order, user, return_type)
         ret = ProductReturn.create_new(order_item.product, order_item.order, quantity_returned, credit_amount, jrnl, user)
-        Status.add(customer, customer, Status.find_event(self.enterprise_id, customer, 'NOTE'),
-                   '%s applied: %s' % (return_type, util.money(credit_amount)))
+        status_note = "'%s' returned.  $%s refunded by %s" % (order_item.product.name, credit_amount, return_type)
+        import pdb; pdb.set_trace()
+        Status.add(customer, customer, Status.find_event(self.enterprise_id, customer, 'NOTE'), status_note)
 
         order_item.quantity -= quantity_returned
+        if order_item.quantity == 0:
+            order_item.delete_dt = util.today()
         order_item.save()
-        if self.request.POST.get('update_inventory') == u'true':
+        if self.request.POST.get('update_inventory') == '1':
             InventoryJournal.create_new(order_item.product, 'Return', quantity_returned, order_item, None, None, ret)
-        return 'True'
+        self.flash(status_note)
+        customer.invalidate_caches()
+        return HTTPFound('http://healthyustore.net/crm/customer/edit_order_dialog/%s/%s' % (customer_id, order_id))
 
 
     @view_config(route_name='crm.customer.apply_payment_dialog', renderer='/crm/customer.apply_payment.mako')
@@ -429,9 +435,10 @@ class CustomerController(BaseController):
         return {
             'customer' : customer,
             'order' : order,
+            'total_price' : order.total_price(),
             'payment_methods' : Journal.get_payment_methods(),
-            'total_applied' : order.total_payments_applied(),
-            'total_discounts' : order.total_discounts_applied(),
+            'total_payments_applied' : order.total_payments_applied(),
+            'total_discounts_applied' : order.total_discounts_applied(),
             'total_due' : total_due,
             'pre_order_balance' : pre_order_balance,
             'total_due_after_balance' : total_due+pre_order_balance if (total_due+pre_order_balance) > 0 else 0
@@ -452,34 +459,38 @@ class CustomerController(BaseController):
         Create a journal entry for the order for the amount and type specified in the UI
         Create a status noting the type and amount of the payment applied.
         """
-        import pdb; pdb.set_trace()
         customer = Customer.load(customer_id)
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         order = customer.get_order(order_id)
         self.forbid_if(not order)
         user = self.request.ctx.user
+        current_customer_balance = customer.get_current_balance()
         prior_payments_applied = order.total_payments_applied()
         prior_total_due = order.total_payments_due()
         balance_amount_to_apply = float(self.request.POST.get('pmt_balance_amount_to_apply', 0.0))
         amt = float(self.request.POST.get('pmt_amount', pmt_amt_param))
         method = self.request.POST.get('pmt_method', pmt_method_param)
         note = self.request.POST.get('pmt_note')
-        pmt_type = None
+
+        if (amt + balance_amount_to_apply) > prior_total_due:
+            raise Exception("amt + balance_amount_to_apply > prior_total_due")
+        if current_customer_balance > 0 and balance_amount_to_apply > current_customer_balance:
+            raise Exception("balance_amount_to_apply > current_customer_balance")
+
+        pmt_type = 'PartialPayment'
         if amt == prior_total_due:
-            if amt == balance_amount_to_apply:
-                pmt_type = 'CreditDecrease'
-            elif amt > balance_amount_to_apply:
-                pmt_type = 'CreditDecrease'
+            pmt_type = 'FullPayment'
 
-
-        Journal.create_new(pmt_amt, customer, order, user, pmt_type, pmt_method, pmt_note)
-        Status.add(customer, order, Status.find_event(self.enterprise_id, order, 'PAYMENT_APPLIED'),
-                   '%s applied: %s' % (pmt_type, util.money(pmt_amt)))
-        pre_order_balance = float(self.request.POST.get('pre_order_balance', 0))
-        if pre_order_balance > 0:
-            Journal.create_new(pre_order_balance, customer, order, user, 'CreditDecrease') # either FullPayment or PartialPayment
-            Status.add(customer, order, Status.find_event(self.enterprise_id, order, 'PAYMENT_APPLIED'),
-                   '%s applied: %s' % ('CreditDecrease', util.money(pre_order_balance)))
+        Journal.create_new(amt, customer, order, user, pmt_type, method, note)
+        status_note = '%s applied: $%s' % (pmt_type, util.money(amt))
+        Status.add(customer, order, Status.find_event(self.enterprise_id, order, 'PAYMENT_APPLIED'), status_note)
+        self.flash(status_note)
+        if balance_amount_to_apply > 0:
+            Journal.create_new(balance_amount_to_apply, customer, order, user, 'CreditDecrease')
+            status_note = '%s applied: $%s' % ('CreditDecrease', util.money(balance_amount_to_apply))
+            Status.add(customer, order, Status.find_event(self.enterprise_id, order, 'PAYMENT_APPLIED'), status_note)
+            self.flash(status_note)
+        customer.invalidate_caches()
         return 'True'
 
 
@@ -558,6 +569,7 @@ class CustomerController(BaseController):
                         oitem.save()
         Status.add(customer, order, Status.find_event(self.enterprise_id, order, 'MODIFIED'), 'Order modified')
         customer.invalidate_caches()
+        self.flash("Saved Order")
         return 'True'
 
 

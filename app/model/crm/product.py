@@ -75,16 +75,41 @@ class Product(ORMBase, BaseModel):
 
     @staticmethod
     def find_names_by_name(enterprise_id, name, limit):
-        return db.get_result_dict(['product_id', 'name', 'unit_cost'],
-                                  """select p.product_id, p.name, p.unit_cost from
-                                                 crm_product p, crm_company com, crm_enterprise ent
+        sql = """select p.product_id, p.name,
+                p.unit_cost, pp.retail_price, pp.wholesale_price, pp.discount_price
+                from
+                crm_product p, crm_company com, crm_enterprise ent, crm_campaign cmp, crm_product_pricing pp
+                where lower(p.name) like '%%{n}%%'
+                and p.delete_dt is null
+                and p.company_id = com.company_id
+                and cmp.campaign_id = com.default_campaign_id
+                and pp.campaign_id = cmp.campaign_id
+                and pp.product_id = p.product_id
+                and com.enterprise_id = {ent_id}
+                order by p.name limit {lim}""".format(n=name.lower(),
+                                                      lim=limit,
+                                                      ent_id=enterprise_id)
+        return db.get_result_dict(['product_id', 'name', 'unit_cost', 'retail_price', 'wholesale_price', 'discount_price'], sql)
+
+
+    @staticmethod
+    def find_names_by_name_and_campaign(enterprise_id, name, limit, campaign):
+        sql = """select p.product_id, p.name, p.unit_cost, pp.retail_price, pp.wholesale_price, pp.discount_price from
+                                                 crm_product p, crm_company com, crm_enterprise ent,
+                                                 crm_product_pricing pp
                                                  where lower(p.name) like '%%{n}%%'
                                                  and p.delete_dt is null
                                                  and p.company_id = com.company_id
+                                                 and pp.campaign_id = {campaign_id}
+                                                 and pp.product_id = p.product_id
                                                  and com.enterprise_id = {ent_id}
                                                  order by p.name limit {lim}""".format(n=name.lower(),
                                                                                        lim=limit,
-                                                                                       ent_id=enterprise_id))
+                                                                                       campaign_id=campaign.campaign_id,
+                                                                                       ent_id=enterprise_id)
+
+        return db.get_result_dict(['product_id', 'name', 'unit_cost', 'retail_price', 'wholesale_price', 'discount_price'], sql)
+
 
     @staticmethod
     def find_all_active(company):

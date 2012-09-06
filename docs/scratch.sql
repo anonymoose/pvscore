@@ -3517,4 +3517,27 @@ select cust.customer_id, cust.lname from
 
 
 
-select count(0) from crm_journal where amount < 0;
+select TYPE, count(0) from crm_journal  group by type;
+
+
+
+select p.product_id, p.name,
+                p.unit_cost, pp.retail_price, pp.wholesale_price, pp.discount_price,
+                cmp.campaign_id, pp.product_pricing_id
+                from
+                crm_product p, crm_company com, crm_enterprise ent, crm_campaign cmp, crm_product_pricing pp
+                where lower(p.name) like '%%phar%%'
+                and p.delete_dt is null
+                and p.company_id = com.company_id
+                and cmp.campaign_id = com.default_campaign_id
+                and pp.campaign_id = cmp.campaign_id
+                and pp.product_id = p.product_id
+                and com.enterprise_id = 3
+                order by p.name limit 15;
+
+select * from crm_product_pricing where product_id = 1451;
+
+
+SELECT core_status_event_1.display_name, core_status.create_dt
+FROM core_status LEFT OUTER JOIN core_status_event AS core_status_event_1 ON core_status_event_1.event_id = core_status.event_id 
+WHERE core_status.customer_id = 220 ORDER BY core_status.status_id DESC;

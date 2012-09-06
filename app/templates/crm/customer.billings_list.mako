@@ -6,7 +6,7 @@
 <h1>Customer Billing Activity</h1>
 <div class="container">
   <div class="row">
-    <div class="span8">
+    <div class="span9">
       <div id="result_list">
         <table width="100%" class="sortable results table table-striped">
           <thead>
@@ -41,9 +41,7 @@
             <a href="javascript:customer_show_billing(${offset-50 if offset > 0 else 0})">&larr; prev</a>
           </li>
           <li class="next">
-            <!--a href="javascript:customer_show_billing(${offset+50})">next
-            &rarr;</a-->
-            <a href="javascript:pvs.alert('titleee', 'this is a message')">next &rarr;</a>
+            <a href="javascript:customer_show_billing(${offset+50})">next &rarr;</a>
           </li>
       </div>
     </div>

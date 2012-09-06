@@ -36,7 +36,8 @@ class Status(ORMBase, BaseModel):
         stat.save()
         if event.change_status:
             obj.status = stat
-            obj.save()
+        obj.save()
+        stat.flush()
         return stat
 
 

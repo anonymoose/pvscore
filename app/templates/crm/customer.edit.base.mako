@@ -1,11 +1,16 @@
 <%inherit file="customer.base.mako"/>\
 
-<div id="div_cust_main">
-${next.body()}
-</div>
+<style>
+.dl-horizontal dt {
+  width: 160px;
+  margin-right: 10px;
+}
+.dl-horizontal dd {
+  text-align: right;
+}
+</style>
 
-<div id="div_customer_detail" style="display:none;">
-</div>
+${next.body()}
 
 <%def name="left_col()">
 <%

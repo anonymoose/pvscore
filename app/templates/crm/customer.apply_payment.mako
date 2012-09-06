@@ -24,34 +24,7 @@ import math
               ${h.select('pmt_method', 'Apply Balance' if pre_order_balance > 0 else 'Credit Card', payment_methods)}
             </div>
           </div>
-          <div class="row">
-            <div class="span5">
-              <label for="">Note</label>
-              ${h.text('pmt_note', class_="input-xxlarge")}
-            </div>
-          </div>
-        </div><!-- well -->
-
-        <h3>Total Due</h3>
-        <div class="well">
-          <div class="row">
-            <div class="span3">
-              <label for="">Total Order Price</label>
-              ${h.text('total_price', class_="input-small", value=h.money(order.total_price()), disabled=True)}
-            </div>
-            <div class="span3">
-              <label for="">Total Amount Due</label>
-              ${h.text('total_due', class_="input-small", value=h.money(total_due), disabled=True)}
-            </div>
-            <div class="span2">
-              <label for="">Total Applied (Pmt+Disc)</label>
-              ${h.text('total_applied', class_="input-small", value=h.money(-1*(total_applied-total_discounts)), disabled=True)}
-            </div>
-          </div>
-        </div>
-        % if pre_order_balance > 0:
-        <h3>Customer Balance Info</h3>
-        <div class="well">
+          % if pre_order_balance > 0:
           <div class="row">
             <div class="span3">
               <label for="">Current Customer Balance</label>
@@ -66,8 +39,33 @@ import math
               ${h.text('pmt_balance_after_purchase', class_="input-small", value=h.money((-1*pre_order_balance)-total_due), disabled=True)}
             </div>
           </div>
+          % endif
+          <div class="row">
+            <div class="span5">
+              <label for="">Note</label>
+              ${h.text('pmt_note', class_="input-xxlarge")}
+            </div>
+          </div>
+        </div><!-- well -->
+
+        <div class="row">
+          <div class="offset5 span4">
+            <dl class="dl-horizontal" style="text-overflow:clip;">
+              <dt>Product Total</dt>
+              <dd id="oi_total_price">$${h.money(total_price)}</dd>
+              <dt>Shipping Total</dt>
+              <dd id="oi_shipping_total">$${h.money(order.shipping_total)}</dd>
+              <dt>Payments Applied</dt>
+              <dd id="oi_payments_applied">$${h.nvl(h.money(total_payments_applied), '0.00')}</dd>
+              <dt>Discounts Applied</dt>
+              <dd id="oi_discounts_applied">$${h.nvl(h.money(total_discounts_applied), '0.00')}</dd>
+              <dt>&nbsp;</dt>
+              <dd><hr/></dd>
+              <dt>Remaining Balance</dt>
+              <dd id="oi_total_due">$${h.nvl(h.money(total_due))}</dd>
+            </dl>
+          </div>
         </div>
-        % endif
       </div>
     </div>
     <div class="row">

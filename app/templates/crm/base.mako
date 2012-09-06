@@ -64,9 +64,9 @@ ${self.pre_process()}
 <hr/>
 
 <footer>
-  &copy; ${h.literal(request.ctx.enterprise.copyright if
-  request.ctx.enterprise.copyright else '<a href="http://www.palmvalleysoftware.com">Palm Valley Software</a>')}
+&nbsp;  &copy; ${h.literal(request.ctx.enterprise.copyright if request.ctx.enterprise.copyright else '<a target="_blank" href="http://www.palmvalleysoftware.com">Palm Valley Software</a>')}
 </footer>
+
 
 <div id="hidden" style="display:none;"></div>
 

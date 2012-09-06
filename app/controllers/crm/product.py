@@ -12,6 +12,7 @@ from app.model.crm.product import Product, ProductReturn, InventoryJournal, Prod
 from app.model.core.statusevent import StatusEvent
 from app.model.core.status import Status
 from app.model.crm.purchase import Vendor
+from app.model.crm.customer import Customer
 import app.lib.util as util
 import simplejson as json
 
@@ -223,7 +224,12 @@ class ProductController(BaseController):
         if not 'search_key' in self.request.GET or not self.request.GET.get('search_key'):
             return
         srch = self.request.GET.get('search_key')
-        lnames = Product.find_names_by_name(self.enterprise_id, srch, self.request.GET.get('max_rows', 10))
+        customer_id = self.request.GET.get('customer_id')
+        if customer_id:
+            customer = Customer.load(customer_id)
+            lnames = Product.find_names_by_name_and_campaign(self.enterprise_id, srch, self.request.GET.get('max_rows', 10), customer.campaign)
+        else:
+            lnames = Product.find_names_by_name(self.enterprise_id, srch, self.request.GET.get('max_rows', 10))
         return json.dumps(lnames)
 
 

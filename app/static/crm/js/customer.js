@@ -231,10 +231,13 @@ pvs.onload.push(function() {
 
 customer_add_order_submit = function() {
     if (!$('.product_chk:checked').length) {
-        pvs.alert("Please select products to add to the order.");
+        pvs.alert("Please select products to add to the order.", 
+                  null, 
+                  function() {
+                      $('#btn_add_order').button('reset');
+                  });
         return;
     }
-    pvs.dialog.wait();
     var obj = {};
     $('.product_chk:checked').each(function(i) {
         obj[this.value] = $('#quant_'+this.value).val();
@@ -244,9 +247,8 @@ customer_add_order_submit = function() {
                             var order_id = parseInt(response);
                             if (order_id && order_id != NaN) {
                                 $('#flashes').append('Saved order.');
-                                customer_show_orders();
+                                pvs.browser.goto_url('/crm/customer/edit_order_dialog/'+$_('#customer_id')+'/'+order_id);
                             } else {
-                                pvs.dialog.unwait();
                                 pvs.alert('Unable to save products:\n'+response);
                             }
                         },
@@ -308,13 +310,13 @@ customer_check_return_credit = function() {
     if ($('#credit_amount')) {
         var amt = parseFloat($_('#credit_amount'));
         if (isNaN(amt)) {
-            alert('Credit Amount must be a number');
+            pvs.alert('Credit Amount must be a number');
             $('#credit_amount').val($_('#original_total'))
             return;
         }
         var tot = parseFloat($_('#original_total'));
         if (amt > tot) {
-            alert('Credit Amount returned must be less or equal than amount due.');
+            pvs.alert('Credit Amount returned must be less or equal than original purchase amount.');
             $('#credit_amount').val($_('#original_total'))
             return;
         }
@@ -454,103 +456,54 @@ pvs.onload.push(function() {
     );
 });
 
-customer_apply_payment_impl = function(order_id, title, url, pmt_type, discount) {
-    if ($_('#oi_order_id')) {
-        pvs.dialog.display({url:url,
-                            title:title,
-                            width: $(window).width()*.40,
-                            height:410,
-                            dialog_id: 'dialog4',
-                            on_ok:
-                            function() {
-                                var pmt_applied = 0;
-                                var pmt_amount = parseFloat($_('#pmt_amount'))
-                                pmt_applied = parseFloat($_('#total_applied')) + pmt_amount;
-                                if (parseFloat($_('#pmt_amount')) > 0 && parseFloat($_('#pmt_amount')) < parseFloat($_('#total_due'))) {
-                                    $('#pmt_type').val('PartialPayment');
-                                }
-                                if (pmt_type) {
-                                    $('#pmt_type').val(pmt_type);
-                                }
-                                pvs.form.post('#frm_apply_payment',
-                                              pvs.ajax.api({root: '/crm/customer/apply_payment/'+$_('#customer_id')+'/'+order_id}),
-                                              function(response) {
-                                                  if (pvs.is_true(response)) {
-                                                      if (!discount) {
-                                                          if ($('#oi_payments_applied')) {
-                                                              $('#oi_payments_applied').html('$'+pmt_applied.toFixed(2));
-                                                              for (var i=0 ; i<oi_ids.length ; i++) {
-                                                                  var oid = oi_ids[i];
-                                                                  if (oid && oid != -1) {
-                                                                      $('#unit_price'+oid+'').attr('disabled', 'disabled');
-                                                                      $('#quantity'+oid+'').attr('disabled', 'disabled');
-                                                                      $('.img_return').show();
-                                                                      $('.img_delete').hide();
-                                                                  }
-                                                              }
-                                                          }
-                                                      } else {
-                                                          $('#oi_total_price').html('$'+(parseFloat($_('#total_price'))-pmt_applied).toFixed(2));
-                                                          var rndid = Math.floor(Math.random()*1000)
-                                                          $('#result_list_header').append('<tr>'+
-                                                                                          '<td>'+
-                                                                                          '<img src="/public/images/icons/silk/delete.png" border="0" onclick="customer_delete_discount('+rndid+'_)">'+
-                                                                                          '</td>'+
-                                                                                          '<td>&nbsp;</td>'+
-                                                                                          '<td width="25%">Discount</td>'+
-                                                                                          '<td>&nbsp;</td>'+
-                                                                                          '<td>&nbsp;</td>'+
-                                                                                          '<td>'+pmt_amount+'</td>'+
-                                                                                          '</tr>');
-                                                      }
-                                                  } else {
-                                                      pvs.alert('Unable to save products:\n'+response);
-                                                  }
-                                              }
-                                             );
-                            }
-                           });
-    } else {
-        pvs.alert('Save order first.');
-    }
-};
-
-customer_add_order_item = function(order_id) {
-    if ($_('#customer_id')) {
-        pvs.dialog.display({url:pvs.ajax.dialog({root: '/crm/customer/add_order_item_dialog/' + $_('#customer_id')+'/'+order_id}),
-                            title:'Add Order Item',
-                            width: $(window).width()*.60,
-                            height:$(document).height()*.75,
-                            dialog_id: 'dialog4',
-                            on_ok:
-                            function() {
-                                $('.product_chk:checked').each(function(i) {
-                                    var product_id = this.value;
-                                    var quantity = $_('#quant_'+this.value);
-                                    pvs.ajax.call(pvs.ajax.api({root: '/crm/product/json/'+product_id+'/'+$_('#campaign_id')}),
-                                                  function(response) {
-                                                      var rndid = Math.floor(Math.random()*1000)
-                                                      var prod = pvs.json.decode(response);
-                                                      oi_ids.push(rndid+'_');
-                                                      $('#result_list_header').after('<tr id="oi_'+rndid+'_">'+
-                                                                                     '<td>'+
-                                                                                     '<input type="hidden" id="product_id'+rndid+'_" name="product_id'+rndid+'_" value="'+prod.product_id+'"/>'+
-                                                                                     '<img src="/public/images/icons/silk/delete.png" border="0" onclick="customer_delete_order_item('+rndid+'_)">'+
-                                                                                     '</td>'+
-                                                                                     '<td>&nbsp;</td>'+
-                                                                                     '<td width="25%">'+prod.name+'</td>'+
-                                                                                     '<td><input type="text" value="'+prod.unit_price+'" size="10" onblur="customer_order_recalc()" name="unit_price['+rndid+'_]" id="unit_price'+rndid+'_"></td>'+
-                                                                                     '<td><input type="text" value="'+quantity+'" size="10" onblur="customer_order_recalc()" name="quantity['+rndid+'_]" id="quantity'+rndid+'_"></td>'+
-                                                                                     '<td id="oi_total_'+rndid+'_">'+prod.unit_price+'</td>'+
-                                                                                     '</tr>');
-                                                  });
-                                });
-                            }
-                           });
-    } else {
-        pvs.alert('Create customer first.');
-    }
-};
+pvs.onload.push(function() {
+    $('#add_product_complete').typeahead({
+        source: function(typeahead, query) {
+            $.ajax({
+                url: "/crm/product/autocomplete_by_name?customer_id="+$('#customer_id').val(),
+                dataType: "json",
+                type: "GET",
+                data: {
+                    max_rows: 15,
+                    search_key: query,
+                    ajax: 1
+                },
+                success: function(data) {
+                    var return_list = [], i = data.length;
+                    while (i--) {
+                        return_list[i] = {id: data[i].product_id, 
+                                          value: data[i].name,
+                                          unit_cost: data[i].unit_cost,
+                                          retail_price: data[i].retail_price,
+                                          wholesale_price: data[i].wholesale_price,
+                                          discount_price: data[i].discount_price};
+                    }
+                    typeahead.process(return_list);
+                }
+            });
+        },
+        onselect: function(obj) {
+            var product_id = obj.id;
+            var rndid = Math.floor(Math.random()*1000)
+            oi_ids[oi_ids.length-1] = rndid+'_';
+            oi_ids.push(-1);
+            $('#result_list_header').after('<tr id="oi_'+rndid+'_">'+
+                                           '<td>'+
+                                           '<input type="hidden" id="product_id'+rndid+'_" name="product_id'+rndid+'_" value="'+product_id+'"/>'+
+                                           '<img src="/static/icons/silk/delete.png" border="0" onclick="customer_delete_order_item('+"'"+rndid+'_'+"'"+')">'+
+                                           '</td>'+
+                                           '<td>&nbsp;</td>'+
+                                           '<td>&nbsp;</td>'+
+                                           '<td width="40%">'+obj.value+'</td>'+
+                                           '<td style="text-align:right;"><input type="text" value="1.00" class="input-small" onblur="customer_order_recalc()" name="quantity['+rndid+'_]" id="quantity'+rndid+'_"></td>'+
+                                           '<td style="text-align:right;">$<input disabled="true" type="text" value="'+obj.retail_price.toFixed(2)+'" class="input-small" onblur="customer_order_recalc()" name="unit_price['+rndid+'_]" id="unit_price'+rndid+'_"></td>'+
+                                           '<td style="text-align:right;" id="oi_total_'+rndid+'_">'+obj.retail_price+'</td>'+
+                                           '</tr>');
+            $('#order_dirty').val(1);
+            customer_order_recalc();
+        }
+    });
+});
 
 customer_edit_order = function(order_id) {
     pvs.browser.goto_url('/crm/customer/edit_order_dialog/'+$_('#customer_id')+'/'+order_id);
@@ -562,8 +515,7 @@ customer_edit_order_prep = function() {
     pvs.ui.init_datepicker('#order_create_dt');
 };
 
-customer_edit_order_submit = function() {
-    pvs.dialog.wait();
+customer_edit_order_submit = function(reload) {
     var ois = {};
     for (var i=0 ; i<oi_ids.length ; i++) {
         var oid = oi_ids[i];
@@ -576,10 +528,13 @@ customer_edit_order_submit = function() {
     pvs.ajax.post_array(pvs.ajax.api({root: '/crm/customer/edit_order/'+$_('#customer_id')+'/'+$_('#oi_order_id')}),
                         function(response) {
                             if (pvs.is_true(response)) {
-                                customer_show_orders();
-                                customer_show_balance();
+                                if (reload == true) {
+                                    document.location.reload(true);
+                                } else {
+                                    pvs.browser.goto_url('/crm/customer/apply_payment_dialog/'+$('#customer_id').val()+'/'+$('#oi_order_id').val()); 
+                                }
                             } else {
-                                pvs.dialog.unwait();
+                                pvs.button.reset();
                                 pvs.alert('Unable to save order:\n'+response);
                             }
                         },
@@ -646,10 +601,27 @@ customer_order_recalc = function() {
                 total += sub_tot;
             }
         }
+
+        var total_price = total;
+        pvs.ui.set('#oi_total_price', '$' + total_price.toFixed(2));
+
         if ($_('#shipping_total')) {
             total += parseFloat($_('#shipping_total'));
         }
-        pvs.ui.set('#oi_total_price', '$' + total.toFixed(2));
+
+        var payments_applied = parseFloat($_('#oi_payments_applied').substring(1));
+        var discounts_applied = parseFloat($_('#oi_discounts_applied').substring(1));
+        total -= payments_applied;
+        total -= discounts_applied;
+        var total_due = total;
+        pvs.ui.set('#oi_total_due', '$' + total_due.toFixed(2));
+        if (total_due == 0 && oi_ids.length > 1) {
+            $('#btn_pay').addClass('hidden');
+        } else {
+            $('#btn_pay').removeClass('hidden');
+        }
+
+        $('#add_product_complete').val('');
         $('#order_dirty').val(1);
     }
 };
@@ -680,6 +652,7 @@ customer_delete_order_item = function(order_item_id) {
         });
         customer_order_recalc();
         $('#order_dirty').val(1);
+        customer_edit_order_submit(true);
     } else {
         pvs.alert("You can't delete the last item in an order.");
     }

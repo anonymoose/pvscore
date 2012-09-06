@@ -16,13 +16,12 @@
         ${h.text('prod_complete1', size=50)}
       </div>
       <div class="offset4 span2">
-        <label for="add_order">&nbsp;</label>
-        <button id="add_order" class="btn btn-primary" onclick="customer_add_order_submit()">Order</button>    
+        <button id="btn_add_order" class="btn btn-primary btn-large" onclick="customer_add_order_submit()" autocomplete="off" data-loading-text="loading...">Order</button>    
       </div>
     </div>
     <div class="row">
       <div class="span9">
-        <table width="100%" class="table table-striped">
+        <table width="100%" class="table table-striped table-condensed">
           <tr id="add_product_header">
             <th width="30%">Name</th>
             <th style="text-align:right;">Price</th>

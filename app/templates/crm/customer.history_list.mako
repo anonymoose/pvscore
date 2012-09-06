@@ -6,7 +6,7 @@
 <div id="result_list">
   <div class="container">
     <div class="row">
-      <div class="span8">
+      <div class="span9">
         <table width="100%" class="sortable results table table-striped">
           <thead>
             <tr>
@@ -26,15 +26,15 @@
             <td>${s.note[0:60]+'...' if s.note else ''}</td>
           </tr>
           % endfor
-          <tr>
-            <td>&nbsp;</td>
-            <td nowrap><a href="javascript:customer_show_history(${offset-50 if offset > 0 else 0})">&lt;&lt; prev</a>&nbsp;&nbsp;
-              <a href="javascript:customer_show_history(${offset+50})">next &gt;&gt;</a></td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-          </tr>
         </table>
+        <ul class="pager">
+          <li class="previous">
+            <a href="javascript:customer_show_history(${offset-50 if offset > 0 else 0})">&larr; prev</a> <!-- " -->
+          </li>
+          <li class="next">
+            <a href="javascript:customer_show_history(${offset+50})">next &rarr;</a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>

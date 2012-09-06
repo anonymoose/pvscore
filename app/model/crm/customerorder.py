@@ -99,8 +99,8 @@ class CustomerOrder(ORMBase, BaseModel):
         item.order = self
         item.product = product
         item.creator = user_created
-        discount = product.get_unit_discount_price(campaign)
-        retail = product.get_unit_price(campaign)
+        discount = product.get_discount_price(campaign)
+        retail = product.get_price(campaign)
         item.unit_price = (discount if discount else retail)
         if campaign.tax_rate and incl_tax:
             item.tax = (item.unit_price * item.quantity) * campaign.tax_rate
@@ -128,7 +128,7 @@ class CustomerOrder(ORMBase, BaseModel):
                     InventoryJournal.create_new(kid.child, 'Sale', child_item.quantity, child_item)
         Status.add(customer, self, Status.find_event(enterprise_id, self, 'MODIFIED'), 'Order Modified ')
         self.save()
-        self.commit()
+        self.flush()
         return item
 
 

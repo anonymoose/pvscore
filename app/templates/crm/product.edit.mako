@@ -218,8 +218,8 @@
                 % for cmp in campaigns:
                 <tr>
                   <td nowrap>${cmp.name}</td>
-                  <td>${h.text('campaign_price[%d]' % cmp.campaign_id, class_="input-small", value=h.money(cmp.get_product_retail_price(product)))}</td>
-                  <td>${h.text('campaign_discount[%d]' % cmp.campaign_id, class_="input-small", value=h.money(cmp.get_product_discount_price(product)))}</td>
+                  <td>${h.text('campaign_price[%d]' % cmp.campaign_id, class_="input-small", value=h.money(product.get_retail_price(cmp)))}</td>
+                  <td>${h.text('campaign_discount[%d]' % cmp.campaign_id, class_="input-small", value=h.money(product.get_discount_price(cmp)))}</td>
                 </tr>
                 % endfor
               </table>
