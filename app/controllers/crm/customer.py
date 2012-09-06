@@ -246,14 +246,44 @@ class CustomerController(BaseController):
         return 'True'
 
 
+    @view_config(route_name='crm.customer.cancel_order_dialog', renderer='/crm/customer.cancel_order.mako')
+    @authorize(IsLoggedIn())    
+    def cancel_order_dialog(self):
+        customer_id = self.request.matchdict.get('customer_id')
+        order_id = self.request.matchdict.get('order_id')
+        customer = Customer.load(customer_id)
+        self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
+        order = CustomerOrder.load(order_id)
+        self.forbid_if(not order or order.customer_id != customer.customer_id)
+        return {
+            'customer' : customer,
+            'order' : order
+            }
+
+
     @view_config(route_name='crm.customer.cancel_order', renderer='string')
     @authorize(IsLoggedIn())    
     def cancel_order(self):
         customer_id = self.request.matchdict.get('customer_id')
-        self._cancel_order_impl(self.request.POST.get('order_id'),
+        order_id = self.request.matchdict.get('order_id')
+        self._cancel_order_impl(order_id,
                                 self.request.POST.get('cancel_reason'),
                                 False)
-        return 'True'
+        self.flash("Order Cancelled")
+        return HTTPFound('/crm/customer/show_orders/%s' % customer_id)
+
+
+    def _cancel_order_impl(self, order_id, reason, by_customer=False):
+        codr = CustomerOrder.load(order_id)
+        self.forbid_if(not codr)
+        cust = codr.customer
+        bill = cust.billing
+        api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
+        if api:
+            if api.cancel_order(codr, bill):
+                Status.add(cust, cust, Status.find_event(self.enterprise_id, cust, 'NOTE'), 'Billing Cancelled at gateway')
+        codr.cancel(reason, by_customer)
+        cust.invalidate_caches()
 
 
     @view_config(route_name='crm.customer.cancel_billing', renderer='string')
@@ -400,6 +430,7 @@ class CustomerController(BaseController):
         self.forbid_if(not order_item or str(order_item.order.order_id) != str(order.order_id))
         user = self.request.ctx.user
 
+        import pdb; pdb.set_trace()
         return_type = self.request.POST.get('rt_refund_type')
         quantity_returned = float(self.request.POST.get('quantity_returned'))
         credit_amount = float(self.request.POST.get('credit_amount'))
@@ -407,8 +438,7 @@ class CustomerController(BaseController):
         jrnl = Journal.create_new(credit_amount, customer, order, user, return_type)
         ret = ProductReturn.create_new(order_item.product, order_item.order, quantity_returned, credit_amount, jrnl, user)
         status_note = "'%s' returned.  $%s refunded by %s" % (order_item.product.name, credit_amount, return_type)
-        import pdb; pdb.set_trace()
-        Status.add(customer, customer, Status.find_event(self.enterprise_id, customer, 'NOTE'), status_note)
+        Status.add(customer, order_item, Status.find_event(self.enterprise_id, order_item, 'RETURN'), status_note)
 
         order_item.quantity -= quantity_returned
         if order_item.quantity == 0:
@@ -417,8 +447,18 @@ class CustomerController(BaseController):
         if self.request.POST.get('update_inventory') == '1':
             InventoryJournal.create_new(order_item.product, 'Return', quantity_returned, order_item, None, None, ret)
         self.flash(status_note)
+
+        if len(order.active_items) == 0:
+            # KB: [2012-09-06]: Deleted the one thing out of this
+            # order.  Kill the order
+            status_note = 'Only item in order returned. Order cancelled.'
+            self._cancel_order_impl(order_id, status_note, False)
+            self.flash(status_note)
+            ret = HTTPFound('/crm/customer/show_orders/%s' % customer_id)
+        else:
+            ret = HTTPFound('/crm/customer/edit_order_dialog/%s/%s' % (customer_id, order_id))
         customer.invalidate_caches()
-        return HTTPFound('http://healthyustore.net/crm/customer/edit_order_dialog/%s/%s' % (customer_id, order_id))
+        return ret
 
 
     @view_config(route_name='crm.customer.apply_payment_dialog', renderer='/crm/customer.apply_payment.mako')
@@ -958,18 +998,3 @@ class CustomerController(BaseController):
         order = cust.add_order(cart, user, self.request.ctx.site, cust.campaign, incl_tax)
         order.flush()
         return order.order_id
-
-
-    def _cancel_order_impl(self, order_id, reason, by_customer=False):
-        """ KB: [2012-02-12]: Cancel the order internally and make calls to billing
-        if there is a recurring product to cancel """
-        codr = CustomerOrder.load(order_id)
-        self.forbid_if(not codr)
-        cust = codr.customer
-        bill = cust.billing
-        api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
-        if api:
-            if api.cancel_order(codr, bill):
-                Status.add(cust, cust, Status.find_event(self.enterprise_id, cust, 'NOTE'), 'Billing Cancelled at gateway')
-        codr.cancel(reason, by_customer)
-

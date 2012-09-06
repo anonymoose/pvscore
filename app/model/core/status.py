@@ -28,7 +28,7 @@ class Status(ORMBase, BaseModel):
         stat = Status()
         stat.event = event
         if customer:
-            stat.customer = customer  #pylint: disable-msg=W0201
+            stat.customer_id = customer.customer_id
         stat.fk_type = type(obj).__name__
         stat.fk_id = getattr(obj, obj.__pk__)
         stat.note = note

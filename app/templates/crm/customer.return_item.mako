@@ -43,7 +43,7 @@
               </label>
             </div>
             <div class="span3">
-              ${h.checkbox('update_inventory', checked=True, value=1, label='Update Inventory?')}
+              ${h.chkbox('update_inventory', checked=True, value=1, label='Update Inventory?')}
             </div>
           </div>
         </div>
@@ -55,6 +55,5 @@
         <a href="/crm/customer/edit_order_dialog/${customer.customer_id}/${order.order_id}" class="btn btn-link btn-large">Cancel</a>
       </div>
     </div>
-
   </form>
 </div>

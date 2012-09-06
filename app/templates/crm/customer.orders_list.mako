@@ -38,7 +38,7 @@
         <img src="/static/icons/silk/comment_add.png" border="0" title="Status Order" alt="Status Order" onclick="customer_status(${o.order_id})">
       </td>
       <td>
-        <img src="/static/icons/silk/delete.png" border="0" title="Delete Order" alt="Delete Order" onclick="customer_cancel_order(${o.order_id})">
+        <a href="/crm/customer/cancel_order_dialog/${customer.customer_id}/${o.order_id}"><img src="/static/icons/silk/delete.png" border="0" title="Delete Order" alt="Delete Order")"></a>
       </td>
       % else:
       <td>&nbsp;</td>

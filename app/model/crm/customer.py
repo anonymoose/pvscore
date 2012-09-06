@@ -2,7 +2,7 @@
 import math
 from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String, Date, Text, Float, DateTime
-from sqlalchemy.orm import relation
+from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session, BaseAnalytic
 from app.model.crm.customerorder import CustomerOrder
@@ -67,7 +67,7 @@ class Customer(ORMBase, BaseModel):
     assigned_to = relation('Users', primaryjoin=Users.username == user_assigned)
     orders = relation('CustomerOrder', lazy="joined", order_by="desc(CustomerOrder.order_id)")
     campaign = relation('Campaign', lazy="joined")
-    status = relation('Status')
+    status = relation('Status', backref=backref('customer'))
     billing = relation('Billing')
 
     def __repr__(self):

@@ -3541,3 +3541,10 @@ select * from crm_product_pricing where product_id = 1451;
 SELECT core_status_event_1.display_name, core_status.create_dt
 FROM core_status LEFT OUTER JOIN core_status_event AS core_status_event_1 ON core_status_event_1.event_id = core_status.event_id 
 WHERE core_status.customer_id = 220 ORDER BY core_status.status_id DESC;
+
+
+
+insert into core_status_event
+(event_type, short_name, display_name, claim, finalize, is_system, milestone_complete, note_req, dashboard, reason_req, change_status, touch)
+values
+('OrderItem', 'RETURN', 'Item Returned', false, false, true, false, false, false, false, true, false);
