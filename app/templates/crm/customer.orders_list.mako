@@ -35,7 +35,11 @@
         <img src="/static/icons/silk/page_edit.png" title="Edit Order (${o.order_id})" alt="Edit Order (${o.order_id})" border="0" onclick="customer_edit_order(${o.order_id})">
       </td>
       <td>
-        <img src="/static/icons/silk/comment_add.png" border="0" title="Status Order" alt="Status Order" onclick="customer_status(${o.order_id})">
+        <a data-toggle="modal" data-target="#dlg_standard"
+           href="/crm/customer/status_dialog/${customer.customer_id}?order_id=${o.order_id}&dialog=1">
+          <img src="/static/icons/silk/comment_add.png" 
+               border="0" title="Status Order" alt="Status Order"/>
+        </a>
       </td>
       <td>
         <a href="/crm/customer/cancel_order_dialog/${customer.customer_id}/${o.order_id}"><img src="/static/icons/silk/delete.png" border="0" title="Delete Order" alt="Delete Order")"></a>

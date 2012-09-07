@@ -70,14 +70,17 @@
           % for oi in order.active_items:
           <tr id="oi_${oi.order_item_id}">
             % if total_payments_applied > 0:
-              <td><img src="/static/icons/silk/delete.png" title="Delete Item" alt="Delete Item" border="0" 
-                       onclick="customer_delete_order_item('${oi.order_item_id}')"  class="img_delete"
-                       style="visibility:hidden;">
+              <td>
+                <img src="/static/icons/silk/delete.png" title="Delete Item" alt="Delete Item" border="0" 
+                     onclick="customer_delete_order_item('${oi.order_item_id}')"  class="img_delete"
+                     style="visibility:hidden;">
               </td>
               <td>
-                <img src="/static/icons/silk/comment_add.png" 
-                     border="0" title="Status Order" alt="Status Order" 
-                     onclick="customer_status_order_item(%{oi.order_id} ${oi.order_item_id})"/>
+                <a data-toggle="modal" data-target="#dlg_standard"
+                   href="/crm/customer/status_dialog/${customer.customer_id}?order_item_id=${oi.order_item_id}&dialog=1">
+                  <img src="/static/icons/silk/comment_add.png" 
+                       border="0" title="Status Order" alt="Status Order" onclick="$('#dlg_standard_title').html('Status')"/>
+                </a>
               </td>
               <td><a href="/crm/customer/return_item_dialog/${customer.customer_id}/${oi.order_id}/${oi.order_item_id}"><img src="/static/icons/silk/arrow_refresh.png" title="Return Item" alt="Return Item" border="0"/></td>
               <td width="40%">${oi.product.name}</td>
@@ -85,12 +88,17 @@
               <td style="text-align:right;">$${h.text('unit_price[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.unit_price), onblur='customer_order_recalc()', disabled=True)}</td>
               <td style="text-align:right;" id="oi_total_${oi.order_item_id}">$${h.money(oi.total())}</td>
             % else:
-              <td><img src="/static/icons/silk/delete.png" title="Delete Item" alt="Delete Item" border="0" 
-                       onclick="customer_delete_order_item('${oi.order_item_id}')" class="img_delete"></td>
               <td>
-                <img src="/static/icons/silk/comment_add.png" 
-                     border="0" title="Status Order" alt="Status Order" 
-                     onclick="customer_status_order_item(${oi.order_id}, ${oi.order_item_id})"/>
+                <img src="/static/icons/silk/delete.png" title="Delete Item" alt="Delete Item" border="0" 
+                     onclick="customer_delete_order_item('${oi.order_item_id}')"
+                     class="img_delete">
+              </td>
+              <td>
+                <a data-toggle="modal" data-target="#dlg_standard"
+                   href="/crm/customer/status_dialog/${customer.customer_id}?order_item_id=${oi.order_item_id}&dialog=1">
+                  <img src="/static/icons/silk/comment_add.png" 
+                     border="0" title="Status Order" alt="Status Order"/>
+                </a>
               </td>
               <td><a disabled="true" href="/crm/customer/return_item_dialog/${customer.customer_id}/${oi.order_id}/${oi.order_item_id}">
                   <img src="/static/icons/silk/arrow_refresh.png" title="Return Item" alt="Return Item" border="0" style="visibility:hidden;"/></td>

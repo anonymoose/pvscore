@@ -11,16 +11,6 @@
     <div class="row">
       <div class="span9">
         <div class="well">
-          <!--div class="row">
-            <div class="span3">
-              <label>Original Price</label>
-              $${h.money(order_item.unit_price)}
-            </div>
-            <div class="span3">
-              <label>Original Quantity</label>
-              ${h.money(order_item.quantity)}
-            </div>
-          </div-->
           <div class="row">
             <div class="span3">
               <label>Quantity Returned</label>

@@ -12,6 +12,13 @@ def crm_routes(config):
     adrt('crm.campaign.save', '/crm/campaign/save')
     adrt('crm.campaign.search', '/crm/campaign/search')
 
+    adrt('crm.appointment.list', '/crm/appointment/list')
+    adrt('crm.appointment.new', '/crm/appointment/new')
+    adrt('crm.appointment.edit', '/crm/appointment/edit/{appointment_id}')
+    adrt('crm.appointment.save', '/crm/appointment/save')
+    adrt('crm.appointment.search', '/crm/appointment/search')
+
+
     adrt('crm.company.new', '/crm/company/new')
     adrt('crm.company.edit', '/crm/company/edit/{company_id}')
     adrt('crm.company.save', '/crm/company/save')

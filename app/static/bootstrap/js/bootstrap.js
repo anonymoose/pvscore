@@ -952,6 +952,9 @@
 
       e.preventDefault()
 
+      /* KB: [2012-09-06]: https://github.com/gpeltink/bootstrap/commit/891faf0160d42089c404d0ebeb3be459d97c78b9 */
+      if (!/#/.test(href) && href) $($target).find('.modal-body').load(href);
+
       $target
         .modal(option)
         .one('hide', function () {

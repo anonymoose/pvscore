@@ -44,10 +44,15 @@ ${next.body()}
         <li>${h.link_to('Communication', 'javascript:customer_send_email()', id='link_send_email')}</li>
       % endif
       % if request.ctx.user.priv.edit_customer:
-        <li>${h.link_to('Status', 'javascript:customer_status()', id='link_status')}</li>
+        <li>
+          <a data-toggle="modal" data-target="#dlg_standard"
+             href="/crm/customer/status_dialog/${customer.customer_id}?dialog=1">
+            Status
+          </a>
+        </li>
       % endif
 
-        <li>${h.link_to('Add Appt', 'javascript:customer_edit_appointment()', id='link_add_appointment')}</li>
+      <li>${h.link_to('Add Appt', 'javascript:appointment_edit()', id='link_add_appointment')}</li>
 
       <li>${h.link_to('History', '/crm/customer/show_history/%s' % customer.customer_id, id='link_history')}</li>
       % if request.ctx.user.priv.add_customer_billing:
@@ -55,7 +60,7 @@ ${next.body()}
       % endif
         <li>${h.link_to('Attributes', '/crm/customer/show_attributes/%s' % customer.customer_id, id='link_attr')}</li>
 
-        <li>${h.link_to('Appointments', '/plugin/appointment/show_appointments/%s' % customer.customer_id, id='link_appointments')}</li>
+      <!--li>${h.link_to('Appointments', '/plugin/appointment/show_appointments/%s' % customer.customer_id, id='link_appointments')}</li-->
 
     % endif
     % if customer.customer_id:

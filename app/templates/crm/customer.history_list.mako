@@ -7,7 +7,7 @@
   <div class="container">
     <div class="row">
       <div class="span9">
-        <table width="100%" class="sortable results table table-striped">
+        <table width="100%" class="sortable results table table-striped table-condensed">
           <thead>
             <tr>
               <td>&nbsp;</td>
@@ -19,7 +19,12 @@
           </thead>
           % for s in history[offset:offset+50]:
           <tr>
-            <td><img src="/static/icons/silk/page_edit.png" border="0" onclick="customer_show_status(${s.status_id})"></td>
+            <td>
+              <a data-toggle="modal" data-target="#dlg_simple"
+                 href="/crm/customer/show_status_dialog/${customer.customer_id}/${s.status_id}?dialog=1">
+                <img src="/static/icons/silk/page_edit.png" border="0"/>
+              </a>
+            </td>
             <td nowrap>${s.fk_type} ${s.event.display_name}</td>
             <td nowrap>${h.date_(s.create_dt)}</td>
             <td>${s.username[:11]+'...' if s.username and len(s.username)>11 else s.username}</td>

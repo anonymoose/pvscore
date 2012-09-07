@@ -649,26 +649,30 @@ class CustomerController(BaseController):
         customer_id = self.request.matchdict.get('customer_id')
         customer = Customer.load(customer_id)
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
-        order = order_item = events = None
+        order = order_item = events = redir = None
         if self.request.GET.get('order_id'):
             order = CustomerOrder.load(self.request.GET.get('order_id'))
             self.forbid_if(not order or order.campaign.company.enterprise_id != self.enterprise_id)
             events = util.select_list(StatusEvent.find_all_applicable(self.enterprise_id, order), 'event_id', 'display_name', True)
+            redir = '/crm/customer/show_orders/%s' % customer_id
         elif self.request.GET.get('order_item_id'):
             order_item = OrderItem.load(self.request.GET.get('order_item_id'))
             self.forbid_if(not order_item or order_item.order.campaign.company.enterprise_id != self.enterprise_id)
             events = util.select_list(StatusEvent.find_all_applicable(self.enterprise_id, order_item), 'event_id', 'display_name', True)
+            redir = '/crm/customer/edit_order/%s/%s' % (customer_id, order_item.order_id)
         else:
             events = util.select_list(StatusEvent.find_all_applicable(self.enterprise_id, customer), 'event_id', 'display_name', True)
+            redir = '/crm/customer/edit/%s' % customer_id
         return {
             'customer' : customer,
             'order' : order,
             'order_item' : order_item,
-            'events' : events
+            'events' : events,
+            'redir' : redir
             }
 
 
-    @view_config(route_name='crm.customer.save_status', renderer='string')
+    @view_config(route_name='crm.customer.save_status')
     @authorize(IsLoggedIn())
     def save_status(self):
         customer_id = self.request.matchdict.get('customer_id')
@@ -678,17 +682,22 @@ class CustomerController(BaseController):
         self.forbid_if(not event or not self.request.POST.get('event_id') or (not event.is_system and event.enterprise_id != self.enterprise_id))
         order = None
         note = self.request.POST.get('note')
-        if self.request.GET.get('order_id'):
-            order = CustomerOrder.load(self.request.GET.get('order_id'))
+
+        if self.request.POST.get('order_id'):
+            order = CustomerOrder.load(self.request.POST.get('order_id'))
             self.forbid_if(not order or order.campaign.company.enterprise_id != self.enterprise_id)
             Status.add(customer, order, event, note)
-        elif self.request.GET.get('order_item_id'):
-            order_item = OrderItem.load(self.request.GET.get('order_item_id'))
+            self.flash('Statused Order to %s' % event.display_name)
+        elif self.request.POST.get('order_item_id'):
+            order_item = OrderItem.load(self.request.POST.get('order_item_id'))
             self.forbid_if(not order_item or order_item.order.campaign.company.enterprise_id != self.enterprise_id)
             Status.add(customer, order_item, event, note)
+            self.flash('Statused Item to %s' % event.display_name)
         else:
             Status.add(customer, customer, event, note)
-        return 'True'
+            self.flash('Statused Customer to %s' % event.display_name)
+        customer.invalidate_caches()
+        return HTTPFound(self.request.POST.get('redir'))
 
 
     @view_config(route_name='crm.customer.delete', renderer='string')

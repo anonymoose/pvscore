@@ -68,6 +68,34 @@ ${self.pre_process()}
 </footer>
 
 
+<!-- Modals -->
+<div class="modal hide fade" id="dlg_standard">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3 id="dlg_standard_title">Update Status</h3>
+  </div>
+  <div class="modal-body">
+  </div>
+  <div class="modal-footer">
+    <button id="btn_ok_dlg_standard" class="btn btn-primary" onclick="$('#frm_dialog').submit()">Ok</button>
+    <button class="btn btn-link" data-dismiss="modal" aria-hidden="true">Cancel</button>
+  </div>
+</div>
+
+<div class="modal hide fade" id="dlg_simple">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3 id="dlg_standard_title">Note</h3>
+  </div>
+  <div class="modal-body">
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Ok</button>
+  </div>
+</div>
+<!-- /Modals -->
+
+
 <div id="hidden" style="display:none;"></div>
 
 <script src="/static/bootstrap/js/jquery.js"></script>
@@ -307,6 +335,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
     <script src="/static/crm/js/purchase.js"></script>
     <script src="/static/crm/js/comm.js"></script>
     <script src="/static/crm/js/customer.js"></script>
+    <script src="/static/crm/js/appointment.js"></script>
 </%def>
 
 <%def name="other_foot()">\

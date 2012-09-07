@@ -45,6 +45,7 @@ class Campaign(ORMBase, BaseModel):
         camp.name = name
         return camp
 
+
     @staticmethod
     def find_all(enterprise_id):
         #pylint: disable-msg=E1101
@@ -53,6 +54,7 @@ class Campaign(ORMBase, BaseModel):
             .join((Company, Campaign.company_id == Company.company_id)).filter(and_(Campaign.delete_dt == None,
                                                                                     Company.enterprise_id == enterprise_id)) \
                                                                                     .order_by(Company.default_campaign_id.desc(), Campaign.name).all()
+
 
     @staticmethod
     def find_by_company(company):
@@ -70,13 +72,13 @@ class Campaign(ORMBase, BaseModel):
             n_clause = "and cam.name like '%s%%'" % name
         if company_id:
             cid_clause = "and cam.company_id = %d" % int(company_id)
-
         sql = """SELECT cam.* FROM crm_campaign cam, crm_company com
                  where cam.company_id = com.company_id
                  and com.enterprise_id = {ent_id}
                  {n} {cid}
               """.format(n=n_clause, cid=cid_clause, ent_id=enterprise_id)
         return Session.query(Campaign).from_statement(sql).all()  #pylint: disable-msg=E1101
+
 
     def get_products(self):
         from app.model.crm.product import Product
@@ -91,6 +93,7 @@ class Campaign(ORMBase, BaseModel):
             if cc_internal:
                 comm.send_internal(self, order.customer, None)
 
+
     def send_post_cancel_comm(self, customer, cc_internal=False):
         if self.comm_post_cancel_id:
             from app.model.crm.comm import Communication
@@ -98,6 +101,7 @@ class Campaign(ORMBase, BaseModel):
             comm.send_to_customer(self, customer, None)
             if cc_internal:
                 comm.send_internal(self, customer, None)
+
 
     def send_forgot_password_comm(self, customer, cc_internal=False):
         if self.comm_forgot_password_id:
@@ -107,17 +111,21 @@ class Campaign(ORMBase, BaseModel):
             if cc_internal:
                 comm.send_internal(self, customer, None)
 
+
     def get_product_specials(self):
         from app.model.crm.product import Product
         return Product.find_specials_by_campaign(self)
+
 
     def get_product_features(self):
         from app.model.crm.product import Product
         return Product.find_featured_by_campaign(self)
 
+
     def clear_attributes(self):
         if self.company_id:
             Attribute.clear_all('Campaign', self.company_id)
+
 
     def set_attr(self, name, value):
         attr = Attribute.find('Campaign', name)
@@ -125,14 +133,17 @@ class Campaign(ORMBase, BaseModel):
             attr = Attribute.create_new('Campaign', name)
         attr.set(self, value)
 
+
     def get_attr(self, name):
         attr = Attribute.find('Campaign', name)
         if attr:
             return attr.get(self)
         return None
 
+
     def get_attrs(self):
         return Attribute.find_values(self)
+
 
     def invalidate_caches(self, **kwargs):
         invalidate(self, 'Campaign.find_all', self.company.enterprise_id)

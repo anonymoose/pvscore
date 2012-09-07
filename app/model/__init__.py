@@ -25,6 +25,7 @@ from app.model.core.asset import Asset
 from app.model.crm.report import Report, ReportCompanyJoin
 from app.model.crm.purchase import PurchaseOrder, PurchaseOrderItem, Vendor
 from app.model.crm.discount import Discount
+from app.model.crm.appointment import Appointment
 
 log = logging.getLogger(__name__)
 
