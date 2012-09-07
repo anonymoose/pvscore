@@ -17,7 +17,7 @@
               <th>Note</th>
             </tr>
           </thead>
-          % for s in history[offset:offset+50]:
+          % for s in history:
           <tr>
             <td>
               <a data-toggle="modal" data-target="#dlg_simple"
@@ -34,10 +34,12 @@
         </table>
         <ul class="pager">
           <li class="previous">
-            <a href="javascript:customer_show_history(${offset-50 if offset > 0 else 0})">&larr; prev</a> <!-- " -->
+            % if offset > 0:
+            <a href="/crm/customer/show_history/${customer.customer_id}?offset=${offset-25}">&larr; prev</a> <!-- " -->
+            % endif
           </li>
           <li class="next">
-            <a href="javascript:customer_show_history(${offset+50})">next &rarr;</a>
+            <a href="/crm/customer/show_history/${customer.customer_id}?offset=${offset+25}">next &rarr;</a>
           </li>
         </ul>
       </div>

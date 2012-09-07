@@ -101,16 +101,8 @@ G = function(method, p0, p1, p2, p3) {
 };
 
 pvs.onload.push(function() {
-    if ($('#rpt_start_dt')) {
-        pvs.ui.init_datepicker('#rpt_start_dt');
-    }
-    if ($('#rpt_end_dt')) {
-        pvs.ui.init_datepicker('#rpt_end_dt');
-    }
-
     report_show($('#rpt').height()*0.63, $('#rpt').width()*0.95);
-
-  report_setup_textarea();
+    report_setup_textarea();
 });
 
 report_refresh = function() {

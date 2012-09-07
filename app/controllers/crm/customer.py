@@ -185,7 +185,7 @@ class CustomerController(BaseController):
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         return {
             'customer' : customer,
-            'history' : Status.find_by_customer(customer),
+            'history' : Status.find_by_customer(customer, self.offset),
             'offset' : self.offset
             }
     
@@ -210,9 +210,25 @@ class CustomerController(BaseController):
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         return {
             'customer' : customer,
-            'billings' : Journal.find_all_by_customer(customer),
+            'billings' : Journal.find_all_by_customer(customer, self.offset),
             'offset' : self.offset
             }
+
+
+    @view_config(route_name='crm.customer.show_billing_dialog', renderer='/crm/customer.view_billing.mako')
+    @authorize(IsLoggedIn())
+    def show_billing_dialog(self):
+        customer_id = self.request.matchdict.get('customer_id')
+        journal_id = self.request.matchdict.get('journal_id')
+        customer = Customer.load(customer_id)
+        self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
+        journal = Journal.load(journal_id)
+        self.forbid_if(not journal or str(journal.customer_id) != str(customer_id))
+        return {
+            'customer' : customer,
+            'journal' : journal
+            }
+
 
 
     @view_config(route_name='crm.customer.edit_billing_dialog', renderer='/crm/customer.edit_billing.mako')
@@ -296,7 +312,8 @@ class CustomerController(BaseController):
         jrnl = Journal.load(journal_id)
         self.forbid_if(not jrnl or jrnl.customer_id != cust.customer_id)
         jrnl.cancel()
-        return 'True'
+        self.flash('Billing record cancelled.')
+        return HTTPFound('/crm/customer/show_billings/%s' % cust.customer_id)
 
 
     @view_config(route_name='crm.customer.add_order_dialog', renderer='/crm/customer.add_order.mako')
@@ -611,21 +628,6 @@ class CustomerController(BaseController):
         customer.invalidate_caches()
         self.flash("Saved Order")
         return 'True'
-
-
-    @view_config(route_name='crm.customer.show_billing_dialog', renderer='/crm/customer.view_billing.mako')
-    @authorize(IsLoggedIn())
-    def show_billing_dialog(self):
-        customer_id = self.request.matchdict.get('customer_id')
-        journal_id = self.request.matchdict.get('journal_id')
-        customer = Customer.load(customer_id)
-        self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
-        journal = Journal.load(journal_id)
-        self.forbid_if(not journal or str(journal.customer_id) != str(customer_id))
-        return {
-            'customer' : customer,
-            'journal' : journal
-            }
 
 
     @view_config(route_name='crm.customer.show_status_dialog', renderer='/crm/customer.view_status.mako')

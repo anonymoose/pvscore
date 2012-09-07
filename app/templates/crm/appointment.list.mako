@@ -3,13 +3,17 @@
 
 <h1>Appointment List</h1>
 
-% if hasattr(c, 'appointments'):
+% if appointments:
 <div id="result_list">
-  <table class="results">
-    % for a in c.appointments:
+  <table class="results table table-striped">
+    % for a in appointments:
     <tr>
-      <td nowrap>${h.link_to(a.title, '/plugin/appointment/edit/%d' % a.appointment_id)}</td>
-      <td nowrap>${a.create_dt}</td>
+      % if a.customer_id:
+      <td nowrap>${h.link_to(a.title, '/crm/appointment/edit_for_customer/%d/%d' % (a.customer_id, a.appointment_id))}</td>
+      % else:
+      <td nowrap>${h.link_to(a.title, '/crm/appointment/edit/%d' % a.appointment_id)}</td>
+      % endif
+      <td nowrap>${a.start_dt} @ ${a.start_time}</td>
     </tr>
     % endfor
   </table>

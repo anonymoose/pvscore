@@ -11,11 +11,13 @@
         <th>Value</th>
       </tr>
     </thead>
-    % for attr_name in attrs:
-    <tr>
-      <td nowrap valign="top">${attr_name}</td>
-      <td> ${attrs[attr_name]}</td>
-    </tr>
-    % endfor
+    <tbody>
+      % for attr_name in attrs:
+      <tr>
+        <td nowrap valign="top">${attr_name}</td>
+        <td> ${attrs[attr_name]}</td>
+      </tr>
+      % endfor
+    </tbody>
   </table>
 </div>

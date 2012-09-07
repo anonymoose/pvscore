@@ -15,21 +15,7 @@ product_dashboard_find = function() {
 };
 
 product_setup_textarea = function(id) {
-    if ($('#frm_product').length || $('#frm_category').length) {
-        tinyMCE.init({
-            height: 190, //width: ($('#div_product_edit').width()*.95),
-	    mode : "textareas",
-	    theme : "advanced",
-            plugins: '',
-            theme_advanced_buttons1 : "bold,italic,underline,separator,justifyleft,justifycenter,justifyright, justifyfull,bullist,numlist,undo,redo,link,unlink,separator,code",
-            theme_advanced_buttons2 : "",
-            theme_advanced_buttons3 : "",
-	    theme_advanced_toolbar_location : "top",
-	    theme_advanced_toolbar_align : "left",
-	    theme_advanced_statusbar_location : "none",
-	    theme_advanced_resizing : true
-        });
-    }
+    pvs.form.init_editors();
 };
 
 var _asset_id = null;

@@ -1,10 +1,7 @@
 appointment_init_calendar = function(id, name) {
-    pvs.ui.init_datepicker(id);
+
 };
 
-pvs.onload.push(function() {
-  appointment_init_calendar('#a_start_dt'); 
-});
 
 appointment_edit = function(appointment_id, year, month, current_day) {
     var url = pvs.ajax.dialog({root: '/crm/appointment/edit/'+appointment_id});

@@ -1,8 +1,6 @@
 
 <%inherit file="customer.edit.base.mako"/>\
 
-
-
 <h1>Customer Billing Activity</h1>
 <div class="container">
   <div class="row">
@@ -21,11 +19,17 @@
               <th>Note</th>
             </tr>
           </thead>
-          % for b in billings[offset:offset+50]:
+          % for b in billings:
           <tr>
-            <td><img src="/static/icons/silk/page_edit.png" border="0" onclick="customer_show_billing(${b.journal_id})"></td>
             <td>
-              <img src="/static/icons/silk/delete.png" border="0" title="Delete Billing" alt="Delete Billing" onclick="customer_cancel_billing(${b.journal_id})">
+              <a data-toggle="modal" data-target="#dlg_simple"
+                 href="/crm/customer/show_billing_dialog/${customer.customer_id}/${b.journal_id}?dialog=1">
+                <img src="/static/icons/silk/page_edit.png" border="0">
+              </a>
+            </td>
+            <td>
+              <img src="/static/icons/silk/delete.png" border="0" 
+                   title="Delete Billing" alt="Delete Billing" onclick="customer_cancel_billing(${b.journal_id})"/>
             </td>
             <td nowrap>${b.type}</td>
             <td nowrap>${b.create_dt}</td>
@@ -38,10 +42,12 @@
         </table>
         <ui class="pager">
           <li class="previous">
-            <a href="javascript:customer_show_billing(${offset-50 if offset > 0 else 0})">&larr; prev</a>
+            % if offset > 0:
+            <a href="/crm/customer/show_billings/${customer.customer_id}?offset=${offset-25}">&larr; prev</a> <!-- " -->
+            % endif
           </li>
           <li class="next">
-            <a href="javascript:customer_show_billing(${offset+50})">next &rarr;</a>
+            <a href="/crm/customer/show_billings/${customer.customer_id}?offset=${offset+25}">next &rarr;</a>
           </li>
       </div>
     </div>

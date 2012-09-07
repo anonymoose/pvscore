@@ -67,21 +67,21 @@ class CommunicationController(BaseController):
 
 
 
-    # @view_config(route_name='crm.communication.send_comm_dialog', renderer='/crm/communication.send.mako')
-    # @authorize(IsLoggedIn())
-    # def send_comm_dialog(self):
-    #     customer_id = self.request.GET.get('customer_id')
-    #     cust = None
-    #     if customer_id:
-    #         cust = Customer.load(customer_id)
-    #         self.forbid_if(cust.campaign.company.enterprise_id != self.enterprise_id)
-    #         comms = Communication.find_all_by_company(cust.campaign.company, True)
-    #     else:
-    #         comms = Communication.find_all(True)
-    #     return {
-    #         'comms' : util.select_list(comms, 'comm_id', 'name'),
-    #         'cust' : cust
-    #         }
+    @view_config(route_name='crm.communication.send_comm_dialog', renderer='/crm/communication.send.mako')
+    @authorize(IsLoggedIn())
+    def send_comm_dialog(self):
+        customer_id = self.request.GET.get('customer_id')
+        cust = None
+        if customer_id:
+            cust = Customer.load(customer_id)
+            self.forbid_if(cust.campaign.company.enterprise_id != self.enterprise_id)
+            comms = Communication.find_all_by_company(cust.campaign.company, True)
+        else:
+            comms = Communication.find_all(self.enterprise_id, True)
+        return {
+            'comms' : util.select_list(comms, 'comm_id', 'name'),
+            'cust' : cust
+            }
 
 
     # @view_config(route_name='crm.communication.send_customer_comm', renderer='string')

@@ -1,11 +1,11 @@
 
-<%inherit file="/cms/siteedit.base.mako"/>\
+<%inherit file="/crm/base.mako"/>\
 
-% if len(c.comms) > 0:
+% if len(comms) > 0:
 <table>
   <tr valign="top">
     <td>
-      <label for="comm">Communication</label></td><td>${h.select('comm_id', None, c.comms)}<td></tr>
+      <label for="comm">Communication</label></td><td>${h.select('comm_id', None, comms)}<td></tr>
     </td>
   </tr>
 <!--
@@ -15,5 +15,10 @@
 -->
 </table>
 % else:
+
 No communications configured for users to send.
+<script>
+$('#btn_ok_dlg_standard').remove();
+</script>
+
 % endif

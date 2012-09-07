@@ -572,18 +572,10 @@ customer_cancel_order = function(order_id) {
 };
 
 customer_cancel_billing = function(journal_id) {
-    var answer = confirm("Delete billing?")
-    if (answer) {
-        pvs.ajax.call(pvs.ajax.api({root: '/crm/customer/cancel_billing/'+$_('#customer_id')+'/'+journal_id}),
-                      function(response) {
-                          if (pvs.is_true(response)) {
-                              $('#flashes').append('Billing cancelled.');
-                              window.location = '/crm/customer/show_billings/'+$_('#customer_id');
-                          } else {
-                              pvs.alert('Unable to cancel billing:\n'+response);
-                          }
-                      });
-    }
+    pvs.confirm("Are you sure you want to delete this billing record?", null,
+                function() {
+                    pvs.browser.goto_url('/crm/customer/cancel_billing/'+$_('#customer_id')+'/'+journal_id);
+                });
 };
 
 customer_order_recalc = function() {
@@ -766,3 +758,7 @@ customer_show_edit = function() {
 customer_show_orders = function() {
     pvs.browser.goto_url('/crm/customer/show_orders/'+$_('#customer_id'));
 };
+
+pvs.onload.push(function() {
+    $('#' + $('#customer_menu_selected').val()).addClass('active');
+});

@@ -38,6 +38,7 @@ class Appointment(ORMBase, BaseModel):
     customer = relation('Customer', backref=backref('appointments'))
     status = relation('Status')
 
+
     @staticmethod
     def search(title, description):
         t_clause = d_clause = ''
@@ -52,14 +53,20 @@ class Appointment(ORMBase, BaseModel):
                                           descr=d_clause)
         return Session.query(Appointment).from_statement(sql).all()
 
+
     @staticmethod
     def find_by_customer(customer):
-        return Session.query(Appointment).filter(Appointment.customer == customer).order_by(Appointment.start_dt.asc()).all()
+        return Session.query(Appointment).filter(Appointment.customer == customer).order_by(Appointment.start_dt.desc(),
+                                                                                             Appointment.start_time.asc()).all()
+
     
     @staticmethod
     def find_by_user(user):
         return Session.query(Appointment).filter(or_(Appointment.creator == user,
-                                                     Appointment.assigned == user)).order_by(Appointment.start_dt.asc()).all()
+                                                     Appointment.assigned == user)).order_by(Appointment.start_dt.desc(),
+                                                                                             Appointment.start_time.asc()).all()
+
+
     @staticmethod
     def find_by_month(year, month, user):
         #return Session.query(Appointment).from_statement("""select *, ((start_time + 5) - %s) from crm_appointment where % user.tz_offset
@@ -68,6 +75,7 @@ class Appointment(ORMBase, BaseModel):
                                                             and date_part('month', start_dt) = :month
                                                             and date_part('year', start_dt) = :year 
                                                             order by start_time asc""" ).params(creator=user.username, year=year, month=month).all()
+
 
     @staticmethod
     def find_by_day(year, month, day, user):

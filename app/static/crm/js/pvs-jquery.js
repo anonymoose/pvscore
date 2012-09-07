@@ -568,6 +568,47 @@ pvs.json = function() {
 
 pvs.form = function(){
     pub = {
+        init_editors : function() {
+            tinyMCE.init({
+  	        mode : "textareas",
+	        theme : "advanced",
+                plugins: '',
+                theme_advanced_buttons1 : "bold,italic,underline,separator,justifyleft,justifycenter,justifyright, justifyfull,bullist,numlist,undo,redo,link,unlink,separator,code",
+                theme_advanced_buttons2 : "",
+                theme_advanced_buttons3 : "",
+	        theme_advanced_toolbar_location : "top",
+	        theme_advanced_toolbar_align : "left",
+	        theme_advanced_statusbar_location : "none",
+	        theme_advanced_resizing : true
+            });
+        },
+
+        init_editors_exact : function(element_id) {
+            tinyMCE.init({
+                //height: 520, width: 800,
+	        mode : "exact",
+                elements: element_id,
+	        theme : "advanced",
+                plugins: '',
+                
+                convert_urls: false,
+                forced_root_block : false,
+                force_p_newlines : 'false',
+                remove_linebreaks : false,
+                force_br_newlines : true,              //btw, I still get <p> tags if this is false
+                remove_trailing_nbsp : false,   
+                verify_html : false,
+                
+                theme_advanced_buttons1 : "bold,italic,underline,separator,justifyleft,justifycenter,justifyright, justifyfull,bullist,numlist,undo,redo,link,unlink,separator,code",
+                theme_advanced_buttons2 : "",
+                theme_advanced_buttons3 : "",
+	        theme_advanced_toolbar_location : "top",
+	        theme_advanced_toolbar_align : "left",
+	        theme_advanced_statusbar_location : "none",
+	        theme_advanced_resizing : true
+            });
+        },
+
         set_checkbox : function(id, true_val, false_val) {
             if ($(id).checked) {
                 $(id).value = true_val;
@@ -1475,11 +1516,9 @@ pvs.ui = function(){
             }
         },
 
-        init_datepicker : function(id, params) {
+        init_datepickers : function() {
             /* KB: [2010-09-17]: http://jqueryui.com/demos/datepicker/ */
-            if ($(id).length) {
-                $(id).datepicker({dateFormat: 'yy-mm-dd'});
-            }
+            $(".datepicker").datepicker({format: 'yyyy-mm-dd'});
         }
     };
 
@@ -1598,6 +1637,9 @@ $(document).ready(function() {
     pvs.button.init();
 });
 
+$(document).ready(function() {
+    pvs.ui.init_datepickers();
+});
 
 /* KB: [2010-08-16]:
    Append to this to get stuff to run at the end.

@@ -34,7 +34,7 @@
 </form>
 % else:
 
-No workflow events for this item.
+No applicable workflow events for this item.
 
 <script>
 $('#btn_ok_dlg_standard').remove();

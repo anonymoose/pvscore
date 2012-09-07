@@ -1,0 +1,43 @@
+#calendar{ width: 98%; }
+#calendar table { width:98%; }
+#calendar th{ width:14.3%; text-align:center; border-bottom: 1px solid #ccc; padding:5px; background:#333; color:#fff; }
+#calendar td{
+	text-align:left;
+        vertical-align: top;
+	border: 1px solid #ccc;
+	padding:5px;
+        height: 120px;
+	font-family: verdana,"Lucida Grande", arial, helvetica, sans-serif;
+	}
+
+#calendar tr{ }
+#calendar td.previous {background: #EDF3FE;}
+#calendar td.weekend {background: #EFEFEF;}
+#calendar td.weekday {background: #FFFFFF;}
+#calendar a {
+	font-weight:bold;
+	text-decoration:none;
+}
+#calendar a:hover {color: #fff; background: #0033bb;}
+
+
+#day_calendar{ width: 98%; }
+#day_calendar table { width:98%; }
+#day_calendar th{ text-align:center; border-bottom: 1px solid #ccc; padding:5px; background:#333; color:#fff; }
+#day_calendar td{
+	text-align:left;
+        vertical-align: top;
+	border: 1px solid #ccc;
+	padding:5px;
+        height: 120px;
+	font-family: verdana,"Lucida Grande", arial, helvetica, sans-serif;
+	}
+
+#day_calendar tr{ }
+#day_calendar td.timeslot {height: 30px;}
+#day_calendar td.timeslot_appt {height: 30px; border: 0px;}
+#day_calendar a {
+	font-weight:bold;
+	text-decoration:none;
+}
+#day_calendar a:hover {color: #fff; background: #0033bb;}

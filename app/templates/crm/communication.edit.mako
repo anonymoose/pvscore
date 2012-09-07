@@ -39,7 +39,7 @@
       <div class="row">
         <div class="span8" id="row_html">
           <label for="description"><h3>Email Template</h3></label>
-          ${h.textarea('data', style="width: 100%; height: 100px;", content=h.literal(comm.data if comm.data else ''), class_='content_editor')}
+          ${h.textarea('data', style="width: 800px; height: 520px;", content=h.literal(comm.data if comm.data else ''), class_='content_editor')}
         </div>
       </div>
       <div class="row">

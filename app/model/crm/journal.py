@@ -176,12 +176,12 @@ class Journal(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_all_by_customer(customer):
+    def find_all_by_customer(customer, offset=0, limit=25):
+        #.options(FromCache('Journal.find_all_by_customer', customer.campaign.company.enterprise_id)) \
         return Session.query(Journal)\
-            .options(FromCache('Journal.find_all_by_customer', customer.campaign.company.enterprise_id)) \
             .filter(and_(Journal.customer==customer,
-                                                  Journal.delete_dt == None))\
-                                                  .order_by(Journal.create_dt.desc()).all()
+                         Journal.delete_dt == None))\
+                         .order_by(Journal.create_dt.desc()).offset(offset).limit(limit).all()
 
 
     @staticmethod

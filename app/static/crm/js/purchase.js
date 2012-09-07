@@ -203,8 +203,4 @@ pvs.onload.push(function() {
              }
          )
     );
-
-    pvs.ui.init_datepicker('#from_dt');
-    pvs.ui.init_datepicker('#to_dt');
-
 });

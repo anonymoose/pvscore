@@ -65,10 +65,9 @@ class Status(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_by_customer(customer):
+    def find_by_customer(customer, offset=0, limit=25):
         #pylint: disable-msg=E1101
         return Session.query(Status)\
             .filter(Status.customer_id==customer.customer_id)\
-            .order_by(Status.status_id.desc()).all()
-
+            .order_by(Status.status_id.desc()).offset(offset).limit(limit).all()
 

@@ -25,7 +25,9 @@ ${self.pre_process()}
   ${h.stylesheet_link('/static/js/jquery/autocomplete/jquery.autocomplete.css')}
   ${h.stylesheet_link('/static/js/jquery/jqgrid/css/ui.jqgrid.css')}
   ${h.stylesheet_link('/static/js/jquery/jquery-ui/css/ui-lightness/jquery-ui-1.8.23.custom.css')}
+  ${h.stylesheet_link('/static/bootstrap-extensions/datepicker/css/datepicker.css')}
   ${h.stylesheet_link('/static/css/pvs.css')}
+  ${h.stylesheet_link('/static/css/appointment.css')}
   
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
   <%include file="style_override.mako"/>
@@ -101,6 +103,8 @@ ${self.pre_process()}
 <script src="/static/bootstrap/js/jquery.js"></script>
 <script src="/static/bootstrap/js/bootstrap.js"></script>
 <script src="/static/bootstrap-extensions/bootstrap-typeahead.js"></script>
+<script src="/static/bootstrap-extensions/datepicker/js/bootstrap-datepicker.js"></script>
+
 
 <script src="/static/js/jquery/validate/jquery.validate.min.js"></script>
 <script src="/static/js/jquery/validate/additional-methods.js"></script>
@@ -183,7 +187,18 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
       </li>
       % endif
 
-    <li class="divider-vertical"></li>
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        Calendar
+        <b class="caret"></b></a>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+        <li><a href="/crm/appointment/this_day">Today</a></li>
+        <li><a href="/crm/appointment/tomorrow">Tomorrow</a></li>
+        <li><a href="/crm/appointment/this_month">This Month</a></li>
+        <li><a href="/crm/appointment/show_search">Search</a></li>
+        <li><a href="/crm/appointment/new">New Appointment</a></li>
+      </ul>
+    </li>
 
     <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown">
