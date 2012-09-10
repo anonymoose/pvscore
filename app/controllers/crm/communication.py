@@ -62,9 +62,9 @@ class CommunicationController(BaseController):
         if self.request.GET.get('order_id'):
             order = CustomerOrder.load(self.request.GET.get('order_id'))
             self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
-
-        return { 'content' : comm.render(cust, order, self.request.POST.get('msg')) }
-
+        return {
+            'content' : comm.render(cust, order, self.request.POST.get('msg'))
+            }
 
 
     @view_config(route_name='crm.communication.send_comm_dialog', renderer='/crm/communication.send.mako')

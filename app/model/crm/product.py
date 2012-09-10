@@ -65,13 +65,6 @@ class Product(ORMBase, BaseModel):
     #    except:
     #        return 0.0
 
-    def get_retail_price(self, campaign):
-        if campaign.campaign_id in self.campaign_prices:
-            return self.campaign_prices[campaign.campaign_id].retail_price
-
-        #def get_max_retail_price(self, campaign):
-        #self.p for p in self.campaign_prices
-        
 
     @staticmethod
     def find_names_by_name(enterprise_id, name, limit):

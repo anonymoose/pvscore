@@ -5,9 +5,8 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from app.lib.validate import validate
 from app.lib.decorators.authorize import authorize
-from app.lib.auth_conditions import IsLoggedIn, IsCustomerLoggedIn
+from app.lib.auth_conditions import IsLoggedIn
 from app.model.crm.customer import Customer
-from app.model.crm.billing import Billing
 from app.model.crm.product import Product, ProductReturn, InventoryJournal
 from app.model.crm.campaign import Campaign
 from app.model.crm.journal import Journal
@@ -15,10 +14,8 @@ from app.model.crm.customerorder import CustomerOrder
 from app.model.crm.orderitem import OrderItem#, OrderItemTermsAcceptance
 from app.model.core.status import Status
 from app.model.core.statusevent import StatusEvent
-from app.model.cms.site import Site
 import simplejson as json
 import app.lib.util as util
-from app.lib.billing_api import BaseBillingApi
 from app.lib.catalog import Cart
 
 log = logging.getLogger(__name__)
@@ -239,7 +236,6 @@ class CustomerController(BaseController):
         codr = CustomerOrder.load(order_id)
         self.forbid_if(not codr)
         cust = codr.customer
-        bill = cust.billing
         # api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
         # if api:
         #     if api.cancel_order(codr, bill):
@@ -526,7 +522,7 @@ class CustomerController(BaseController):
     
     @view_config(route_name='crm.customer.edit_order', renderer='string')
     @authorize(IsLoggedIn())
-    def edit_order(self):
+    def edit_order(self):   #pylint: disable-msg=R0915
         customer_id = self.request.matchdict.get('customer_id')
         order_id = self.request.matchdict.get('order_id')
         oids_to_delete = self.request.POST.getall('order_items_to_delete[]')
@@ -694,7 +690,7 @@ class CustomerController(BaseController):
             }
 
 
-    def _add_order_impl(self, customer_id, product_ids, prices, user, discount_id, campaign_id, incl_tax=True):
+    def _add_order_impl(self, customer_id, product_ids, prices, user, discount_id, campaign_id, incl_tax=True):   #pylint: disable-msg=R0913
         cust = Customer.load(customer_id)
         self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
         cart = Cart()

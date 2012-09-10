@@ -3,7 +3,6 @@ from app.model.crm.customer import Customer
 from app.model.crm.customerorder import CustomerOrder
 from app.model.crm.orderitem import OrderItem
 from app.model.core.status import Status
-import app.lib.helpers as h
 
 # T app.tests.controllers.test_crm_customer
 
@@ -19,7 +18,7 @@ class TestCrmCustomer(TestController):
         self.assertEqual(f['fname'].value, '')
 
 
-    def _create_new(self):
+    def _create_new(self):  #pylint: disable-msg=R0915
         # create the customer and ensure he's editable.
         R = self.get('/crm/customer/new')
         self.assertEqual(R.status_int, 200)
@@ -74,9 +73,9 @@ class TestCrmCustomer(TestController):
         # add something to the order
         product_to_add = {'shipping_total' : '0.00', 'create_dt' : '2011-07-23'}
         for oid in oids:
-            oi = OrderItem.load(oid)
-            product_to_add['order_items[%s][unit_price]' % oi.order_item_id] = oi.unit_price
-            product_to_add['order_items[%s][quantity]' % oi.order_item_id] = oi.quantity
+            oitem = OrderItem.load(oid)
+            product_to_add['order_items[%s][unit_price]' % oitem.order_item_id] = oitem.unit_price
+            product_to_add['order_items[%s][quantity]' % oitem.order_item_id] = oitem.quantity
         product_to_add['order_items[999_][unit_price]'] = 25
         product_to_add['order_items[999_][quantity]'] = 1.00
         product_to_add['order_items[999_][product_id]'] = 1451
@@ -280,22 +279,22 @@ class TestCrmCustomer(TestController):
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Order List')
         ordr = cust.get_active_orders()[0]
-        js = 'customer_edit_order(%s)' % ordr.order_id
-        R.mustcontain(js)
+        jslink = 'customer_edit_order(%s)' % ordr.order_id
+        R.mustcontain(jslink)
         R = self.get('/crm/customer/edit_order_dialog/%s/%s' % (customer_id, ordr.order_id))
         self.assertEqual(R.status_int, 200)
         R.mustcontain("Finalize Order for")
-        oi = ordr.active_items[0]
-        R = self.get('/crm/customer/return_item_dialog/%s/%s/%s' % (customer_id, ordr.order_id, oi.order_item_id))
+        oitem = ordr.active_items[0]
+        R = self.get('/crm/customer/return_item_dialog/%s/%s/%s' % (customer_id, ordr.order_id, oitem.order_item_id))
         self.assertEqual(R.status_int, 200)
-        R.mustcontain('Return <i><b>%s</b></i>' % oi.product.name)
+        R.mustcontain('Return <i><b>%s</b></i>' % oitem.product.name)
         f = R.forms['frm_return_item']
         f.set('rt_refund_type', return_type)
         R = f.submit('btn_return')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
         self.assertEqual(R.status_int, 200)
-        R.mustcontain("&#39;%s&#39; returned.  $%.2f refunded by %s" % (oi.product.name, oi.total(), return_type))
+        R.mustcontain("&#39;%s&#39; returned.  $%.2f refunded by %s" % (oitem.product.name, oitem.total(), return_type))
 
 
     @secure

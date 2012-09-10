@@ -1,10 +1,13 @@
-from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Boolean
+#pylint: disable-msg=E1101
+from sqlalchemy import Column, ForeignKey, or_
+from sqlalchemy.types import Integer, String, Date, Text, Boolean
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
 from app.model.core.users import Users
-from app.model.crm.customer import Customer
+import logging
+
+log = logging.getLogger(__name__)
 
 class Appointment(ORMBase, BaseModel):
     __tablename__ = 'crm_appointment'

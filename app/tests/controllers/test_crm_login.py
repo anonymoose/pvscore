@@ -1,4 +1,7 @@
-from app.tests import TestController, UID, PWD
+from app.tests import TestController, UID, PWD, secure
+import logging
+
+log = logging.getLogger(__name__)
 
 # nosetests app.tests.controllers.test_crm_login
 
@@ -55,11 +58,13 @@ class TestCrmLogin(TestController):
         self.app.reset()
 
         
+    @secure
     def test_logout(self):
         try:
             self.post('/crm/logout')
         except Exception as exc:
-            pass
+            log.debug(exc)
+
         
 
 

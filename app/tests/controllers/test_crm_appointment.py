@@ -1,7 +1,5 @@
 from app.tests import TestController, secure
-from app.model.crm.customer import Customer
 from app.model.crm.appointment import Appointment
-import app.lib.helpers as h
 import app.lib.util as util
 
 # T app.tests.controllers.test_crm_appointment

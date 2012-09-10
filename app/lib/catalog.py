@@ -1,8 +1,5 @@
-
-""" KB: [2010-11-09]: Utility class for managing a bunch of items that we sell. """
 import datetime
 from app.model.crm.product import Product, ProductCategory
-from app.model.crm.campaign import Campaign
 import app.lib.util as util
 
 class ProductProxy(object):

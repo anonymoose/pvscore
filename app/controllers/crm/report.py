@@ -145,12 +145,10 @@ class ReportController(BaseController):
             total_pages = math.ceil(int(count)/int(limit))
             total_pages = total_pages if total_pages > 1 else 1
 
-        if int(page) > int(total_pages):
-            page = total_pages
+        page = min(page, total_pages)
 
         start = int(limit)*int(page)-int(limit)  # // do not put $limit*($page - 1)
-        if not limit:
-            limit = 'all'
+        limit = util.nvl(limit, 'all')
         if start < 0:
             start = 0
         results = db.get_list(sql +

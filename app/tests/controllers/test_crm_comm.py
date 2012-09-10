@@ -1,7 +1,10 @@
 from app.tests import TestController, secure
 from app.model.crm.comm import Communication
+from app.model.crm.customer import Customer
 
 # T app.tests.controllers.test_crm_comm
+
+TEST_CUSTOMER_ID = 220
 
 class TestCrmCommunication(TestController):
     
@@ -84,3 +87,19 @@ class TestCrmCommunication(TestController):
         self._delete_new(comm_id)
 
 
+    @secure
+    def test_view_comm_dialog(self):
+        cust = Customer.load(TEST_CUSTOMER_ID)
+        order = cust.get_active_orders()[0]
+        R = self.get('/crm/communication/view_comm_dialog/%s/3?order_id=%s&dialog=1' % (TEST_CUSTOMER_ID, order.order_id))
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('%s %s' % (cust.fname, cust.lname))
+
+
+    @secure
+    def test_send_comm_dialog(self):
+        R = self.get('/crm/communication/send_comm_dialog?customer_id=%s&dialog=1' % TEST_CUSTOMER_ID)
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('No communications configured for users to send.')
+
+        

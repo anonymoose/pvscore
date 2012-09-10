@@ -6,7 +6,7 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
 import app.lib.util as util
-from app.lib.dbcache import FromCache, invalidate
+from app.lib.dbcache import invalidate
 
 class Journal(ORMBase, BaseModel):
     """ KB: [2012-09-03]: 
@@ -98,7 +98,7 @@ class Journal(ORMBase, BaseModel):
         jrnl.note = note
         jrnl.customer = customer
         jrnl.creator = creator
-        jrnl.order = order
+        jrnl.order_id = order.order_id
         jrnl.amount = amount
         jrnl.method = payment_method
         jrnl.save()

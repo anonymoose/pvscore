@@ -3,7 +3,6 @@ from sqlalchemy.types import Integer, String, Date, Float
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from app.model.meta import ORMBase, BaseModel, Session
-from app.model.crm.pricing import ProductPricing
 from app.model.crm.company import Company
 from app.lib.dbcache import FromCache, invalidate
 from app.model.core.attribute import Attribute

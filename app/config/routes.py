@@ -95,7 +95,6 @@ def crm_routes(config):
     adrt('crm.report.save', '/crm/report/save') #, controller='crm/report', action='save')
     adrt('crm.report.results', '/crm/report/results/{report_id}') #, controller='crm/report', action='results')
     adrt('crm.report.export', '/crm/report/results_export/{report_id}') #, controller='crm/report', action='results_export')
-
     
     adrt('crm.purchase.vendor.new', '/crm/purchase/vendor/new')  #, controller='crm/purchase', action='new_vendor')
     adrt('crm.purchase.vendor.edit', '/crm/purchase/vendor/edit/{vendor_id}')  #controller='crm/purchase', action='edit_vendor')
