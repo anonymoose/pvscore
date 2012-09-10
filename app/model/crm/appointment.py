@@ -40,15 +40,16 @@ class Appointment(ORMBase, BaseModel):
 
 
     @staticmethod
-    def search(title, description):
+    def search(enterprise_id, title, description):
         t_clause = d_clause = ''
         if title:
             t_clause = "and appt.title like '%%%s%%'" % title
         if description:
             d_clause = "and appt.description like '%%%s%%'" % description
         sql = """SELECT appt.* FROM crm_appointment appt, core_user u where
-                 u.username = appt.user_created and u.enterprise_id = {entid}
-                {title} {descr}""".format(entid=BaseModel.get_enterprise_id(), 
+                 u.username = appt.user_created
+                 and (u.enterprise_id = {entid} or u.enterprise_id is null)
+                {title} {descr}""".format(entid=enterprise_id, 
                                           title=t_clause, 
                                           descr=d_clause)
         return Session.query(Appointment).from_statement(sql).all()
@@ -85,3 +86,9 @@ class Appointment(ORMBase, BaseModel):
                                                             and date_part('year', start_dt) = :year 
                                                             and date_part('day', start_dt) = :day
                                                             order by start_time asc""").params(creator=user.username, year=year, month=month, day=day).all()
+
+    @staticmethod
+    def full_delete(appointment_id):
+        Session.execute("delete from crm_appointment where appointment_id = %s" % appointment_id)
+
+        

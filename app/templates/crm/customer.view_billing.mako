@@ -15,7 +15,7 @@
   <dt>User</dt>
   <dd>${journal.user_created}</dd>
   <dt>Amount</dt>
-  <dd>${journal.amount}</dd>
+  <dd>${'%.2f' % journal.amount}</dd>
   <dt>Order</dt>
   <dd>${journal.order_id}</dd>
   <dt>Note</dt>

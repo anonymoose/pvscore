@@ -3,46 +3,46 @@
 <%inherit file="customer.base.mako"/>\
 
 <div>
-  <h1>Customer Search</h1>
-  <div class="container">
-    <form method="POST" id="frm_customer_search" action="/crm/customer/search">
-      <div class="well">
-        <div class="row">
-          <div class="span3">
-            <label for="fname">First Name</label>
-            ${h.text('fname', size=50, value=fname)}
-          </div>
-          <div class="span3">
-            <label for="lname">Last Name</label>
-            ${h.text('lname', size=50, value=lname)}
-          </div>
-          <div class="span3">
-            <label for="email">Email Address</label>
-            ${h.text('email', size=50, value=email)}
-          </div>
+  <form method="POST" id="frm_customer_search" action="/crm/customer/search">
+    <h1>Customer Search</h1>
+    <div class="container">
+      <div class="row">
+        <div class="span11">
+          <div class="well">
+            <div class="row">
+              <div class="span3">
+                <label for="fname">First Name</label>
+                ${h.text('fname', size=50, value=fname)}
+              </div>
+              <div class="span3">
+                <label for="lname">Last Name</label>
+                ${h.text('lname', size=50, value=lname)}
+              </div>
+              <div class="span3">
+                <label for="email">Email Address</label>
+                ${h.text('email', size=50, value=email)}
+              </div>
+            </div>
+            <div class="row">
+              <div class="span3">
+                <label for="company_name">Company Name</label>
+                ${h.text('company_name', size=50, value=company_name)}
+              </div>
+              <div class="span3">
+                <label for="phone">Phone</label>
+                ${h.text('phone', size=50, value=phone)}
+              </div>
+            </div>
+          </div>        
         </div>
-        <div class="row">
-          <div class="span3">
-            <label for="company_name">Company Name</label>
-            ${h.text('company_name', size=50, value=company_name)}
-          </div>
-          <div class="span3">
-            <label for="phone">Phone</label>
-            ${h.text('phone', size=50, value=phone)}
-          </div>
-          <div class="span3">
-            <label for="external_cart_id">External Cart ID</label>
-            ${h.text('external_cart_id', size=50, value=external_cart_id)}
-          </div>
+      </div>
+      <div class="row">
+        <div class="span2 offset10">
+          <input type="submit" name="submit" class="btn btn-primary btn-large" value="Search"/>
         </div>
-        <div class="row">
-          <div class="span2 offset10">
-            <input type="submit" name="submit" class="btn btn-primary btn-large" value="Search"/>
-          </div>
-        </div>
-      </div>        
-    </form>
-  </div>
+      </div>
+    </div>
+  </form>
 </div>
 
 % if customers:

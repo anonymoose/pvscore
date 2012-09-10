@@ -46,22 +46,6 @@ class UsersController(BaseController):
             }
 
 
-    @view_config(route_name='crm.users.search', renderer='/crm/users.search.mako')
-    @authorize(IsLoggedIn())
-    def search(self):
-        username = self.request.POST.get('username') 
-        fname = self.request.POST.get('fname')
-        lname = self.request.POST.get('lname')
-        email = self.request.POST.get('email')
-        return {
-            'username' : username,
-            'fname' : fname,
-            'lname' : lname,
-            'email' : email,
-            'users' : Users.search(self.enterprise_id, username, fname, lname, email)
-            }
-
-
     @view_config(route_name='crm.users.list', renderer='/crm/users.list.mako')
     @authorize(IsLoggedIn())
     def list(self):
@@ -79,7 +63,7 @@ class UsersController(BaseController):
                ('email', 'email'),
                ('password', 'equals', 'confirm')))
     def save(self):
-        usr = Users.load(self.request.POST.get('username'))
+        usr = Users.find_by_uid(self.request.POST.get('username'))
         if not usr:
             usr = Users()
             usr.enterprise_id = self.enterprise_id
@@ -118,4 +102,18 @@ class UsersController(BaseController):
         return 'True'
 
 
-        
+    # @view_config(route_name='crm.users.search', renderer='/crm/users.search.mako')
+    # @authorize(IsLoggedIn())
+    # def search(self):
+    #     username = self.request.POST.get('username') 
+    #     fname = self.request.POST.get('fname')
+    #     lname = self.request.POST.get('lname')
+    #     email = self.request.POST.get('email')
+    #     return {
+    #         'username' : username,
+    #         'fname' : fname,
+    #         'lname' : lname,
+    #         'email' : email,
+    #         'users' : Users.search(self.enterprise_id, username, fname, lname, email)
+    #         }
+

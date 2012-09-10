@@ -1,15 +1,12 @@
+#pylint: disable-msg=C0302
 import logging
-import re, datetime, calendar, sys
+import datetime, calendar
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from app.controllers.base import BaseController
-from app.lib.helpers import is_api
 from app.lib.decorators.authorize import authorize 
-from app.lib.auth_conditions import AllMet, OneMet, IsLoggedIn
-from app.model.crm.campaign import Campaign
-from app.model.crm.company import Company
+from app.lib.auth_conditions import IsLoggedIn
 from app.model.crm.appointment import Appointment
-from app.model.core.users import Users
 from app.model.crm.customer import Customer
 import app.lib.util as util
 
@@ -43,7 +40,7 @@ class AppointmentPlugin(BaseController):
 
     def _edit_impl(self):
         appointment_id = self.request.matchdict.get('appointment_id')
-        customer_id= self.request.matchdict.get('customer_id')
+        customer_id = self.request.matchdict.get('customer_id')
         if appointment_id:
             appointment = Appointment.load(appointment_id)
             self.forbid_if(not appointment)
@@ -66,7 +63,11 @@ class AppointmentPlugin(BaseController):
     @view_config(route_name="crm.appointment.show_search", renderer='/crm/appointment.search.mako')
     @authorize(IsLoggedIn())
     def show_search(self):
-        return {}
+        return {
+            'title' : '',
+            'description' : '',
+            'appointments' : []
+            }
 
 
     @view_config(route_name="crm.appointment.search", renderer='/crm/appointment.search.mako')
@@ -74,10 +75,11 @@ class AppointmentPlugin(BaseController):
     def search(self):
         title = self.request.POST.get('title') 
         description = self.request.POST.get('description') 
+        appts = Appointment.search(self.enterprise_id, title, description)
         return {
             'title' : title,
             'description' : description,
-            'appointments' : Appointment.search(title, description)
+            'appointments' : appts
             }
 
 
@@ -115,7 +117,6 @@ class AppointmentPlugin(BaseController):
         apt.save()
         apt.flush()
         self.flash('Successfully saved "%s".' % apt.title)
-        
         if customer_id:
             return HTTPFound('/crm/appointment/edit_for_customer/%s/%s' % (customer_id, apt.appointment_id))
         else:
@@ -167,6 +168,7 @@ class AppointmentPlugin(BaseController):
         last_month = first_day_of_month - datetime.timedelta(weeks=1)
         month_cal = calendar.monthcalendar(year, month)
         return {
+            'today' : util.today_date(),
             'appointments' : appointments,
             'month_cal' : month_cal,
             'month_name' : month_name,

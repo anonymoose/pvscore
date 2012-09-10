@@ -26,7 +26,7 @@
             <div class="row">
               <div class="span2">
                 <label for="start_dt">Date</label>
-                ${h.text('start_dt', class_="input-small datepicker", autocomplete="off", value=appointment.start_dt if appointment.start_dt else tomorrow)}
+                ${h.text('start_dt', class_="input-small datepicker", autocomplete="off", value=appointment.start_dt if appointment.start_dt else (request.GET.get('dt') if request.GET.get('dt') else tomorrow))}
               </div>
               <div class="span3">
                 <label for="start_time">From</label>
@@ -37,6 +37,18 @@
                 ${h.select('end_time', appointment.end_time if appointment.end_time else '09:00', hours)}
               </div>
             </div>
+            % if appointment.start_dt:
+            <div class="row">
+              <div class="span2">
+                <a href="/crm/appointment/day_view/${appointment.start_dt.year}/${appointment.start_dt.month}/${appointment.start_dt.day}"
+                   class="btn btn-link">Show Day</a>
+              </div>
+              <div class="span2">
+                <a href="/crm/appointment/month_view/${appointment.start_dt.year}/${appointment.start_dt.month}" 
+                   class="btn btn-link">Show Month</a>
+              </div>
+            </div>
+            % endif
           </div>  
           <div class="row">
             <div class="span2 offset8">

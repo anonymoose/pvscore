@@ -7,7 +7,11 @@
       ${h.hidden('customer_id', value=customer.customer_id)}
       <div class="row">
         <div class="span7">
+          % if customer.customer_id:
           <h1>Edit Customer</h1>  
+          % else:
+          <h1>New Customer</h1>  
+          % endif
         </div>
       </div>
       <div class="row">
@@ -154,6 +158,7 @@
       % endif
     </form>
   </div>
-  
+</div>
+
   
   

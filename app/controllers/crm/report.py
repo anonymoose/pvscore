@@ -1,6 +1,7 @@
 #import pdb
 import logging
 import math
+import datetime
 from app.controllers.base import BaseController
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -66,6 +67,10 @@ class ReportController(BaseController):
             products = util.select_list(Product.find_all(self.enterprise_id), 'product_id', 'name', True)
 
         return {
+            'today' : util.today_date(),
+            'thirty_ago' : util.today_date() - datetime.timedelta(days=30),
+            'rpt_end_dt' : self.request.GET.get('rpt_end_dt'),
+            'rpt_start_dt' : self.request.GET.get('rpt_start_dt'),
             'enterprise_id' : self.enterprise_id,
             'report' : report,
             'campaigns' : campaigns,
@@ -133,7 +138,7 @@ class ReportController(BaseController):
                              rpt_p0=rpt_p0,
                              rpt_p1=rpt_p1,
                              rpt_p2=rpt_p2)
-        
+
         count = db.get_value('select count(0) from (%s) x' % sql)
         total_pages = 0
         if count > 0:

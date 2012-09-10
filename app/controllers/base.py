@@ -3,6 +3,9 @@ import transaction
 from app.model.meta import Session
 from app.lib.geoip.geo import Geo
 from pyramid.httpexceptions import HTTPForbidden
+import logging
+
+log = logging.getLogger(__name__)
 
 class BaseUI(object):
 
@@ -38,8 +41,10 @@ class BaseController(BaseUI):
         self.session.flash(msg)
 
 
-    def forbid_if(self, result):
+    def forbid_if(self, result, msg=None):
         if result:
+            if msg:
+                log.info(msg)
             raise HTTPForbidden()
 
 

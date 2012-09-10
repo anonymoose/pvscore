@@ -34,6 +34,7 @@ class TestCrmUsers(TestController):
         Users.full_delete(username)
         self.commit()
 
+
     @secure
     def test_save_password(self):
         username = self._create_new()

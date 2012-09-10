@@ -116,7 +116,7 @@ class BaseModel(object):
     def delete(self):
         # invalidate the single load cache from load() and tell the object to
         # invalidate itself.
-        self._invalidate_self()
+        self.invalidate_self()
         try:
             self.invalidate_caches()
         except Exception as exc:   #pylint: disable-msg=W0703
@@ -126,7 +126,7 @@ class BaseModel(object):
 
     def soft_delete(self):
         # If there is a delete_dt attribute, then set it to "now" and save it.
-        self._invalidate_self()
+        self.invalidate_self()
         try:
             self.invalidate_caches()
             self.delete_dt = util.today()   #pylint: disable-msg=W0201
@@ -179,10 +179,10 @@ class BaseModel(object):
         """ KB: [2011-02-07]: Override this in your data class to invalidate caches related to individual load objects and
         lists that this object may be contained in.
         """
-        self._invalidate_self()
+        self.invalidate_self()
 
 
-    def _invalidate_self(self):
+    def invalidate_self(self):
         if self.__pk__:
             Session.query(self.__class__).options(FromCache('%s.load' % self.__class__.__name__,      #pylint: disable-msg=E1101
                                                             getattr(self, self.__pk__))).invalidate()
@@ -191,7 +191,7 @@ class BaseModel(object):
     def save(self):
         # invalidate the single load cache from load() and tell the object to
         # invalidate itself.
-        self._invalidate_self()
+        self.invalidate_self()
         try:
             self.invalidate_caches()
         except Exception as exc:   #pylint: disable-msg=W0703

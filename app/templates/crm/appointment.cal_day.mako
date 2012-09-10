@@ -17,22 +17,28 @@
       <hr/>
       
       <div id="div_calendar" style="width: 100%;">
-        <table id="day_calendar" class="table table-striped table-condensed"> 
+        <table id="" class="table table-striped table-condensed"> 
           <tbody>
-            % for hr in hours_list:
+            % for hr in hours_list[14:43]:
             <tr>
-              <td class="timeslot" style="">${hr[1]}</td>
-              <td class="timeslot">
+              <td>${hr[1]}</td>
+              <td>
                 <table>
-                  <tr>
-                    % for a in appointments:
-                    % if a.start_time == hr[0]:
-                    <td class="timeslot_appt">
-                      <a href="javascript:appointment_edit(${a.appointment_id})"><b>${a.title} ${a.phone}</b></a>
-                    </td>
-                    % endif
+                    <tr>
+                    % for i,a in enumerate(appointments):
+                      % if a.start_time == hr[0]:
+                        <td>
+                        % if a.customer_id:
+                          <a href="/crm/appointment/edit_for_customer/${a.customer_id}/${a.appointment_id}">
+                        % else:
+                          <a href="/crm/appointment/edit/${a.appointment_id}">
+                        % endif
+                        <b>${a.title} ${h.nvl(a.phone)}</b>
+                        </a>
+                        </td>
+                      % endif
                     % endfor
-                  </tr>
+                    </tr>
                 </table>
               </td>
             </tr>

@@ -1,12 +1,7 @@
 
-<%inherit file="customer.base.mako"/>\
+<%inherit file="customer.edit.base.mako"/>\
 
-% if not h.is_dialog():
-<p>
 <h3>Order List</h3>
-</p>
-<hr>
-% endif
 
 <table>
   <tr valign="top">
@@ -25,7 +20,7 @@
               <th nowrap>Status</th>
             </tr>
           </thead>
-        % if not len(c.orders):
+        % if not len(orders):
           <tr>
               <td>&nbsp;</td>
               <td>&nbsp;</td>
@@ -33,12 +28,12 @@
               <td style="width:200px;" colspan="5">No Orders Yet.</td>
           </tr>
         % endif
-        % for o in c.orders:
+        % for o in orders:
           <%
              due = o.total_payments_due()
            %>
           <tr order_id="${o.order_id}">
-            % if c.current_user.priv.modify_customer_order:
+            % if request.ctx.user.priv.modify_customer_order:
             <td>
               <img src="/public/images/icons/silk/page_edit.png" title="Edit Order (${o.order_id})" alt="Edit Order (${o.order_id})" border="0" onclick="customer_edit_order(${o.order_id})">
             </td>

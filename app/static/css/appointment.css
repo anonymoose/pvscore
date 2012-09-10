@@ -14,11 +14,11 @@
 #calendar td.previous {background: #EDF3FE;}
 #calendar td.weekend {background: #EFEFEF;}
 #calendar td.weekday {background: #FFFFFF;}
+#calendar td.today {background: #ffffdd;}
 #calendar a {
-	font-weight:bold;
 	text-decoration:none;
 }
-#calendar a:hover {color: #fff; background: #0033bb;}
+/*#calendar a:hover {color: #fff; background: #0033bb;}*/
 
 
 #day_calendar{ width: 98%; }
@@ -40,4 +40,4 @@
 	font-weight:bold;
 	text-decoration:none;
 }
-#day_calendar a:hover {color: #fff; background: #0033bb;}
+/*#day_calendar a:hover {color: #fff; background: #0033bb;}*/

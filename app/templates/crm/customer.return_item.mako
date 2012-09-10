@@ -1,7 +1,7 @@
 
 <%inherit file="customer.edit.base.mako"/>\
 
-<h1>Return <i><b>${order_item.product.name}</i></b></h1>
+<h1>Return <i><b>${order_item.product.name}</b></i></h1>
 
 <div class="container">  
   <form id="frm_return_item" method="POST" action="/crm/customer/return_item/${customer.customer_id}/${order.order_id}/${order_item.order_item_id}">
@@ -20,9 +20,7 @@
               <label>Credit Amount</label>
               $${h.text('credit_amount', class_="input-small", value=h.money(order_item.total()), onblur="customer_check_return_credit()")}
             </div>
-          </div>
-          <div class="row">
-            <div class="span3">
+            <div class="span2">
               <label class="radio">
                 <input type="radio" name="rt_refund_type" id="rt_creditincrease" checked="checked" value="CreditIncrease"/>
                 Store Credit
@@ -32,16 +30,13 @@
                 Refund
               </label>
             </div>
-            <div class="span3">
-              ${h.chkbox('update_inventory', checked=True, value=1, label='Update Inventory?')}
-            </div>
           </div>
         </div>
       </div>
     </div>
     <div class="row">
       <div class="span3 offset6">
-        <button type="submit" id="btn_return" class="btn btn-primary btn-large" autocomplete="off" data-loading-text="loading...">Return</button>
+        <button type="submit" name="btn_return" id="btn_return" class="btn btn-primary btn-large" autocomplete="off" data-loading-text="loading...">Return</button>
         <a href="/crm/customer/edit_order_dialog/${customer.customer_id}/${order.order_id}" class="btn btn-link btn-large">Cancel</a>
       </div>
     </div>

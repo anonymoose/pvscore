@@ -72,6 +72,10 @@ class Journal(ORMBase, BaseModel):
     creator = relation('Users')
 
 
+    def __repr__(self):
+        return '%s %s %s = %s' % (self.journal_id, self.type, self.method, self.amount)
+
+
     def cancel(self):
         self.delete_dt = util.today()
         self.save()

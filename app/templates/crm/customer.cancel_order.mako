@@ -20,7 +20,7 @@
 
     <div class="row">
       <div class="span3 offset6">
-        <button type="submit" id="btn_cancel" class="btn btn-primary btn-large" autocomplete="off" data-loading-text="loading...">Cancel Order</button>
+        <button type="submit" id="btn_cancel" name="btn_cancel" class="btn btn-primary btn-large" autocomplete="off" data-loading-text="loading...">Cancel Order</button>
         <a href="/crm/customer/show_orders/${customer.customer_id}" class="btn btn-link btn-large">Cancel</a>
       </div>
     </div>

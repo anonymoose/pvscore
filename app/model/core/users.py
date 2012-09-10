@@ -47,28 +47,6 @@ class Users(ORMBase, BaseModel):
     def get_user_types():
         return ["Internal", "External", "Reporting", "API", "Admin"]
 
-    # KB: [2011-04-14]: Make sure there is a priv object and that it is populated.
-    def post_load(self):
-        if not self.priv:
-            self.priv = UserPriv()
-            self.priv.view_customer = True
-            self.priv.view_product = True
-            self.priv.view_users = True
-            self.priv.add_customer_order = True
-            self.priv.add_customer_billing = True
-            self.priv.save()
-            self.save()
-            self.commit()
-
-    @staticmethod
-    def create(fname, lname, email, username, password):
-        usr = Users()
-        usr.fname = fname
-        usr.lname = lname
-        usr.email = email
-        usr.username = username
-        usr.password = password
-        return usr
 
     @staticmethod
     def authenticate(username, pwd):
@@ -78,10 +56,6 @@ class Users(ORMBase, BaseModel):
         return None != Session.query(Users).filter(
             and_(Users.username == username, 
                  Users.password == Users.encode_password(pwd))).first()
-
-    #@staticmethod
-    #def load(uid, pkey=False, cache=True):
-    #    return Users.find_by_uid(uid)
 
 
     @staticmethod
@@ -98,26 +72,49 @@ class Users(ORMBase, BaseModel):
     def encode_password(password):
         return md5(password).hexdigest()
 
+    # def post_load(self):
+    #     if not self.priv:
+    #         self.priv = UserPriv()
+    #         self.priv.view_customer = True
+    #         self.priv.view_product = True
+    #         self.priv.view_users = True
+    #         self.priv.add_customer_order = True
+    #         self.priv.add_customer_billing = True
+    #         self.priv.save()
+    #         self.save()
+    #         self.commit()
 
-    @staticmethod
-    def search(enterprise_id, username, fname, lname, email):
-        u_clause = f_clause = l_clause = e_clause = ''
-        if username:
-            u_clause = "and lower(username) like '%s%%'" % username.lower()
-        if fname:
-            f_clause = "and lower(fname) like '%s%%'" % fname.lower()
-        if lname:
-            l_clause = "and lower(lname) like '%s%%'" % lname.lower()
-        if email:
-            e_clause = "and lower(email) like '%s%%'" % email.lower()
-        sql = """SELECT * FROM core_user where 1=1 
-              and enterprise_id = {entid}
-              {uname} {fname} {lname} {email} """.format(uname=u_clause, 
-                                                         fname=f_clause, 
-                                                         lname=l_clause, 
-                                                         email=e_clause, 
-                                                         entid=enterprise_id)
-        return Session.query(Users).from_statement(sql).all()
+
+    # @staticmethod
+    # def create(fname, lname, email, username, password):
+    #     usr = Users()
+    #     usr.fname = fname
+    #     usr.lname = lname
+    #     usr.email = email
+    #     usr.username = username
+    #     usr.password = password
+    #     return usr
+
+
+    # @staticmethod
+    # def search(enterprise_id, username, fname, lname, email):
+    #     u_clause = f_clause = l_clause = e_clause = ''
+    #     if username:
+    #         u_clause = "and lower(username) like '%s%%'" % username.lower()
+    #     if fname:
+    #         f_clause = "and lower(fname) like '%s%%'" % fname.lower()
+    #     if lname:
+    #         l_clause = "and lower(lname) like '%s%%'" % lname.lower()
+    #     if email:
+    #         e_clause = "and lower(email) like '%s%%'" % email.lower()
+    #     sql = """SELECT * FROM core_user where 1=1 
+    #           and enterprise_id = {entid}
+    #           {uname} {fname} {lname} {email} """.format(uname=u_clause, 
+    #                                                      fname=f_clause, 
+    #                                                      lname=l_clause, 
+    #                                                      email=e_clause, 
+    #                                                      entid=enterprise_id)
+    #     return Session.query(Users).from_statement(sql).all()
 
 
     @staticmethod
@@ -129,6 +126,7 @@ class Users(ORMBase, BaseModel):
     @staticmethod
     def full_delete(username):
         Session.execute("delete from core_user where username = '%s'" % username)
+
 
 
 class UserPriv(ORMBase, BaseModel):
