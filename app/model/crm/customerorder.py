@@ -55,7 +55,7 @@ class CustomerOrder(ORMBase, BaseModel):
         for cart_item in cart.items:
             prd = Product.load(cart_item['product'].product_id)
             item = OrderItem()
-            item.order_id = cord.order_id
+            item.order = cord
             item.product = prd
             item.creator = user_created
             discount = prd.get_discount_price(campaign)
@@ -77,7 +77,7 @@ class CustomerOrder(ORMBase, BaseModel):
                 if children and len(children) > 0:
                     for kid in children:
                         child_item = OrderItem()
-                        child_item.order_id = cord.order_id
+                        child_item.order = cord.order
                         child_item.parent_id = item.order_item_id
                         child_item.product = kid.child
                         child_item.creator = user_created
@@ -96,7 +96,7 @@ class CustomerOrder(ORMBase, BaseModel):
     def augment_order(self, customer, product, campaign, user_created, quantity=0, incl_tax=True):
         enterprise_id = product.company.enterprise_id
         item = OrderItem()
-        item.order_id = self.order_id
+        item.order = self
         item.product = product
         item.creator = user_created
         discount = product.get_discount_price(campaign)
@@ -117,7 +117,7 @@ class CustomerOrder(ORMBase, BaseModel):
             if children and len(children) > 0:
                 for kid in children:
                     child_item = OrderItem()
-                    child_item.order_id = self.order_id
+                    child_item.order = self
                     child_item.parent_id = item.order_item_id
                     child_item.product = kid.child
                     child_item.creator = user_created

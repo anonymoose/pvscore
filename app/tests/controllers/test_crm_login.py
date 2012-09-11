@@ -13,11 +13,13 @@ class TestCrmLogin(TestController):
         R.mustcontain('CRM Login')
         self.app.reset()
 
+
     def test_login_empty(self):
         R = self.post('/crm/login')
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Invalid User or Password')
         self.app.reset()
+
 
     def test_valid(self):
         R = self.post('/crm/login', {'username': UID, 'password': PWD})
@@ -63,7 +65,7 @@ class TestCrmLogin(TestController):
         try:
             self.post('/crm/logout')
         except Exception as exc:
-            log.debug(exc)
+            pass  #log.debug(exc)
 
         
 
