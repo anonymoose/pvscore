@@ -10,7 +10,7 @@ git init .
 git add file1 file2
 git commit -m "initial"
 git remote a
-git remote add github https://kbedwell@bitbucket.org/kbedwell/proj.git
+git remote add github git@github.com:anonymoose/pvs-core.git
 git push -u github master
 
 
