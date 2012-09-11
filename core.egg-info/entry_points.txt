@@ -1,0 +1,5 @@
+      [paste.app_factory]
+      main = pvscore:main
+      [console_scripts]
+      initialize_pvscore_db = pvscore.scripts.initializedb:main
+      

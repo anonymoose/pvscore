@@ -3,6 +3,8 @@ import os
 from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
+README = open(os.path.join(here, 'README.txt')).read()
+CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'pyramid',
@@ -33,10 +35,10 @@ requires = [
     'pyflakes'
     ]
 
-setup(name='app',
+setup(name='pvscore',
       version='0.0',
-      description='app',
-      long_description='app',
+      description='pvscore',
+      long_description=README + '\n\n' +  CHANGES,
       classifiers=[
         "Programming Language :: Python",
         "Framework :: Pylons",
@@ -50,13 +52,13 @@ setup(name='app',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      test_suite='app',
+      test_suite='pvscore',
       install_requires=requires,
       entry_points="""\
       [paste.app_factory]
-      main = app:main
+      main = pvscore:main
       [console_scripts]
-      initialize_app_db = app.scripts.initializedb:main
+      initialize_pvscore_db = pvscore.scripts.initializedb:main
       """,
       )
 
