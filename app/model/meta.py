@@ -30,43 +30,6 @@ class BaseModel(object):
     def __init__(self):
         pass
 
-    def to_dict(self, maxlevel=2, level=0):
-        if level > maxlevel:
-            return
-
-        keys = [m for m in dir(self) if not m.startswith('_')
-                and (isinstance(getattr(self, m), list)
-                     or isinstance(getattr(self, m), int)
-                     or isinstance(getattr(self, m), str)
-                     or isinstance(getattr(self, m), unicode)
-                     or isinstance(getattr(self, m), float)
-                     or isinstance(getattr(self, m), datetime.date)
-                     or hasattr(getattr(self, m), 'to_dict'))]
-        data = {}
-        for key in keys:
-            val = getattr(self, key)
-            if isinstance(val, list):
-                data[key] = []
-                for j in val:
-                    if hasattr(j, 'to_dict'):
-                        dic = j.to_dict(maxlevel, level+1)
-                        if dic and len(dic) > 0:
-                            data[key].append(dic)
-                    elif isinstance(j, datetime.date):
-                        data[key] = str(j)
-                    else:
-                        data[key] = j
-            else:
-                if hasattr(val, 'to_dict'):
-                    dic = val.to_dict(maxlevel, level+1)
-                    if dic and len(dic) > 0:
-                        data[key] = dic
-                elif isinstance(val, datetime.date):
-                    data[key] = str(val)
-                else:
-                    data[key] = val
-        return data
-
 
     def to_json(self, maxlevel=2):
         return json.dumps(self.to_dict(), maxlevel)

@@ -107,6 +107,7 @@ class PurchaseOrderItem(ORMBase, BaseModel):
             log.debug(exc)
             return 0.0
 
+
     @staticmethod
     def find_by_product(product):
         return Session.query(PurchaseOrderItem)\
@@ -130,6 +131,7 @@ class PurchaseOrderItem(ORMBase, BaseModel):
         poi.note = note
         poi.save()
         return poi
+
 
 class Vendor(ORMBase, BaseModel):
     __tablename__ = 'crm_vendor'

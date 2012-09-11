@@ -97,14 +97,6 @@ class ReportCompanyJoin(ORMBase, BaseModel):
     company = relation('Company', lazy='joined', primaryjoin=Company.company_id == company_id)
 
     @staticmethod
-    def create_new(report_id, company_id):
-        rcj = ReportCompanyJoin()
-        rcj.report_id = report_id
-        rcj.company_id = company_id
-        rcj.save()
-        return rcj
-
-    @staticmethod
     def clear_by_company(company):
         Session.execute("delete from crm_report_company_join where company_id = %d" % int(company.company_id))
 
