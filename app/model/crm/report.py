@@ -42,6 +42,7 @@ class Report(ORMBase, BaseModel):
     create_dt = Column(Date, server_default = text('now()'))
     delete_dt = Column(Date)
 
+
     @staticmethod
     def find_all(only_show_vendor_reports=False):
         if not only_show_vendor_reports:
@@ -50,10 +51,12 @@ class Report(ORMBase, BaseModel):
             return Session.query(Report).filter(and_(Report.delete_dt == None,
                                                      Report.is_vendor == True)).order_by(Report.name).all()
 
+
     @staticmethod
     def find_default_by_company(company):
         return Session.query(Campaign).filter(and_(Campaign.delete_dt == None,
                                                    Campaign.company == company)).order_by(Campaign.create_dt.asc()).first()
+
 
     @staticmethod
     def search(name, company_id, only_show_vendor_reports=False):
@@ -64,7 +67,6 @@ class Report(ORMBase, BaseModel):
             cid_clause = "and rep.company_id = %d" % int(company_id)
         if only_show_vendor_reports:
             v_clause = "and rep.is_vendor = true"
-
         sql = """SELECT rep.* FROM crm_report rep
                  where 1=1
                  {n} {cid} {v}
@@ -79,6 +81,7 @@ class Report(ORMBase, BaseModel):
 
     def add_company(self, company_id):
         return ReportCompanyJoin.create_new(self.report_id, company_id)
+
 
     @staticmethod
     def full_delete(report_id):
@@ -96,9 +99,11 @@ class ReportCompanyJoin(ORMBase, BaseModel):
     report = relation('Report')
     company = relation('Company', lazy='joined', primaryjoin=Company.company_id == company_id)
 
+
     @staticmethod
     def clear_by_company(company):
         Session.execute("delete from crm_report_company_join where company_id = %d" % int(company.company_id))
+
 
     @staticmethod
     def clear_by_report(report):

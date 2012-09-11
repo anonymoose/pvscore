@@ -45,4 +45,3 @@ def command_line_main(settings):
     dbcache.init_cache_manager()
     return cfg.make_wsgi_app()
 
-
