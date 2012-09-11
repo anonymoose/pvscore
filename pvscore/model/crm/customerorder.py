@@ -117,7 +117,7 @@ class CustomerOrder(ORMBase, BaseModel):
             if children and len(children) > 0:
                 for kid in children:
                     child_item = OrderItem()
-                    child_item.order = self
+                    child_item.order = self  #pylint: disable-msg=W0201
                     child_item.parent_id = item.order_item_id
                     child_item.product = kid.child
                     child_item.creator = user_created

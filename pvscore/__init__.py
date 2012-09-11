@@ -16,7 +16,6 @@ def add_renderer_globals(event):
 
 
 def _config_impl(cfg):
-    import pdb; pdb.set_trace()
     cfg.include("pyramid_beaker")
     cfg.add_subscriber(add_renderer_globals, BeforeRender)
     cfg.add_static_view('static', 'static', cache_max_age=3600)

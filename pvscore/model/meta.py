@@ -1,8 +1,7 @@
 import logging
-import inspect, datetime, transaction
+import inspect, transaction
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-import simplejson as json
 import pvscore.lib.util as util
 import pvscore.lib.dbcache as dbcache
 from pvscore.lib.dbcache import FromCache
@@ -29,10 +28,6 @@ class BaseModel(object):
 
     def __init__(self):
         pass
-
-
-    def to_json(self, maxlevel=2):
-        return json.dumps(self.to_dict(), maxlevel)
 
 
     @classmethod

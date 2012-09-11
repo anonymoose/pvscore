@@ -1,31 +1,30 @@
 import logging
 from pvscore.model.meta import Session
 import pvscore.lib.util as util
-"""
-from pvscore.model.core.status import Status
-from pvscore.model.core.association import Association
-from pvscore.model.core.attribute import Attribute, AttributeValue
-from pvscore.model.crm.company import Company, Enterprise
-from pvscore.model.crm.campaign import Campaign
-from pvscore.model.crm.product import Product, ProductChild, ProductCategory, ProductCategoryJoin, ProductReturn, InventoryJournal
-from pvscore.model.crm.pricing import ProductPricing
-from pvscore.model.crm.customer import Customer
-from pvscore.model.crm.billing import Billing, BillingHistory
-from pvscore.model.crm.orderitem import OrderItem, OrderItemTermsAcceptance
-from pvscore.model.crm.customerorder import CustomerOrder
-from pvscore.model.crm.journal import Journal
-from pvscore.model.core.users import Users, UserPriv
-from pvscore.model.core.statusevent import StatusEvent
-from pvscore.model.core.statuseventreason import StatusEventReason
-from pvscore.model.crm.comm import Communication
-from pvscore.model.cms.site import Site
-from pvscore.model.core.kv import KeyValue
-from pvscore.model.core.asset import Asset
-from pvscore.model.crm.report import Report, ReportCompanyJoin
-from pvscore.model.crm.purchase import PurchaseOrder, PurchaseOrderItem, Vendor
-from pvscore.model.crm.discount import Discount
-from pvscore.model.crm.appointment import Appointment
-"""
+# from pvscore.model.core.status import Status
+# from pvscore.model.core.association import Association
+# from pvscore.model.core.attribute import Attribute, AttributeValue
+# from pvscore.model.crm.company import Company, Enterprise
+# from pvscore.model.crm.campaign import Campaign
+# from pvscore.model.crm.product import Product, ProductChild, ProductCategory, ProductCategoryJoin, ProductReturn, InventoryJournal
+# from pvscore.model.crm.pricing import ProductPricing
+# from pvscore.model.crm.customer import Customer
+# from pvscore.model.crm.billing import Billing, BillingHistory
+# from pvscore.model.crm.orderitem import OrderItem, OrderItemTermsAcceptance
+# from pvscore.model.crm.customerorder import CustomerOrder
+# from pvscore.model.crm.journal import Journal
+# from pvscore.model.core.users import Users, UserPriv
+# from pvscore.model.core.statusevent import StatusEvent
+# from pvscore.model.core.statuseventreason import StatusEventReason
+# from pvscore.model.crm.comm import Communication
+# from pvscore.model.cms.site import Site
+# from pvscore.model.core.kv import KeyValue
+# from pvscore.model.core.asset import Asset
+# from pvscore.model.crm.report import Report, ReportCompanyJoin
+# from pvscore.model.crm.purchase import PurchaseOrder, PurchaseOrderItem, Vendor
+# from pvscore.model.crm.discount import Discount
+# from pvscore.model.crm.appointment import Appointment
+
 log = logging.getLogger(__name__)
 
 def init_model(engine, **settings):

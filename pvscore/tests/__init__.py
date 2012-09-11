@@ -39,7 +39,7 @@ SITEDOMAIN = 'healthyustore.net'
 class TestController(TestCase):
 
     def setUp(self):
-        from app import command_line_main
+        from pvscore import command_line_main
         settings = paste.deploy.appconfig('config:unittest.ini', relative_to='.')
         app = command_line_main(settings)
         self.app = TestApp(app)
@@ -96,12 +96,12 @@ class TestController(TestCase):
             self.site = None
         except Exception as exc:
             logger.debug(exc)
-        self.core.reset()
+        self.app.reset()
         return True
 
 
     def get(self, url, params=None, headers=None):
-        resp = self.core.get(url, params=params, headers=self._get_headers(headers))
+        resp = self.app.get(url, params=params, headers=self._get_headers(headers))
         if resp.status_int in [302, 301]:
             resp = resp.follow()
             if resp.status_int in [302, 301]:
@@ -112,7 +112,7 @@ class TestController(TestCase):
     def post(self, url, params=None, headers=None):
         if params == None:
             params = {}
-        resp = self.core.post(url, params=params, headers=self._get_headers(headers))
+        resp = self.app.post(url, params=params, headers=self._get_headers(headers))
         if resp.status_int in [302, 301]:
             resp = resp.follow()
             if resp.status_int in [302, 301]:
