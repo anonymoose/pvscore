@@ -10,7 +10,6 @@ from pvscore.model.meta import ORMBase, BaseModel, Session
 import pvscore.lib.util as util
 from pvscore.model.core.users import Users
 from pvscore.model.crm.company import Company
-
 from hashlib import md5
 from pvscore.lib.dbcache import FromCache, invalidate
 import ConfigParser

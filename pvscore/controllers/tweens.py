@@ -5,7 +5,7 @@ from pvscore.model.crm.campaign import Campaign
 from pvscore.model.crm.company import Enterprise
 from pvscore.model.cms.site import Site
 from pvscore.model.core.users import Users
-from pyramid.httpexceptions import HTTPFound, HTTPForbidden
+from pyramid.httpexceptions import HTTPFound
 import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)

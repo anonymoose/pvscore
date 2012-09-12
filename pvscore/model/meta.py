@@ -37,14 +37,14 @@ class BaseModel(object):
             return None
         try:
             if not cache:
-                obj = Session.query(cls).filter("%s.%s = :val" % (cls.__tablename__, cls.__pk__)).params(val=pkey).one()    #pylint: disable-msg=E1101
+                obj = Session.query(cls).filter("%s.%s = :val" % (cls.__tablename__, cls.__pk__)).params(val=pkey).first()    #pylint: disable-msg=E1101
             else:
-                obj = Session.query(cls).options(FromCache('%s.load' % cls.__name__, pkey)).filter("%s.%s = :val" % (cls.__tablename__, cls.__pk__)).params(val=pkey).one()    #pylint: disable-msg=E1101
-            obj.post_load()
+                obj = Session.query(cls).options(FromCache('%s.load' % cls.__name__, pkey)).filter("%s.%s = :val" % (cls.__tablename__, cls.__pk__)).params(val=pkey).first()    #pylint: disable-msg=E1101
+            if obj:
+                obj.post_load()
             return obj
         except Exception as exc:
             raise exc
-        #return None
 
 
     @classmethod

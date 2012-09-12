@@ -20,7 +20,7 @@ def _config_impl(cfg, settings):
     init_model(engine, settings)
     cfg.include("pyramid_beaker")
     cfg.add_subscriber(add_renderer_globals, BeforeRender)
-    cfg.add_static_view('static', 'static', cache_max_age=3600)
+    cfg.add_static_view('static', 'pvscore:static', cache_max_age=3600)
     cfg.add_tween('pvscore.controllers.tweens.request_context_tween_factory')
     cfg.add_tween('pvscore.controllers.tweens.timing_tween_factory')
     crm_routes(cfg)

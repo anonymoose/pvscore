@@ -1,7 +1,7 @@
 import logging, os
 from pyramid.response import Response
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPFound, HTTPNotFound
+from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPForbidden
 from pyramid.renderers import render
 from mako.exceptions import TopLevelLookupException
 from pvscore.controllers.base import BaseController
@@ -79,23 +79,6 @@ class SiteController(BaseController):
         return HTTPFound('/cms/site/edit/%s' % site.site_id)
 
 
-    def show_page(self, pid):
-        return self.render(self.siteutil.show_page(pid))
-
-
-    def show_dynamic_page(self, root, mako):
-        return self.render(self.siteutil.show_dynamic_page(root, mako))
-
-
-    def show_css(self, template_id, css):
-        return self.render(self.siteutil.show_css(template_id, css))
-
-
-    def show_root(self):
-        return self.render(self.siteutil.show_root())
-
-
-
 def _load_customer(request):
     """ KB: [2012-09-12]: Get the customer_id from the various places it
     may be stashed.  session first."""
@@ -107,8 +90,8 @@ def _load_customer(request):
     elif 'customer_id' in request.GET:
         customer_id = request.GET.get('customer_id')
     customer = Customer.load(customer_id)
-    if customer:
-        if customer.campaign.company.enterprise_id != request.ctx.enterprise.enterprise_id:
+    if customer_id:
+        if not customer or customer.campaign.company.enterprise_id != request.ctx.enterprise.enterprise_id:
             raise HTTPForbidden()
     return customer
     
@@ -150,6 +133,7 @@ def dynamic_url_lookup(request):
                                 'matchdict' : matchdict},                                
                                request))
     except TopLevelLookupException as exc:
+        log.error(exc)
         raise HTTPNotFound()
 
 

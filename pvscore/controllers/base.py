@@ -29,6 +29,7 @@ class BaseController(BaseUI):
         self.request = request
         self.session = request.session
         self.enterprise_id = self.request.ctx.enterprise.enterprise_id
+        self.user = self.request.ctx.user
         super(BaseController, self).__init__()
 
 

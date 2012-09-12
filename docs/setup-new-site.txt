@@ -1,0 +1,48 @@
+cd ~/dev/pydev/pvs
+
+source bin/activate
+pcreate -s alchemy $name
+
+# Eventually replace the following with this:
+# http://pyramid.readthedocs.org/en/latest/narr/scaffolding.html
+
+cd $name
+edit setup.py
+
+# ensure that requires looks like so...
+      requires = [
+          'pyramid',
+          'SQLAlchemy',
+          'transaction',
+          'pyramid_tm',
+          'pyramid_debugtoolbar',
+          'zope.sqlalchemy',
+          'waitress',
+          'psycopg2',
+          'redis',
+          'html5lib',
+          'lxml',
+          'suds',
+          'pygeoip',
+          'tweepy',
+          'prettytable',
+          'Mako==0.7.2',
+          'simplejson',
+          'webhelpers',
+          'beaker',
+          'pyramid_beaker',
+          'decorator',
+          'webtest',
+          'nose',
+          'nose-exclude',
+          'pylint',
+          'pyflakes',
+          'feedparser'
+      ]
+      
+
+python setup.py develop
+
+# setup __init__.py to look like wm's
+# setup directory structure as empty, but like wm's
+# ensure that the scan in __init__.py is right for your new app

@@ -1,5 +1,9 @@
 from pvscore.tests import TestController, secure
 from pvscore.model.cms.site import Site
+from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPForbidden
+import logging
+
+log = logging.getLogger(__name__)
 
 # T pvscore.tests.controllers.test_cms_site
 
@@ -103,3 +107,18 @@ Disallow: /cms/cart/add/*""")
         R = self.get('/subdir1-subdir2-in_subdir_2/220/123')
         R.mustcontain('this is in subdir2 param0 = 220 param1 = 123 param2 = None')
         
+
+    def test_customer_found(self):
+        R = self.get('/customer?customer_id=220')
+        R.mustcontain('fname = Amy lname = Bedwell id = 220')
+
+
+    def test_customer_not_found(self):
+        try:
+            R = self.get('/customer?customer_id=9999')
+        except HTTPForbidden as forbid:
+            log.debug(forbid)
+            return
+        # should never get here.
+        self.assertEqual(True, False)
+
