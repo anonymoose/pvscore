@@ -205,34 +205,6 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
         Administration
         <b class="caret"></b></a>
       <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-        % if request.ctx.user.priv.cms:
-        <li class="dropdown-submenu">
-          <a tabindex="-1" href="#">Website</a>
-          <ul class="dropdown-menu">
-            <li><a href="/cms/site/list">List Websites</a></li>
-            <li><a href="/cms/site/new">New Website</a></li>
-          </ul>
-        </li>
-        % endif
-        
-        % if request.ctx.user.priv.view_product or request.ctx.user.priv.edit_product:
-        <li class="dropdown-submenu">
-          <a tabindex="-1" href="#">Products</a>
-          <ul class="dropdown-menu">
-            % if request.ctx.user.priv.edit_product:
-            <li><a href="/crm/product/new">Add New Product</a></li>
-            <li><a href="/crm/product/show_inventory">Edit Inventory</a></li>
-            % endif
-            <li><a href="/crm/product/list">List All Products</a></li>
-            % if request.ctx.user.priv.edit_category:
-            <li><a href="/crm/product/category/new">Add Product Category</a></li>
-            % endif
-            <li><a href="/crm/product/category/list">List Product Categories</a></li>
-          </ul>
-        </li>
-        % endif
-
-
         % if request.ctx.user.priv.edit_company or request.ctx.user.priv.view_company or request.ctx.user.priv.view_campaign or request.ctx.user.priv.edit_campaign or request.ctx.user.priv.view_enterprise or request.ctx.user.priv.edit_enterprise:
         <li class="dropdown-submenu">
           <a tabindex="-1" href="#">Company</a>
@@ -253,6 +225,49 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
         </li>
         % endif
 
+
+        % if request.ctx.user.priv.view_communication or request.ctx.user.priv.edit_communication:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Email</a>
+          <ul class="dropdown-menu">
+            % if request.ctx.user.priv.edit_communication:
+            <li><a href="/crm/communication/new">Add Template</a></li>
+            % endif
+            <li><a href="/crm/communication/list">List Templates</a> </li>
+          </ul>
+        </li>
+        % endif
+
+        % if request.ctx.user.priv.view_product or request.ctx.user.priv.edit_product:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Products</a>
+          <ul class="dropdown-menu">
+            % if request.ctx.user.priv.edit_product:
+            <li><a href="/crm/product/new">Add New Product</a></li>
+            <li><a href="/crm/product/show_inventory">Edit Inventory</a></li>
+            % endif
+            <li><a href="/crm/product/list">List All Products</a></li>
+            % if request.ctx.user.priv.edit_category:
+            <li><a href="/crm/product/category/new">Add Product Category</a></li>
+            % endif
+            <li><a href="/crm/product/category/list">List Product Categories</a></li>
+          </ul>
+        </li>
+        % endif
+
+
+        % if request.ctx.user.priv.view_report:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Reports</a>
+          <ul class="dropdown-menu">
+            % if request.ctx.user.priv.edit_report or request.ctx.user.priv.edit_users:
+            <li><a href="/crm/report/new">Add New Report</a></li>
+            % endif
+            <li><a href="/crm/report/list">List All Reports</a></li>
+          </ul>
+        </li>
+        % endif
+        
         % if request.ctx.user.priv.edit_purchasing or request.ctx.user.priv.view_purchasing:
         <li class="dropdown-submenu">
           <a tabindex="-1" href="#">Suppliers</a>
@@ -270,6 +285,28 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
         </li>
         % endif
         
+        % if request.ctx.user.priv.view_users or request.ctx.user.priv.edit_users:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Users</a>
+          <ul class="dropdown-menu">
+            % if request.ctx.user.priv.edit_users:
+            <li><a href="/crm/users/new">Add New User</a></li>
+            % endif
+            <li><a href="/crm/users/list">List All Users</a> </li>
+          </ul>
+        </li>
+        % endif
+
+        % if request.ctx.user.priv.cms:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Website</a>
+          <ul class="dropdown-menu">
+            <li><a href="/cms/site/list">List Websites</a></li>
+            <li><a href="/cms/site/new">New Website</a></li>
+          </ul>
+        </li>
+        % endif
+        
         % if request.ctx.user.priv.edit_event or request.ctx.user.priv.view_event:
         <li class="dropdown-submenu">
           <a tabindex="-1" href="#">Workflow</a>
@@ -282,41 +319,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
         </li>
         % endif
         
-        % if request.ctx.user.priv.view_communication or request.ctx.user.priv.edit_communication:
-        <li class="dropdown-submenu">
-          <a tabindex="-1" href="#">Email</a>
-          <ul class="dropdown-menu">
-            % if request.ctx.user.priv.edit_communication:
-            <li><a href="/crm/communication/new">Add Template</a></li>
-            % endif
-            <li><a href="/crm/communication/list">List Templates</a> </li>
-          </ul>
-        </li>
-        % endif
-        
-        % if request.ctx.user.priv.view_report:
-        <li class="dropdown-submenu">
-          <a tabindex="-1" href="#">Reports</a>
-          <ul class="dropdown-menu">
-            % if request.ctx.user.priv.edit_report or request.ctx.user.priv.edit_users:
-            <li><a href="/crm/report/new">Add New Report</a></li>
-            % endif
-            <li><a href="/crm/report/list">List All Reports</a></li>
-          </ul>
-        </li>
-        % endif
-        
-        % if request.ctx.user.priv.view_users or request.ctx.user.priv.edit_users:
-        <li class="dropdown-submenu">
-          <a tabindex="-1" href="#">Users</a>
-          <ul class="dropdown-menu">
-            % if request.ctx.user.priv.edit_users:
-            <li><a href="/crm/users/new">Add New User</a></li>
-            % endif
-            <li><a href="/crm/users/list">List All Users</a> </li>
-          </ul>
-        </li>
-        % endif
+
       </ul>
     </li>
 

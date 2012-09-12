@@ -102,7 +102,6 @@ class CachingQuery(Query):
 
     def set_value(self, value):
         """Set the value in the cache for this query."""
-
         cache_, cache_key = _get_cache_parameters(self)
         cache_.put(cache_key, value)
 
