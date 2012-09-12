@@ -38,7 +38,7 @@ class CustomerOrder(ORMBase, BaseModel):
     campaign = relation('Campaign')
     creator = relation('Users')
     status = relation('Status', lazy="joined")
-    items = relation('OrderItem', lazy="joined", backref=backref('order'), order_by='asc(OrderItem.order_item_id)')
+    items = relation('OrderItem', lazy="joined", order_by='asc(OrderItem.order_item_id)')
     journal_entries = relation('Journal', lazy="joined", backref=backref('order'), order_by='asc(Journal.journal_id)')
 
     @staticmethod
@@ -117,7 +117,7 @@ class CustomerOrder(ORMBase, BaseModel):
             if children and len(children) > 0:
                 for kid in children:
                     child_item = OrderItem()
-                    child_item.order = self  #pylint: disable-msg=W0201
+                    child_item.order = self
                     child_item.parent_id = item.order_item_id
                     child_item.product = kid.child
                     child_item.creator = user_created

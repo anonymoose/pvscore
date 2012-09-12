@@ -28,6 +28,7 @@ class OrderItem(ORMBase, BaseModel):
     parent_id = Column(Integer, ForeignKey('crm_order_item.order_item_id'))
     tax = Column(Float, default=0.0)
 
+    order = relation('CustomerOrder', lazy="joined")
     creator = relation('Users')
     product = relation('Product', lazy="joined")
     status = relation('Status')
