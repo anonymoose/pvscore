@@ -7,7 +7,7 @@ from pvscore.lib import helpers
 from pvscore.config.routes import crm_routes
 import pvscore.config as config
 import pvscore.lib.dbcache as dbcache
-
+from pvscore.controllers.cms.site import dynamic_url_lookup
 
 def add_renderer_globals(event):
     event['h'] = helpers
@@ -24,6 +24,7 @@ def _config_impl(cfg, settings):
     cfg.add_tween('pvscore.controllers.tweens.request_context_tween_factory')
     cfg.add_tween('pvscore.controllers.tweens.timing_tween_factory')
     crm_routes(cfg)
+    cfg.add_view(context='pyramid.exceptions.NotFound', view=dynamic_url_lookup)
     cfg.scan()
     cfg.commit()
     config.init_settings(settings)

@@ -1,4 +1,5 @@
 import logging, os
+from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.controllers.base import BaseController
@@ -92,3 +93,6 @@ class SiteController(BaseController):
 
 
 
+
+def dynamic_url_lookup(request):
+    return Response('Hello world!')

@@ -45,6 +45,7 @@ class Site(ORMBase, BaseModel):
     tax_method = Column(String(50))
     robots_txt = Column(Text)
     maintenance_mode = Column(Boolean, default=False)
+    namespace = Column(String(30))
 
     company = relation('Company', lazy='joined')
     default_campaign = relation('Campaign', lazy='joined')
