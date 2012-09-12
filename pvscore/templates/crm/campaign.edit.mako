@@ -67,7 +67,6 @@
           </div>
         </div>
       </div>
-      
       <div class="row">
         <div class="span6">
           <h3>Campaign Attributes</h3>

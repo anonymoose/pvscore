@@ -206,7 +206,13 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
         <b class="caret"></b></a>
       <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
         % if request.ctx.user.priv.cms:
-        <li><a href="/cms/siteedit/list">Website</a></li>
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Website</a>
+          <ul class="dropdown-menu">
+            <li><a href="/cms/site/list">List Websites</a></li>
+            <li><a href="/cms/site/new">New Website</a></li>
+          </ul>
+        </li>
         % endif
         
         % if request.ctx.user.priv.view_product or request.ctx.user.priv.edit_product:

@@ -126,7 +126,7 @@ class Company(ORMBase, BaseModel):
         invalidate(self, 'Company.find_all', self.enterprise_id)
         invalidate(self, 'Company.find_by_name', self.name)
         invalidate(self, 'Company.default_campaign', self.company_id)
-        for i in Site.find_all():
+        for i in Site.find_all(self.enterprise_id):
             i.invalidate_caches()
 
 
@@ -142,14 +142,17 @@ class Company(ORMBase, BaseModel):
               """.format(n=n_clause)
         return Session.query(Company).from_statement(sql).all()
 
+
     @property
     def web_full_directory(self):
         return "{root_dir}/{dirname}".format(root_dir=util.cache_get('pvs.company.web.root.dir'),
                                              dirname=self.web_directory)
 
+
     @property
     def web_directory(self):
         return md5(str(self.company_id)).hexdigest()
+
 
     def create_dir_structure(self):
         dirname = self.web_full_directory
@@ -158,9 +161,11 @@ class Company(ORMBase, BaseModel):
         util.mkdir_p("%s/script" % dirname)
         util.mkdir_p("%s/cache" % dirname)
 
+
     def company_web_directory(self, subdir):
         """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
         return "/companies/{dirname}/{subdir}".format(dirname=self.web_directory, subdir=subdir)
+
 
     def store_asset(self, asset_data, folder, fk_type, fk_id):
         """ KB: [2010-11-18]:

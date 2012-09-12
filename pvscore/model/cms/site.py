@@ -53,6 +53,7 @@ class Site(ORMBase, BaseModel):
     def __repr__(self):
         return '%s : %s' % (self.domain, self.company.name)
 
+
     def get_config(self):
         #dir = '/Users/kbedwell/dev/pydev/wm/app/sites/' + self.site_directory
         #cache_key = 'site.config.%s' % self.site_id
@@ -64,6 +65,7 @@ class Site(ORMBase, BaseModel):
             config.read(cfgfile)
             return config
 
+
 #    def get_shipping(self):
 #        from pvscore.lib.plugin import plugin_registry
 #        cfg = self.get_config()
@@ -71,21 +73,25 @@ class Site(ORMBase, BaseModel):
 #        pe = plugin_registry[shipping_type]
 #        return pe.obj
 
+
     @staticmethod
     def get_shipping_methods():
         return ['Flat', 'Per', 'Tiered', 'UPS', 'FedEx']
+
 
     @staticmethod
     def get_tax_methods():
         return ['Flat', 'No', 'Area']
 
+
     @staticmethod
-    def find_all():
+    def find_all(enterprise_id):
         return Session.query(Site) \
-            .options(FromCache('Site.find_all', BaseModel.get_enterprise_id())) \
+            .options(FromCache('Site.find_all', enterprise_id)) \
             .join((Company, Company.company_id == Site.company_id))\
-            .filter(Company.enterprise_id == BaseModel.get_enterprise_id())\
+            .filter(Company.enterprise_id == enterprise_id)\
             .order_by(Site.domain).all()
+
 
     @staticmethod
     def find_by_host(host):
@@ -107,20 +113,24 @@ class Site(ORMBase, BaseModel):
                 Site.domain_alias2==www_host,
                 Site.domain_alias2==short_host)).first()
 
+
     def invalidate_caches(self, **kwargs):
         invalidate(self, 'Site.find_by_host', self.domain)
         invalidate(self, 'Site.find_by_host', 'www.'+self.domain)
         invalidate(self, 'Site.find_all', self.company.enterprise_id)
 
 
+
     @property
     def site_full_directory(self):
-        return "{root_dir}/{dirname}".format(root_dir=util.cache_get('pvs.site.root.dir'),
+        return "{root_dir}/{dirname}".format(root_dir=util.nvl(util.cache_get('pvs.site.root.dir'), 'sites'),
                                              dirname=self.site_directory)
+
         
     @property
     def site_directory(self):
         return md5(str(self.site_id)).hexdigest()
+
 
     def create_dir_structure(self):
         dirname = self.site_full_directory
@@ -129,9 +139,11 @@ class Site(ORMBase, BaseModel):
         util.mkdir_p("%s/script" % dirname)
         util.mkdir_p("%s/cache" % dirname)
 
+
     def site_web_directory(self, subdir=''):
         """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
         return "/sites/{dirname}/{subdir}".format(dirname=self.site_directory, subdir=subdir)
+
 
 #    def store_asset(self, asset_data, folder):
 #        """ KB: [2010-11-18]:

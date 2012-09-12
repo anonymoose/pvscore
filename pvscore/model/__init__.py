@@ -4,7 +4,7 @@ import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
 
-def init_model(engine, **settings):
+def init_model(engine, settings):
     """
     import os
     app_extension = config['app_conf']['pvs.core.extension']

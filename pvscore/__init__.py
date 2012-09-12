@@ -15,9 +15,9 @@ def add_renderer_globals(event):
     event['tmpl_context'] = event['request'].tmpl_context
 
 
-def _config_impl(cfg, **settings):
+def _config_impl(cfg, settings):
     engine = engine_from_config(settings, 'sqlalchemy.')
-    init_model(engine, **settings)
+    init_model(engine, settings)
     cfg.include("pyramid_beaker")
     cfg.add_subscriber(add_renderer_globals, BeforeRender)
     cfg.add_static_view('static', 'static', cache_max_age=3600)
@@ -29,17 +29,18 @@ def _config_impl(cfg, **settings):
     config.init_settings(settings)
     dbcache.init_cache_manager()
 
-def init_pvscore(cfg, **settings):
-    _config_impl(cfg, **settings)
+
+def init_pvscore(cfg, settings):
+    _config_impl(cfg, settings)
 
 
 def command_line_main(settings):
     cfg = Configurator(settings=settings)
-    _config_impl(cfg)
+    _config_impl(cfg, settings)
     return cfg.make_wsgi_app()
 
 
 def main(global_config, **settings):   #pylint: disable-msg=W0613
     cfg = Configurator(settings=settings)
-    init_pvscore(cfg, **settings)
+    init_pvscore(cfg, settings)
     return cfg.make_wsgi_app()

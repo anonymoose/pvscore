@@ -1,4 +1,4 @@
-from pvscore.tests import TestController, UID, PWD, secure
+from pvscore.tests import TestController, UID, PWD
 import logging
 
 log = logging.getLogger(__name__)
@@ -60,12 +60,12 @@ class TestCrmLogin(TestController):
         self.app.reset()
 
         
-    @secure
-    def test_logout(self):
-        try:
-            self.post('/crm/logout')
-        except Exception as exc:
-            log.debug(exc)
+    # @secure
+    # def test_logout(self):
+    #     try:
+    #         self.post('/crm/logout')
+    #     except Exception as exc:
+    #         log.debug(exc)
 
         
 

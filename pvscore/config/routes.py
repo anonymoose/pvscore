@@ -159,32 +159,10 @@ def crm_routes(config):
     adrt('crm.customer.save_status', '/crm/customer/save_status/{customer_id}') # controller='crm/customer', action='save_status')
     adrt('crm.customer.get_balance', '/crm/customer/get_balance/{customer_id}') # controller='crm/customer', action='get_balance')
 
+
+    adrt('cms.site.new', '/cms/site/new') #, controller='cms/siteedit', action='new')
+    adrt('cms.site.edit', '/cms/site/edit/{site_id}') #, controller='cms/siteedit', action='edit')
+    adrt('cms.site.save', '/cms/site/save') #, controller='cms/siteedit', action='save')
+    adrt('cms.site.list', '/cms/site/list') #, controller='cms/siteedit', action='list')
+
     adrt('crm.dashboard', '/crm/dashboard')
-
-#    adrt('crm.cust.login.post', '/crm/customer_login', controller='crm/login', action='customer_login')
-#    adrt('crm.cust.login.forgot', '/crm/customer_forgot_password', controller='crm/login', action='customer_forgot_password')
-#    adrt('crm.cust.login.login_to_link', '/crm/customer_login_to_link/{key}/{link}', controller='crm/login', action='customer_login_to_link')
-#
-#
-#
-#
-#
-#    adrt('crm.discount.dialog', '/crm/discount/dialog/{subdir}/{dlg}', controller='crm/discount', action='dialog')
-#    adrt('crm.discount.new', '/crm/discount/new', controller='crm/discount', action='new')
-#    adrt('crm.discount.edit', '/crm/discount/edit/{discount_id}', controller='crm/discount', action='edit')
-#    adrt('crm.discount.save', '/crm/discount/save', controller='crm/discount', action='save')
-#    adrt('crm.discount.list', '/crm/discount/list', controller='crm/discount', action='list')
-#
-#
-#    adrt('api.product.list', '/api/product/list', controller='crm/product', action='list')
-#
-#    adrt('test.1', '/tsst/tsst_validate', controller='crm/tsst', action='tsst_validate')
-#    adrt('test.1', '/tsst/tsst_validate_session', controller='crm/tsst', action='tsst_validate')
-#    adrt('test.1', '/tsst/tsst_float', controller='crm/tsst', action='tsst_float')
-#    adrt('test.1', '/tsst/tsst_int', controller='crm/tsst', action='tsst_int')
-#    adrt('test.1', '/tsst/tsst_string', controller='crm/tsst', action='tsst_string')
-#    adrt('test.1', '/tsst/tsst_number', controller='crm/tsst', action='tsst_number')
-#    adrt('test.1', '/tsst/tsst_equals', controller='crm/tsst', action='tsst_equals')
-#    adrt('test.1', '/tsst/tsst_redirto', controller='crm/tsst', action='tsst_redirto')
-#    adrt('test.1', '/tsst/tsst_redirto_post', controller='crm/tsst', action='tsst_redirto_post')
-
