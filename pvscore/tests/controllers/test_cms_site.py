@@ -83,4 +83,23 @@ Disallow: /cms/cart/add/*""")
         camp.delete()
         self.commit()
 
+
+    def test_dynamic_root(self):
+        R = self.get('/')
+        R.mustcontain('this is the index')
+
+
+    def test_dynamic_file(self):
+        R = self.get('/dynamic1')
+        R.mustcontain('this is dynamic1.mako domain = %s' % self.site.domain)
+
+
+    def test_dynamic_1deep(self):
+        R = self.get('/subdir1-in_subdir_1/220/123')
+        R.mustcontain('this is in subdir1 param0 = 220 param1 = 123 param2 = None')
+        
+
+    def test_dynamic_2deep(self):
+        R = self.get('/subdir1-subdir2-in_subdir_2/220/123')
+        R.mustcontain('this is in subdir2 param0 = 220 param1 = 123 param2 = None')
         

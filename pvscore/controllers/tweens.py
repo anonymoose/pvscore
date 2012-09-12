@@ -5,7 +5,7 @@ from pvscore.model.crm.campaign import Campaign
 from pvscore.model.crm.company import Enterprise
 from pvscore.model.cms.site import Site
 from pvscore.model.core.users import Users
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound, HTTPForbidden
 import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
@@ -57,7 +57,6 @@ def request_context_tween_factory(handler, registry):
             request.tmpl_context.enterprise = request.ctx.enterprise
             request.tmpl_context.campaign = request.ctx.campaign
             request.tmpl_context.user = request.ctx.user
-    
         return handler(request)
     return request_context_tween
 
@@ -100,3 +99,4 @@ def _remember_user(request):
         request.ctx.user = Users.load(request.session['user_id'])
 
 
+        

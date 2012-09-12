@@ -43,8 +43,11 @@
             <label for="">&nbsp;</label>
             ${h.chkbox('maintenance_mode', checked=site.maintenance_mode, label='Maintenance Mode?')}
           </div>
+          <div class="span2">
+            <label for="">Namespace</label>
+            ${h.text('namespace', class_="input-small", value=site.namespace)}
+          </div>
         </div>
-        
         <div class="row">
           <div class="span3">
             <label for="">Title</label>
