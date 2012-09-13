@@ -21,8 +21,6 @@ ${self.pre_process()}
   </style>
   ${h.stylesheet_link('/static/bootstrap/css/bootstrap-responsive.css')}
   
-  ${h.stylesheet_link('/static/js/jquery/fancybox/jquery.fancybox-1.3.4.css')}
-  ${h.stylesheet_link('/static/js/jquery/autocomplete/jquery.autocomplete.css')}
   ${h.stylesheet_link('/static/js/jquery/jqgrid/css/ui.jqgrid.css')}
   ${h.stylesheet_link('/static/js/jquery/jquery-ui/css/ui-lightness/jquery-ui-1.8.23.custom.css')}
   ${h.stylesheet_link('/static/bootstrap-extensions/datepicker/css/datepicker.css')}
@@ -109,7 +107,6 @@ ${self.pre_process()}
 <script src="/static/js/jquery/validate/jquery.validate.min.js"></script>
 <script src="/static/js/jquery/validate/additional-methods.js"></script>
 <script src="/static/js/jquery/spinner/jquery.spinner.js"></script>
-<script src="/static/js/jquery/tablesorter/jquery.tablesorter.min.js"></script>
 <script src="/static/js/jquery/uploadify/swfobject.js"></script>
 <script src="/static/js/jquery/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
 <script src="/static/js/jquery/json/jquery.json-2.2.min.js"></script>
