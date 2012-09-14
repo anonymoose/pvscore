@@ -134,7 +134,7 @@ def dynamic_url_lookup(request):
                                request))
     except TopLevelLookupException as exc:
         log.error(exc)
-        raise HTTPNotFound()
+        return HTTPNotFound()
 
 
 
