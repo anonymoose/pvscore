@@ -5,7 +5,8 @@ from pvscore.model.crm.campaign import Campaign
 from pvscore.model.crm.company import Enterprise
 from pvscore.model.cms.site import Site
 from pvscore.model.core.users import Users
-from pyramid.httpexceptions import HTTPFound
+from pvscore.model.crm.customer import Customer
+from pyramid.httpexceptions import HTTPFound, HTTPForbidden
 import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
@@ -50,6 +51,9 @@ def request_context_tween_factory(handler, registry):
             if not request.ctx.enterprise:
                 _remember_enterprise(request)
                 
+            if not request.ctx.customer:
+                _remember_customer(request)
+
             if not request.ctx.user:
                 _remember_user(request)
 
@@ -92,6 +96,16 @@ def _remember_enterprise(request):
     else:
         request.ctx.enterprise = request.ctx.site.company.enterprise
         request.session['enterprise_id'] = request.ctx.enterprise.enterprise_id
+
+
+def _remember_customer(request):
+    if 'customer_id' in request.session:
+        request.ctx.customer = Customer.load(request.session['customer_id'])
+    elif 'customer_id' in request.params:
+        request.ctx.customer = Customer.load(request.params.get('customer_id'))
+    if request.ctx.customer:
+        if request.ctx.customer.campaign.company.enterprise_id != request.ctx.enterprise.enterprise_id:
+            raise HTTPForbidden()
 
 
 def _remember_user(request):

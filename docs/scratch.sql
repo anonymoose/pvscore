@@ -3591,3 +3591,8 @@ cs.event_id = csx.event_id and
   ('2012-09-07' is null or o.create_dt <= '2012-09-07')
 group by o.create_dt, cust.email,
   o.order_id, csx.display_name, cust.customer_id, o.user_created, o.shipping_total, o.handling_total;
+
+
+select domain, domain_alias0, domain_alias1, domain_alias2
+ from cms_site;
+

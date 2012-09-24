@@ -5,6 +5,7 @@ def crm_routes(config):
     adrt('crm.login', '/crm')
     adrt('crm.login.post', '/crm/login')
     adrt('crm.login.logout', '/crm/logout')
+    adrt('crm.login.customer', '/crm/customer_login')
 
     adrt('crm.campaign.list', '/crm/campaign/list')
     adrt('crm.campaign.new', '/crm/campaign/new')
@@ -164,5 +165,12 @@ def crm_routes(config):
     adrt('cms.site.edit', '/cms/site/edit/{site_id}') #, controller='cms/siteedit', action='edit')
     adrt('cms.site.save', '/cms/site/save') #, controller='cms/siteedit', action='save')
     adrt('cms.site.list', '/cms/site/list') #, controller='cms/siteedit', action='list')
+
+    adrt('crm.listing.remove', '/crm/listing/remove/{listing_id}')
+    adrt('crm.listing.json', '/crm/listing/json/{listing_id}')
+    adrt('crm.listing.show_add_picture', '/crm/listing/add_picture')
+    adrt('crm.listing.save', '/crm/listing/save')
+    adrt('crm.listing.upload', '/crm/listing/upload/{listing_id}')
+
 
     adrt('crm.dashboard', '/crm/dashboard')

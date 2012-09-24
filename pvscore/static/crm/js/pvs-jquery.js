@@ -1617,9 +1617,11 @@ pvs.button = function(){
 
         init : function(val) {
             //http://twitter.github.com/bootstrap/javascript.html#buttons
-            $('.btn[data-loading-text]').on('click', function () {
-                $(this).button('loading')
-            });
+            if ($('.btn[data-loading-text]').on) {
+                $('.btn[data-loading-text]').on('click', function () {
+                    $(this).button('loading')
+                });
+            }
         },
 
         reset : function(msg, title, onclick) {

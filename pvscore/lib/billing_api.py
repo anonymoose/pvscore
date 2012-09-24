@@ -14,17 +14,31 @@ class BaseBillingApi(object):
         """ KB: [2010-10-20]: this is called to get the right api for the application """
         if ('Stripe' == enterprise.billing_method):
             return StripeBillingApi()
+        else:
+            return NullBillingApi()
 
 
-    @abstractmethod
-    def purchase(self, order, billing):
-        pass
+    def purchase(self, order, billing, remote_ip):
+        return True
 
 
-    @abstractmethod
     def get_last_status(self):
         """ KB: [2010-10-21]: Return a (status, note) tuple """
         pass
+
+
+    def set_coupon(self, coupon):
+        pass
+
+
+    def is_declined(self):
+        return False
+
+
+class NullBillingApi(BaseBillingApi):
+    def __init__(self):
+        self.payment_method = 'Credit Card'
+        self.coupon = None
 
 
 class StripeBillingApi(BaseBillingApi):
@@ -38,15 +52,15 @@ class StripeBillingApi(BaseBillingApi):
 
     def  __init__(self):
         super(StripeBillingApi, self).__init__()
-        self.last_status = ''
-        self.last_note = ''
+        self.last_status = None
+        self.last_note = None
         self.payment_method = 'Credit Card'
         self.coupon = None
 
     def set_coupon(self, coupon):
         self.coupon = coupon
 
-    def purchase(self, order, billing, handler, remote_ip=None):
+    def purchase(self, order, billing, remote_ip=None):
         """ KB: [2012-09-10]: 
         If it's subscription, then subscribe this customer to the plan.
         Otherwise just hit them up non-recurring.
@@ -67,7 +81,6 @@ class StripeBillingApi(BaseBillingApi):
                     )
                 cust.third_party_id = stripe_cust.id
                 cust.save()
-                cust.commit()
 
             for oitem in order.active_items:
                 prod = oitem.product
@@ -94,6 +107,7 @@ class StripeBillingApi(BaseBillingApi):
             self.last_status = exc.code
             self.last_note = exc.message
         except Exception as exc2:
+            self.last_status = -1
             self.last_note = exc2.message
         return False
 
@@ -125,11 +139,14 @@ class StripeBillingApi(BaseBillingApi):
             self.last_note = exc2.message
         return False
 
+
     def _create_history(self, resp, order, billing, customer):
         pass
 
-    def is_declined(self, response_dict):
-        return False
+
+    def is_declined(self):
+        return (self.last_status is not None or self.last_note is not None)
+
 
     def get_last_status(self):
         return (self.last_status, self.last_note)

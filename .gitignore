@@ -2,6 +2,7 @@
 syntax: glob
 
 TAGS
+tags
 public/err.html
 *.elc
 *.pyc

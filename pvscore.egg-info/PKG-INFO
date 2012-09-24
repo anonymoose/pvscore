@@ -6,27 +6,7 @@ Home-page: UNKNOWN
 Author: UNKNOWN
 Author-email: UNKNOWN
 License: UNKNOWN
-Description: pvscore README
-        ==================
-        
-        Getting Started
-        ---------------
-        
-        - cd <directory containing this file>
-        
-        - $venv/bin/python setup.py develop
-        
-        - $venv/bin/populate_pvscore development.ini
-        
-        - $venv/bin/pserve development.ini
-        
-        
-        
-        0.0
-        ---
-        
-        -  Initial version
-        
+Description: pvscore
 Keywords: web wsgi bfg pylons pyramid
 Platform: UNKNOWN
 Classifier: Programming Language :: Python

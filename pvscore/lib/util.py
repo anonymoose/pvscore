@@ -465,6 +465,12 @@ def nvl(val, default=''):
     return val
 
 
+def request_ip(request):
+    if 'X-Real-Ip' in request.headers:
+        return request.headers['X-Real-Ip']
+    return '127.0.0.1'
+
+
 #def in_test_mode():
 #    from pylons import request
 #    try:

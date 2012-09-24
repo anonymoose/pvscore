@@ -35,6 +35,12 @@ class Billing(ORMBase, BaseModel):
     _cc_num = None
     _cc_cvv = None
 
+
+    def set_cc_num(self, num, cvv):
+        self._cc_num = num
+        self._cc_cvv = cvv
+
+
     @staticmethod
     def get_billing_types():
         return ['Credit Card']
@@ -76,7 +82,7 @@ class Billing(ORMBase, BaseModel):
         customer.save()
         Session.execute('delete from crm_billing_history where billing_id = %s' % self.billing_id)
         Session.delete(self)
-        Session.commit()
+
 
 class BillingHistory(ORMBase, BaseModel):
     __tablename__ = 'crm_billing_history'

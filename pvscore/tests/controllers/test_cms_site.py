@@ -1,6 +1,6 @@
 from pvscore.tests import TestController, secure
 from pvscore.model.cms.site import Site
-from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPForbidden
+from pyramid.httpexceptions import HTTPForbidden
 import logging
 
 log = logging.getLogger(__name__)
@@ -115,7 +115,7 @@ Disallow: /cms/cart/add/*""")
 
     def test_customer_not_found(self):
         try:
-            R = self.get('/customer?customer_id=9999')
+            self.get('/customer?customer_id=9999')
         except HTTPForbidden as forbid:
             log.debug(forbid)
             return

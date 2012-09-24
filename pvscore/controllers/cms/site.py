@@ -102,7 +102,7 @@ def dynamic_url_lookup(request):
     /fud/a/b                 -->  /${site.namespace}/fud.mako
                                     request.GET['param0'] = 'a'
                                     request.GET['param1'] = 'b'
-    /derf.fud/a/b            -->  /${site.namespace}/derf/fud.mako   <--    note the dot in the first part
+    /derf-fud/a/b            -->  /${site.namespace}/derf/fud.mako   <--    note the dash in the first part
                                     request.GET['param0'] = 'a'
                                     request.GET['param1'] = 'b'
     /  ("")                  -->  /${site.namespace}/index.mako

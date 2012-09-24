@@ -94,11 +94,9 @@ class IsCustomerLoggedIn(object):
     message = u'Customer must be logged'
 
     def check(self, controller):
-        """ KB: [2010-09-23]: If it's an API call, then @api_method() (core.lib.decorators.api) will handle security. """
-        if 'customer_logged_in' in controller.session and controller.session['customer_logged_in'] == True:
+        if 'customer_id' in controller.session and controller.session['customer_id'] is not None and controller.request.ctx.customer is not None:
             return True
         raise NotValidAuth(self.message)
-
 
     def handler(self, exc, controller):        #pylint: disable-msg=W0613
         """ TODO: KB: [2010-08-12]: Fix this to be dynamic by app """

@@ -6,6 +6,8 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from webhelpers.html import literal
 from pvscore.lib.dbcache import invalidate
+from pvscore.lib.mail import UserMail
+from pvscore.model.core.status import Status
 import logging
 
 log = logging.getLogger(__name__)
@@ -124,6 +126,7 @@ class Communication(ORMBase, BaseModel):
         else:
             return ''
 
+
     def tokenize(self, dat, customer, order):
         #pylint: disable-msg=W0612,W0613
         campaign = customer.campaign
@@ -138,20 +141,21 @@ class Communication(ORMBase, BaseModel):
             dat = dat.replace(tok, str(replacement if replacement else ''))
         return dat
 
+
     def add_token(self, key, value):
         self._other_tokens[key] = value
 
-#    def send_to_customer(self, sender, customer, order=None, extra_message=None, subject=None):
-#        pass
-#        """
-#        output = self.render(customer, order, extra_message)
-#        subject = subject if subject else self.tokenize(self.subject, customer, order)
-#        mail = UserMail(sender)
-#        mail.send(customer.email, subject, output)
-#        Status.add(customer, self, Status.find_event(self, 'SENT'), 'Sent %s (%s)' % (self.name, subject)).commit()
-#        return True
-#        """
-#
+
+    def send_to_customer(self, sender, customer, order=None, extra_message=None, subject=None):   #pylint: disable-msg=R0913
+        output = self.render(customer, order, extra_message)
+        subject = subject if subject else self.tokenize(self.subject, customer, order)
+        mail = UserMail(sender)
+        mail.send(customer.email, subject, output)
+        Status.add(customer, self, Status.find_event(customer.campaign.company.enterprise_id, self, 'SENT'),
+                   'Sent %s (%s)' % (self.name, subject))
+        return True
+
+
 #    def send_internal(self, sender, customer, order=None, extra_message=None, subject=None):
 #        pass
 #        """

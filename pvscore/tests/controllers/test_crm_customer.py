@@ -3,6 +3,7 @@ from pvscore.model.crm.customer import Customer
 from pvscore.model.crm.customerorder import CustomerOrder
 from pvscore.model.crm.orderitem import OrderItem
 from pvscore.model.core.status import Status
+from pvscore.model.crm.product import Product
 
 # T pvscore.tests.controllers.test_crm_customer
 
@@ -462,10 +463,52 @@ class TestCrmCustomer(TestController):
         self._delete_new(customer_id)
 
 
-
+    def test_signup(self):
+        R = self.post('/crm/customer/signup',
+                      {'fname' : 'Ken',
+                       'lname' : 'Bedwell',
+                       'email' : 'test@test.com',
+                       'password' : 'password',
+                       'confirmpassword' : 'password',
+                       'redir' : '/'
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params 
+        customer_id = R.request.params['customer_id']
+        cust = Customer.load(customer_id)
+        self.assertEqual(str(cust.customer_id), str(customer_id))
+        self.assertEqual(cust.fname, 'Ken')
+        self.assertEqual(cust.lname, 'Bedwell')
+        self.assertEqual(cust.email, 'test@test.com')
+        self._delete_new(customer_id)
         
 
+    def test_save_and_purchase(self):
+        R = self.post('/crm/customer/signup',
+                      {'fname' : 'Ken',
+                       'lname' : 'Bedwell',
+                       'email' : 'test@test.com',
+                       'password' : 'password',
+                       'confirmpassword' : 'password',
+                       'redir' : '/'
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params 
+        customer_id = R.request.params['customer_id']
+        cust = Customer.load(customer_id)
+        self.assertEqual(str(cust.customer_id), str(customer_id))
+        self.assertEqual(cust.fname, 'Ken')
+        self.assertEqual(cust.lname, 'Bedwell')
+        self.assertEqual(cust.email, 'test@test.com')
 
+        products = Product.find_by_campaign(self.site.default_campaign)
+        R = self.post('/crm/customer/save_and_purchase',
+                      {'fname' : 'Ken Test',
+                       'accept_terms' : '1',
+                       'product_sku' : products[0].sku})
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params
+        self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
+        self._delete_new(customer_id)        
 
-
-
+        

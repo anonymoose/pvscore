@@ -2,6 +2,7 @@ from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String
 from sqlalchemy.orm import relation, joinedload
 from pvscore.model.meta import ORMBase, BaseModel, Session
+from pvscore.lib.dbcache import FromCache, invalidate
 
 
 class Attribute(ORMBase, BaseModel):
@@ -23,8 +24,10 @@ class Attribute(ORMBase, BaseModel):
     @staticmethod
     def find(fk_type, attr_name):
         #pylint: disable-msg=E1101
-        return Session.query(Attribute).filter(and_(Attribute.fk_type == fk_type,
-                                                    Attribute.attr_name == attr_name)).first()
+        return Session.query(Attribute)\
+            .options(FromCache('Attribute.find.%s.%s' % (fk_type, attr_name)))\
+            .filter(and_(Attribute.fk_type == fk_type,
+                         Attribute.attr_name == attr_name)).first()
 
 
     @staticmethod
@@ -88,9 +91,11 @@ class AttributeValue(ORMBase, BaseModel):
     @staticmethod
     def find(attr, fk_id):
         #pylint: disable-msg=E1101
-        return Session.query(AttributeValue).filter(and_(AttributeValue.fk_type == attr.fk_type,
-                                                         AttributeValue.fk_id == fk_id,
-                                                         AttributeValue.attr_id == attr.attr_id)).first()
+        return Session.query(AttributeValue)\
+            .options(FromCache('AttributeValue.find.%s.%s' % (attr.attr_id, fk_id)))\
+            .filter(and_(AttributeValue.fk_type == attr.fk_type,
+                         AttributeValue.fk_id == fk_id,
+                         AttributeValue.attr_id == attr.attr_id)).first()
 
 
     @staticmethod

@@ -40,70 +40,6 @@ class Listing(ORMBase, BaseModel):
     company = relation('Company')
     status = relation('Status')
 
-    """ KB: [2011-07-13]: For now, just stuff it in Redis. """
-    def record_hit(self, ip, geo_ip, is_mobile):
-        now = util.now()
-        Redis.hincrby('LISTING:cmp|%s:c|%s:l|%s:y|%s:m|%s:d|%s'\
-                          % (self.company_id, self.customer_id, self.listing_id, now.year, now.month, now.day), '.', 1)
-        Redis.hincrby('LISTING:cmp|%s:c|%s:l|%s'\
-                          % (self.company_id, self.customer_id, self.listing_id), '.', 1)
-
-    @property
-    def hit_count(self):
-        val = Redis.hget('LISTING:cmp|%s:c|%s:l|%s'\
-                              % (self.company_id, self.customer_id, self.listing_id), '.')
-        return val if val else 0
-
-    @property
-    def hit_count_today(self):
-        now = util.now()
-        val = Redis.hget('LISTING:cmp|%s:c|%s:l|%s:y|%s:m|%s:d|%s'\
-                              % (self.company_id, self.customer_id, self.listing_id, now.year, now.month, now.day), '.')
-        return val if val else 0
-
-    @staticmethod
-    def _search_impl(kw, category, lat, lng, limit, radius_mi):
-        cl = SphinxClient()
-        cl.SetServer('localhost', 9312)
-        #cl.SetMatchMode(SPH_MATCH_ALL)
-        cl.SetMatchMode(SPH_MATCH_EXTENDED2)
-        cl.SetLimits(0, limit, 100)
-        cl.SetGeoAnchor('latitude', 'longitude', math.radians(lat), math.radians(lng))
-        circle = radius_mi * 1609.344
-        cl.SetFilterFloatRange('@geodist', 0.0, circle)
-        if category:
-            if kw:
-                q = '@category {cat} @(title,description) {kw}'.format(cat=category, kw=kw)
-            else:
-                q = '@category {cat}'.format(cat=category, kw=kw)
-        else:
-            q = '@(title,description) {kw}'.format(kw=kw)
-
-        res = cl.Query(q, '*')
-        if res and 'matches' in res and len(res['matches']) > 0:
-            return [str(m['id']) for m in res['matches']]
-
-    @staticmethod
-    def search(kw, category, lat, lng, radius_mi=10.0):  #radius in miles
-        # change this limit to something user configurable.
-        listing_ids = Listing._search_impl(kw, category, lat, lng, 20, radius_mi)
-        if listing_ids and len(listing_ids) > 0:
-            return Session.query(Listing)\
-                .filter(Listing.listing_id.in_(listing_ids)).all()
-
-    @staticmethod
-    def search_related(primary_search_results, kw, category, lat, lng, limit, radius_mi=100.0):
-        listing_ids = Listing._search_impl(kw, category, lat, lng, limit, radius_mi)
-        if listing_ids and len(listing_ids) > 0:
-            other_clause = ''
-            if primary_search_results and len(primary_search_results) > 0:
-                other_ids = [str(lst.listing_id) for lst in primary_search_results]
-                return Session.query(Listing)\
-                    .filter(and_(Listing.listing_id.in_(listing_ids),
-                                 not_(Listing.listing_id.in_(other_ids)))).all()
-            else:
-                return Session.query(Listing)\
-                    .filter(Listing.listing_id.in_(listing_ids)).all()
 
     """ KB: [2012-07-20]: This sucks completely. """
     @staticmethod
@@ -155,6 +91,71 @@ class Listing(ORMBase, BaseModel):
 
     def get_attrs(self):
         return Attribute.find_values(self)
+
+    # """ KB: [2011-07-13]: For now, just stuff it in Redis. """
+    # def record_hit(self, ip, geo_ip, is_mobile):
+    #     now = util.now()
+    #     Redis.hincrby('LISTING:cmp|%s:c|%s:l|%s:y|%s:m|%s:d|%s'\
+    #                       % (self.company_id, self.customer_id, self.listing_id, now.year, now.month, now.day), '.', 1)
+    #     Redis.hincrby('LISTING:cmp|%s:c|%s:l|%s'\
+    #                       % (self.company_id, self.customer_id, self.listing_id), '.', 1)
+
+    # @property
+    # def hit_count(self):
+    #     val = Redis.hget('LISTING:cmp|%s:c|%s:l|%s'\
+    #                           % (self.company_id, self.customer_id, self.listing_id), '.')
+    #     return val if val else 0
+
+    # @property
+    # def hit_count_today(self):
+    #     now = util.now()
+    #     val = Redis.hget('LISTING:cmp|%s:c|%s:l|%s:y|%s:m|%s:d|%s'\
+    #                           % (self.company_id, self.customer_id, self.listing_id, now.year, now.month, now.day), '.')
+    #     return val if val else 0
+
+    # @staticmethod
+    # def _search_impl(kw, category, lat, lng, limit, radius_mi):
+    #     cl = SphinxClient()
+    #     cl.SetServer('localhost', 9312)
+    #     #cl.SetMatchMode(SPH_MATCH_ALL)
+    #     cl.SetMatchMode(SPH_MATCH_EXTENDED2)
+    #     cl.SetLimits(0, limit, 100)
+    #     cl.SetGeoAnchor('latitude', 'longitude', math.radians(lat), math.radians(lng))
+    #     circle = radius_mi * 1609.344
+    #     cl.SetFilterFloatRange('@geodist', 0.0, circle)
+    #     if category:
+    #         if kw:
+    #             q = '@category {cat} @(title,description) {kw}'.format(cat=category, kw=kw)
+    #         else:
+    #             q = '@category {cat}'.format(cat=category, kw=kw)
+    #     else:
+    #         q = '@(title,description) {kw}'.format(kw=kw)
+
+    #     res = cl.Query(q, '*')
+    #     if res and 'matches' in res and len(res['matches']) > 0:
+    #         return [str(m['id']) for m in res['matches']]
+
+    # @staticmethod
+    # def search(kw, category, lat, lng, radius_mi=10.0):  #radius in miles
+    #     # change this limit to something user configurable.
+    #     listing_ids = Listing._search_impl(kw, category, lat, lng, 20, radius_mi)
+    #     if listing_ids and len(listing_ids) > 0:
+    #         return Session.query(Listing)\
+    #             .filter(Listing.listing_id.in_(listing_ids)).all()
+
+    # @staticmethod
+    # def search_related(primary_search_results, kw, category, lat, lng, limit, radius_mi=100.0):
+    #     listing_ids = Listing._search_impl(kw, category, lat, lng, limit, radius_mi)
+    #     if listing_ids and len(listing_ids) > 0:
+    #         other_clause = ''
+    #         if primary_search_results and len(primary_search_results) > 0:
+    #             other_ids = [str(lst.listing_id) for lst in primary_search_results]
+    #             return Session.query(Listing)\
+    #                 .filter(and_(Listing.listing_id.in_(listing_ids),
+    #                              not_(Listing.listing_id.in_(other_ids)))).all()
+    #         else:
+    #             return Session.query(Listing)\
+    #                 .filter(Listing.listing_id.in_(listing_ids)).all()
 
 
 class ListingFavorite(ORMBase, BaseModel):
