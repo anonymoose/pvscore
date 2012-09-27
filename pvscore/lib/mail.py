@@ -21,10 +21,9 @@ class UserMail(object):
 
 
     def send(self, to_addr, subject, text, *attachment_file_paths):
-        from_addr = self.sender.email
-        username = self.sender.smtp_username
-        password = self.sender.smtp_password
-
+        from_addr, server_info, username, password = self.sender.email_info
+        server, port = server_info.split(':')
+        
         msg = MIMEMultipart()
         msg['From'] = from_addr
         msg['To'] = to_addr
@@ -32,7 +31,7 @@ class UserMail(object):
         msg.attach(MIMEText(text, 'html'))
         for path in attachment_file_paths:
             msg.attach(self.get_attachment(path))
-        server, port = self.sender.smtp_server.split(':')
+
         mailServer = smtplib.SMTP(server, int(port))
         mailServer.ehlo()
         try:

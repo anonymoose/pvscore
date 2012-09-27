@@ -3606,3 +3606,4 @@ alter table crm_enterprise add column     smtp_password varchar(50);
 alter table crm_enterprise add column     imap_server varchar(50);
 alter table crm_enterprise add column     imap_username varchar(50);
 alter table crm_enterprise add column     imap_password varchar(50);
+alter table crm_enterprise add column email varchar(50);

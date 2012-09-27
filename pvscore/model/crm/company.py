@@ -57,7 +57,7 @@ class Company(ORMBase, BaseModel):
     @property
     def email_info(self):
         if self.smtp_server is not None and self.smtp_username is not None:
-            return self.smtp_server, self.smtp_username, self.smtp_password
+            return self.email, self.smtp_server, self.smtp_username, self.smtp_password
         return self.enterprise.email_info
 
 
@@ -234,7 +234,7 @@ class Enterprise(ORMBase, BaseModel):
 
     @property
     def email_info(self):
-        return self.smtp_server, self.smtp_username, self.smtp_password
+        return self.email, self.smtp_server, self.smtp_username, self.smtp_password
 
 
     @staticmethod
