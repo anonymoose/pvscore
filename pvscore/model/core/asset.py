@@ -6,6 +6,7 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.lib.dbcache import FromCache, invalidate
 
+
 class Asset(ORMBase, BaseModel):
     __tablename__ = "core_asset"
     __pk__ = 'id'
@@ -59,3 +60,8 @@ class Asset(ORMBase, BaseModel):
             return ast
 
 
+    def get_listing(self):
+        # KB: [2012-09-27]: if this is applicable you'll know it.
+        # otherwise it will barf.
+        from pvscore.model.crm.listing import Listing
+        return Listing.load(self.fk_id)

@@ -1,4 +1,4 @@
-from pvscore.bin import pylons_script, log
+from pvscore.bin import pyramid_script, log
 from pvscore.model.crm.customer import Customer
 from pvscore.model.crm.product import Product, InventoryJournal
 from pvscore.model.crm.pricing import ProductPricing
@@ -13,7 +13,7 @@ import pvscore.lib.db as db
 """
 python -c 'from pvscore.bin.load_products import dump_product_list; dump_product_list(4, "/Users/kbedwell/dev/pydev/wm/extensions/ext_pvs/pvs/sitetemplates/amy/inventory.csv")' -I ../extensions/ext_pvs/pvs/dev.ini
 """
-@pylons_script
+@pyramid_script
 def dump_product_list(company_id, filename='/tmp/products.csv'):
     company = Company.load(company_id)
     dc = company.default_campaign
@@ -40,7 +40,7 @@ def dump_product_list(company_id, filename='/tmp/products.csv'):
 """
 python -c 'from pvscore.bin.load_products import import_product_list; import_product_list(4, "/Users/kbedwell/dev/pydev/wm/extensions/ext_pvs/pvs/sitetemplates/amy/inventory.csv")' -I ../extensions/ext_pvs/pvs/dev.ini
 """
-@pylons_script
+@pyramid_script
 def import_product_list(company_id, filename='/tmp/products.csv'):
     company = Company.load(company_id)
     dc = company.default_campaign
@@ -81,7 +81,7 @@ def import_product_list(company_id, filename='/tmp/products.csv'):
 """ KB: [2010-11-04]: 
 python -c 'from pvscore.bin.load_products import import_pricing; import_pricing("/Users/kbedwell/dev/pydev/wm/extensions/ext_pvs/pvs/docs/inventory.csv", 5, 4, 6)' -I ../extensions/ext_pvs/pvs/dev.ini
 """
-@pylons_script
+@pyramid_script
 def import_pricing(filename, company_id, campaign_id_retail, campaign_id_patients):
     company = Company.load(company_id)
     campaign_retail = Campaign.load(campaign_id_retail)
@@ -129,7 +129,7 @@ def import_pricing(filename, company_id, campaign_id_retail, campaign_id_patient
 """ KB: [2010-11-04]: 
 python -c 'from pvscore.bin.load_products import import_images; import_images("pvs/docs/lst", 5, 4)' -I pvs/dev.ini
 """
-@pylons_script
+@pyramid_script
 def import_images(filename, company_id, campaign_id):
     company = Company.load(company_id)
     campaign = Campaign.load(campaign_id)

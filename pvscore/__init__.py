@@ -9,6 +9,7 @@ import pvscore.config as config
 import pvscore.lib.dbcache as dbcache
 from pvscore.controllers.cms.site import dynamic_url_lookup
 
+
 def add_renderer_globals(event):
     event['h'] = helpers
     event['c'] = event['request'].tmpl_context

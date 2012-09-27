@@ -86,7 +86,7 @@ class LoginController(BaseController):
                 return HTTPFound(self.request.POST.get('redir'))
         else:
             self.flash('Invalid User or Password')
-            raise HTTPFound(request.referrer)
+            raise HTTPFound(self.request.referrer)
 
 
     @validate((('username', 'string'),
