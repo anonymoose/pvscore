@@ -43,6 +43,42 @@
         </div>
       </div>
 
+      <h3>Email</h3>
+      <div class="well">
+        <div class="row">
+          <div class="span3">
+            <label for="email">Email</label>
+            ${h.text('email', size=50, value=the_enterprise.email)}
+          </div>
+          <div class="span3">
+            <label for="smtp_username">SMTP Username</label>
+            ${h.text('smtp_username', size=50, value=the_enterprise.smtp_username)}
+          </div>
+          <div class="span3">
+            <label for="smtp_password">SMTP Password</label>
+            ${h.password('smtp_password', size=50, value=the_enterprise.smtp_password)}
+          </div>
+          <div class="span2">
+            <label for="smtp_server">SMTP Server</label>
+            ${h.text('smtp_server', size=50, value=the_enterprise.smtp_server)}
+          </div>
+        </div>
+        <div class="row">
+          <div class="span3 offset3">
+            <label for="imap_username">IMAP Username</label>
+            ${h.text('imap_username', size=50, value=the_enterprise.imap_username)}
+          </div>
+          <div class="span3">
+            <label for="imap_password">IMAP Password</label>
+            ${h.password('imap_password', size=50, value=the_enterprise.imap_password)}
+          </div>
+          <div class="span2">
+            <label for="imap_server">IMAP Server</label>
+            ${h.text('imap_server', size=50, value=the_enterprise.imap_server)}
+          </div>
+        </div>
+      </div>
+
       <div class="row">
         <div class="span6">
           <h3>Company Attributes</h3>

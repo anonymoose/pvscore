@@ -346,8 +346,9 @@ def to_dict(obj, maxlevel=2, level=0, data=None):
 
 def cache_get(key):
     red = redis.StrictRedis(host='localhost', port=6379, db=0)
-    red.get(key)
+    ret = red.get(key)
     red.connection_pool.disconnect()
+    return ret
 
 
 def cache_set(key, value):

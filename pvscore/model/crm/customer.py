@@ -68,7 +68,7 @@ class Customer(ORMBase, BaseModel):
     orders = relation('CustomerOrder', lazy="joined", order_by="desc(CustomerOrder.order_id)")
     campaign = relation('Campaign', lazy="joined")
     status = relation('Status', backref=backref('customer'))
-    billing = relation('Billing')
+    billing = relation('Billing', lazy="joined")
 
     def __repr__(self):
         return '%s : %s %s %s' % (self.customer_id, self.email, self.fname, self.lname)

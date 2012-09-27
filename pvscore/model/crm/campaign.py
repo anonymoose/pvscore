@@ -37,6 +37,14 @@ class Campaign(ORMBase, BaseModel):
     def __repr__(self):
         return '%s : %s' % (self.campaign_id, self.name)
 
+
+    @property
+    def email_info(self):
+        if self.smtp_server is not None and self.smtp_username is not None:
+            return self.smtp_server, self.smtp_username, self.smtp_password
+        return self.company.email_info
+    
+
     @staticmethod
     def create(name, company):
         camp = Campaign()

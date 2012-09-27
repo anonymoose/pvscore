@@ -7,7 +7,6 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from hashlib import md5
 
-
 class Users(ORMBase, BaseModel):
     __tablename__ = 'core_user'
     __pk__ = 'username'
@@ -40,8 +39,17 @@ class Users(ORMBase, BaseModel):
     priv = relation('UserPriv', lazy='joined')
     vendor = relation('Vendor')
 
+
+    @property
+    def email_info(self):
+        if self.smtp_server is not None and self.smtp_username is not None:
+            return self.smtp_server, self.smtp_username, self.smtp_password
+        return self.enterprise.email_info
+
+
     def is_vendor_user(self):
         return self.vendor_id != None
+
 
     @staticmethod
     def get_user_types():

@@ -160,7 +160,6 @@ def crm_routes(config):
     adrt('crm.customer.save_status', '/crm/customer/save_status/{customer_id}') # controller='crm/customer', action='save_status')
     adrt('crm.customer.get_balance', '/crm/customer/get_balance/{customer_id}') # controller='crm/customer', action='get_balance')
 
-
     adrt('cms.site.new', '/cms/site/new') #, controller='cms/siteedit', action='new')
     adrt('cms.site.edit', '/cms/site/edit/{site_id}') #, controller='cms/siteedit', action='edit')
     adrt('cms.site.save', '/cms/site/save') #, controller='cms/siteedit', action='save')
@@ -170,7 +169,7 @@ def crm_routes(config):
     adrt('crm.listing.json', '/crm/listing/json/{listing_id}')
     adrt('crm.listing.show_add_picture', '/crm/listing/add_picture')
     adrt('crm.listing.save', '/crm/listing/save')
-    adrt('crm.listing.upload', '/crm/listing/upload/{listing_id}')
+    adrt('crm.listing.upload', '/crm/listing/upload/{listing_id}/{hash}')
 
 
     adrt('crm.dashboard', '/crm/dashboard')

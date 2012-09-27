@@ -47,11 +47,18 @@ class Company(ORMBase, BaseModel):
 
     default_campaign_id = Column(Integer)
 
-    enterprise = relation('Enterprise', backref=backref('companies', order_by='Company.name'))
+    enterprise = relation('Enterprise', lazy="joined", backref=backref('companies', order_by='Company.name'))
     status = relation('Status')
 
     def __repr__(self):
         return '%s : %s' % (self.company_id, self.name)
+
+
+    @property
+    def email_info(self):
+        if self.smtp_server is not None and self.smtp_username is not None:
+            return self.smtp_server, self.smtp_username, self.smtp_password
+        return self.enterprise.email_info
 
 
     def get_all_active_products(self):
@@ -213,8 +220,21 @@ class Enterprise(ORMBase, BaseModel):
     delete_dt = Column(Date)
     billing_method = Column(String(50))
 
+    email = Column(String(50))
+    smtp_server = Column(String(50))
+    smtp_username = Column(String(50))
+    smtp_password = Column(String(50))
+    imap_server = Column(String(50))
+    imap_username = Column(String(50))
+    imap_password = Column(String(50))
+
     def __repr__(self):
         return '%s : %s' % (self.enterprise_id, self.name)
+
+
+    @property
+    def email_info(self):
+        return self.smtp_server, self.smtp_username, self.smtp_password
 
 
     @staticmethod

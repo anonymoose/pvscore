@@ -5,7 +5,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.lib.validate import validate
 from pvscore.lib.decorators.authorize import authorize
-from pvscore.lib.auth_conditions import IsLoggedIn
+from pvscore.lib.auth_conditions import IsLoggedIn, IsCustomerLoggedIn
 from pvscore.model.crm.customer import Customer
 from pvscore.model.crm.product import Product, ProductReturn, InventoryJournal
 from pvscore.model.crm.campaign import Campaign
@@ -733,7 +733,6 @@ class CustomerController(BaseController):
  
             self._apply_payment(cust.customer_id, order.order_id, order.total_price(), api.payment_method)
             try:
-                import pdb; pdb.set_trace()
                 campaign.send_post_purchase_comm(order)
             except Exception as exc:
                 log.warning(exc)
@@ -750,68 +749,80 @@ class CustomerController(BaseController):
             #BaseController.cancel_self.session()
             raise HTTPFound(self.request.referrer)
 
-#    @authorize(IsCustomerLoggedIn())
-#    def self_save_billing(self):
-#        """ KB: [2012-01-31]: Called from end site customer self-edit section. """
-#        self.forbid_if('customer_id' not in self.session or 'redir' not in self.request.POST)
-#        cust = Customer.load(self.session['customer_id'])
-#        self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
-#        bill = cust.billing
-#        if not bill:
-#            bill = Billing.create(cust, True)
-#
-#        bill._cc_num = self.request.POST.get('bill_cc_num')
-#        bill._cc_cvv = self.request.POST.get('bill_cc_cvv')
-#        bill.cc_exp = self.request.POST.get('bill_cc_exp')
-#        bill.cc_token = self.request.POST.get('bill_cc_token')
-#        if 'bill_exp_month' in self.request.POST and 'bill_exp_year' in self.request.POST:
-#            bill.cc_exp = self.request.POST.get('bill_exp_month') + '/' + self.request.POST.get('bill_exp_year')
-#
-#        bill.bind(self.request.POST, False, 'bill')
-#        bill.save()
-#        cust.save()
-#        self.db_flush()
-#        
-#        api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
-#        if api:
-#            if api.update_billing(cust, bill):
-#                Status.add(cust, cust, Status.find_event(self.enterprise_id, cust, 'NOTE'), 'Billing Updated at gateway')
-#
-#        self.flash('Successfully saved billing information.')
-#        return HTTPFound(self.request.POST.get('redir'))
 
+    @view_config(route_name='crm.customer.self_save')
+    @authorize(IsCustomerLoggedIn())
+    def self_save(self):
+        # if they didn't provide a password, don't record blank.
+        if self.request.POST.get('password') is None:
+            del self.request.POST['password']
+        # fix this.  double lookup of customer is lame.
+        return self._save(self.request.ctx.customer.customer_id)
 
-#    @authorize(IsCustomerLoggedIn())
-#    def self_cancel_order(self):
-#        """ KB: [2011-04-07]: If the order id is specified, then cancel that order, otherwise, cancel every active order.
-#        User has to specify username and password to confirm cancellation.
-#        """
-#        self.forbid_if('customer_id' not in self.session)
-#        cust = Customer.load(self.session['customer_id'])
-#        self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
-#        self.forbid_if('username' not in self.request.POST or 'password' not in self.request.POST)
-#
-#        if cust.email.lower() != self.request.POST.get('username').lower() or cust.password != self.request.POST.get('password'):
-#            self.flash('Username or password incorrect.  Unable to cancel.')
-#            return HTTPFound(self.request.referrer)
-#
-#        if self.request.POST.get('order_id'):
-#            self._cancel_order_impl(self.session['customer_id'],
-#                                    self.request.POST.get('order_id'),
-#                                    None, True)
-#        else:
-#            for cord in cust.get_active_orders():
-#                self._cancel_order_impl(cust.customer_id,
-#                                        cord.order_id,
-#                                        None, True)
-#        self.flash('Order cancelled.')
-#
-#        cust.campaign.send_post_cancel_comm(cust)
-#        if self.request.POST.get('redir'):
-#            return HTTPFound(self.request.POST.get('redir'))
-#        else:
-#            return HTTPFound(self.request.referrer)
+    
+    @view_config(route_name='crm.customer.self_save_billing')
+    @authorize(IsCustomerLoggedIn())
+    def self_save_billing(self):
+        """ KB: [2012-01-31]: Called from end site customer self-edit section. """
+        cust = self.request.ctx.customer
+        self.forbid_if(cust.campaign.company.enterprise_id != self.enterprise_id)
+        bill = cust.billing
+        if not bill:
+            bill = Billing.create(cust, True)
+ 
+        bill._cc_num = self.request.POST.get('bill_cc_num')
+        bill._cc_cvv = self.request.POST.get('bill_cc_cvv')
+        bill.cc_exp = self.request.POST.get('bill_cc_exp')
+        bill.cc_token = self.request.POST.get('bill_cc_token')
+        if 'bill_exp_month' in self.request.POST and 'bill_exp_year' in self.request.POST:
+            bill.cc_exp = self.request.POST.get('bill_exp_month') + '/' + self.request.POST.get('bill_exp_year')
+ 
+        bill.bind(self.request.POST, False, 'bill')
+        bill.save()
+        cust.save()
+        self.db_flush()
+        api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
+        if api:
+            if api.update_billing(cust, bill):
+                Status.add(cust, cust, Status.find_event(self.enterprise_id, cust, 'NOTE'),
+                           'Billing Updated at gateway')
+        self.flash('Successfully saved billing information.')
+        cust.invalidate_caches()
+        if self.request.POST.get('redir'):
+            return HTTPFound(self.request.POST.get('redir'))
+        else:
+            return HTTPFound(self.request.referrer)
+ 
 
+    @view_config(route_name='crm.customer.self_cancel_order')
+    @authorize(IsCustomerLoggedIn())
+    def self_cancel_order(self):
+        """ KB: [2011-04-07]: If the order id is specified, then cancel that order, otherwise, cancel every active order.
+        User has to specify username and password to confirm cancellation.
+        """
+        cust = self.request.ctx.customer
+        self.forbid_if(cust.campaign.company.enterprise_id != self.enterprise_id)
+        self.forbid_if('username' not in self.request.POST or 'password' not in self.request.POST)
+ 
+        if cust.email.lower() != self.request.POST.get('username').lower() or cust.password != self.request.POST.get('password'):
+            self.flash('Username or password incorrect.  Unable to cancel.')
+            return HTTPFound(self.request.referrer)
+ 
+        if self.request.POST.get('order_id'):
+            self._cancel_order_impl(self.request.POST.get('order_id'),
+                                    None, True)
+        else:
+            for cord in cust.get_active_orders():
+                self._cancel_order_impl(cord.order_id,
+                                        None, True)
+        self.flash('Order cancelled.')
+        cust.invalidate_caches()
+        cust.campaign.send_post_cancel_comm(cust)
+        if self.request.POST.get('redir'):
+            return HTTPFound(self.request.POST.get('redir'))
+        else:
+            return HTTPFound(self.request.referrer)
+ 
 
 
 #    def signup_and_purchase(self):

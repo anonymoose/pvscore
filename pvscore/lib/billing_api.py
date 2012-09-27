@@ -116,11 +116,10 @@ class StripeBillingApi(BaseBillingApi):
         stripe.api_key = cust.campaign.company.enterprise.get_attr('stripe_private_key')
         if cust.third_party_id:
             stripe_cust = stripe.Customer.retrieve(cust.third_party_id)
-        else: return False
-
+        else:
+            return False
         stripe_cust.card = bill.cc_token
         stripe_cust.save()
-
         return True
 
     def cancel_order(self, order, billing):

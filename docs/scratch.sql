@@ -3596,3 +3596,13 @@ group by o.create_dt, cust.email,
 select domain, domain_alias0, domain_alias1, domain_alias2
  from cms_site;
 
+
+
+alter table crm_enterprise add column 
+
+alter table crm_enterprise add column     smtp_server varchar(50);
+alter table crm_enterprise add column     smtp_username varchar(50);
+alter table crm_enterprise add column     smtp_password varchar(50);
+alter table crm_enterprise add column     imap_server varchar(50);
+alter table crm_enterprise add column     imap_username varchar(50);
+alter table crm_enterprise add column     imap_password varchar(50);

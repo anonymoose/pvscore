@@ -1,4 +1,4 @@
-import pdb, math
+import pdb, math, logging
 from sqlalchemy import Column, ForeignKey, and_, not_
 from sqlalchemy.types import Integer, String, Date, Numeric, Text, Boolean, DateTime, Float
 from sqlalchemy.orm import relation, backref
@@ -10,6 +10,9 @@ from pvscore.model.core.asset import Asset
 import pvscore.lib.db as db
 import pvscore.lib.util as util
 from pvscore.model.core.attribute import Attribute, AttributeValue
+from hashlib import md5
+
+log = logging.getLogger(__name__)
 
 class Listing(ORMBase, BaseModel):
     __tablename__ = 'pvs_listing'
@@ -41,9 +44,15 @@ class Listing(ORMBase, BaseModel):
     status = relation('Status')
 
 
-    """ KB: [2012-07-20]: This sucks completely. """
+    @property
+    def hash(self):
+        salt = 'derf'
+        return md5('%s%s%s%s' % (self.company_id, self.customer_id, self.listing_id, salt)).hexdigest()
+
+
     @staticmethod
     def find_by_title_and_description_and_keywords(title, description, keywords, company):
+        """ KB: [2012-07-20]: This sucks completely. """
         olist = db.get_object_list(Listing, """
                     select * from pvs_listing where
                      trim(both from title) = trim(both from '{title}')

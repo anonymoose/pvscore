@@ -74,7 +74,7 @@ class ListingController(BaseController):
             }
 
     
-    @view_config(route_name='crm.listing.add_picture', renderer="/crm/listing.add_picture.mako")
+    @view_config(route_name='crm.listing.show_add_picture', renderer="/crm/listing.add_picture.mako")
     @authorize(IsCustomerLoggedIn())
     def add_picture(self):
         return {}
@@ -116,19 +116,22 @@ class ListingController(BaseController):
                 ass.fk_id = lis.listing_id
                 ass.save()
 
-        Status.add(cust, l, Status.find_event(self.enterprise_id, l, 'OPEN'),
+        Status.add(cust, lis, Status.find_event(self.enterprise_id, lis, 'OPEN'),
                    'Listing Created: %s' % self.request.POST.get('title'))
-        self.flash('Listing: "%s" saved' % l.title)
-        return HTTPFound('%s?listing_id=%s&post=1' % (redir, l.listing_id))
+        self.flash('Listing: "%s" saved' % lis.title)
+        return HTTPFound('%s?listing_id=%s&post=1' % (redir, lis.listing_id))
 
 
     @view_config(route_name='crm.listing.upload', renderer='string')
-    @authorize(IsCustomerLoggedIn())
+    # KB: [2012-09-26]: we can't use IsCustomerLoggedIn() here because flash doesn't
+    # respect sessions.  the .../{hash} parameter ensures that uploads
+    # are secure.
     def upload_asset(self):
         """ KB: [2011-03-23]: Take this file and hash its name up to put it in a sensible directory. """
-        listing_id = self.request.matchdict('listing_id')
+        listing_id = self.request.matchdict.get('listing_id')
+        listing_hash = self.request.matchdict.get('hash')
         lis = Listing.load(listing_id)
-        self.forbid_if(not lis)
+        self.forbid_if(not lis or lis.hash != listing_hash)
         site = self.request.ctx.site
         asset_data = self.request.POST['Filedata']
         filename = md5('%s%s' % (asset_data.filename, listing_id)).hexdigest()
@@ -154,7 +157,8 @@ class ListingController(BaseController):
             ass.save()
             Status.add(lis.customer, lis, Status.find_event(self.enterprise_id, lis, 'ASSET_UPLOAD'),
                        '%s = %s' % (asset_data.filename, filename))
-            return str(a.id)
+            return str(ass.id)
+        
 
 
     # def category_search(self, category_id, category=None):

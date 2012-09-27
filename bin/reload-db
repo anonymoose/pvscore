@@ -1,0 +1,21 @@
+#!/bin/bash
+
+
+# ./reload-db.sh pvs02 retail
+# ./reload-db.sh wm01 wm
+
+export svr=$1
+export db=$2
+
+set -x
+
+ssh $svr "rm production-$svr-$db.sql.gz"
+ssh $svr "pg_dump -U $db -O -c $db > production-$svr-$db.sql"
+ssh $svr "gzip production-$svr-$db.sql"
+
+rm ../backup/production-$svr-$db.sql.gz
+rm ../backup/production-$svr-$db.sql
+scp kbedwell@$svr:/home/kbedwell/production-$svr-$db.sql.gz ../backup/
+gunzip ../backup/production-$svr-$db.sql.gz
+psql -U $db -d $db -f ../backup/production-$svr-$db.sql
+
