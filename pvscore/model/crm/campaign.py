@@ -120,14 +120,14 @@ class Campaign(ORMBase, BaseModel):
             #    comm.send_internal(self, customer, None)
 
 
-    def get_product_specials(self):
-        from pvscore.model.crm.product import Product
-        return Product.find_specials_by_campaign(self)
+    # def get_product_specials(self):
+    #     from pvscore.model.crm.product import Product
+    #     return Product.find_specials_by_campaign(self)
 
 
-    def get_product_features(self):
-        from pvscore.model.crm.product import Product
-        return Product.find_featured_by_campaign(self)
+    # def get_product_features(self):
+    #     from pvscore.model.crm.product import Product
+    #     return Product.find_featured_by_campaign(self)
 
 
     def clear_attributes(self):

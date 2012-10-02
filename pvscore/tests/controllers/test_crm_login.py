@@ -59,7 +59,21 @@ class TestCrmLogin(TestController):
         R.mustcontain('Dashboard')
         self.app.reset()
 
-        
+
+    def test_customer_login(self):
+        R = self.post('/crm/customer_login', {'username': 'amers_j@yahoo.com', 'password': 'geology'})
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('this is the index')
+        self.app.reset()
+
+    def test_customer_login_invalid(self):
+        R = self.post('/crm/customer_login', {'username': 'amers_j@yahoo.com', 'password': 'bogus'})
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('this is the index')
+        self.assertEqual(R.request.path, '/')
+        self.app.reset()
+
+
     # @secure
     # def test_logout(self):
     #     try:

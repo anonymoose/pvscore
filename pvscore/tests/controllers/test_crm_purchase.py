@@ -110,8 +110,11 @@ class TestCrmPurchase(TestController):
         R = self.get('/crm/purchase/show_search')
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Purchase Order Search')
+        
         f = R.forms['frm_purchase_search']
         f.set('vendor_id', 21)
+        f.set('from_dt', '2000-01-01')
+        f.set('to_dt', '2040-01-01')
         R = f.submit()
         R.mustcontain('Purchase Order Search')
         R.mustcontain('2011-06-21')

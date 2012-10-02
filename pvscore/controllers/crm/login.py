@@ -1,4 +1,4 @@
-import logging, random
+import logging
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.controllers.base import BaseController
@@ -90,35 +90,37 @@ class LoginController(BaseController):
                 return HTTPFound('/')
         else:
             self.flash('Invalid User or Password')
-            raise HTTPFound(self.request.referrer)
+            raise HTTPFound(self.request.referrer if self.request.referrer else '/')
 
 
-    @validate((('username', 'string'),
-               ('username', 'required')))
-    def customer_forgot_password(self):
-        """ KB: [2011-03-13]: Try to be at least a little sneaky.  Don't give any hints as to valid user accounts, etc.
-        If we don't find that email address then just redir back to /.
-        """
-        uid = self.request.POST.get('username')
-        if not uid:
-            raise HTTPFound('/')
 
-        cust = Customer.find_by_company(uid, self.request.ctx.site.company)
-        if not cust:
-            raise HTTPFound('/')
 
-        # reset the customer's password to something random.
-        cust.password = '%s%s%s' % (chr(random.randint(65, 90)),
-                                    chr(random.randint(97, 122)),
-                                    str(random.randint(100000, 999999)))
-        cust.save()
+    # @validate((('username', 'string'),
+    #            ('username', 'required')))
+    # def customer_forgot_password(self):
+    #     """ KB: [2011-03-13]: Try to be at least a little sneaky.  Don't give any hints as to valid user accounts, etc.
+    #     If we don't find that email address then just redir back to /.
+    #     """
+    #     uid = self.request.POST.get('username')
+    #     if not uid:
+    #         raise HTTPFound('/')
 
-        self.request.ctx.campaign.send_forgot_password_comm(cust)
-        self.flash('Your new password has been sent to the email address you provided.')
-        if self.request.POST.get('redir'):
-            return HTTPFound(self.request.POST['redir'])
-        else:
-            return HTTPFound('/')
+    #     cust = Customer.find_by_company(uid, self.request.ctx.site.company)
+    #     if not cust:
+    #         raise HTTPFound('/')
+
+    #     # reset the customer's password to something random.
+    #     cust.password = '%s%s%s' % (chr(random.randint(65, 90)),
+    #                                 chr(random.randint(97, 122)),
+    #                                 str(random.randint(100000, 999999)))
+    #     cust.save()
+
+    #     self.request.ctx.campaign.send_forgot_password_comm(cust)
+    #     self.flash('Your new password has been sent to the email address you provided.')
+    #     if self.request.POST.get('redir'):
+    #         return HTTPFound(self.request.POST['redir'])
+    #     else:
+    #         return HTTPFound('/')
 
 
 #    """ KB: [2011-06-28]:

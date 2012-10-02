@@ -1,6 +1,9 @@
 from unittest import TestCase
 from pvscore.controllers.base import BaseController
 from pyramid.httpexceptions import HTTPForbidden
+import logging
+
+log = logging.getLogger(__name__)
 
 # bin/T pvscore.tests.functional.test_base
 
@@ -12,7 +15,7 @@ class TestBase(TestCase):
             tst.it_is_forbidden()
             self.assertEqual(True, False)
         except HTTPForbidden as forbidden:
-            print forbidden
+            log.info(forbidden)
             excepted = True
         self.assertEqual(excepted, True)
 

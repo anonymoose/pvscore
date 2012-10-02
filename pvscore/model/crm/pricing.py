@@ -1,5 +1,4 @@
 #pylint: disable-msg=E1101
-import datetime
 from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String, Date, Float
 from sqlalchemy.orm import relation
@@ -39,9 +38,9 @@ class ProductPricing(ORMBase, BaseModel):
                          ProductPricing.delete_dt == None)).all()
 
 
-    def delete(self):
-        self.delete_dt = datetime.datetime.date(datetime.datetime.now()) 
-        self.save()
+    # def delete(self):
+    #     self.delete_dt = datetime.datetime.date(datetime.datetime.now()) 
+    #     self.save()
 
     def invalidate_caches(self, **kwargs):
         pid = self.product_id if self.product_id else (self.product.product_id if self.product else None)

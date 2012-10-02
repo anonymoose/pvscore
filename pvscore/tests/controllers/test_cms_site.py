@@ -116,7 +116,7 @@ Disallow: /cms/cart/add/*""")
         try:
             self.get('/subdir1-notthere-in_subdir_2/220/123')
         except Exception as notfound:
-            print notfound
+            log.info(notfound)
             excepted = True
         self.assertEqual(excepted, True)
         

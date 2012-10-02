@@ -69,10 +69,10 @@ class PurchaseOrder(ORMBase, BaseModel):
                          .all()
 
                          
-    @staticmethod
-    def full_delete(purchase_order_id):
-        Session.execute('delete from crm_purchase_order_item where purchase_order_id = %s' % purchase_order_id)
-        Session.execute('delete from crm_purchase_order where purchase_order_id = %s' % purchase_order_id)
+    # @staticmethod
+    # def full_delete(purchase_order_id):
+    #     Session.execute('delete from crm_purchase_order_item where purchase_order_id = %s' % purchase_order_id)
+    #     Session.execute('delete from crm_purchase_order where purchase_order_id = %s' % purchase_order_id)
 
 
     def invalidate_caches(self, **kwargs):
@@ -120,17 +120,17 @@ class PurchaseOrderItem(ORMBase, BaseModel):
                          .all()
 
 
-    @staticmethod
-    def create_new(purchase_order, product, quantity, unit_cost, discount=0.0, note=None):
-        poi = PurchaseOrderItem()
-        poi.purchase_order = purchase_order
-        poi.product = product
-        poi.quantity = quantity
-        poi.unit_cost = unit_cost
-        poi.discount = discount
-        poi.note = note
-        poi.save()
-        return poi
+    # @staticmethod
+    # def create_new(purchase_order, product, quantity, unit_cost, discount=0.0, note=None):
+    #     poi = PurchaseOrderItem()
+    #     poi.purchase_order = purchase_order
+    #     poi.product = product
+    #     poi.quantity = quantity
+    #     poi.unit_cost = unit_cost
+    #     poi.discount = discount
+    #     poi.note = note
+    #     poi.save()
+    #     return poi
 
 
 class Vendor(ORMBase, BaseModel):

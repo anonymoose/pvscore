@@ -85,46 +85,45 @@ class Product(ORMBase, BaseModel):
         return db.get_result_dict(['product_id', 'name', 'unit_cost', 'retail_price', 'wholesale_price', 'discount_price'], sql)
 
 
+    # @staticmethod
+    # def find_names_by_name_and_campaign(enterprise_id, name, limit, campaign):
+    #     sql = """select p.product_id, p.name, p.unit_cost, pp.retail_price, pp.wholesale_price, pp.discount_price from
+    #                                              crm_product p, crm_company com, crm_enterprise ent,
+    #                                              crm_product_pricing pp
+    #                                              where lower(p.name) like '%%{n}%%'
+    #                                              and p.delete_dt is null
+    #                                              and p.company_id = com.company_id
+    #                                              and pp.campaign_id = {campaign_id}
+    #                                              and pp.product_id = p.product_id
+    #                                              and com.enterprise_id = {ent_id}
+    #                                              order by p.name limit {lim}""".format(n=name.lower(),
+    #                                                                                    lim=limit,
+    #                                                                                    campaign_id=campaign.campaign_id,
+    #                                                                                    ent_id=enterprise_id)
+    #     return db.get_result_dict(['product_id', 'name', 'unit_cost', 'retail_price', 'wholesale_price', 'discount_price'], sql)
+
+
+    # @staticmethod
+    # def find_all_active(company):
+    #     return Session.query(Product) \
+    #         .filter(and_(Product.delete_dt == None,
+    #                      Product.company_id == company.company_id))\
+    #                      .order_by(Product.vendor_id, Product.name) \
+    #                  .all()
+
+
     @staticmethod
-    def find_names_by_name_and_campaign(enterprise_id, name, limit, campaign):
-        sql = """select p.product_id, p.name, p.unit_cost, pp.retail_price, pp.wholesale_price, pp.discount_price from
-                                                 crm_product p, crm_company com, crm_enterprise ent,
-                                                 crm_product_pricing pp
-                                                 where lower(p.name) like '%%{n}%%'
-                                                 and p.delete_dt is null
-                                                 and p.company_id = com.company_id
-                                                 and pp.campaign_id = {campaign_id}
-                                                 and pp.product_id = p.product_id
-                                                 and com.enterprise_id = {ent_id}
-                                                 order by p.name limit {lim}""".format(n=name.lower(),
-                                                                                       lim=limit,
-                                                                                       campaign_id=campaign.campaign_id,
-                                                                                       ent_id=enterprise_id)
-
-        return db.get_result_dict(['product_id', 'name', 'unit_cost', 'retail_price', 'wholesale_price', 'discount_price'], sql)
-
-
-    @staticmethod
-    def find_all_active(company):
-        return Session.query(Product) \
-            .filter(and_(Product.delete_dt == None,
-                         Product.company_id == company.company_id))\
-                         .order_by(Product.vendor_id, Product.name) \
-                     .all()
-
-
-    @staticmethod
-    def find_all(enterprise_id, for_web=False):
-        if for_web:
-            return Session.query(Product).options(FromCache('Product.find_all_for_web', enterprise_id)) \
-                .join((Company, Product.company_id == Company.company_id)) \
-                .filter(and_(Product.delete_dt == None,
-                             Company.enterprise_id == enterprise_id,
-                             Product.web_visible == True)) \
-                             .order_by(Product.name) \
-                             .all()
-        else:
-            return Session.query(Product).options(FromCache('Product.find_all', enterprise_id)) \
+    def find_all(enterprise_id):
+        # if for_web:
+        #     return Session.query(Product).options(FromCache('Product.find_all_for_web', enterprise_id)) \
+        #         .join((Company, Product.company_id == Company.company_id)) \
+        #         .filter(and_(Product.delete_dt == None,
+        #                      Company.enterprise_id == enterprise_id,
+        #                      Product.web_visible == True)) \
+        #                      .order_by(Product.name) \
+        #                      .all()
+        # else:
+        return Session.query(Product).options(FromCache('Product.find_all', enterprise_id)) \
             .join((Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
                          Company.enterprise_id == enterprise_id
@@ -188,14 +187,14 @@ class Product(ORMBase, BaseModel):
         return Product._find_by_campaign_impl(campaign, for_catalog, False, False)
 
 
-    @staticmethod
-    def find_specials_by_campaign(campaign, for_catalog=False):
-        return Product._find_by_campaign_impl(campaign, for_catalog, True, False)
+    # @staticmethod
+    # def find_specials_by_campaign(campaign, for_catalog=False):
+    #     return Product._find_by_campaign_impl(campaign, for_catalog, True, False)
 
 
-    @staticmethod
-    def find_featured_by_campaign(campaign, for_catalog=False):
-        return Product._find_by_campaign_impl(campaign, for_catalog, False, True)
+    # @staticmethod
+    # def find_featured_by_campaign(campaign, for_catalog=False):
+    #     return Product._find_by_campaign_impl(campaign, for_catalog, False, True)
 
 
     @staticmethod

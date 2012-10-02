@@ -85,16 +85,16 @@ class Catalog(object):
         return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_web_ready_by_campaign(self.campaign)], offset, limit)
 
 
-#    def get_web_ready_unpriced_products(self, offset=None, limit=None):
-#        return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_web_ready_unpriced_by_campaign(self.campaign)], offset, limit)
+    # def get_web_ready_unpriced_products(self, offset=None, limit=None):
+    #     return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_web_ready_unpriced_by_campaign(self.campaign)], offset, limit)
 
 
-    def get_specials(self, offset=None, limit=None):
-        return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_specials_by_campaign(self.campaign)], offset, limit)
+    # def get_specials(self, offset=None, limit=None):
+    #     return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_specials_by_campaign(self.campaign)], offset, limit)
 
 
-    def get_featured(self, offset=None, limit=None):
-        return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_featured_by_campaign(self.campaign)], offset, limit)
+    # def get_featured(self, offset=None, limit=None):
+    #     return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_featured_by_campaign(self.campaign)], offset, limit)
 
 
     def get_best_sellers(self, offset=None, limit=None):
