@@ -59,9 +59,9 @@ class Attribute(ORMBase, BaseModel):
         return avl
 
 
-    def get(self, obj):
-        avl = AttributeValue.find(self, getattr(obj, obj.__pk__))
-        return avl.attr_value if avl else None
+    # def get(self, obj):
+    #     avl = AttributeValue.find(self, getattr(obj, obj.__pk__))
+    #     return avl.attr_value if avl else None
 
 
     @staticmethod
@@ -88,14 +88,14 @@ class AttributeValue(ORMBase, BaseModel):
         Session.execute("delete from core_attribute_value where fk_type = '%s' and fk_id = %s" % (fk_type, fk_id))
 
 
-    @staticmethod
-    def find(attr, fk_id):
-        #pylint: disable-msg=E1101
-        return Session.query(AttributeValue)\
-            .options(FromCache('AttributeValue.find.%s.%s' % (attr.attr_id, fk_id)))\
-            .filter(and_(AttributeValue.fk_type == attr.fk_type,
-                         AttributeValue.fk_id == fk_id,
-                         AttributeValue.attr_id == attr.attr_id)).first()
+    # @staticmethod
+    # def find(attr, fk_id):
+    #     #pylint: disable-msg=E1101
+    #     return Session.query(AttributeValue)\
+    #         .options(FromCache('AttributeValue.find.%s.%s' % (attr.attr_id, fk_id)))\
+    #         .filter(and_(AttributeValue.fk_type == attr.fk_type,
+    #                      AttributeValue.fk_id == fk_id,
+    #                      AttributeValue.attr_id == attr.attr_id)).first()
 
 
     @staticmethod
@@ -108,18 +108,18 @@ class AttributeValue(ORMBase, BaseModel):
                          .order_by(AttributeValue.attr_value_id).all()
 
 
-    @staticmethod
-    def find_fk_id_by_value(fk_type, attr_name, attr_value):
-        #pylint: disable-msg=E1101
-        ret = Session.query("fk_id").from_statement("""SELECT cav.fk_id FROM core_attribute_value cav, core_attribute ca
-                                                 where
-                                                 cav.attr_id = ca.attr_id and
-                                                 ca.fk_type = '{fk_type}' and
-                                                 ca.attr_name = '{attr_name}' and
-                                                 cav.fk_type = '{fk_type}' and
-                                                 cav.attr_value = '{attr_value}'""".format(fk_type=fk_type, 
-                                                                                           attr_name=attr_name,
-                                                                                           attr_value=attr_value)).one()
-        return ret[0]
+    # @staticmethod
+    # def find_fk_id_by_value(fk_type, attr_name, attr_value):
+    #     #pylint: disable-msg=E1101
+    #     ret = Session.query("fk_id").from_statement("""SELECT cav.fk_id FROM core_attribute_value cav, core_attribute ca
+    #                                              where
+    #                                              cav.attr_id = ca.attr_id and
+    #                                              ca.fk_type = '{fk_type}' and
+    #                                              ca.attr_name = '{attr_name}' and
+    #                                              cav.fk_type = '{fk_type}' and
+    #                                              cav.attr_value = '{attr_value}'""".format(fk_type=fk_type, 
+    #                                                                                        attr_name=attr_name,
+    #                                                                                        attr_value=attr_value)).one()
+    #     return ret[0]
 
                        

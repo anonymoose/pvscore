@@ -1,7 +1,6 @@
 #pylint: disable-msg=E1101
 #import shutil
 #from pvscore.model.core.asset import Asset
-import os
 from sqlalchemy import Column, ForeignKey, or_
 from sqlalchemy.types import Integer, String, Date, Text, Boolean
 from sqlalchemy.orm import relation
@@ -12,7 +11,6 @@ from pvscore.model.core.users import Users
 from pvscore.model.crm.company import Company
 from hashlib import md5
 from pvscore.lib.dbcache import FromCache, invalidate
-import ConfigParser
 import logging
 
 log = logging.getLogger(__name__)
@@ -54,24 +52,24 @@ class Site(ORMBase, BaseModel):
         return '%s : %s' % (self.domain, self.company.name)
 
 
-    def get_config(self):
-        #dir = '/Users/kbedwell/dev/pydev/wm/app/sites/' + self.site_directory
-        #cache_key = 'site.config.%s' % self.site_id
-        #if not util.cache_has_key(cache_key):
-        directory = self.site_full_directory
-        cfgfile = directory + '/site.config'
-        if os.path.exists(cfgfile):
-            config = ConfigParser.ConfigParser()
-            config.read(cfgfile)
-            return config
+    # def get_config(self):
+    #     #dir = '/Users/kbedwell/dev/pydev/wm/app/sites/' + self.site_directory
+    #     #cache_key = 'site.config.%s' % self.site_id
+    #     #if not util.cache_has_key(cache_key):
+    #     directory = self.site_full_directory
+    #     cfgfile = directory + '/site.config'
+    #     if os.path.exists(cfgfile):
+    #         config = ConfigParser.ConfigParser()
+    #         config.read(cfgfile)
+    #         return config
 
 
-#    def get_shipping(self):
-#        from pvscore.lib.plugin import plugin_registry
-#        cfg = self.get_config()
-#        shipping_type = cfg.get('SHIPPING', 'type')
-#        pe = plugin_registry[shipping_type]
-#        return pe.obj
+    # def get_shipping(self):
+    #     from pvscore.lib.plugin import plugin_registry
+    #     cfg = self.get_config()
+    #     shipping_type = cfg.get('SHIPPING', 'type')
+    #     pe = plugin_registry[shipping_type]
+    #     return pe.obj
 
 
     @staticmethod
@@ -145,25 +143,24 @@ class Site(ORMBase, BaseModel):
         return "/sites/{dirname}/{subdir}".format(dirname=self.site_directory, subdir=subdir)
 
 
-#    def store_asset(self, asset_data, folder):
-#        """ KB: [2010-11-18]:
-#        called from pvscore.controllers.cms.asset::upload()
-#        http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
-#        """
-#
-#        fs_path = os.path.join(
-#            '%s%s' % (self.site_full_directory, folder),
-#            asset_data.filename.replace(os.sep, '_')
-#            )
-#        permanent_file = open(fs_path, 'wb')
-#        shutil.copyfileobj(asset_data.file, permanent_file)
-#        asset_data.file.close()
-#        permanent_file.close()
-#        # at this point everything is saved to disk. Create an asset object in
-#        # the DB to remember it.
-#        return Asset.create_new(asset_data.filename,
-#                             fs_path,
-#                             '{base}/{f}'.format(base=self.site_web_directory('images'),
-#                                                 f=asset_data.filename),
-#                             self).flush()
+    # def store_asset(self, asset_data, folder):
+    #     """ KB: [2010-11-18]:
+    #     called from pvscore.controllers.cms.asset::upload()
+    #     http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
+    #     """
+    #     fs_path = os.path.join(
+    #         '%s%s' % (self.site_full_directory, folder),
+    #         asset_data.filename.replace(os.sep, '_')
+    #         )
+    #     permanent_file = open(fs_path, 'wb')
+    #     shutil.copyfileobj(asset_data.file, permanent_file)
+    #     asset_data.file.close()
+    #     permanent_file.close()
+    #     # at this point everything is saved to disk. Create an asset object in
+    #     # the DB to remember it.
+    #     return Asset.create_new(asset_data.filename,
+    #                          fs_path,
+    #                          '{base}/{f}'.format(base=self.site_web_directory('images'),
+    #                                              f=asset_data.filename),
+    #                          self).flush()
 

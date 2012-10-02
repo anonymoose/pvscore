@@ -7,7 +7,7 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session, BaseAnalytic
 from pvscore.model.crm.customerorder import CustomerOrder
 from pvscore.model.core.users import Users
-from pvscore.model.core.attribute import Attribute, AttributeValue
+from pvscore.model.core.attribute import Attribute
 from pvscore.model.crm.journal import Journal
 import pvscore.lib.db as db
 import pvscore.lib.util as util
@@ -86,44 +86,44 @@ class Customer(ORMBase, BaseModel):
         return db.get_value("select md5('%s%s')" % (self.email, self.customer_id))
 
 
-    @staticmethod
-    def find_by_attr(attr_name, attr_value):
-        customer_id = AttributeValue.find_fk_id_by_value('Customer', attr_name, attr_value)
-        if customer_id:
-            return Customer.load(customer_id)
+    # @staticmethod
+    # def find_by_attr(attr_name, attr_value):
+    #     customer_id = AttributeValue.find_fk_id_by_value('Customer', attr_name, attr_value)
+    #     if customer_id:
+    #         return Customer.load(customer_id)
 
 
-    @staticmethod
-    def find_all_by_channel(cid_0, cid_1=None):
-        return Session.query(Customer)\
-            .filter(and_(Customer.cid_0==cid_0, cid_1==cid_1)).all()
+    # @staticmethod
+    # def find_all_by_channel(cid_0, cid_1=None):
+    #     return Session.query(Customer)\
+    #         .filter(and_(Customer.cid_0==cid_0, cid_1==cid_1)).all()
 
 
-    @staticmethod
-    def find_by_key(key):
-        return Session.query(Customer)\
-            .from_statement("""select * from crm_customer where '%s' = md5(email||password)
-                            """ % key).first()
+    # @staticmethod
+    # def find_by_key(key):
+    #     return Session.query(Customer)\
+    #         .from_statement("""select * from crm_customer where '%s' = md5(email||password)
+    #                         """ % key).first()
 
 
-    @staticmethod
-    def find_by_api_key(key):
-        return Session.query(Customer)\
-            .from_statement("""select * from crm_customer where '%s' = md5(email||customer_id)
-                            """ % key.lower()).first()
+    # @staticmethod
+    # def find_by_api_key(key):
+    #     return Session.query(Customer)\
+    #         .from_statement("""select * from crm_customer where '%s' = md5(email||customer_id)
+    #                         """ % key.lower()).first()
 
 
-    def ready_to_purchase(self):
-        return (self.fname and self.lname and self.phone and self.addr1
-                and self.city and self.state and self.zip and self.country)
+    # def ready_to_purchase(self):
+    #     return (self.fname and self.lname and self.phone and self.addr1
+    #             and self.city and self.state and self.zip and self.country)
 
 
-    @staticmethod
-    def find_all_by_campaign(campaign):
-        from pvscore.model.crm.campaign import Campaign
-        return Session.query(Customer).join((Campaign, Campaign.campaign_id == Customer.campaign_id)) \
-            .filter(and_(Customer.delete_dt == None,
-                         Campaign.company_id == campaign.company_id)).all()
+    # @staticmethod
+    # def find_all_by_campaign(campaign):
+    #     from pvscore.model.crm.campaign import Campaign
+    #     return Session.query(Customer).join((Campaign, Campaign.campaign_id == Customer.campaign_id)) \
+    #         .filter(and_(Customer.delete_dt == None,
+    #                      Campaign.company_id == campaign.company_id)).all()
 
 
     @staticmethod
@@ -162,13 +162,13 @@ class Customer(ORMBase, BaseModel):
                          Customer.email.ilike(email))).first()
 
 
-    @staticmethod
-    def find_by_third_party_id(tpid, company):
-        from pvscore.model.crm.campaign import Campaign
-        return Session.query(Customer).join((Campaign, Campaign.campaign_id == Customer.campaign_id)) \
-            .filter(and_(Customer.delete_dt == None,
-                         Campaign.company_id == company.company_id,
-                         Customer.third_party_id == tpid)).first()
+    # @staticmethod
+    # def find_by_third_party_id(tpid, company):
+    #     from pvscore.model.crm.campaign import Campaign
+    #     return Session.query(Customer).join((Campaign, Campaign.campaign_id == Customer.campaign_id)) \
+    #         .filter(and_(Customer.delete_dt == None,
+    #                      Campaign.company_id == company.company_id,
+    #                      Customer.third_party_id == tpid)).first()
 
 
     @staticmethod
@@ -200,8 +200,8 @@ class Customer(ORMBase, BaseModel):
         return CustomerOrder.create_new(cart, self, site, campaign, user_created, incl_tax)
 
 
-    def has_purchased_product(self, product):
-        return CustomerOrder.has_customer_purchased_product(self, product)
+    # def has_purchased_product(self, product):
+    #     return CustomerOrder.has_customer_purchased_product(self, product)
 
 
     def get_order(self, order_id):
@@ -272,10 +272,10 @@ class Customer(ORMBase, BaseModel):
         Session.execute('delete from core_status where customer_id = %s' % customer_id)
         
 
-    @staticmethod
-    def delete_newest_customer():
-        maxid = Session.query("m").from_statement("SELECT max(customer_id) m FROM crm_customer").one()
-        Customer.full_delete(maxid)
+    # @staticmethod
+    # def delete_newest_customer():
+    #     maxid = Session.query("m").from_statement("SELECT max(customer_id) m FROM crm_customer").one()
+    #     Customer.full_delete(maxid)
 
         
     def clear_attributes(self):

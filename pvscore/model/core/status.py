@@ -46,13 +46,13 @@ class Status(ORMBase, BaseModel):
         return StatusEvent.find(enterprise_id, type(obj).__name__, short_name)
 
 
-    @staticmethod
-    def find_by_event(customer, obj, event):
-        #pylint: disable-msg=E1101
-        return Session.query(Status).filter(and_(Status.customer_id==customer.customer_id,
-                                                 Status.fk_id == getattr(obj, obj.__pk__),
-                                                 Status.fk_type == type(obj).__name__,
-                                                 Status.event == event)).order_by(Status.status_id.desc()).all()
+    # @staticmethod
+    # def find_by_event(customer, obj, event):
+    #     #pylint: disable-msg=E1101
+    #     return Session.query(Status).filter(and_(Status.customer_id==customer.customer_id,
+    #                                              Status.fk_id == getattr(obj, obj.__pk__),
+    #                                              Status.fk_type == type(obj).__name__,
+    #                                              Status.event == event)).order_by(Status.status_id.desc()).all()
 
 
     @staticmethod

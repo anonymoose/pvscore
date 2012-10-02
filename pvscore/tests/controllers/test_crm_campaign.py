@@ -23,19 +23,12 @@ class TestCrmCampaign(TestController):
 
 
     @secure
-    def test_search(self):
-        campaign_id = self._create_new()
-        R = self.get('/crm/campaign/list')
-        self.assertEqual(R.status_int, 200)
-        R.mustcontain('Test Campaign')
-        self._delete_new(campaign_id)
-        
-
-    @secure
     def test_single_search(self):
         campaign_id = self._create_new()
+        camp = Campaign.load(campaign_id)
         R = self.post('/crm/campaign/search',
-                      {'name': 'Test Campaign'})
+                      {'name': 'Test Campaign',
+                       'company_id' : camp.company_id})
         R.mustcontain('%s : Test Campaign' % campaign_id)
         self._delete_new(campaign_id)
 

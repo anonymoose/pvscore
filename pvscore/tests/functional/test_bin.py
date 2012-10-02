@@ -1,6 +1,4 @@
 from unittest import TestCase
-from pvscore.model.crm.appointment import Appointment
-import pvscore.lib.util as util
 from pvscore.bin import pyramid_script, log
 import sys, os
 

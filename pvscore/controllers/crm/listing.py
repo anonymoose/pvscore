@@ -52,20 +52,24 @@ class ListingController(BaseController):
     def remove(self):
         lis = Listing.load(self.request.matchdict.get('listing_id'))
         cust = self.request.ctx.customer
-        self.forbid_if(not lis or not cust or lis.customer != cust or cust.campaign.company.enterprise_id != self.enterprise_id)
+        self.forbid_if(not lis or not cust or lis.customer.customer_id != cust.customer_id or cust.campaign.company.enterprise_id != self.enterprise_id)
         lis.soft_delete()
         Status.add(cust, lis, Status.find_event(self.enterprise_id, lis, 'CLOSED'),
                    'Listing Deleted: %s' % self.request.POST.get('title'))
         return 'True'
 
 
+    @view_config(route_name='crm.listing.json.get', renderer="/crm/listing.json.mako")
     @view_config(route_name='crm.listing.json', renderer="/crm/listing.json.mako")
     @authorize(IsCustomerLoggedIn())
     def json(self):
         listing_id = self.request.matchdict.get('listing_id')
+        if not listing_id:
+            listing_id = self.request.GET.get('listing_id')
+        self.forbid_if(not listing_id)
         cust = self.request.ctx.customer
         listing = Listing.load(listing_id)
-        self.forbid_if(not listing or not cust or listing.customer != cust or cust.campaign.company.enterprise_id != self.enterprise_id)
+        self.forbid_if(not listing or not cust or listing.customer.customer_id != cust.customer_id or cust.campaign.company.enterprise_id != self.enterprise_id)
         return {
             'listing' : listing
             }

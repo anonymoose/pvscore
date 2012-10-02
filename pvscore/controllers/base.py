@@ -1,7 +1,5 @@
 #pylint: disable-msg=E1101
-import transaction
 from pvscore.model.meta import Session
-from pvscore.lib.geoip.geo import Geo
 from pyramid.httpexceptions import HTTPForbidden
 import logging
 from pvscore.lib.plugin import plugin_registry
@@ -18,27 +16,28 @@ class BaseUI(object):
         Session.flush()
 
 
-    def db_doom(self):
-        transaction.doom()
+    # def db_doom(self):
+    #     transaction.doom()
         
 
-    def db_delete(self, obj):
-        Session.delete(obj)
+    # def db_delete(self, obj):
+    #     Session.delete(obj)
 
 
 class BaseController(BaseUI):
     def __init__(self, request):
-        self.request = request
-        self.session = request.session
-        self.enterprise_id = self.request.ctx.enterprise.enterprise_id
-        self.user = self.request.ctx.user
-        self.plugin_registry = plugin_registry
+        if request:
+            self.request = request
+            self.session = request.session
+            self.enterprise_id = self.request.ctx.enterprise.enterprise_id
+            self.user = self.request.ctx.user
+            self.plugin_registry = plugin_registry
         super(BaseController, self).__init__()
 
 
-    def get_geoip(self):
-        geo = Geo()
-        return geo.by_ip(self.request.headers['X-Real-Ip'])
+    # def get_geoip(self):
+    #     geo = Geo()
+    #     return geo.by_ip(self.request.headers['X-Real-Ip'])
 
 
     def flash(self, msg):

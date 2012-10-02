@@ -1,7 +1,7 @@
 from pvscore.tests import TestController, secure
 from pvscore.model.cms.site import Site
 from pyramid.httpexceptions import HTTPForbidden
-import logging
+import logging, shutil, os
 
 log = logging.getLogger(__name__)
 
@@ -82,10 +82,13 @@ Disallow: /cms/cart/add/*""")
 
 
     def _delete_new(self, site_id):
-        camp = Site.load(site_id)
-        self.assertNotEqual(camp, None)
-        camp.delete()
+        site = Site.load(site_id)
+        self.assertNotEqual(site, None)
+        if not os.path.isdir(site.site_full_directory):
+            shutil.rmtree(site.site_full_directory)
+        site.delete()
         self.commit()
+        
 
 
     def test_dynamic_root(self):
@@ -108,8 +111,24 @@ Disallow: /cms/cart/add/*""")
         R.mustcontain('this is in subdir2 param0 = 220 param1 = 123 param2 = None')
         
 
+    def test_dynamic_not_found(self):
+        excepted = False
+        try:
+            self.get('/subdir1-notthere-in_subdir_2/220/123')
+        except Exception as notfound:
+            print notfound
+            excepted = True
+        self.assertEqual(excepted, True)
+        
+
     def test_customer_found(self):
         R = self.get('/customer?customer_id=220')
+        R.mustcontain('fname = Amy lname = Bedwell id = 220')
+
+
+    def test_customer_found_post(self):
+        R = self.post('/customer',
+                      {'customer_id' : '220'})
         R.mustcontain('fname = Amy lname = Bedwell id = 220')
 
 
@@ -122,3 +141,6 @@ Disallow: /cms/cart/add/*""")
         # should never get here.
         self.assertEqual(True, False)
 
+
+
+        

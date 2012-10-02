@@ -208,7 +208,6 @@ class CompanyController(BaseController):
     # Only add items here if they give you an issue in Tfull for full
     # regression testing. So dumb.
     @view_config(route_name='crm.company.enterprise.clearcache', renderer='string')
-    @authorize(IsLoggedIn())
     def clear_caches(self):
         for camp in Campaign.find_all(self.enterprise_id):
             camp.invalidate_caches()

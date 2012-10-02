@@ -70,12 +70,15 @@ class Listing(ORMBase, BaseModel):
                                                   Listing.delete_dt == None))\
                                                   .order_by(Listing.create_dt.desc()).all()
 
-    def is_favorite(self, customer):
-        return ListingFavorite.is_favorite(customer, self)
+
+    # def is_favorite(self, customer):
+    #     return ListingFavorite.is_favorite(customer, self)
+
 
     @property
     def assets(self):
         return Asset.find_for_object(self)
+
 
     @staticmethod
     def find_by_attr(attr_name, attr_value):
@@ -83,9 +86,11 @@ class Listing(ORMBase, BaseModel):
         if listing_id:
             return Listing.load(listing_id)
 
+
     def clear_attributes(self):
         if self.listing_id:
             Attribute.clear_all('Listing', self.listing_id)
+
 
     def set_attr(self, name, value):
         attr = Attribute.find('Listing', name)
@@ -93,14 +98,22 @@ class Listing(ORMBase, BaseModel):
             attr = Attribute.create_new('Listing', name)
         attr.set(self, value)
 
+
     def get_attr(self, name):
         attr = Attribute.find('Listing', name)
         if attr:
             return attr.get(self)
         return None
 
+
     def get_attrs(self):
         return Attribute.find_values(self)
+
+
+    @staticmethod
+    def full_delete(listing_id):
+        Session.execute('delete from pvs_listing where listing_id = %s' % listing_id)
+
 
     # """ KB: [2011-07-13]: For now, just stuff it in Redis. """
     # def record_hit(self, ip, geo_ip, is_mobile):
@@ -168,129 +181,146 @@ class Listing(ORMBase, BaseModel):
     #                 .filter(Listing.listing_id.in_(listing_ids)).all()
 
 
-class ListingFavorite(ORMBase, BaseModel):
-    __tablename__ = 'pvs_listing_favorite'
-    __pk__ = 'favorite_id'
 
-    favorite_id = Column(Integer, primary_key = True)
-    listing_id = Column(Integer, ForeignKey('pvs_listing.listing_id'))
-    customer_id = Column(Integer, ForeignKey('crm_customer.customer_id'))
-    create_dt = Column(DateTime, server_default = text('now()'))
-    delete_dt = Column(DateTime)
-
-    @staticmethod
-    def create_new(customer, listing):
-        lf = ListingFavorite()
-        lf.customer_id = customer.customer_id
-        lf.listing_id = listing.listing_id
-        lf.save()
-        return lf
-
-    @staticmethod
-    def find_favorite(customer, listing):
-        return Session.query(ListingFavorite).filter(and_(ListingFavorite.customer_id == customer.customer_id,
-                                                          ListingFavorite.listing_id == listing.listing_id)).first()
-
-    @staticmethod
-    def is_favorite(customer, listing):
-        return (0 < ListingFavorite.count('where customer_id = %d and listing_id = %d' % (customer.customer_id, listing.listing_id)))
-
-    @staticmethod
-    def find_favorites_by_customer(customer):
-        return Session.query(Listing)\
-            .join((ListingFavorite, ListingFavorite.listing_id == Listing.listing_id))\
-            .filter(and_(ListingFavorite.customer_id == customer.customer_id,
-                         ListingFavorite.delete_dt == None))
-
-class ListingMessage(ORMBase, BaseModel):
-    __tablename__ = 'pvs_listing_message'
-    __pk__ = 'listing_message_id'
-
-    listing_message_id = Column(Integer, primary_key = True)
-    listing_id = Column(Integer, ForeignKey('pvs_listing.listing_id'))
-    customer_id = Column(Integer, ForeignKey('crm_customer.customer_id'))
-    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
-    parent_id = Column(Integer, ForeignKey('pvs_listing.listing_id'))
-    subject = Column(String(500))
-    message = Column(Text)
-    responder_email = Column(String(50)) # the guy responding to the listing
-    to_email = Column(String(50)) # the guy its to.  might be either.
-    from_email = Column(String(50)) # the guy sending the email.  might be either.
-    from_latitude = Column(Float)
-    from_longitude = Column(Float)
-    from_ip = Column(String(15))
-    create_dt = Column(DateTime, server_default = text('now()'))
-    delete_dt = Column(DateTime)
-    sent_dt = Column(DateTime)
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
-
-    customer = relation('Customer')
-    company = relation('Company')
-    status = relation('Status')
-
-    @property
-    def responder_key(self):
-        """ KB: [2011-06-29]: Gotta figure out how to do this in python so it works with PSQL md5 function indices. """
-        return db.get_value("select md5('%s')" % self.responder_email)
-
-    @property
-    def customer_key(self):
-        """ KB: [2011-06-29]: Gotta figure out how to do this in python so it works with PSQL md5 function indices. """
-        return db.get_value("select md5('%s')" % self.customer_id)
-
-    @property
-    def to_responder(self):
-        return self.responder_email == self.to_email
-
-    @property
-    def to_customer(self):
-        return not self.to_responder
-
-    @staticmethod
-    def validate_responder(listing, in_reply_to, responder_key):
-        return db.get_value("""select count(0) from pvs_listing_message
-                              where listing_id = {lid} and listing_message_id = {lmid}
-                              and md5(responder_email) = '{rkey}'""".format(lid=listing.listing_id,
-                                                                            lmid=in_reply_to.listing_message_id,
-                                                                            rkey=responder_key))
-
-    @staticmethod
-    def validate_customer(listing, in_reply_to, customer_key):
-        return db.get_value("""select count(0) from pvs_listing_message
-                              where listing_id = {lid} and listing_message_id = {lmid}
-                              and md5(text(customer_id)) = '{ckey}'""".format(lid=listing.listing_id,
-                                                                        lmid=in_reply_to.listing_message_id,
-                                                                        ckey=customer_key))
-
-    @staticmethod
-    def find_by_listing(listing):
-        return Session.query(ListingMessage).filter(and_(ListingMessage.delete_dt == None,
-                                                         #ListingMessage.sent_dt == None,
-                                                         ListingMessage.listing_id == listing.listing_id))\
-                                                         .order_by(ListingMessage.listing_message_id.desc())\
-                                                         .all()
-
-    @staticmethod
-    def find_count_by_email_and_listing(email, listing):
-        return Session.query(ListingMessage).filter(and_(ListingMessage.responder_email == email.lower(),
-                                                         ListingMessage.listing_id == listing.listing_id)).count()
-
-    @staticmethod
-    def find_by_customer(customer):
-        return Session.query(ListingMessage)\
-            .filter(and_(ListingMessage.customer == customer,
-                         ListingMessage.delete_dt == None))\
-                         .order_by(ListingMessage.create_dt.asc()).all()
-
-    @property
-    def children(self):
-        return Session.query(ListingMessage)\
-            .filter(and_(ListingMessage.parent_id == self.listing_message_id,
-                         ListingMessage.delete_dt==None))\
-                         .order_by(ListingMessage.create_dt.asc()).all()
-
-    @property
-    def parent(self):
-        if self.parent_id:
-            return ListingMessage(self.parent_id)
-
+#class ListingFavorite(ORMBase, BaseModel):
+#    __tablename__ = 'pvs_listing_favorite'
+#    __pk__ = 'favorite_id'
+#
+#    favorite_id = Column(Integer, primary_key = True)
+#    listing_id = Column(Integer, ForeignKey('pvs_listing.listing_id'))
+#    customer_id = Column(Integer, ForeignKey('crm_customer.customer_id'))
+#    create_dt = Column(DateTime, server_default = text('now()'))
+#    delete_dt = Column(DateTime)
+#
+#
+#    @staticmethod
+#    def create_new(customer, listing):
+#        lf = ListingFavorite()
+#        lf.customer_id = customer.customer_id
+#        lf.listing_id = listing.listing_id
+#        lf.save()
+#        return lf
+#
+#
+#    @staticmethod
+#    def find_favorite(customer, listing):
+#        return Session.query(ListingFavorite).filter(and_(ListingFavorite.customer_id == customer.customer_id,
+#                                                          ListingFavorite.listing_id == listing.listing_id)).first()
+#
+#
+#    @staticmethod
+#    def is_favorite(customer, listing):
+#        return (0 < ListingFavorite.count('where customer_id = %d and listing_id = %d' % (customer.customer_id, listing.listing_id)))
+#
+#
+#    @staticmethod
+#    def find_favorites_by_customer(customer):
+#        return Session.query(Listing)\
+#            .join((ListingFavorite, ListingFavorite.listing_id == Listing.listing_id))\
+#            .filter(and_(ListingFavorite.customer_id == customer.customer_id,
+#                         ListingFavorite.delete_dt == None))
+#
+#
+#class ListingMessage(ORMBase, BaseModel):
+#    __tablename__ = 'pvs_listing_message'
+#    __pk__ = 'listing_message_id'
+#
+#    listing_message_id = Column(Integer, primary_key = True)
+#    listing_id = Column(Integer, ForeignKey('pvs_listing.listing_id'))
+#    customer_id = Column(Integer, ForeignKey('crm_customer.customer_id'))
+#    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
+#    parent_id = Column(Integer, ForeignKey('pvs_listing.listing_id'))
+#    subject = Column(String(500))
+#    message = Column(Text)
+#    responder_email = Column(String(50)) # the guy responding to the listing
+#    to_email = Column(String(50)) # the guy its to.  might be either.
+#    from_email = Column(String(50)) # the guy sending the email.  might be either.
+#    from_latitude = Column(Float)
+#    from_longitude = Column(Float)
+#    from_ip = Column(String(15))
+#    create_dt = Column(DateTime, server_default = text('now()'))
+#    delete_dt = Column(DateTime)
+#    sent_dt = Column(DateTime)
+#    status_id = Column(Integer, ForeignKey('core_status.status_id'))
+#
+#    customer = relation('Customer')
+#    company = relation('Company')
+#    status = relation('Status')
+#
+#
+#    @property
+#    def responder_key(self):
+#        """ KB: [2011-06-29]: Gotta figure out how to do this in python so it works with PSQL md5 function indices. """
+#        return db.get_value("select md5('%s')" % self.responder_email)
+#
+#
+#    @property
+#    def customer_key(self):
+#        """ KB: [2011-06-29]: Gotta figure out how to do this in python so it works with PSQL md5 function indices. """
+#        return db.get_value("select md5('%s')" % self.customer_id)
+#
+#
+#    @property
+#    def to_responder(self):
+#        return self.responder_email == self.to_email
+#
+#
+#    @property
+#    def to_customer(self):
+#        return not self.to_responder
+#
+#
+#    @staticmethod
+#    def validate_responder(listing, in_reply_to, responder_key):
+#        return db.get_value("""select count(0) from pvs_listing_message
+#                              where listing_id = {lid} and listing_message_id = {lmid}
+#                              and md5(responder_email) = '{rkey}'""".format(lid=listing.listing_id,
+#                                                                            lmid=in_reply_to.listing_message_id,
+#                                                                            rkey=responder_key))
+#
+#
+#    @staticmethod
+#    def validate_customer(listing, in_reply_to, customer_key):
+#        return db.get_value("""select count(0) from pvs_listing_message
+#                              where listing_id = {lid} and listing_message_id = {lmid}
+#                              and md5(text(customer_id)) = '{ckey}'""".format(lid=listing.listing_id,
+#                                                                        lmid=in_reply_to.listing_message_id,
+#                                                                        ckey=customer_key))
+#
+#
+#    @staticmethod
+#    def find_by_listing(listing):
+#        return Session.query(ListingMessage).filter(and_(ListingMessage.delete_dt == None,
+#                                                         #ListingMessage.sent_dt == None,
+#                                                         ListingMessage.listing_id == listing.listing_id))\
+#                                                         .order_by(ListingMessage.listing_message_id.desc())\
+#                                                         .all()
+#
+#
+#    @staticmethod
+#    def find_count_by_email_and_listing(email, listing):
+#        return Session.query(ListingMessage).filter(and_(ListingMessage.responder_email == email.lower(),
+#                                                         ListingMessage.listing_id == listing.listing_id)).count()
+#
+#
+#    @staticmethod
+#    def find_by_customer(customer):
+#        return Session.query(ListingMessage)\
+#            .filter(and_(ListingMessage.customer == customer,
+#                         ListingMessage.delete_dt == None))\
+#                         .order_by(ListingMessage.create_dt.asc()).all()
+#
+#
+#    @property
+#    def children(self):
+#        return Session.query(ListingMessage)\
+#            .filter(and_(ListingMessage.parent_id == self.listing_message_id,
+#                         ListingMessage.delete_dt==None))\
+#                         .order_by(ListingMessage.create_dt.asc()).all()
+#
+#
+#    @property
+#    def parent(self):
+#        if self.parent_id:
+#            return ListingMessage(self.parent_id)
+#

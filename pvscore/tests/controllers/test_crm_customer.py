@@ -512,3 +512,7 @@ class TestCrmCustomer(TestController):
         self._delete_new(customer_id)        
 
         
+def find_customer(campaign):
+    return Customer.find('amers_j@yahoo.com', campaign)
+
+

@@ -75,9 +75,9 @@ class CommunicationController(BaseController):
         if customer_id:
             cust = Customer.load(customer_id)
             self.forbid_if(cust.campaign.company.enterprise_id != self.enterprise_id)
-            comms = Communication.find_all_by_company(cust.campaign.company, True)
+            comms = Communication.find_all_by_company(cust.campaign.company)
         else:
-            comms = Communication.find_all(self.enterprise_id, True)
+            comms = Communication.find_all(self.enterprise_id)
         return {
             'comms' : util.select_list(comms, 'comm_id', 'name'),
             'cust' : cust

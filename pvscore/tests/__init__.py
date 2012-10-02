@@ -50,16 +50,16 @@ class TestController(TestCase):
         pass
 
 
-    def quiet(self):
-        self.old_stdout = sys.stdout #pylint: disable-msg=W0201
-        self.old_stderr = sys.stderr #pylint: disable-msg=W0201
-        sys.stdout = StringIO()
-        sys.stderr = StringIO()
+    # def quiet(self):
+    #     self.old_stdout = sys.stdout #pylint: disable-msg=W0201
+    #     self.old_stderr = sys.stderr #pylint: disable-msg=W0201
+    #     sys.stdout = StringIO()
+    #     sys.stderr = StringIO()
 
 
-    def unquiet(self):
-        sys.stdout = self.old_stdout
-        sys.stderr = self.old_stderr
+    # def unquiet(self):
+    #     sys.stdout = self.old_stdout
+    #     sys.stderr = self.old_stderr
 
 
     def get_host(self):
@@ -71,6 +71,19 @@ class TestController(TestCase):
                                         'HTTP_X_REAL_IP': '98.231.77.218', # a real PV ip addr.
                                         'X-Real-Ip': '98.231.77.218'
                                         }
+
+
+    def login_customer(self, username='amers_j@yahoo.com', password='geology'):
+        # this sets the site it.
+        self.post('/crm/customer_login',
+                  {'username' : username, 'password' : password})
+
+        assert self.site
+        os.environ['enterprise_id'] = str(self.site.company.enterprise_id)
+
+
+    def logout_customer(self):
+        return self.logout_crm()
 
 
     def login_crm(self, username='kenneth.bedwell@gmail.com', password='Zachary234'):
@@ -122,6 +135,15 @@ class TestController(TestCase):
 
     def commit(self):
         transaction.commit()
+
+def customer_logged_in(func, username="amers_j@yahoo.com", password="geology"):
+    def wrap(self):
+        self.login_customer(username, password)
+        ret = func(self)
+        self.logout_customer()
+        return ret
+    wrap.__name__ = func.__name__
+    return wrap
 
 
 def secure(func, username='kenneth.bedwell@gmail.com', password='Zachary234'):

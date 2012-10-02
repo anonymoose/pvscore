@@ -84,6 +84,10 @@ class LoginController(BaseController):
             self.session['customer_id'] = cust.customer_id
             if 'redir' in self.request.POST:
                 return HTTPFound(self.request.POST.get('redir'))
+            elif self.request.referrer:
+                return HTTPFound(self.request.referrer)
+            else:
+                return HTTPFound('/')
         else:
             self.flash('Invalid User or Password')
             raise HTTPFound(self.request.referrer)

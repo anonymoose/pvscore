@@ -1,10 +1,9 @@
 #pylint: disable-msg=E1101
-from sqlalchemy import Column, ForeignKey, and_, or_
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.types import Integer, String, Date, Text, Float, Boolean, DateTime
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
-from pvscore.model.meta import ORMBase, BaseModel, Session
-import pvscore.lib.util as util
+from pvscore.model.meta import ORMBase, BaseModel
 
 class Discount(ORMBase, BaseModel):
     __tablename__ = 'crm_discount'
@@ -32,28 +31,28 @@ class Discount(ORMBase, BaseModel):
     product = relation('Product')
 
 
-    @staticmethod
-    def get_which_item_types():
-        return ['All Items', 'First Item', 'Most Expensive Item', 'Least Expensive Item']
+    # @staticmethod
+    # def get_which_item_types():
+    #     return ['All Items', 'First Item', 'Most Expensive Item', 'Least Expensive Item']
 
 
-    @staticmethod
-    def find_all_active(enterprise_id):
-        return Session.query(Discount) \
-            .filter(and_(Discount.delete_dt == None, 
-                         Discount.enterprise_id == enterprise_id,
-                         or_(Discount.end_dt == None,
-                             Discount.end_dt >= util.now())))\
-                         .order_by(Discount.name) \
-                     .all() 
+    # @staticmethod
+    # def find_all_active(enterprise_id):
+    #     return Session.query(Discount) \
+    #         .filter(and_(Discount.delete_dt == None, 
+    #                      Discount.enterprise_id == enterprise_id,
+    #                      or_(Discount.end_dt == None,
+    #                          Discount.end_dt >= util.now())))\
+    #                      .order_by(Discount.name) \
+    #                  .all() 
 
 
-    @staticmethod
-    def find_all(enterprise_id):
-        return Session.query(Discount) \
-            .filter(and_(Discount.delete_dt == None, 
-                         Discount.enterprise_id == enterprise_id))\
-                         .order_by(Discount.name) \
-                     .all() 
+    # @staticmethod
+    # def find_all(enterprise_id):
+    #     return Session.query(Discount) \
+    #         .filter(and_(Discount.delete_dt == None, 
+    #                      Discount.enterprise_id == enterprise_id))\
+    #                      .order_by(Discount.name) \
+    #                  .all() 
 
 

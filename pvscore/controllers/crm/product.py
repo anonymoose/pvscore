@@ -12,7 +12,6 @@ from pvscore.model.crm.product import Product, ProductReturn, InventoryJournal, 
 from pvscore.model.core.statusevent import StatusEvent
 from pvscore.model.core.status import Status
 from pvscore.model.crm.purchase import Vendor
-from pvscore.model.crm.customer import Customer
 import pvscore.lib.util as util
 import simplejson as json
 
@@ -224,12 +223,12 @@ class ProductController(BaseController):
         if not 'search_key' in self.request.GET or not self.request.GET.get('search_key'):
             return
         srch = self.request.GET.get('search_key')
-        customer_id = self.request.GET.get('customer_id')
-        if customer_id:
-            customer = Customer.load(customer_id)
-            lnames = Product.find_names_by_name_and_campaign(self.enterprise_id, srch, self.request.GET.get('max_rows', 10), customer.campaign)
-        else:
-            lnames = Product.find_names_by_name(self.enterprise_id, srch, self.request.GET.get('max_rows', 10))
+        # customer_id = self.request.GET.get('customer_id')
+        # if customer_id:
+        #     customer = Customer.load(customer_id)
+        #     lnames = Product.find_names_by_name_and_campaign(self.enterprise_id, srch, self.request.GET.get('max_rows', 10), customer.campaign)
+
+        lnames = Product.find_names_by_name(self.enterprise_id, srch, self.request.GET.get('max_rows', 10))
         return json.dumps(lnames)
 
 

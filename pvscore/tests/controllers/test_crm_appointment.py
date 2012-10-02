@@ -174,6 +174,7 @@ class TestCrmAppointment(TestController):
         R.mustcontain('Appointment Search')
         f = R.forms["frm_appointment_search"]
         f.set('title', 'Test')
+        f.set('description', 'Test Description')
         R = f.submit('submit')
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Appointment Search')

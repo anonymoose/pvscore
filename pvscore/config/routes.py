@@ -166,8 +166,9 @@ def crm_routes(config):
     adrt('cms.site.list', '/cms/site/list') #, controller='cms/siteedit', action='list')
 
     adrt('crm.listing.remove', '/crm/listing/remove/{listing_id}')
+    adrt('crm.listing.json.get', '/crm/listing/json_get')
     adrt('crm.listing.json', '/crm/listing/json/{listing_id}')
-    adrt('crm.listing.show_add_picture', '/crm/listing/add_picture')
+    adrt('crm.listing.show_add_picture', '/crm/listing/show_add_picture')
     adrt('crm.listing.save', '/crm/listing/save')
     adrt('crm.listing.upload', '/crm/listing/upload/{listing_id}/{hash}')
 

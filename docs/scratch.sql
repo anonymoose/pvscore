@@ -3607,3 +3607,6 @@ alter table crm_enterprise add column     imap_server varchar(50);
 alter table crm_enterprise add column     imap_username varchar(50);
 alter table crm_enterprise add column     imap_password varchar(50);
 alter table crm_enterprise add column email varchar(50);
+
+
+select * from crm_customer where email = 'amers_j@yahoo.com';

@@ -102,4 +102,11 @@ class TestCrmCommunication(TestController):
         self.assertEqual(R.status_int, 200)
         R.mustcontain('No communications configured for users to send.')
 
+
+    @secure
+    def test_send_comm_dialog_all(self):
+        R = self.get('/crm/communication/send_comm_dialog')
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('No communications configured for users to send.')
+        
         

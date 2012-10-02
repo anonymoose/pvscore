@@ -41,9 +41,9 @@ class Billing(ORMBase, BaseModel):
         self._cc_cvv = cvv
 
 
-    @staticmethod
-    def get_billing_types():
-        return ['Credit Card']
+    # @staticmethod
+    # def get_billing_types():
+    #     return ['Credit Card']
 
     @staticmethod
     def create(cust, save=True):
@@ -61,20 +61,20 @@ class Billing(ORMBase, BaseModel):
             bill.save()
         return bill
 
-    def bind(self, dic, clear=False, prefix=None):
-        super(Billing, self).bind(dic, clear, prefix)
-        # KB: [2010-10-20]: If the user has provided a credit card number, go to the billing api and set up the new CC 
-        if self._cc_num:
-            self.cc_last_4 = self._cc_num[-4:]
+    # def bind(self, dic, clear=False, prefix=None):
+    #     super(Billing, self).bind(dic, clear, prefix)
+    #     # KB: [2010-10-20]: If the user has provided a credit card number, go to the billing api and set up the new CC 
+    #     if self._cc_num:
+    #         self.cc_last_4 = self._cc_num[-4:]
 
     def save(self):
         return super(Billing, self).save()
 
-    def get_credit_card_number(self):
-        return self._cc_num
+    # def get_credit_card_number(self):
+    #     return self._cc_num
 
-    def get_credit_card_cvv(self):
-        return self._cc_cvv
+    # def get_credit_card_cvv(self):
+    #     return self._cc_cvv
 
     def delete_billing(self, customer):
         #pylint: disable-msg=E1101

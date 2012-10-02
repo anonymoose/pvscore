@@ -62,13 +62,13 @@ class Company(ORMBase, BaseModel):
             return self.enterprise.get_email_info()
 
 
-    def get_all_active_products(self):
-        from pvscore.model.crm.product import Product
-        return Product.find_all_active(self)
+    # def get_all_active_products(self):
+    #     from pvscore.model.crm.product import Product
+    #     return Product.find_all_active(self)
 
 
-    def is_email_ready(self):
-        return (self.smtp_server and self.smtp_server.find(':') >= 0)
+    # def is_email_ready(self):
+    #     return (self.smtp_server and self.smtp_server.find(':') >= 0)
 
 
     @property
@@ -79,11 +79,11 @@ class Company(ORMBase, BaseModel):
             .filter(and_(Campaign.delete_dt == None,
                          Campaign.campaign_id == self.default_campaign_id)).first()
 
-    @staticmethod
-    def create(name):
-        comp = Company()
-        comp.name = name
-        return comp
+    # @staticmethod
+    # def create(name):
+    #     comp = Company()
+    #     comp.name = name
+    #     return comp
 
 
     @staticmethod
@@ -119,14 +119,17 @@ class Company(ORMBase, BaseModel):
             attr = Attribute.create_new('Company', name)
         attr.set(self, value)
 
+
     def get_attr(self, name):
         attr = Attribute.find('Company', name)
         if attr:
             return attr.get(self)
         return None
 
+
     def get_attrs(self):
         return Attribute.find_values(self)
+
 
     def invalidate_caches(self, **kwargs):
         from pvscore.model.cms.site import Site

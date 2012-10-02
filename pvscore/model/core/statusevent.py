@@ -45,17 +45,17 @@ class StatusEvent(ORMBase, BaseModel):
                 'PurchaseOrder']
 
     
-    @staticmethod
-    def search(enterprise_id, display_name, short_name):
-        dn_clause = sn_clause = ''
-        if display_name:
-            dn_clause = "and se.display_name like '%%%s%%'" % display_name
-        if short_name:
-            sn_clause = "and se.short_name like '%%%s%%'" % short_name
-        sql = """SELECT * FROM core_status_event se
-                 where se.enterprise_id = {ent_id}
-                 {dn} {sn}""".format(dn=dn_clause, sn=sn_clause, ent_id=enterprise_id)
-        return Session.query(StatusEvent).from_statement(sql).all()
+    # @staticmethod
+    # def search(enterprise_id, display_name, short_name):
+    #     dn_clause = sn_clause = ''
+    #     if display_name:
+    #         dn_clause = "and se.display_name like '%%%s%%'" % display_name
+    #     if short_name:
+    #         sn_clause = "and se.short_name like '%%%s%%'" % short_name
+    #     sql = """SELECT * FROM core_status_event se
+    #              where se.enterprise_id = {ent_id}
+    #              {dn} {sn}""".format(dn=dn_clause, sn=sn_clause, ent_id=enterprise_id)
+    #     return Session.query(StatusEvent).from_statement(sql).all()
 
 
     @staticmethod
