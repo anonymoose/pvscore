@@ -202,6 +202,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
         Administration
         <b class="caret"></b></a>
       <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+
         % if request.ctx.user.priv.edit_company or request.ctx.user.priv.view_company or request.ctx.user.priv.view_campaign or request.ctx.user.priv.edit_campaign or request.ctx.user.priv.view_enterprise or request.ctx.user.priv.edit_enterprise:
         <li class="dropdown-submenu">
           <a tabindex="-1" href="#">Company</a>
@@ -315,9 +316,15 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
           </ul>
         </li>
         % endif
-        
+       
+        % for link_name in plugin_registry.category('administration_link'):
+        <li><a href="${plugin_registry.getattr('administration_link', link_name, 'href')}">${link_name}</a></li>
+        % endfor
+
 
       </ul>
+
+
     </li>
 
 </%def>

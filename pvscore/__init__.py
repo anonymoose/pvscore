@@ -8,12 +8,14 @@ from pvscore.config.routes import crm_routes
 import pvscore.config as config
 import pvscore.lib.dbcache as dbcache
 from pvscore.controllers.cms.site import dynamic_url_lookup
+from pvscore.lib.plugin import plugin_registry
 
 
 def add_renderer_globals(event):
     event['h'] = helpers
     event['c'] = event['request'].tmpl_context
     event['tmpl_context'] = event['request'].tmpl_context
+    event['plugin_registry'] = plugin_registry
 
 
 def _config_impl(cfg, settings):
@@ -38,7 +40,7 @@ def init_pvscore(cfg, settings):
 
 def command_line_main(settings):
     cfg = Configurator(settings=settings)
-    _config_impl(cfg, settings)
+    init_pvscore(cfg, settings)
     return cfg.make_wsgi_app()
 
 

@@ -41,10 +41,11 @@ class Users(ORMBase, BaseModel):
 
 
     @property
-    def email_info(self):
+    def get_email_info(self):
         if self.smtp_server is not None and self.smtp_username is not None:
             return self.email, self.smtp_server, self.smtp_username, self.smtp_password
-        return self.enterprise.email_info
+        if self.enterprise:
+            return self.enterprise.get_email_info
 
 
     def is_vendor_user(self):

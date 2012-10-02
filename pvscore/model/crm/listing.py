@@ -1,14 +1,14 @@
-import pdb, math, logging
-from sqlalchemy import Column, ForeignKey, and_, not_
-from sqlalchemy.types import Integer, String, Date, Numeric, Text, Boolean, DateTime, Float
-from sqlalchemy.orm import relation, backref
+#pylint: disable-msg=E1101,C0103
+import logging
+from sqlalchemy import Column, ForeignKey, and_
+from sqlalchemy.types import Integer, String, Date, Text, Boolean, DateTime, Float
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from pvscore.model.crm.customer import Customer
 from pvscore.model.core.asset import Asset
 #from pvscore.lib.sphinx.sphinxapi import *
 import pvscore.lib.db as db
-import pvscore.lib.util as util
+
 from pvscore.model.core.attribute import Attribute, AttributeValue
 from hashlib import md5
 
@@ -61,7 +61,8 @@ class Listing(ORMBase, BaseModel):
                                description=db.clean(description),
                                keywords=db.clean(keywords),
                                company_id=company.company_id))
-        if olist: return olist[0]
+        if olist:
+            return olist[0]
 
     @staticmethod
     def find_by_customer(customer):
@@ -268,11 +269,6 @@ class ListingMessage(ORMBase, BaseModel):
                                                          ListingMessage.listing_id == listing.listing_id))\
                                                          .order_by(ListingMessage.listing_message_id.desc())\
                                                          .all()
-
-    @staticmethod
-    def find_unsent_by_company(company):
-        return Session.query(ListingMessage).filter(and_(ListingMessage.delete_dt == None,
-                                                         ListingMessage.sent_dt == None)).all()
 
     @staticmethod
     def find_count_by_email_and_listing(email, listing):

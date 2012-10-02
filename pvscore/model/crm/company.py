@@ -55,10 +55,11 @@ class Company(ORMBase, BaseModel):
 
 
     @property
-    def email_info(self):
+    def get_email_info(self):
         if self.smtp_server is not None and self.smtp_username is not None:
             return self.email, self.smtp_server, self.smtp_username, self.smtp_password
-        return self.enterprise.email_info
+        if self.enterprise:
+            return self.enterprise.get_email_info()
 
 
     def get_all_active_products(self):
@@ -232,8 +233,7 @@ class Enterprise(ORMBase, BaseModel):
         return '%s : %s' % (self.enterprise_id, self.name)
 
 
-    @property
-    def email_info(self):
+    def get_email_info(self):
         return self.email, self.smtp_server, self.smtp_username, self.smtp_password
 
 

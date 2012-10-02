@@ -1,4 +1,4 @@
-import logging
+import logging, random
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.controllers.base import BaseController
@@ -99,12 +99,12 @@ class LoginController(BaseController):
         if not uid:
             raise HTTPFound('/')
 
-        cust = Customer.find_by_company(uid, site.company)
+        cust = Customer.find_by_company(uid, self.request.ctx.site.company)
         if not cust:
-            raise HTTFound('/')
+            raise HTTPFound('/')
 
         # reset the customer's password to something random.
-        cust.password = '%s%s%s' % (chr(random.randint(65,90)),
+        cust.password = '%s%s%s' % (chr(random.randint(65, 90)),
                                     chr(random.randint(97, 122)),
                                     str(random.randint(100000, 999999)))
         cust.save()
@@ -112,9 +112,9 @@ class LoginController(BaseController):
         self.request.ctx.campaign.send_forgot_password_comm(cust)
         self.flash('Your new password has been sent to the email address you provided.')
         if self.request.POST.get('redir'):
-            redirect(self.request.POST['redir'])
+            return HTTPFound(self.request.POST['redir'])
         else:
-            redirect('/')
+            return HTTPFound('/')
 
 
 #    """ KB: [2011-06-28]:

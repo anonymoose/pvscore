@@ -1,5 +1,5 @@
-     #pylint: disable-msg=W0221,W0613
-from abc import ABCMeta, abstractmethod
+#pylint: disable-msg=W0221,W0613
+from abc import ABCMeta
 import stripe
 import logging
 
@@ -37,6 +37,7 @@ class BaseBillingApi(object):
 
 class NullBillingApi(BaseBillingApi):
     def __init__(self):
+        super(NullBillingApi, self).__init__()
         self.payment_method = 'Credit Card'
         self.coupon = None
 

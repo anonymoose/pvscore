@@ -1,14 +1,6 @@
-#import smtplib
-#import mimetypes
-#from email.MIMEMultipart import MIMEMultipart
-#from email.MIMEBase import MIMEBase
-#from email.MIMEText import MIMEText
-#from email.MIMEAudio import MIMEAudio
-#from email.MIMEImage import MIMEImage
-#from email.Encoders import encode_base64
-#import email, string, re
-#from email.parser import HeaderParser
-#import imaplib, email, string
+import smtplib
+from email.MIMEMultipart import MIMEMultipart   #pylint: disable-msg=F0401,E0611
+from email.MIMEText import MIMEText   #pylint: disable-msg=F0401,E0611
 import redis
 import socket
 import calendar
@@ -203,26 +195,26 @@ def select_list(obj_array, id_attr, disp_attr, blank=False):
     return arr
 
 
-#def quickmail(subject, text, from_addr='kenneth.bedwell@gmail.com', to_addr='kenneth.bedwell@gmail.com'):
-#    return sendmail(from_addr, to_addr, subject, text, 'kenneth.bedwell@gmail.com', 'Zachary345', 'smtp.gmail.com', '587')
+def quickmail(subject, text, from_addr='kenneth.bedwell@gmail.com', to_addr='kenneth.bedwell@gmail.com'):
+    return sendmail(from_addr, to_addr, subject, text, 'kenneth.bedwell@gmail.com', 'Zachary345', 'smtp.gmail.com', '587')
 
 
-#def sendmail(from_addr, to_addr, subject, text, username, password, server, port):
-#    msg = MIMEMultipart()
-#    msg['From'] = from_addr
-#    msg['To'] = to_addr
-#    msg['Subject'] = subject
-#    msg.attach(MIMEText(text, 'html'))
-#    conn = smtplib.SMTP(server, int(port))
-#    conn.ehlo()
-#    try:
-#        conn.starttls()
-#    except Exception as exc:
-#        log.debug(exc)
-#    conn.ehlo()
-#    conn.login(username, password)
-#    conn.sendmail(from_addr, to_addr, msg.as_string())
-#    conn.close()
+def sendmail(from_addr, to_addr, subject, text, username, password, server, port):   #pylint: disable-msg=R0913
+    msg = MIMEMultipart()
+    msg['From'] = from_addr
+    msg['To'] = to_addr
+    msg['Subject'] = subject
+    msg.attach(MIMEText(text, 'html'))
+    conn = smtplib.SMTP(server, int(port))
+    conn.ehlo()
+    try:
+        conn.starttls()
+    except Exception as exc:
+        log.debug(exc)
+    conn.ehlo()
+    conn.login(username, password)
+    conn.sendmail(from_addr, to_addr, msg.as_string())
+    conn.close()
 
 
 def nl2br(val):

@@ -1,27 +1,74 @@
+#pylint: disable-msg=C0103,R0903
 import venusian
 import importlib
 
-class Registry(object):
+class PluginRegistry(object):
     def __init__(self):
         self.registry = {}
 
-    def add(self, name, obj):
-        self.registry[name] = obj
 
-def scan_plugins(package_name):
-    registry = Registry
-    scanner = venusian.Scanner(registry=registry)
-    mod = importlib.import_module(package_name)
-    scanner.scan(mod, categories=('pvs.plugins',))
+    def add(self, category, name, obj):
+        if category not in self.registry:
+            self.registry[category] = {}
+        self.registry[category][name] = obj
+
+    def category(self, category):
+        if category in self.registry:
+            return self.registry[category].keys()
+        else:
+            return []
 
 
-class plugin_customer_sidebar(object):
+    def get(self, category, name):
+        if category in self.registry and name in self.registry[category]:
+            return self.registry[category][name]
+
+
+    def getattr(self, category, name, attr):
+        if category in self.registry and name in self.registry[category]:
+            obj = self.registry[category][name]
+            if hasattr(obj, attr):
+                return getattr(obj, attr)
+        return ''
+
+
+class PluginRegistryItem(object):
+    def __init__(self, decorator):
+        # go over all the attrs of decorator and set them as members of self.
+        for attr in [attr for attr in dir(decorator) if not callable(getattr(decorator, attr)) and not attr.startswith('_')]:
+            setattr(self, attr, getattr(decorator, attr))
+
+
+plugin_registry = PluginRegistry()
+
+
+def init_controllers(cfg, pkg):
+    cfg.scan(pkg, plugin_registry=plugin_registry)
+
+
+class plugin_customer_sidebar_link(object):
     def __init__(self):
         pass
 
+
     def __call__(self, wrapped):
-        def callback(scanner, name, ob):
-            scanner.registry.add('derf', ob)
+        def callback(scanner, name, obj):
+            scanner.plugin_registry.add('customer_sidebar_link', decorator.link_text, PluginRegistryItem(decorator))
         venusian.attach(wrapped, callback, category='pvs.plugins')
         return wrapped
 
+
+class plugin_administration_link(object):
+    """ KB: [2012-10-01]: Declaration of this plugin gets your function
+    called to render a link on the administration menu """
+    def __init__(self, link_text=None, href=None):
+        self.link_text = link_text
+        self.href = href
+
+
+    def __call__(self, wrapped):
+        decorator = self
+        def callback(scanner, name, obj):
+            scanner.plugin_registry.add('administration_link', decorator.link_text, PluginRegistryItem(decorator))
+        venusian.attach(wrapped, callback, category='pvs.plugins')
+        return wrapped

@@ -1,16 +1,15 @@
 # KB: [2012-09-21]: http://docs.pylonsproject.org/projects/pyramid_mailer/en/latest/?awesome
-import os, pdb
 import smtplib
 import mimetypes
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEBase import MIMEBase
-from email.MIMEText import MIMEText
-from email.MIMEAudio import MIMEAudio
-from email.MIMEImage import MIMEImage
-from email.Encoders import encode_base64
-import email, string, re
-from email.parser import HeaderParser
+from email.MIMEMultipart import MIMEMultipart   #pylint: disable-msg=F0401,E0611
+from email.MIMEText import MIMEText   #pylint: disable-msg=F0401,E0611
+from email.MIMEImage import MIMEImage   #pylint: disable-msg=F0401,E0611
+from email.MIMEAudio import MIMEAudio   #pylint: disable-msg=F0401,E0611
+from email.MIMEBase import MIMEBase   #pylint: disable-msg=F0401,E0611
+from email.Encoders import encode_base64  #pylint: disable-msg=F0401,E0611
+import email
 import logging
+import os
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +20,7 @@ class UserMail(object):
 
 
     def send(self, to_addr, subject, text, *attachment_file_paths):
-        from_addr, server_info, username, password = self.sender.email_info
+        from_addr, server_info, username, password = self.sender.get_email_info()
         server, port = server_info.split(':')
         
         msg = MIMEMultipart()
@@ -32,16 +31,16 @@ class UserMail(object):
         for path in attachment_file_paths:
             msg.attach(self.get_attachment(path))
 
-        mailServer = smtplib.SMTP(server, int(port))
-        mailServer.ehlo()
+        mail_server = smtplib.SMTP(server, int(port))
+        mail_server.ehlo()
         try:
-            mailServer.starttls()
+            mail_server.starttls()
         except Exception as exc:
             log.info(exc)
-        mailServer.ehlo()
-        mailServer.login(username, password)
-        retval = mailServer.sendmail(from_addr, to_addr, msg.as_string())
-        mailServer.close()
+        mail_server.ehlo()
+        mail_server.login(username, password)
+        retval = mail_server.sendmail(from_addr, to_addr, msg.as_string())
+        mail_server.close()
         return retval
 
 
@@ -49,21 +48,21 @@ class UserMail(object):
         content_type, encoding = mimetypes.guess_type(attachment_path)
         if content_type is None or encoding is not None:
             content_type = 'application/octet-stream'
-        mainType, subType = content_type.split('/', 1)
-        file = open(attachment_path, 'rb')
-        if mainType == 'text':
-            attachment = MIMEText(file.read())
-        elif mainType == 'message':
-            attachment = email.message_from_file(file)
-        elif mainType == 'image':
-            attachment = MIMEImage(file.read(),_subType=subType)
-        elif mainType == 'audio':
-            attachment = MIMEAudio(file.read(),_subType=subType)
+        main_type, sub_type = content_type.split('/', 1)
+        attachment_file = open(attachment_path, 'rb')
+        if main_type == 'text':
+            attachment = MIMEText(attachment_file.read())
+        elif main_type == 'message':
+            attachment = email.message_from_file(attachment_file)
+        elif main_type == 'image':
+            attachment = MIMEImage(attachment_file.read(), _subType=sub_type)
+        elif main_type == 'audio':
+            attachment = MIMEAudio(attachment_file.read(), _subType=sub_type)
         else:
-            attachment = MIMEBase(mainType, subType)
-        attachment.set_payload(file.read())
+            attachment = MIMEBase(main_type, sub_type)
+        attachment.set_payload(attachment_file.read())
         encode_base64(attachment)
-        file.close()
+        attachment_file.close()
         attachment.add_header('Content-Disposition', 'attachment',   filename=os.path.basename(attachment_path))
         return attachment
 

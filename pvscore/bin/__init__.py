@@ -1,4 +1,5 @@
 """Import the TCD_sample_database model into your script"""
+#pylint: disable-msg=R0912
 import commands, traceback, os, time, pdb
 from paste.deploy import appconfig
 import getopt, sys
@@ -7,7 +8,9 @@ import pvscore.lib.util as util
 from pyramid.paster import bootstrap
 from pvscore import command_line_main
 import paste.deploy
+import logging
 
+logger = logging.getLogger(__name__)   #pylint: disable-msg=C0103
 
 def init_pyramid(config_file_path=None):
     if config_file_path == None:
@@ -19,25 +22,25 @@ def init_pyramid(config_file_path=None):
 
 
 # so we only call this once.
-_initialized = False
+INITIALIZED = False
 
-
-""" KB: [2012-01-04]: http://code.activestate.com/recipes/546512/ """
 class SingleInstance(object):
-    def __init__(self, pidPath):
+    def __init__(self, pid_path):
         """ KB: [2012-01-04]:
-        pidPath - full path/filename where pid for running application is to be
+        http://code.activestate.com/recipes/546512/
+        
+        pid_path - full path/filename where pid for running application is to be
                   stored.  Often this is ./var/<pgmname>.pid
         """
-        self.pidPath = pidPath
-        if os.path.exists(pidPath):
+        self.pid_path = pid_path
+        if os.path.exists(pid_path):
             # Make sure it is not a "stale" pidFile
-            pid = open(pidPath, 'r').read().strip()
+            pid = open(pid_path, 'r').read().strip()
 
             # Check list of running pids, if not running it is stale so
             # overwrite
-            pidRunning = commands.getoutput('ls /proc | grep %s' % pid)
-            if pidRunning:
+            pid_running = commands.getoutput('ls /proc | grep %s' % pid)
+            if pid_running:
                 self.lasterror = True
             else:
                 self.lasterror = False
@@ -46,16 +49,16 @@ class SingleInstance(object):
 
         if not self.lasterror:
             # Write my pid into pidFile to keep multiple copies of program from running.
-            fp = open(pidPath, 'w')
-            fp.write(str(os.getpid()))
-            fp.close()
+            filep = open(pid_path, 'w')
+            filep.write(str(os.getpid()))
+            filep.close()
 
     def already_running(self):
         return self.lasterror
 
     def __del__(self):
         if not self.lasterror:
-            os.unlink(self.pidPath)
+            os.unlink(self.pid_path)
 
 class PVSOptionParser(OptionParser):
     """ KB: [2011-11-08]: this is to ignore invalid command line arguments so that you can pass -I and it get parsed in init_pyramid
@@ -64,7 +67,7 @@ class PVSOptionParser(OptionParser):
     def error(self, msg):
         pass
 
-""" KB: [2011-11-08]: This is so OptionParser will work, provided -I /whatever is the first arg """
+# KB: [2011-11-08]: This is so OptionParser will work, provided -I /whatever is the first arg 
 ARGV = sys.argv[sys.argv.index('-I')+1:] if '-I' in sys.argv else sys.argv
 
 # call scripts like so
@@ -81,21 +84,24 @@ def pyramid_script(func):
             if single.already_running():
                 sys.exit("Another instance of this program is already running")
 
-            if not _initialized:
+            if not INITIALIZED:
                 if 'PYRAMID_INI' in os.environ:
                     inifile = os.environ['PYRAMID_INI']
                 else:
                     inifile = None
-                    for i,a in enumerate(sys.argv):
-                        if a == '-I':
+                    for i, arg in enumerate(sys.argv):
+                        if arg == '-I':
                             inifile = sys.argv[i+1]
                             break
-                if not inifile: raise Warning
+                if not inifile:
+                    logger.error("No ini file specified")
+                    raise Warning
                 init_pyramid(inifile)
             try:
                 res = func(*args, **kwargs)
                 return res
-            except:
+            except Exception as exc:
+                logger.error(exc)
                 if 'is_debug' in os.environ and os.environ['is_debug'] == 'True':
                     raise
                 else:
@@ -107,18 +113,14 @@ def pyramid_script(func):
                         util.quickmail(subj, msg.replace("\\n", "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;").replace("', '  File", 'File').replace("'", ''))
         finally:
             del single
-
     return _init_pyramid
 
-def log(s):
-    try:
-        print "%s -- %s" % (time.ctime(), s)
-        sys.stdout.flush()
-    except: pass
 
-def email(to, subj, msg):
-    from pvscore.lib.base import BaseUI
-    from pvscore.model.crm.company import Company, Enterprise
-    Enterprise.load(BaseUI.get_enterprise_id())
-    mail = UserMail(Company.find_all()[0])
-    mail.send(to, subj, msg)
+def log(msg):
+    try:
+        logger.info("%s -- %s" % (time.ctime(), msg))
+        sys.stdout.flush()
+    except Exception as exc:
+        logger.error(exc)
+
+

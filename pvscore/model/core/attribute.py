@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String
 from sqlalchemy.orm import relation, joinedload
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from pvscore.lib.dbcache import FromCache, invalidate
+from pvscore.lib.dbcache import FromCache
 
 
 class Attribute(ORMBase, BaseModel):

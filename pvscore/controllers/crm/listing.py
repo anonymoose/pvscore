@@ -3,17 +3,13 @@ import os, shutil
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.controllers.base import BaseController
-from pvscore.model.crm.customer import Customer
 from pvscore.lib.decorators.authorize import authorize
 from pvscore.lib.auth_conditions import IsCustomerLoggedIn
-from pvscore.model.crm.listing import Listing, ListingMessage, ListingFavorite
+from pvscore.model.crm.listing import Listing
 from pvscore.model.core.status import Status
-from pvscore.controllers.cms.site import SiteController
 from pvscore.model.core.asset import Asset
-from pvscore.model.cms.site import Site
 from hashlib import md5
 import pvscore.lib.util as util
-from pvscore.lib.geoip.geo import Geo
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +50,8 @@ class ListingController(BaseController):
     @view_config(route_name='crm.listing.remove', renderer="string")
     @authorize(IsCustomerLoggedIn())
     def remove(self):
-        lis = Listing.load(self.request.matchdict('listing_id'))
+        lis = Listing.load(self.request.matchdict.get('listing_id'))
+        cust = self.request.ctx.customer
         self.forbid_if(not lis or not cust or lis.customer != cust or cust.campaign.company.enterprise_id != self.enterprise_id)
         lis.soft_delete()
         Status.add(cust, lis, Status.find_event(self.enterprise_id, lis, 'CLOSED'),
@@ -65,7 +62,7 @@ class ListingController(BaseController):
     @view_config(route_name='crm.listing.json', renderer="/crm/listing.json.mako")
     @authorize(IsCustomerLoggedIn())
     def json(self):
-        listing_id = self.reqeust.matchdict('listing_id')
+        listing_id = self.request.matchdict.get('listing_id')
         cust = self.request.ctx.customer
         listing = Listing.load(listing_id)
         self.forbid_if(not listing or not cust or listing.customer != cust or cust.campaign.company.enterprise_id != self.enterprise_id)
@@ -373,27 +370,4 @@ class ListingController(BaseController):
     #     msg.commit()
     #     flash('Message sent.')
     #     redirect('%s?listing_id=%s&listing_message_id=%s' % (self.request.POST.get('redir'), listing_id, msg.listing_message_id))
-
-class ListingUtil:
-    @staticmethod
-    def _get_site():
-        site = None
-        if not 'site_id' in session:
-            site = Site.find_by_host(self.request.host)
-            session['site_id'] = site.site_id
-        else:
-            site = Site.load(session['site_id'])
-        if not site:
-            abort(500)
-        return site
-
-    @staticmethod
-    def get_categories():
-        """ KB: [2011-03-28]: The categories have to be defined in the site.config file.  They are stored in the DB
-        as strings for now.
-        """
-        site = ListingUtil._get_site()
-        cfg = site.get_config()
-        categories = cfg.get('CATEGORIES', 'categories')
-        return [cs.split('|') for cs in categories.split(',')]
 

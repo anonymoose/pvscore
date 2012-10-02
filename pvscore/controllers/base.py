@@ -4,6 +4,8 @@ from pvscore.model.meta import Session
 from pvscore.lib.geoip.geo import Geo
 from pyramid.httpexceptions import HTTPForbidden
 import logging
+from pvscore.lib.plugin import plugin_registry
+
 
 log = logging.getLogger(__name__)
 
@@ -30,6 +32,7 @@ class BaseController(BaseUI):
         self.session = request.session
         self.enterprise_id = self.request.ctx.enterprise.enterprise_id
         self.user = self.request.ctx.user
+        self.plugin_registry = plugin_registry
         super(BaseController, self).__init__()
 
 
