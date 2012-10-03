@@ -80,13 +80,7 @@ class TestValidate(TestController):
             excepted = True
         assert excepted
         excepted = False
-
-        try:
-            self.get('/tsst/tsst_string', {'a':'ken'})
-        except Exception as exc:
-            log.info(exc)
-            excepted = True
-        assert not excepted
+        self.get('/tsst/tsst_string', {'a':'ken'})
 
 
     @secure
@@ -104,8 +98,8 @@ class TestValidate(TestController):
 
     @secure
     def test_equals(self):
-        assert self.get('/tsst/tsst_equals', {'b':'11'}).body == 'CALLED:tsst_number'
-        assert self.get('/tsst/tsst_equals', {'a': 'ken', 'b':'ken'}).body == 'CALLED:tsst_number'
+        assert self.get('/tsst/tsst_equals', {'b':'11'}).body == 'CALLED:tsst_equals'
+        assert self.get('/tsst/tsst_equals', {'a': 'ken', 'b':'ken'}).body == 'CALLED:tsst_equals'
 
         err = False
         try:
