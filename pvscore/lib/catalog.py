@@ -57,10 +57,10 @@ class Catalog(object):
             return ProductProxy(prod, self.campaign)
 
 
-    def get_product_by_attr(self, attr_name, attr_value):
-        prod = Product.find_by_attr(attr_name, attr_value)
-        if prod:
-            return ProductProxy(prod, self.campaign)
+    # def get_product_by_attr(self, attr_name, attr_value):
+    #     prod = Product.find_by_attr(attr_name, attr_value)
+    #     if prod:
+    #         return ProductProxy(prod, self.campaign)
 
 
     def get_product(self, product_id):
@@ -77,12 +77,12 @@ class Catalog(object):
         return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_by_campaign(self.campaign, True)], offset, limit)
 
 
-    def get_products_with_pictures(self, offset=None, limit=None):
-        return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_products_with_pictures_by_campaign(self.campaign)], offset, limit)
+    # def get_products_with_pictures(self, offset=None, limit=None):
+    #     return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_products_with_pictures_by_campaign(self.campaign)], offset, limit)
 
 
-    def get_web_ready_products(self, offset=None, limit=None):
-        return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_web_ready_by_campaign(self.campaign)], offset, limit)
+    # def get_web_ready_products(self, offset=None, limit=None):
+    #     return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_web_ready_by_campaign(self.campaign)], offset, limit)
 
 
     # def get_web_ready_unpriced_products(self, offset=None, limit=None):
@@ -97,8 +97,8 @@ class Catalog(object):
     #     return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_featured_by_campaign(self.campaign)], offset, limit)
 
 
-    def get_best_sellers(self, offset=None, limit=None):
-        return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_best_sellers_by_campaign(self.campaign)], offset, limit)
+    # def get_best_sellers(self, offset=None, limit=None):
+    #     return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_best_sellers_by_campaign(self.campaign)], offset, limit)
 
 
     def get_category(self, category_id):
@@ -110,20 +110,20 @@ class Catalog(object):
         return util.page_list([ProductProxy(prod, self.campaign) for prod in pcat.products], offset, limit)
 
 
-    def get_manufacturer_products(self, mfr_name, offset=None, limit=None):
-        return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_by_manufacturer(self.enterprise_id, mfr_name)], offset, limit)
+    # def get_manufacturer_products(self, mfr_name, offset=None, limit=None):
+    #     return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_by_manufacturer(self.enterprise_id, mfr_name)], offset, limit)
 
 
-    def get_search_results(self, search, offset=None, limit=None):
-        return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.catalog_search(search, self.campaign.company_id)], offset, limit)
+    # def get_search_results(self, search, offset=None, limit=None):
+    #     return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.catalog_search(search, self.campaign.company_id)], offset, limit)
 
 
-    def get_categories(self):
-        return ProductCategory.find_by_campaign(self.campaign)
+    # def get_categories(self):
+    #     return ProductCategory.find_by_campaign(self.campaign)
 
 
-    def get_manufacturers(self):
-        return Product.find_manufacturers_by_campaign(self.enterprise_id, self.campaign)
+    # def get_manufacturers(self):
+    #     return Product.find_manufacturers_by_campaign(self.enterprise_id, self.campaign)
 
 
     #def set_cart_default_shipping_timeframe(self, cart):

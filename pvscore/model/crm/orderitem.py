@@ -5,6 +5,7 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 import logging
+import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
 
@@ -34,11 +35,7 @@ class OrderItem(ORMBase, BaseModel):
     status = relation('Status')
 
     def total(self):
-        try:
-            return self.unit_price * self.quantity
-        except Exception as exc:
-            log.debug(exc)
-            return 0.0
+        return util.nvl(self.unit_price, 0.0) * util.nvl(self.quantity, 0.0)
 
 
     # @staticmethod

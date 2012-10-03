@@ -83,10 +83,10 @@ class Report(ORMBase, BaseModel):
         return ReportCompanyJoin.create_new(self.report_id, company_id)
 
 
-    @staticmethod
-    def full_delete(report_id):
-        Session.execute('delete from crm_report_company_join where report_id = %s' % report_id) 
-        Session.execute('delete from crm_report where report_id = %s' % report_id)
+    # @staticmethod
+    # def full_delete(report_id):
+    #     Session.execute('delete from crm_report_company_join where report_id = %s' % report_id) 
+    #     Session.execute('delete from crm_report where report_id = %s' % report_id)
 
 class ReportCompanyJoin(ORMBase, BaseModel):
     __tablename__ = 'crm_report_company_join'
