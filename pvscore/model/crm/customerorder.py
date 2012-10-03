@@ -77,7 +77,7 @@ class CustomerOrder(ORMBase, BaseModel):
                 if children and len(children) > 0:
                     for kid in children:
                         child_item = OrderItem()
-                        child_item.order = cord.order
+                        child_item.order = cord
                         child_item.parent_id = item.order_item_id
                         child_item.product = kid.child
                         child_item.creator = user_created

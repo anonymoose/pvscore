@@ -55,8 +55,8 @@ def format_date(d, fmt="%Y-%m-%d"):
 
 
 #<pubDate>Wed, 02 Oct 2002 08:00:00 EST</pubDate>
-# def format_rss_date(d):
-#     return format_date(d, "%a, %d %b %Y %H:%M:%S EST")
+def format_rss_date(d):
+    return format_date(d, "%a, %d %b %Y %H:%M:%S EST")
 
 
 def slash_date(d):

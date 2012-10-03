@@ -84,10 +84,10 @@ class TestCrmCustomer(TestController):
         for oid in oids:
             oitem = OrderItem.load(oid)
             post_data['order_items[%s][unit_price]' % oitem.order_item_id] = oitem.unit_price
-            post_data['order_items[%s][quantity]' % oitem.order_item_id] = oitem.quantity
+            post_data['order_items[%s][quantity]' % oitem.order_item_id] = oitem.quantity + 1
         post_data['order_items[999_][unit_price]'] = 25
         post_data['order_items[999_][quantity]'] = 1.00
-        post_data['order_items[999_][product_id]'] = 1451
+        post_data['order_items[999_][product_id]'] = 2090
         post_data['order_items_to_delete[]'] = oids[0]
         R = self.post('/crm/customer/edit_order/%s/%s' % (str(customer_id), str(order_id)), post_data)
         order.invalidate_self()
