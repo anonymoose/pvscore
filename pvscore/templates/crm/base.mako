@@ -320,13 +320,8 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
         % for link_name in plugin_registry.category('administration_link'):
         <li><a href="${plugin_registry.getattr('administration_link', link_name, 'href')}">${link_name}</a></li>
         % endfor
-
-
       </ul>
-
-
     </li>
-
 </%def>
 
 

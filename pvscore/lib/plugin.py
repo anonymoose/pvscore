@@ -18,11 +18,6 @@ class PluginRegistry(object):
             return []
 
 
-    def get(self, category, name):
-        if category in self.registry and name in self.registry[category]:
-            return self.registry[category][name]
-
-
     def getattr(self, category, name, attr):
         if category in self.registry and name in self.registry[category]:
             obj = self.registry[category][name]
@@ -64,10 +59,10 @@ class plugin_administration_link(object):
         self.link_text = link_text
         self.href = href
 
-
     def __call__(self, wrapped):
         decorator = self
         def callback(scanner, name, obj):  #pylint: disable-msg=W0613
-            scanner.plugin_registry.add('administration_link', decorator.link_text, PluginRegistryItem(decorator))
+            if hasattr(scanner, 'plugin_registry'):
+                scanner.plugin_registry.add('administration_link', decorator.link_text, PluginRegistryItem(decorator))
         venusian.attach(wrapped, callback, category='pvs.plugins')
         return wrapped

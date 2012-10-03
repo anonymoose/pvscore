@@ -20,7 +20,6 @@ class TestBase(TestCase):
         self.assertEqual(excepted, True)
 
 
-
 class TestController(BaseController):
     def it_is_forbidden(self):
         self.forbid_if(True, "this is message")

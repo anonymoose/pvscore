@@ -5,5 +5,5 @@ psql -U unittest -d unittest -f ./unittest-db/unittest.sql > /tmp/Tfull.log 2>&1
 echo "... done"
 
 rm -rf ./data/cache ./data/sessions #./data/templates/crm/*
-
+export PVS_TESTING='TRUE'
 nosetests -x -v --cover-package=pvscore.model --cover-package=pvscore.controllers --cover-package=pvscore.lib --cover-package=pvscore.config --with-id $*

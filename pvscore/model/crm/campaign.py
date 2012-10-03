@@ -37,7 +37,6 @@ class Campaign(ORMBase, BaseModel):
         return '%s : %s' % (self.campaign_id, self.name)
 
 
-    @property
     def get_email_info(self):
         if self.smtp_server is not None and self.smtp_username is not None:
             return self.email, self.smtp_server, self.smtp_username, self.smtp_password

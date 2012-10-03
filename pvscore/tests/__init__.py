@@ -23,10 +23,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Invoke websetup with the current config file
-os.environ['PVS_TESTING'] = 'TRUE'
-#SetupCommand('setup-app').run([pylons.test.pylonscore.config['__file__']])
-
 environ = {}
 
 UID = 'kenneth.bedwell@gmail.com'
