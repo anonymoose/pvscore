@@ -13,14 +13,14 @@ because it is simultaneously a Customer Relationship Management system (CRM), li
 for constructing almost any kind of web application.  It builds upon the Pyramid web framework, a widely used, open source framework for building 
 websites, and Sqlalchemy, the best-of-breed ORM layer for Python.
 
-* Flexible
+* Flexible *
 Plug in framework allows for simple integration into the CRM UI.  Create batch jobs that integrate directly with the CRM and your own business logic.
 
-* Powerful
+* Powerful *
 Host multiple websites and companies on the same framework and on the same server.  Segment customers using any of 12 dimensions.  Create different pricing
 structures by customer segment.  Create custom reports directly in the UI with SQL templates.
 
-* Robust
+* Robust *
 Run multiple servers behind non-sticky load balancing for high availability.  Combine with Postgres replication to create a rock solid platform for your business.
 
 
