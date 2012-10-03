@@ -6,6 +6,34 @@ from pyramid.httpexceptions import HTTPFound
 class NotValidAuth(Exception):
     pass
 
+class IsLoggedIn(object):
+
+    message = u'User must be logged'
+
+
+    def check(self, controller):
+        """ KB: [2010-09-23]: If it's an API call, then @api_method() (core.lib.decorators.api) will handle security. """
+        if 'crm_logged_in' in controller.session and controller.session['crm_logged_in'] == True and ('user_id' in controller.session or is_api(controller.request)):
+            return True
+        raise NotValidAuth(self.message)
+
+
+    def handler(self, exc, controller):        #pylint: disable-msg=W0613
+        raise HTTPFound('/crm/login?path=%s&vars=%s' % (controller.request.path, urllib.quote(controller.request.query_string)))
+
+
+class IsCustomerLoggedIn(object):
+    message = u'Customer must be logged'
+
+    def check(self, controller):
+        if 'customer_id' in controller.session and controller.session['customer_id'] is not None and controller.request.ctx.customer is not None:
+            return True
+        raise NotValidAuth(self.message)
+
+    def handler(self, exc, controller):        #pylint: disable-msg=W0613
+        raise HTTPFound('/?path=%s&vars=%s' % (controller.request.path, urllib.quote(controller.request.query_string)))
+
+    
 # class AllMet(object):
 
 #     message = u'All of these conditions have to be met: %s.'
@@ -47,7 +75,6 @@ class NotValidAuth(Exception):
 
 
 #     def handler(self, exc, controller):        #pylint: disable-msg=W0613
-#         """ TODO: KB: [2010-08-12]: Fix this to be dynamic by app """
 #         raise HTTPFound('/crm/login?path=%s&vars=%s' % (controller.request.path, urllib.quote(controller.request.query_string)))
 
 
@@ -71,37 +98,6 @@ class NotValidAuth(Exception):
 #         if valid:
 #             return True
 #         raise NotValidAuth(self.message % ', '.join(condition_messages))
-
-
-class IsLoggedIn(object):
-
-    message = u'User must be logged'
-
-
-    def check(self, controller):
-        """ KB: [2010-09-23]: If it's an API call, then @api_method() (core.lib.decorators.api) will handle security. """
-        if 'crm_logged_in' in controller.session and controller.session['crm_logged_in'] == True and ('user_id' in controller.session or is_api(controller.request)):
-            return True
-        raise NotValidAuth(self.message)
-
-
-    def handler(self, exc, controller):        #pylint: disable-msg=W0613
-        """ TODO: KB: [2010-08-12]: Fix this to be dynamic by app """
-        raise HTTPFound('/crm/login?path=%s&vars=%s' % (controller.request.path, urllib.quote(controller.request.query_string)))
-
-
-class IsCustomerLoggedIn(object):
-    message = u'Customer must be logged'
-
-    def check(self, controller):
-        if 'customer_id' in controller.session and controller.session['customer_id'] is not None and controller.request.ctx.customer is not None:
-            return True
-        raise NotValidAuth(self.message)
-
-    def handler(self, exc, controller):        #pylint: disable-msg=W0613
-        """ TODO: KB: [2010-08-12]: Fix this to be dynamic by app """
-        raise HTTPFound('/?path=%s&vars=%s' % (controller.request.path, urllib.quote(controller.request.query_string)))
-
 
 # class IsInternalReferrer(object):
 #     message = u'Referrer must be from internal source: %s invalid'

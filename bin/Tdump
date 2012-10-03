@@ -2,3 +2,4 @@
 
 echo "RECREATE DB..."
 pg_dump -U unittest -O -c unittest > ./unittest-db/unittest.sql
+

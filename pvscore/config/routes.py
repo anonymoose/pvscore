@@ -158,7 +158,8 @@ def crm_routes(config):
     adrt('crm.customer.status_dialog', '/crm/customer/status_dialog/{customer_id}') # controller='crm/customer', action='status_dialog')
     adrt('crm.customer.show_status_dialog', '/crm/customer/show_status_dialog/{customer_id}/{status_id}') # controller='crm/customer', action='show_status_dialog')
     adrt('crm.customer.save_status', '/crm/customer/save_status/{customer_id}') # controller='crm/customer', action='save_status')
-    adrt('crm.customer.get_balance', '/crm/customer/get_balance/{customer_id}') # controller='crm/customer', action='get_balance')
+    adrt('crm.customer.get_balance', '/crm/customer/get_balance/{customer_id}') #controller='crm/customer', action='get_balance')
+    adrt('crm.customer.self_get_balance', '/crm/customer/self_get_balance/{customer_id}')
 
     adrt('cms.site.new', '/cms/site/new') #, controller='cms/siteedit', action='new')
     adrt('cms.site.edit', '/cms/site/edit/{site_id}') #, controller='cms/siteedit', action='edit')
@@ -174,3 +175,14 @@ def crm_routes(config):
 
 
     adrt('crm.dashboard', '/crm/dashboard')
+
+
+    # KB: [2011-09-02]: Don't let /test into the nginx proxying namespace. 
+    adrt('test.1', '/tsst/tsst_validate') #, controller='crm/tsst', action='tsst_validate')
+    adrt('test.3', '/tsst/tsst_float') #, controller='crm/tsst', action='tsst_float')
+    adrt('test.4', '/tsst/tsst_int') #, controller='crm/tsst', action='tsst_int')
+    adrt('test.5', '/tsst/tsst_string') #, controller='crm/tsst', action='tsst_string')
+    adrt('test.6', '/tsst/tsst_number') #, controller='crm/tsst', action='tsst_number')
+    adrt('test.7', '/tsst/tsst_equals') #, controller='crm/tsst', action='tsst_equals')
+    adrt('test.8', '/tsst/tsst_redirto') #, controller='crm/tsst', action='tsst_redirto')
+    adrt('test.9', '/tsst/tsst_redirto_post')#, controller='crm/tsst', action='tsst_redirto_post')

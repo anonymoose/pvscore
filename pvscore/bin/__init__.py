@@ -12,11 +12,11 @@ import logging
 
 logger = logging.getLogger(__name__)   #pylint: disable-msg=C0103
 
-def init_pyramid(config_file_path=None):
-    if config_file_path == None:
-        config_file_path = os.getcwd() + '/prod.ini'
-    else:
-        config_file_path = os.getcwd() + '/' + config_file_path
+def init_pyramid(config_file_path):
+    # if config_file_path == None:
+    #     config_file_path = os.getcwd() + '/prod.ini'
+    # else:
+    config_file_path = os.getcwd() + '/' + config_file_path
     settings = paste.deploy.appconfig('config:%s' % config_file_path, relative_to='.')
     return command_line_main(settings)
 
@@ -32,6 +32,7 @@ class SingleInstance(object):
         pid_path - full path/filename where pid for running application is to be
                   stored.  Often this is ./var/<pgmname>.pid
         """
+        self.lasterror = False
         self.pid_path = pid_path
         if os.path.exists(pid_path):
             # Make sure it is not a "stale" pidFile
@@ -56,7 +57,7 @@ class SingleInstance(object):
     def already_running(self):
         return self.lasterror
 
-    def __del__(self):
+    def cleanup(self):
         if not self.lasterror:
             os.unlink(self.pid_path)
 
@@ -82,7 +83,7 @@ def pyramid_script(func):
         single = SingleInstance("/tmp/%s.%s.pid" % (func.__module__, func.__name__))
         try:
             if single.already_running():
-                sys.exit("Another instance of this program is already running")
+                raise Exception("Another instance of this program is already running")
 
             if not INITIALIZED:
                 if 'PYRAMID_INI' in os.environ:
@@ -112,15 +113,14 @@ def pyramid_script(func):
                         msg = repr(traceback.format_exception(exc_type, exc_value, exc_traceback))
                         util.quickmail(subj, msg.replace("\\n", "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;").replace("', '  File", 'File').replace("'", ''))
         finally:
-            del single
+            single.cleanup()
     return _init_pyramid
 
 
 def log(msg):
-    try:
-        logger.info("%s -- %s" % (time.ctime(), msg))
-        sys.stdout.flush()
-    except Exception as exc:
-        logger.error(exc)
+    logger.info("%s -- %s" % (time.ctime(), msg))
+    sys.stdout.flush()
+
+
 
 

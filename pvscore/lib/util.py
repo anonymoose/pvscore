@@ -3,23 +3,21 @@ from email.MIMEMultipart import MIMEMultipart   #pylint: disable-msg=F0401,E0611
 from email.MIMEText import MIMEText   #pylint: disable-msg=F0401,E0611
 import redis
 import socket
-import calendar
 import datetime, os, errno
 from webhelpers.html import literal
-from datetime import date
 import re
-from operator import itemgetter
+#from operator import itemgetter
 import logging
 
 log = logging.getLogger(__name__)
 
 
-def index_of_max(lst):
-    return max(enumerate(lst), key=itemgetter(1))[0]
+# def index_of_max(lst):
+#     return max(enumerate(lst), key=itemgetter(1))[0]
 
 
-def index_of_min(lst):
-    return min(enumerate(lst), key=itemgetter(1))[0]
+# def index_of_min(lst):
+#     return min(enumerate(lst), key=itemgetter(1))[0]
 
 
 #def is_production():
@@ -29,27 +27,27 @@ def index_of_min(lst):
 #    return True
 
 
-def get_first_day(dt, d_years=0, d_months=0):
-    # d_years, d_months are "deltas" to apply to dt
-    year, mon = dt.year + d_years, dt.month + d_months
-    aaa, mon = divmod(mon - 1, 12)
-    return date(year + aaa, mon + 1, 1)
+# def get_first_day(dt, d_years=0, d_months=0):
+#     # d_years, d_months are "deltas" to apply to dt
+#     year, mon = dt.year + d_years, dt.month + d_months
+#     aaa, mon = divmod(mon - 1, 12)
+#     return date(year + aaa, mon + 1, 1)
 
 
-def get_last_day(dt, d_years=0, d_months=0):
-    # d_years, d_months are "deltas" to apply to dt
-    year, mon = dt.year + d_years, dt.month + d_months
-    aaa, mon = divmod(mon - 1, 12)
-    return date(year + aaa, mon + 1, calendar.monthrange(year + aaa, mon + 1)[1])
+# def get_last_day(dt, d_years=0, d_months=0):
+#     # d_years, d_months are "deltas" to apply to dt
+#     year, mon = dt.year + d_years, dt.month + d_months
+#     aaa, mon = divmod(mon - 1, 12)
+#     return date(year + aaa, mon + 1, calendar.monthrange(year + aaa, mon + 1)[1])
 
 
-def parse_date(strdt, fmt='%Y-%m-%d'):
-    return datetime.datetime.strptime(strdt, fmt)
+# def parse_date(strdt, fmt='%Y-%m-%d'):
+#     return datetime.datetime.strptime(strdt, fmt)
 
 
-def parse_date_as_date(strdt, fmt='%Y-%m-%d'):
-    dt = parse_date(strdt, fmt)
-    return datetime.date(dt.year, dt.month, dt.day)
+# def parse_date_as_date(strdt, fmt='%Y-%m-%d'):
+#     dt = parse_date(strdt, fmt)
+#     return datetime.date(dt.year, dt.month, dt.day)
 
 
 def format_date(d, fmt="%Y-%m-%d"):
@@ -57,8 +55,8 @@ def format_date(d, fmt="%Y-%m-%d"):
 
 
 #<pubDate>Wed, 02 Oct 2002 08:00:00 EST</pubDate>
-def format_rss_date(d):
-    return format_date(d, "%a, %d %b %Y %H:%M:%S EST")
+# def format_rss_date(d):
+#     return format_date(d, "%a, %d %b %Y %H:%M:%S EST")
 
 
 def slash_date(d):
@@ -105,25 +103,25 @@ def hostname():
     return socket.gethostname()
 
 
-def date_list(start_dt, end_dt=str_today()):
-    """ KB: [2011-05-26]: Build a list of dates from start_dt to end_dt inclusive. """
-    ret = []
-    d = parse_date(start_dt)
-    end_dt = parse_date(end_dt)
-    delta = datetime.timedelta(days=1)
-    while True:
-        ret.append(d)
-        d += delta
-        if end_dt and d >= end_dt:
-            break
-        if d >= today():
-            break
-    return ret
+# def date_list(start_dt, end_dt=str_today()):
+#     """ KB: [2011-05-26]: Build a list of dates from start_dt to end_dt inclusive. """
+#     ret = []
+#     d = parse_date(start_dt)
+#     end_dt = parse_date(end_dt)
+#     delta = datetime.timedelta(days=1)
+#     while True:
+#         ret.append(d)
+#         d += delta
+#         if end_dt and d >= end_dt:
+#             break
+#         if d >= today():
+#             break
+#     return ret
 
 
-def is_today(dt):
-    today_ = datetime.datetime.today()
-    return (today_.year == dt.year and today_.month == dt.month and today_.day == dt.day)
+# def is_today(dt):
+#     today_ = datetime.datetime.today()
+#     return (today_.year == dt.year and today_.month == dt.month and today_.day == dt.day)
 
 
 def is_empty(val):
@@ -160,30 +158,30 @@ def is_string(val):
     return not is_number(val)
 
 
-def single_attr_array(obj_array, attr_name):
-    """ KB: [2010-08-27]: Given an array of homogenous objects,
-    create an array of those values specified by attr_name
-    """
-    arr = []
-    for obj in obj_array:
-        arr.append(getattr(obj, attr_name, None))
-    return arr
+# def single_attr_array(obj_array, attr_name):
+#     """ KB: [2010-08-27]: Given an array of homogenous objects,
+#     create an array of those values specified by attr_name
+#     """
+#     arr = []
+#     for obj in obj_array:
+#         arr.append(getattr(obj, attr_name, None))
+#     return arr
 
 
-def single_key_array(dict_array, attr_name):
-    """ KB: [2010-08-27]: Given an array of homogenous objects,
-    create an array of those values specified by attr_name
-    """
-    arr = []
-    for obj in dict_array:
-        if type(obj) == tuple and type(attr_name) == int:
-            arr.append(obj[attr_name])
-        else:
-            if obj.has_key(attr_name):
-                arr.append(obj[attr_name])
-            else:
-                arr.append(None)
-    return arr
+# def single_key_array(dict_array, attr_name):
+#     """ KB: [2010-08-27]: Given an array of homogenous objects,
+#     create an array of those values specified by attr_name
+#     """
+#     arr = []
+#     for obj in dict_array:
+#         if type(obj) == tuple and type(attr_name) == int:
+#             arr.append(obj[attr_name])
+#         else:
+#             if obj.has_key(attr_name):
+#                 arr.append(obj[attr_name])
+#             else:
+#                 arr.append(None)
+#     return arr
 
 
 def select_list(obj_array, id_attr, disp_attr, blank=False):
@@ -217,23 +215,23 @@ def sendmail(from_addr, to_addr, subject, text, username, password, server, port
     conn.close()
 
 
-def nl2br(val):
-    return val.replace('\n','<br>\n')
+# def nl2br(val):
+#     return val.replace('\n','<br>\n')
 
 
-def month_list():
-    return [['1', 'January'],
-            ['2', 'February'],
-            ['3', 'March'],
-            ['4', 'April'],
-            ['5', 'May'],
-            ['6', 'June'],
-            ['7', 'July'],
-            ['8', 'August'],
-            ['9', 'September'],
-            ['10', 'October'],
-            ['11', 'November'],
-            ['12', 'December']]
+# def month_list():
+#     return [['1', 'January'],
+#             ['2', 'February'],
+#             ['3', 'March'],
+#             ['4', 'April'],
+#             ['5', 'May'],
+#             ['6', 'June'],
+#             ['7', 'July'],
+#             ['8', 'August'],
+#             ['9', 'September'],
+#             ['10', 'October'],
+#             ['11', 'November'],
+#             ['12', 'December']]
 
 
 def month_list_simple():
@@ -291,49 +289,49 @@ def hours_list():
             ['23:30', '11:30 pm']]
 
 
-def year_list():
-    arr = []
-    today_ = datetime.date.today()
-    for year in range(today_.year, today_.year + 10):
-        arr.append([year, year])
-    return arr
+# def year_list():
+#     arr = []
+#     today_ = datetime.date.today()
+#     for year in range(today_.year, today_.year + 10):
+#         arr.append([year, year])
+#     return arr
 
 
-def to_dict(obj, maxlevel=2, level=0, data=None):
-    """ KB: [2010-09-23]: Recursively traverse trees of objects to attach dicts in order
-    in order for them to be converted to a JSON string.
-    """
-    if level > maxlevel:
-        return
-    if level == 0 and data == None:
-        data = {}
-    keys = [mbr for mbr in dir(obj) if not mbr.startswith('_')
-            and (isinstance(getattr(obj, mbr), list)
-                 or isinstance(getattr(obj, mbr), int)
-                 or isinstance(getattr(obj, mbr), str)
-                 or isinstance(getattr(obj, mbr), unicode)
-                 or isinstance(getattr(obj, mbr), float)
-                 or hasattr(getattr(obj, mbr), 'to_dict'))]
-    data = {}
-    for key in keys:
-        val = getattr(obj, key)
-        if isinstance(val, list):
-            data[key] = []
-            for j in val:
-                if hasattr(j, 'to_dict'):
-                    dat = j.to_dict(maxlevel, level+1)
-                    if dat and len(dat) > 0:
-                        data[key].append(dat)
-                else:
-                    data[key] = j
-        else:
-            if hasattr(val, 'to_dict'):
-                dat = val.to_dict(maxlevel, level+1)
-                if dat and len(dat) > 0:
-                    data[key] = dat
-            else:
-                data[key] = val
-    return data
+# def to_dict(obj, maxlevel=2, level=0, data=None):
+#     """ KB: [2010-09-23]: Recursively traverse trees of objects to attach dicts in order
+#     in order for them to be converted to a JSON string.
+#     """
+#     if level > maxlevel:
+#         return
+#     if level == 0 and data == None:
+#         data = {}
+#     keys = [mbr for mbr in dir(obj) if not mbr.startswith('_')
+#             and (isinstance(getattr(obj, mbr), list)
+#                  or isinstance(getattr(obj, mbr), int)
+#                  or isinstance(getattr(obj, mbr), str)
+#                  or isinstance(getattr(obj, mbr), unicode)
+#                  or isinstance(getattr(obj, mbr), float)
+#                  or hasattr(getattr(obj, mbr), 'to_dict'))]
+#     data = {}
+#     for key in keys:
+#         val = getattr(obj, key)
+#         if isinstance(val, list):
+#             data[key] = []
+#             for j in val:
+#                 if hasattr(j, 'to_dict'):
+#                     dat = j.to_dict(maxlevel, level+1)
+#                     if dat and len(dat) > 0:
+#                         data[key].append(dat)
+#                 else:
+#                     data[key] = j
+#         else:
+#             if hasattr(val, 'to_dict'):
+#                 dat = val.to_dict(maxlevel, level+1)
+#                 if dat and len(dat) > 0:
+#                     data[key] = dat
+#             else:
+#                 data[key] = val
+#     return data
 
 
 def cache_get(key):
@@ -349,18 +347,18 @@ def cache_set(key, value):
     red.connection_pool.disconnect()
 
 
-def points_2d(obj_array, lhs_key, rhs_key):
-    """ KB: [2010-10-25]: Given an array of objects, pull out a dict that flattens the object into a dict.
-    qs = EodQuote.find_by_date_diff(yhoo, -30, date(2010, 01, 31))
-    vals = util.points_2d(qs, 'quote_dt', 'close')
-    # now do something with numpy to map close to quote_dt...
-    """
-    lhs = []
-    rhs = []
-    for obj in obj_array:
-        lhs.append(getattr(obj, lhs_key))
-        rhs.append(getattr(obj, rhs_key))
-    return (lhs, rhs)
+# def points_2d(obj_array, lhs_key, rhs_key):
+#     """ KB: [2010-10-25]: Given an array of objects, pull out a dict that flattens the object into a dict.
+#     qs = EodQuote.find_by_date_diff(yhoo, -30, date(2010, 01, 31))
+#     vals = util.points_2d(qs, 'quote_dt', 'close')
+#     # now do something with numpy to map close to quote_dt...
+#     """
+#     lhs = []
+#     rhs = []
+#     for obj in obj_array:
+#         lhs.append(getattr(obj, lhs_key))
+#         rhs.append(getattr(obj, rhs_key))
+#     return (lhs, rhs)
 
 
 def mkdir_p(path):
@@ -371,10 +369,10 @@ def mkdir_p(path):
     try:
         os.makedirs(path)
     except OSError as exc: # Python >2.5
-        if exc.errno == errno.EEXIST:
-            pass
-        else:
+        if exc.errno != errno.EEXIST:
             raise
+
+
 
 
 def float_(flt):
@@ -384,10 +382,10 @@ def float_(flt):
         return float(flt)
 
 
-def fltrnd2(flt):
-    if flt:
-        return float('%.2f' % flt)
-    else: return ''
+# def fltrnd2(flt):
+#     if flt:
+#         return float('%.2f' % flt)
+#     else: return ''
 
 
 def money(dbl, zero=False):
@@ -397,27 +395,27 @@ def money(dbl, zero=False):
         return '0.00'
     else: return ''
 
-def datestamp(d, sep=None):
-    return '{year}{sep}{month}{sep}{day}'.format(year = d.year,
-                                                 month = d.month if d.month > 9 else '0'+str(d.month),
-                                                 day = d.day if d.day > 9 else '0'+str(d.day),
-                                                 sep=sep if sep else '')
+# def datestamp(d, sep=None):
+#     return '{year}{sep}{month}{sep}{day}'.format(year = d.year,
+#                                                  month = d.month if d.month > 9 else '0'+str(d.month),
+#                                                  day = d.day if d.day > 9 else '0'+str(d.day),
+#                                                  sep=sep if sep else '')
 
 
-def list_get_selected(arr, indices):
-    out = []
-    for i in indices:
-        out.append(arr[i])
-    return out
+# def list_get_selected(arr, indices):
+#     out = []
+#     for i in indices:
+#         out.append(arr[i])
+#     return out
 
 
-def contains(lst, val):
-    try:
-        lst.index(val)
-        return True
-    except ValueError as exc:
-        log.debug(exc)
-        return False
+# def contains(lst, val):
+#     try:
+#         lst.index(val)
+#         return True
+#     except ValueError as exc:
+#         log.debug(exc)
+#         return False
 
 
 def get(arry, key, default=None):
@@ -427,19 +425,19 @@ def get(arry, key, default=None):
         return default
 
 
-def unique(seq, idfun=None):
-    seen = {}
-    result = []
-    for item in seq:
-        marker = idfun(item)
-        # in old Python versions:
-        # if seen.has_key(marker)
-        # but in new ones:
-        if marker in seen:
-            continue
-        seen[marker] = 1
-        result.append(item)
-    return result
+# def unique(seq, idfun=None):
+#     seen = {}
+#     result = []
+#     for item in seq:
+#         marker = idfun(item)
+#         # in old Python versions:
+#         # if seen.has_key(marker)
+#         # but in new ones:
+#         if marker in seen:
+#             continue
+#         seen[marker] = 1
+#         result.append(item)
+#     return result
 
 
 #http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python
@@ -459,9 +457,10 @@ def nvl(val, default=''):
 
 
 def request_ip(request):
+    retval = '127.0.0.1'
     if 'X-Real-Ip' in request.headers:
-        return request.headers['X-Real-Ip']
-    return '127.0.0.1'
+        retval = request.headers['X-Real-Ip']
+    return retval
 
 
 #def in_test_mode():
@@ -480,74 +479,74 @@ def page_list(arr, offset, limit):
     return arr
 
 
-def state_abbrev_to_state_dict():
-    return {'AL' : 'Alabama',
-            'AK' : 'Alaska',
-            'AZ' : 'Arizona',
-            'AR' : 'Arkansas',
-            'CA' : 'California',
-            'CO' : 'Colorado',
-            'CT' : 'Connecticut',
-            'DE' : 'Delaware',
-            'DC' : 'District Of Columbia',
-            'FL' : 'Florida',
-            'GA' : 'Georgia',
-            'HI' : 'Hawaii',
-            'ID' : 'Idaho',
-            'IL' : 'Illinois',
-            'IN' : 'Indiana',
-            'IA' : 'Iowa',
-            'KS' : 'Kansas',
-            'KY' : 'Kentucky',
-            'LA' : 'Louisiana',
-            'ME' : 'Maine',
-            'MD' : 'Maryland',
-            'MA' : 'Massachusetts',
-            'MI' : 'Michigan',
-            'MN' : 'Minnesota',
-            'MS' : 'Mississippi',
-            'MO' : 'Missouri',
-            'MT' : 'Montana',
-            'NE' : 'Nebraska',
-            'NV' : 'Nevada',
-            'NH' : 'New Hampshire',
-            'NJ' : 'New Jersey',
-            'NM' : 'New Mexico',
-            'NY' : 'New York',
-            'NC' : 'North Carolina',
-            'ND' : 'North Dakota',
-            'OH' : 'Ohio',
-            'OK' : 'Oklahoma',
-            'OR' : 'Oregon',
-            'PA' : 'Pennsylvania',
-            'RI' : 'Rhode Island',
-            'SC' : 'South Carolina',
-            'SD' : 'South Dakota',
-            'TN' : 'Tennessee',
-            'TX' : 'Texas',
-            'UT' : 'Utah',
-            'VT' : 'Vermont',
-            'VA' : 'Virginia',
-            'WA' : 'Washington',
-            'WV' : 'West Virginia',
-            'WI' : 'Wisconsin',
-            'WY' : 'Wyoming'}
+# def state_abbrev_to_state_dict():
+#     return {'AL' : 'Alabama',
+#             'AK' : 'Alaska',
+#             'AZ' : 'Arizona',
+#             'AR' : 'Arkansas',
+#             'CA' : 'California',
+#             'CO' : 'Colorado',
+#             'CT' : 'Connecticut',
+#             'DE' : 'Delaware',
+#             'DC' : 'District Of Columbia',
+#             'FL' : 'Florida',
+#             'GA' : 'Georgia',
+#             'HI' : 'Hawaii',
+#             'ID' : 'Idaho',
+#             'IL' : 'Illinois',
+#             'IN' : 'Indiana',
+#             'IA' : 'Iowa',
+#             'KS' : 'Kansas',
+#             'KY' : 'Kentucky',
+#             'LA' : 'Louisiana',
+#             'ME' : 'Maine',
+#             'MD' : 'Maryland',
+#             'MA' : 'Massachusetts',
+#             'MI' : 'Michigan',
+#             'MN' : 'Minnesota',
+#             'MS' : 'Mississippi',
+#             'MO' : 'Missouri',
+#             'MT' : 'Montana',
+#             'NE' : 'Nebraska',
+#             'NV' : 'Nevada',
+#             'NH' : 'New Hampshire',
+#             'NJ' : 'New Jersey',
+#             'NM' : 'New Mexico',
+#             'NY' : 'New York',
+#             'NC' : 'North Carolina',
+#             'ND' : 'North Dakota',
+#             'OH' : 'Ohio',
+#             'OK' : 'Oklahoma',
+#             'OR' : 'Oregon',
+#             'PA' : 'Pennsylvania',
+#             'RI' : 'Rhode Island',
+#             'SC' : 'South Carolina',
+#             'SD' : 'South Dakota',
+#             'TN' : 'Tennessee',
+#             'TX' : 'Texas',
+#             'UT' : 'Utah',
+#             'VT' : 'Vermont',
+#             'VA' : 'Virginia',
+#             'WA' : 'Washington',
+#             'WV' : 'West Virginia',
+#             'WI' : 'Wisconsin',
+#             'WY' : 'Wyoming'}
 
 
-def state_abbrev_to_state(abbrev):
-    states = state_abbrev_to_state_dict()
-    if abbrev in states:
-        return states[abbrev]
+# def state_abbrev_to_state(abbrev):
+#     states = state_abbrev_to_state_dict()
+#     if abbrev in states:
+#         return states[abbrev]
 
 
-def state_select_list(selected_st=None):
-    states = state_abbrev_to_state_dict()
-    ret = ''
-    for st8 in sorted(states.keys()):
-        ret += '\t<option value="{key}" {selected}>{name}</option>\n'.format(key=st8,
-                                                                             selected='selected' if st8 == selected_st else '',
-                                                                             name=states[st8])
-    return literal(ret)
+# def state_select_list(selected_st=None):
+#     states = state_abbrev_to_state_dict()
+#     ret = ''
+#     for st8 in sorted(states.keys()):
+#         ret += '\t<option value="{key}" {selected}>{name}</option>\n'.format(key=st8,
+#                                                                              selected='selected' if st8 == selected_st else '',
+#                                                                              name=states[st8])
+#     return literal(ret)
 
 
 def country_select_list():

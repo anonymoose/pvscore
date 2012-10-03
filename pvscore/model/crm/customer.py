@@ -7,7 +7,6 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session, BaseAnalytic
 from pvscore.model.crm.customerorder import CustomerOrder
 from pvscore.model.core.users import Users
-from pvscore.model.core.attribute import Attribute
 from pvscore.model.crm.journal import Journal
 import pvscore.lib.db as db
 import pvscore.lib.util as util
@@ -194,9 +193,7 @@ class Customer(ORMBase, BaseModel):
         return Session.query(Customer).from_statement(sql).all()
 
 
-    def add_order(self, cart, user_created, site, campaign=None, incl_tax=True):     #pylint: disable-msg=R0913
-        if not campaign:
-            campaign = self.campaign
+    def add_order(self, cart, user_created, site, campaign, incl_tax=True):     #pylint: disable-msg=R0913
         return CustomerOrder.create_new(cart, self, site, campaign, user_created, incl_tax)
 
 
@@ -222,10 +219,10 @@ class Customer(ORMBase, BaseModel):
                          Customer.password == pwd)).first()
                          #                             Customer.password == Customer.encode_password(pwd))).first()
 
-    @staticmethod
-    def encode_password(password):
-        # return md5(password).hexdigest()
-        return password
+    # @staticmethod
+    # def encode_password(password):
+    #     # return md5(password).hexdigest()
+    #     return password
 
 
     def get_active_orders(self):
@@ -278,29 +275,6 @@ class Customer(ORMBase, BaseModel):
     #     Customer.full_delete(maxid)
 
         
-    def clear_attributes(self):
-        if self.customer_id:
-            Attribute.clear_all('Customer', self.customer_id)
-
-            
-    def set_attr(self, name, value):
-        attr = Attribute.find('Customer', name)
-        if not attr:
-            attr = Attribute.create_new('Customer', name)
-        attr.set(self, value)
-
-
-    def get_attr(self, name):
-        attr = Attribute.find('Customer', name)
-        if attr:
-            return attr.get(self)
-        return None
-
-
-    def get_attrs(self):
-        return Attribute.find_values(self)
-
-
 class PeriodCustomerCountSummary(BaseAnalytic):
     """ KB: [2011-11-02]: Google charts report for customer count over a period """
 

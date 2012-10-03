@@ -5,7 +5,6 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.crm.company import Company
 from pvscore.lib.dbcache import FromCache, invalidate
-from pvscore.model.core.attribute import Attribute
 
 class Campaign(ORMBase, BaseModel):
     __tablename__ = 'crm_campaign'
@@ -128,29 +127,6 @@ class Campaign(ORMBase, BaseModel):
     # def get_product_features(self):
     #     from pvscore.model.crm.product import Product
     #     return Product.find_featured_by_campaign(self)
-
-
-    def clear_attributes(self):
-        if self.company_id:
-            Attribute.clear_all('Campaign', self.company_id)
-
-
-    def set_attr(self, name, value):
-        attr = Attribute.find('Campaign', name)
-        if not attr:
-            attr = Attribute.create_new('Campaign', name)
-        attr.set(self, value)
-
-
-    def get_attr(self, name):
-        attr = Attribute.find('Campaign', name)
-        if attr:
-            return attr.get(self)
-        return None
-
-
-    def get_attrs(self):
-        return Attribute.find_values(self)
 
 
     def invalidate_caches(self, **kwargs):

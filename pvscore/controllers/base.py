@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101
 from pvscore.model.meta import Session
-from pyramid.httpexceptions import HTTPForbidden
+from pyramid.httpexceptions import HTTPForbidden, HTTPFound
 import logging
 from pvscore.lib.plugin import plugin_registry
 
@@ -58,3 +58,21 @@ class BaseController(BaseUI):
     @property
     def offset(self):
         return int(self.request.GET.get('offset')) if 'offset' in self.request.GET else 0
+
+
+    def find_redirect(self, params=""):
+        if self.request.POST.get('redir'):
+            return HTTPFound('%s%s' % (self.request.POST.get('redir'), params))
+        elif self.request.referrer:
+            return HTTPFound('%s%s' % (self.request.referrer, params))
+        else:
+            return HTTPFound('/%s' % params)
+
+
+    def raise_redirect(self, params=""):
+        if self.request.POST.get('redir'):
+            raise HTTPFound('%s%s' % (self.request.POST.get('redir'), params))
+        elif self.request.referrer:
+            raise HTTPFound('%s%s' % (self.request.referrer, params))
+        else:
+            raise HTTPFound('/%s' % params)

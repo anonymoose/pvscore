@@ -1,10 +1,10 @@
-import os
+#import os
 from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String, Date
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from pvscore.lib.dbcache import FromCache, invalidate
+from pvscore.lib.dbcache import invalidate , FromCache
 
 
 class Asset(ORMBase, BaseModel):
@@ -24,15 +24,15 @@ class Asset(ORMBase, BaseModel):
 
     status = relation('Status')
 
-    @property
-    def exists(self):
-        return os.path.exists(self.fs_path)
+    # @property
+    # def exists(self):
+    #     return os.path.exists(self.fs_path)
 
-    def delete(self):
-        if os.path.exists(self.fs_path):
-            os.remove(self.fs_path)
-        self.invalidate_caches()
-        Session.delete(self)   #pylint: disable-msg=E1101
+    # def delete(self):
+    #     if os.path.exists(self.fs_path):
+    #         os.remove(self.fs_path)
+    #     self.invalidate_caches()
+    #     Session.delete(self)   #pylint: disable-msg=E1101
 
     @staticmethod
     def find_for_object(obj):
@@ -44,20 +44,22 @@ class Asset(ORMBase, BaseModel):
             .filter(and_(Asset.fk_type == fk_type,
                          Asset.fk_id == fk_id)).all()
 
+
     def invalidate_caches(self, **kwargs):
         invalidate(self, 'Asset.find_for_object', '%s/%s' % (self.fk_type, self.fk_id))
 
-    @staticmethod
-    def create_new(name, fs_path, web_path, fk_type, fk_id):
-        if os.path.exists(fs_path):
-            ast = Asset()
-            ast.fs_path = fs_path
-            ast.web_path = web_path
-            ast.name = name
-            ast.fk_type = fk_type
-            ast.fk_id = fk_id
-            ast.save()
-            return ast
+
+    # @staticmethod
+    # def create_new(name, fs_path, web_path, fk_type, fk_id):
+    #     if os.path.exists(fs_path):
+    #         ast = Asset()
+    #         ast.fs_path = fs_path
+    #         ast.web_path = web_path
+    #         ast.name = name
+    #         ast.fk_type = fk_type
+    #         ast.fk_id = fk_id
+    #         ast.save()
+    #         return ast
 
 
     def get_listing(self):

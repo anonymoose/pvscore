@@ -99,7 +99,7 @@ class TestCrmCompany(TestController):
     def _delete_new(self, company_id):
         comp = Company.load(company_id)
         self.assertNotEqual(comp, None)
-        if not os.path.isdir(comp.web_full_directory):
+        if os.path.isdir(comp.web_full_directory):
             shutil.rmtree(comp.web_full_directory)
         comp.delete()
         self.commit()

@@ -1,6 +1,8 @@
 from pvscore.tests import TestController, secure
 from pvscore.model.cms.site import Site
 from pyramid.httpexceptions import HTTPForbidden
+from pvscore.model.crm.campaign import Campaign
+from pvscore.model.crm.company import Enterprise
 import logging, shutil, os
 
 log = logging.getLogger(__name__)
@@ -78,17 +80,32 @@ Disallow: /cms/cart/add/*""")
         R.mustcontain('Edit Site')
         site_id = f['site_id'].value
         self.assertNotEqual(f['site_id'].value, '')
+        site = Site.load(site_id)
+        log.debug(site)
         return site_id
 
 
     def _delete_new(self, site_id):
         site = Site.load(site_id)
         self.assertNotEqual(site, None)
-        if not os.path.isdir(site.site_full_directory):
+        if os.path.isdir(site.site_full_directory):
             shutil.rmtree(site.site_full_directory)
         site.delete()
         self.commit()
-        
+
+
+    def test_site_alternate_campaign(self):
+        ent = Enterprise.find_all()[0]
+        cmpns = Campaign.find_all(ent.enterprise_id)
+        other_campaign = cmpns[1]
+        R = self.get('/?__cid=%s' % other_campaign.campaign_id)
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain("campaign_id = %s" % other_campaign.campaign_id)
+
+    def test_site_not_hosted(self):
+        headers = {'Host': 'www.bogus.com'}
+        R = self.app.get('/', params=None, headers=self._get_headers(headers))
+        self.assertEqual(R.headers['Location'], 'http://www.google.com')
 
 
     def test_dynamic_root(self):

@@ -1,13 +1,19 @@
+#pylint: disable-msg=C0103
 from pvscore.tests import TestController, secure
 from pvscore.model.crm.customer import Customer
 from pvscore.model.crm.customerorder import CustomerOrder
 from pvscore.model.crm.orderitem import OrderItem
 from pvscore.model.core.status import Status
 from pvscore.model.crm.product import Product
+from pvscore.lib.billing_api import StripeBillingApi
+from pvscore.model.crm.company import Enterprise
 
-# T pvscore.tests.controllers.test_crm_customer
+# bin/T pvscore.tests.controllers.test_crm_customer
 
 TEST_CUSTOMER_ID = 220
+
+def find_customer(campaign):
+    return Customer.find('amers_j@yahoo.com', campaign)
 
 class TestCrmCustomer(TestController):
     @secure
@@ -28,10 +34,12 @@ class TestCrmCustomer(TestController):
         self.assertEqual(f['customer_id'].value, '')
         f.set('fname', 'Fnametest')
         f.set('lname', 'Lnametest')
+        f.set('company_name', 'Test Company')
         f.set('email', 'ken@testxyz.com')
         f.set('addr1', '123 Elm')
         f.set('city', 'Jacksonville')
-        f.set('phone', '9041112222')        
+        f.set('phone', '9041112222') 
+        f.set('password', 'password')        
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
@@ -72,15 +80,16 @@ class TestCrmCustomer(TestController):
         R.mustcontain('$%.2f' % total)
         
         # add something to the order
-        product_to_add = {'shipping_total' : '0.00', 'create_dt' : '2011-07-23'}
+        post_data = {'shipping_total' : '0.00', 'create_dt' : '2011-07-23'}
         for oid in oids:
             oitem = OrderItem.load(oid)
-            product_to_add['order_items[%s][unit_price]' % oitem.order_item_id] = oitem.unit_price
-            product_to_add['order_items[%s][quantity]' % oitem.order_item_id] = oitem.quantity
-        product_to_add['order_items[999_][unit_price]'] = 25
-        product_to_add['order_items[999_][quantity]'] = 1.00
-        product_to_add['order_items[999_][product_id]'] = 1451
-        R = self.post('/crm/customer/edit_order/%s/%s' % (str(customer_id), str(order_id)), product_to_add)
+            post_data['order_items[%s][unit_price]' % oitem.order_item_id] = oitem.unit_price
+            post_data['order_items[%s][quantity]' % oitem.order_item_id] = oitem.quantity
+        post_data['order_items[999_][unit_price]'] = 25
+        post_data['order_items[999_][quantity]'] = 1.00
+        post_data['order_items[999_][product_id]'] = 1451
+        post_data['order_items_to_delete[]'] = oids[0]
+        R = self.post('/crm/customer/edit_order/%s/%s' % (str(customer_id), str(order_id)), post_data)
         order.invalidate_self()
         order = CustomerOrder.load(order_id)
         total = order.total_price()
@@ -149,6 +158,10 @@ class TestCrmCustomer(TestController):
         R.mustcontain('Customer Search')
         f = R.forms['frm_customer_search']
         f.set('phone', '9041112222')
+        f.set('fname', 'Fnametest')
+        f.set('lname', 'Lnametest')
+        f.set('email', 'ken@testxyz.com')
+        f.set('company_name', 'Test Company')
         R = f.submit()
         self.assertEqual(R.status_int, 302)
         R = R.follow()
@@ -481,9 +494,52 @@ class TestCrmCustomer(TestController):
         self.assertEqual(cust.lname, 'Bedwell')
         self.assertEqual(cust.email, 'test@test.com')
         self._delete_new(customer_id)
+
+    @secure
+    def test_signup_exists(self):
+        customer_id = self._create_new()
+        R = self.post('/crm/customer/signup',
+                      {'fname' : 'Ken',
+                       'lname' : 'Bedwell',
+                       'email' : 'ken@testxyz.com',
+                       'password' : 'password',
+                       'confirmpassword' : 'password',
+                       'redir' : '/'
+                       })
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('Email ken@testxyz.com already in use')
+        self._delete_new(customer_id)
+
+    @secure
+    def test_get_balance(self):
+        customer_id = self._create_new()
+        R = self.get('/crm/customer/get_balance/%s' % customer_id)
+        self.assertEqual(R.body, "0.0")
+        self._delete_new(customer_id)
+
+
+    @secure
+    def test_self_get_balance(self):
+        customer_id = self._create_new()
+        cust = Customer.load(customer_id)
+        self.login_customer(cust.email, 'password')
+        R = self.get('/crm/customer/self_get_balance/%s' % customer_id)
+        self.assertEqual(R.body, "0.0")
+        self.logout_customer()
+        self._delete_new(customer_id)
+
+
+    @secure
+    def test_not_logged_in(self):
+        customer_id = self._create_new()
+        R = self.get('/crm/customer/self_get_balance/%s' % customer_id)
+        self.assertEqual(R.request.url, 'http://%s/?path=/crm/customer/self_get_balance/%s&vars=' % (self.get_host(), customer_id))
+        self._delete_new(customer_id)
         
 
     def test_save_and_purchase(self):
+        ent = Enterprise.find_all()[0]
+        api = StripeBillingApi()
         R = self.post('/crm/customer/signup',
                       {'fname' : 'Ken',
                        'lname' : 'Bedwell',
@@ -505,14 +561,273 @@ class TestCrmCustomer(TestController):
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',
                        'accept_terms' : '1',
-                       'product_sku' : products[0].sku})
+                       'product_sku' : products[0].sku,
+                       'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
+                       })
         self.assertEqual(R.status_int, 200)
         assert 'customer_id' in R.request.params
         self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
         self._delete_new(customer_id)        
 
+    def test_save_and_purchase_invalid_sku(self):
+        ent = Enterprise.find_all()[0]
+        api = StripeBillingApi()
+        R = self.post('/crm/customer/signup',
+                      {'fname' : 'Ken',
+                       'lname' : 'Bedwell',
+                       'email' : 'test@test.com',
+                       'password' : 'password',
+                       'confirmpassword' : 'password',
+                       'redir' : '/'
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params 
+        customer_id = R.request.params['customer_id']
+        cust = Customer.load(customer_id)
+        self.assertEqual(str(cust.customer_id), str(customer_id))
+        self.assertEqual(cust.fname, 'Ken')
+        self.assertEqual(cust.lname, 'Bedwell')
+        self.assertEqual(cust.email, 'test@test.com')
+
+        R = self.post('/crm/customer/save_and_purchase',
+                      {'fname' : 'Ken Test',
+                       'accept_terms' : '1',
+                       'product_sku' : 'crapcrap',
+                       'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
+                       })
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain("No such product sku: crapcrap")
+        self._delete_new(customer_id)        
+
+
+    def test_save_and_purchase_invalid_cc(self):
+        ent = Enterprise.find_all()[0]
+        api = StripeBillingApi()
+        R = self.post('/crm/customer/signup',
+                      {'fname' : 'Ken',
+                       'lname' : 'Bedwell',
+                       'email' : 'test@test.com',
+                       'password' : 'password',
+                       'confirmpassword' : 'password',
+                       'redir' : '/'
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params 
+        customer_id = R.request.params['customer_id']
+        cust = Customer.load(customer_id)
+        self.assertEqual(str(cust.customer_id), str(customer_id))
+        self.assertEqual(cust.fname, 'Ken')
+        self.assertEqual(cust.lname, 'Bedwell')
+        self.assertEqual(cust.email, 'test@test.com')
+
+        products = Product.find_by_campaign(self.site.default_campaign)
+        R = self.post('/crm/customer/save_and_purchase',
+                      {'fname' : 'Ken Test',
+                       'accept_terms' : '1',
+                       'product_sku' : products[0].sku,
+                       'bill_cc_token' : api.create_token(ent, '4000000000000002', '12', '2019', '123')
+                       })
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain("Unable to bill credit card:")
+        self._delete_new(customer_id)        
+
+
+    def test_self_save_billing(self):
+        ent = Enterprise.find_all()[0]
+        api = StripeBillingApi()
+        R = self.post('/crm/customer/signup',
+                      {'fname' : 'Ken',
+                       'lname' : 'Bedwell',
+                       'email' : 'test@test.com',
+                       'password' : 'password',
+                       'confirmpassword' : 'password',
+                       'redir' : '/'
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params 
+        customer_id = R.request.params['customer_id']
+        cust = Customer.load(customer_id)
+        self.assertEqual(str(cust.customer_id), str(customer_id))
+        self.assertEqual(cust.fname, 'Ken')
+        self.assertEqual(cust.lname, 'Bedwell')
+        self.assertEqual(cust.email, 'test@test.com')
+
+        products = Product.find_by_campaign(self.site.default_campaign)
+        R = self.post('/crm/customer/save_and_purchase',
+                      {'fname' : 'Ken Test',
+                       'accept_terms' : '1',
+                       'product_sku' : products[0].sku,
+                       'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params
+        self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
+        R = self.post('/crm/customer/self_save_billing',
+                      {'fname' : 'Ken Test',
+                       'bill_cc_token' : api.create_token(ent, '4012888888881881', '12', '2019', '123')
+                       })
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain("Successfully saved billing information.")
+        self._delete_new(customer_id)        
+
+
+    def test_self_save_billing_invalid(self):
+        ent = Enterprise.find_all()[0]
+        api = StripeBillingApi()
+        R = self.post('/crm/customer/signup',
+                      {'fname' : 'Ken',
+                       'lname' : 'Bedwell',
+                       'email' : 'test@test.com',
+                       'password' : 'password',
+                       'confirmpassword' : 'password',
+                       'redir' : '/'
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params 
+        customer_id = R.request.params['customer_id']
+        cust = Customer.load(customer_id)
+        self.assertEqual(str(cust.customer_id), str(customer_id))
+        self.assertEqual(cust.fname, 'Ken')
+        self.assertEqual(cust.lname, 'Bedwell')
+        self.assertEqual(cust.email, 'test@test.com')
+
+        products = Product.find_by_campaign(self.site.default_campaign)
+        R = self.post('/crm/customer/save_and_purchase',
+                      {'fname' : 'Ken Test',
+                       'accept_terms' : '1',
+                       'product_sku' : products[0].sku,
+                       'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params
+        self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
+
+        R = self.post('/crm/customer/self_save_billing',
+                      {'fname' : 'Ken Test',
+                       'bill_cc_token' : api.create_token(ent, '4000000000000002', '12', '2019', '123')
+                       })
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain("Unable to save credit card information")
+        self._delete_new(customer_id) 
         
-def find_customer(campaign):
-    return Customer.find('amers_j@yahoo.com', campaign)
+
+    @secure
+    def test_self_save(self):
+        customer_id = self._create_new()
+        cust = Customer.load(customer_id)
+        self.login_customer(cust.email, cust.password)
+        R = self.post('/crm/customer/self_save',
+                      {'customer_id' : customer_id,
+                       'fname' : 'Fnametest new',
+                       'lname' : 'Lnametest new',
+                       'password' : '',
+                       'email' : 'ken@testxyz.com new'})
+        R.mustcontain('Successfully saved Fnametest new Lnametest new')
+        self.logout_customer()
+        self._delete_new(customer_id)
+
+
+    @secure
+    def test_self_cancel_invalid_password(self):
+        customer_id = self._create_new()
+        cust = Customer.load(customer_id)
+        self.login_customer(cust.email, cust.password)
+        orders = cust.get_active_orders()
+        pre_len = len(orders)
+        R = self.post('/crm/customer/self_cancel_order',
+                      {'username': cust.email,
+                       'password': 'bogus',
+                       'order_id' : orders[0].order_id})
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('Username or password incorrect.  Unable to cancel.')
+        cust.invalidate_caches()
+        cust = Customer.load(customer_id)
+        self.assertEqual(len(cust.get_active_orders()), pre_len)
+        self.logout_customer()
+        self._delete_new(customer_id)
+
+
+    @secure
+    def test_self_cancel_one(self):
+        customer_id = self._create_new()
+        cust = Customer.load(customer_id)
+        self.login_customer(cust.email, cust.password)
+        order = cust.get_active_orders()[0]
+        R = self.post('/crm/customer/self_cancel_order',
+                      {'username': cust.email,
+                       'password': cust.password,
+                       'order_id' : order.order_id})
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('Order cancelled.')
+        cust.invalidate_caches()
+        cust = Customer.load(customer_id)
+        self.assertEqual(len(cust.get_active_orders()), 0)
+        self.logout_customer()
+        self._delete_new(customer_id)
+
+
+    @secure
+    def test_self_cancel_all(self):
+        customer_id = self._create_new()
+        cust = Customer.load(customer_id)
+        self.login_customer(cust.email, cust.password)
+        R = self.post('/crm/customer/self_cancel_order',
+                      {'username': cust.email,
+                       'password': cust.password})
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('Order cancelled.')
+        cust.invalidate_caches()
+        cust = Customer.load(customer_id)
+        self.assertEqual(len(cust.get_active_orders()), 0)
+        self.logout_customer()
+        self._delete_new(customer_id)
+
+
+    @secure
+    def test_self_cancel_at_gateway(self):
+        ent = Enterprise.find_all()[0]
+        api = StripeBillingApi()
+        R = self.post('/crm/customer/signup',
+                      {'fname' : 'Ken',
+                       'lname' : 'Bedwell',
+                       'email' : 'test@test.com',
+                       'password' : 'password',
+                       'confirmpassword' : 'password',
+                       'redir' : '/'
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params 
+        customer_id = R.request.params['customer_id']
+        cust = Customer.load(customer_id)
+        self.assertEqual(str(cust.customer_id), str(customer_id))
+        self.assertEqual(cust.fname, 'Ken')
+        self.assertEqual(cust.lname, 'Bedwell')
+        self.assertEqual(cust.email, 'test@test.com')
+
+        products = Product.find_by_campaign(self.site.default_campaign)
+        R = self.post('/crm/customer/save_and_purchase',
+                      {'fname' : 'Ken Test',
+                       'accept_terms' : '1',
+                       'product_sku' : products[0].sku,
+                       'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params
+        self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
+
+        cust = Customer.load(customer_id)
+        #self.login_customer(cust.email, cust.password)
+        R = self.post('/crm/customer/self_cancel_order',
+                      {'username': cust.email,
+                       'password': cust.password})
+        self.assertEqual(R.status_int, 200)
+        R.mustcontain('Order cancelled.')
+        cust.invalidate_caches()
+        cust = Customer.load(customer_id)
+        self.assertEqual(len(cust.get_active_orders()), 0)
+        #self.logout_customer()
+        self._delete_new(customer_id)
+
+
 
 

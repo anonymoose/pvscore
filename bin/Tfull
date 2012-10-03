@@ -6,4 +6,4 @@ echo "... done"
 
 rm -rf ./data/cache ./data/sessions #./data/templates/crm/*
 
-nosetests -x -v --cover-package=pvscore.model --cover-package=pvscore.controllers --cover-package=pvscore.lib --cover-package=pvscore.config $*
+nosetests -x -v --cover-package=pvscore.model --cover-package=pvscore.controllers --cover-package=pvscore.lib --cover-package=pvscore.config --with-id $*

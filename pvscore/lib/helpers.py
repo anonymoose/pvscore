@@ -24,8 +24,8 @@ def money(dbl):
     else: return ''
 
 
-def flt(dbl):
-    return money(dbl)
+# def flt(dbl):
+#     return money(dbl)
 
 
 def google_analytics(site, script_tags=True):
@@ -105,9 +105,9 @@ def nl2br(val):
 
 
 def get(obj, attr, default=''):
-    if not obj:
+    if not obj or not hasattr(obj, attr):
         return default
-    return getattr(obj, attr, default)
+    return getattr(obj, attr)
 
 def chkbox(ident, **kwargs):
     # we wrap this so that bootstrap can format our checkboxes properly

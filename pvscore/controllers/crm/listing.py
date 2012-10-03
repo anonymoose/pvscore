@@ -9,6 +9,7 @@ from pvscore.model.crm.listing import Listing
 from pvscore.model.core.status import Status
 from pvscore.model.core.asset import Asset
 from hashlib import md5
+
 import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)

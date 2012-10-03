@@ -43,7 +43,7 @@ class ReportController(BaseController):
             report = Report()
         return {
             'report' : report,
-            'reports' : Report.find_all(self.request.ctx.user.is_vendor_user()),
+            'reports' : Report.find_vendor_reports() if self.request.ctx.user.is_vendor_user() else Report.find_all(),
             'companies' : util.select_list(Company.find_all_all(), 'company_id', 'name')
             }
 
@@ -90,7 +90,9 @@ class ReportController(BaseController):
     @view_config(route_name='crm.report.list', renderer='/crm/report.list.mako')
     @authorize(IsLoggedIn())
     def list(self):
-        return {'reports' :Report.find_all(self.request.ctx.user.is_vendor_user())}
+        return {
+            'reports' :Report.find_vendor_reports() if self.request.ctx.user.is_vendor_user() else Report.find_all()
+            }
 
 
     @view_config(route_name='crm.report.save', renderer='/crm/report.edit.mako')
@@ -147,10 +149,8 @@ class ReportController(BaseController):
 
         page = min(page, total_pages)
 
-        start = int(limit)*int(page)-int(limit)  # // do not put $limit*($page - 1)
+        start = max(int(limit)*int(page)-int(limit), 0)  # // do not put $limit*($page - 1)
         limit = util.nvl(limit, 'all')
-        if start < 0:
-            start = 0
         results = db.get_list(sql +
                               (' ORDER BY %s %s ' % (sidx, sord) if sidx else '') +
                               ' LIMIT {limit} offset {start}'.format(limit=limit,

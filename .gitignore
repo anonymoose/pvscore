@@ -20,3 +20,4 @@ dump.rdb
 redis.conf
 .coverage
 .ropeproject
+.noseids

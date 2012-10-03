@@ -1,5 +1,6 @@
 import logging
-import inspect, transaction
+import inspect
+#import transaction
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import pvscore.lib.util as util
@@ -26,8 +27,8 @@ class BaseModel(object):
     __pk__ = ''
     __tablename__ = ''
 
-    def __init__(self):
-        pass
+    # def __init__(self):
+    #     pass
 
 
     @classmethod
@@ -44,31 +45,32 @@ class BaseModel(object):
                 obj.post_load()
             return obj
         except Exception as exc:
+            log.error(exc)
             raise exc
 
 
-    @classmethod
-    def load_ids(cls, pk_list):
-        return Session.query(cls).from_statement("SELECT * FROM %s where %s in (%s)" % (cls.__tablename__, cls.__pk__, ','.join([str(pk) for pk in pk_list]))).all()    #pylint: disable-msg=E1101
+    # @classmethod
+    # def load_ids(cls, pk_list):
+    #     return Session.query(cls).from_statement("SELECT * FROM %s where %s in (%s)" % (cls.__tablename__, cls.__pk__, ','.join([str(pk) for pk in pk_list]))).all()    #pylint: disable-msg=E1101
 
 
     def post_load(self):
         pass
 
 
-    def expire(self):
-        Session.expire(self)    #pylint: disable-msg=E1101
-        Session.flush()    #pylint: disable-msg=E1101
+    # def expire(self):
+    #     Session.expire(self)    #pylint: disable-msg=E1101
+    #     Session.flush()    #pylint: disable-msg=E1101
 
 
-    def expunge(self):
-        Session.expunge(self)    #pylint: disable-msg=E1101
-        Session.flush()    #pylint: disable-msg=E1101
+    # def expunge(self):
+    #     Session.expunge(self)    #pylint: disable-msg=E1101
+    #     Session.flush()    #pylint: disable-msg=E1101
 
 
-    @classmethod
-    def delete_all(cls, where=''):
-        Session.execute('delete from %s %s' % (cls.__tablename__, where))    #pylint: disable-msg=E1101
+    # @classmethod
+    # def delete_all(cls, where=''):
+    #     Session.execute('delete from %s %s' % (cls.__tablename__, where))    #pylint: disable-msg=E1101
 
 
     def delete(self):
@@ -92,13 +94,13 @@ class BaseModel(object):
             return True
         except Exception as exc:   #pylint: disable-msg=W0703
             log.debug(exc)
-            return False
+        return False
 
 
-    @classmethod
-    def count(cls, where=''):
-        ret = Session.query("c").from_statement("SELECT count(0) c FROM %s %s" % (cls.__tablename__, where)).one()    #pylint: disable-msg=E1101
-        return ret[0]
+    # @classmethod
+    # def count(cls, where=''):
+    #     ret = Session.query("c").from_statement("SELECT count(0) c FROM %s %s" % (cls.__tablename__, where)).one()    #pylint: disable-msg=E1101
+    #     return ret[0]
 
 
     def bind(self, dic, clear=False, prefix=None):     #pylint: disable-msg=R0912
@@ -163,9 +165,36 @@ class BaseModel(object):
         return self
 
 
-    def doom(self):
-        transaction.doom()
-        return True
+    # def doom(self):
+    #     transaction.doom()
+    #     return True
+
+
+    def clear_attributes(self):
+        from pvscore.model.core.attribute import Attribute
+        pkid = getattr(self, self.__pk__)
+        if pkid:
+            Attribute.clear_all(self.__class__.__name__, pkid)
+
+
+    def set_attr(self, name, value):
+        from pvscore.model.core.attribute import Attribute
+        attr = Attribute.find(self.__class__.__name__, name)
+        if not attr:
+            attr = Attribute.create_new(self.__class__.__name__, name)
+        attr.set(self, value)
+
+
+    def get_attr(self, name):
+        from pvscore.model.core.attribute import Attribute
+        attr = Attribute.find(self.__class__.__name__, name)
+        if attr:
+            return attr.get(self)
+
+
+    def get_attrs(self):
+        from pvscore.model.core.attribute import Attribute        
+        return Attribute.find_values(self)
 
 
 # KB: [2011-11-01]: Base class for reports that can render a SQL statement to a google chart or whatver

@@ -45,17 +45,16 @@ def init_controllers(cfg, pkg):
     cfg.scan(pkg, plugin_registry=plugin_registry)
 
 
-class plugin_customer_sidebar_link(object):
-    def __init__(self):
-        pass
+# class plugin_customer_sidebar_link(object):
+#     def __init__(self):
+#         pass
 
-
-    def __call__(self, wrapped):
-        decorator = self
-        def callback(scanner, name, obj):  #pylint: disable-msg=W0613
-            pass #scanner.plugin_registry.add('customer_sidebar_link', decorator.link_text, PluginRegistryItem(decorator))
-        venusian.attach(wrapped, callback, category='pvs.plugins')
-        return wrapped
+#     def __call__(self, wrapped):
+#         decorator = self
+#         def callback(scanner, name, obj):  #pylint: disable-msg=W0613
+#             pass #scanner.plugin_registry.add('customer_sidebar_link', decorator.link_text, PluginRegistryItem(decorator))
+#         venusian.attach(wrapped, callback, category='pvs.plugins')
+#         return wrapped
 
 
 class plugin_administration_link(object):

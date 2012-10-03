@@ -59,9 +59,9 @@ class Attribute(ORMBase, BaseModel):
         return avl
 
 
-    # def get(self, obj):
-    #     avl = AttributeValue.find(self, getattr(obj, obj.__pk__))
-    #     return avl.attr_value if avl else None
+    def get(self, obj):
+        avl = AttributeValue.find(self, getattr(obj, obj.__pk__))
+        return avl.attr_value if avl else None
 
 
     @staticmethod
@@ -88,14 +88,14 @@ class AttributeValue(ORMBase, BaseModel):
         Session.execute("delete from core_attribute_value where fk_type = '%s' and fk_id = %s" % (fk_type, fk_id))
 
 
-    # @staticmethod
-    # def find(attr, fk_id):
-    #     #pylint: disable-msg=E1101
-    #     return Session.query(AttributeValue)\
-    #         .options(FromCache('AttributeValue.find.%s.%s' % (attr.attr_id, fk_id)))\
-    #         .filter(and_(AttributeValue.fk_type == attr.fk_type,
-    #                      AttributeValue.fk_id == fk_id,
-    #                      AttributeValue.attr_id == attr.attr_id)).first()
+    @staticmethod
+    def find(attr, fk_id):
+        #pylint: disable-msg=E1101
+        return Session.query(AttributeValue)\
+            .options(FromCache('AttributeValue.find.%s.%s' % (attr.attr_id, fk_id)))\
+            .filter(and_(AttributeValue.fk_type == attr.fk_type,
+                         AttributeValue.fk_id == fk_id,
+                         AttributeValue.attr_id == attr.attr_id)).first()
 
 
     @staticmethod

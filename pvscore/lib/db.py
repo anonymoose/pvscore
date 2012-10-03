@@ -75,20 +75,20 @@ def get_value(sql, **kwargs):
 #     return Session.bind.execute(sql, **kwargs).fetchone()
 
 
-def get_value_list(cls, col, sql):
-    objs = Session.query(cls).from_statement(sql).all()
-    return [getattr(o, col) for o in objs]
+# def get_value_list(cls, col, sql):
+#     objs = Session.query(cls).from_statement(sql).all()
+#     return [getattr(o, col) for o in objs]
 
 
-def get_raw_value_list(val, sql):
-    tuples = Session.query(val).from_statement(sql).all()
-    ret = []
-    for tup in tuples:
-        ret.append(tup[0])
-    return ret
+# def get_raw_value_list(val, sql):
+#     tuples = Session.query(val).from_statement(sql).all()
+#     ret = []
+#     for tup in tuples:
+#         ret.append(tup[0])
+#     return ret
 
 
-def clean(val):
-    return val.replace("'", "''")
+# def clean(val):
+#     return val.replace("'", "''")
 #    if val:
 #        return val.replace('%', '').replace

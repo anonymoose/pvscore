@@ -7,7 +7,7 @@ from sqlalchemy.sql.expression import text, exists
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.crm.pricing import ProductPricing
 from pvscore.model.crm.company import Company
-from pvscore.model.core.attribute import Attribute, AttributeValue
+from pvscore.model.core.attribute import AttributeValue
 from pvscore.model.core.asset import Asset
 import pvscore.lib.db as db
 from pvscore.lib.dbcache import FromCache, invalidate
@@ -614,33 +614,8 @@ class Product(ORMBase, BaseModel):
 
 
     def remove_price(self, campaign):
-        ppri = ProductPricing.find(campaign, self)
-        if ppri:
-            ppri.invalidate_caches()
-            ppri.delete()
-            ppri.save()
-
-
-    def clear_attributes(self):
-        Attribute.clear_all('Product', self.product_id)
-
-
-    def set_attr(self, name, value):
-        attr = Attribute.find('Product', name)
-        if not attr:
-            attr = Attribute.create_new('Product', name)
-        attr.set(self, value)
-
-
-    def get_attr(self, name):
-        attr = Attribute.find('Product', name)
-        if attr:
-            return attr.get(self)
-        return None
-
-
-    def get_attrs(self):
-        return Attribute.find_values(self)
+        if campaign.campaign_id in self.campaign_prices:
+            del self.campaign_prices[campaign.campaign_id]
 
 
     @staticmethod

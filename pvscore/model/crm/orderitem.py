@@ -41,9 +41,9 @@ class OrderItem(ORMBase, BaseModel):
             return 0.0
 
 
-    @staticmethod
-    def find_by_order(order):
-        return Session.query(OrderItem).filter(OrderItem.order_id == order.order_id).order_by(OrderItem.create_dt.asc())
+    # @staticmethod
+    # def find_by_order(order):
+    #     return Session.query(OrderItem).filter(OrderItem.order_id == order.order_id).order_by(OrderItem.create_dt.asc())
 
 
     @property
@@ -51,10 +51,10 @@ class OrderItem(ORMBase, BaseModel):
         return Session.query(OrderItem).filter(OrderItem.parent_id == self.order_item_id).all()
 
 
-    def has_status(self, event):
-        from pvscore.model.core.status import Status
-        sts = Status.find_by_event(self.order.customer, self, event)
-        return (sts and len(sts) > 0)
+    # def has_status(self, event):
+    #     from pvscore.model.core.status import Status
+    #     sts = Status.find_by_event(self.order.customer, self, event)
+    #     return (sts and len(sts) > 0)
 
 
 class OrderItemTermsAcceptance(ORMBase, BaseModel):
@@ -69,11 +69,11 @@ class OrderItemTermsAcceptance(ORMBase, BaseModel):
     signature = Column(String(100))
 
 
-    @staticmethod
-    def find_all_by_order_id(order_id):
-        return Session.query(OrderItemTermsAcceptance)\
-            .filter(and_(OrderItemTermsAcceptance.order_id == order_id,
-                         OrderItemTermsAcceptance.delete_dt == None)).all()
+    # @staticmethod
+    # def find_all_by_order_id(order_id):
+    #     return Session.query(OrderItemTermsAcceptance)\
+    #         .filter(and_(OrderItemTermsAcceptance.order_id == order_id,
+    #                      OrderItemTermsAcceptance.delete_dt == None)).all()
 
 
     @staticmethod

@@ -44,13 +44,13 @@ class Report(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_all(only_show_vendor_reports=False):
-        if not only_show_vendor_reports:
-            return Session.query(Report).filter(Report.delete_dt == None).order_by(Report.name).all()
-        else:
-            return Session.query(Report).filter(and_(Report.delete_dt == None,
-                                                     Report.is_vendor == True)).order_by(Report.name).all()
+    def find_all():
+        return Session.query(Report).filter(Report.delete_dt == None).order_by(Report.name).all()
 
+    @staticmethod
+    def find_vendor_reports():
+        return Session.query(Report).filter(and_(Report.delete_dt == None,
+                                                 Report.is_vendor == True)).order_by(Report.name).all()
 
     @staticmethod
     def find_default_by_company(company):
@@ -58,25 +58,25 @@ class Report(ORMBase, BaseModel):
                                                    Campaign.company == company)).order_by(Campaign.create_dt.asc()).first()
 
 
-    @staticmethod
-    def search(name, company_id, only_show_vendor_reports=False):
-        n_clause = cid_clause = v_clause = ''
-        if name:
-            n_clause = "and rep.name like '%s%%'" % name
-        if company_id:
-            cid_clause = "and rep.company_id = %d" % int(company_id)
-        if only_show_vendor_reports:
-            v_clause = "and rep.is_vendor = true"
-        sql = """SELECT rep.* FROM crm_report rep
-                 where 1=1
-                 {n} {cid} {v}
-              """.format(n=n_clause, cid=cid_clause, v=v_clause)
-        return Session.query(Report).from_statement(sql).all()
+    # @staticmethod
+    # def search(name, company_id, only_show_vendor_reports=False):
+    #     n_clause = cid_clause = v_clause = ''
+    #     if name:
+    #         n_clause = "and rep.name like '%s%%'" % name
+    #     if company_id:
+    #         cid_clause = "and rep.company_id = %d" % int(company_id)
+    #     if only_show_vendor_reports:
+    #         v_clause = "and rep.is_vendor = true"
+    #     sql = """SELECT rep.* FROM crm_report rep
+    #              where 1=1
+    #              {n} {cid} {v}
+    #           """.format(n=n_clause, cid=cid_clause, v=v_clause)
+    #     return Session.query(Report).from_statement(sql).all()
 
 
-    def clear_companies(self):
-        if self.report_id:
-            ReportCompanyJoin.clear_by_report(self)
+    # def clear_companies(self):
+    #     if self.report_id:
+    #         ReportCompanyJoin.clear_by_report(self)
 
 
     def add_company(self, company_id):
@@ -100,13 +100,13 @@ class ReportCompanyJoin(ORMBase, BaseModel):
     company = relation('Company', lazy='joined', primaryjoin=Company.company_id == company_id)
 
 
-    @staticmethod
-    def clear_by_company(company):
-        Session.execute("delete from crm_report_company_join where company_id = %d" % int(company.company_id))
+    # @staticmethod
+    # def clear_by_company(company):
+    #     Session.execute("delete from crm_report_company_join where company_id = %d" % int(company.company_id))
 
 
-    @staticmethod
-    def clear_by_report(report):
-        Session.execute("delete from crm_report_company_join where report_id = %d" % int(report.report_id))
+    # @staticmethod
+    # def clear_by_report(report):
+    #     Session.execute("delete from crm_report_company_join where report_id = %d" % int(report.report_id))
 
 

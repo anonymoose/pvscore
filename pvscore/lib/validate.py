@@ -63,27 +63,27 @@ def validate(rules=(), redir_to=None):
     return decorator(wrap)
 
 
-def validate_session(rules=(), redir_to=None):
-    def wrap(func, self, *args, **kwargs):
-        for rul in rules:
-            key = rul[0]
-            rule = rul[1]
-            val = self.request.session[key] if key in self.request.session else None
+# def validate_session(rules=(), redir_to=None):
+#     def wrap(func, self, *args, **kwargs):
+#         for rul in rules:
+#             key = rul[0]
+#             rule = rul[1]
+#             val = self.request.session[key] if key in self.request.session else None
 
-            if 'required' == rule and val and util.is_empty(val):
-                _die('%s is required' % key, redir_to)
+#             if 'required' == rule and val and util.is_empty(val):
+#                 _die('%s is required' % key, redir_to)
 
-            if 'string' == rule and val and not util.is_string(val):
-                _die('%s must not be a number' % key, redir_to)
+#             if 'string' == rule and val and not util.is_string(val):
+#                 _die('%s must not be a number' % key, redir_to)
             
-            if 'number' == rule and val and not util.is_number(val):
-                _die('%s must be a number %s %s' % (key, val, util.is_number(val)), redir_to)
+#             if 'number' == rule and val and not util.is_number(val):
+#                 _die('%s must be a number %s %s' % (key, val, util.is_number(val)), redir_to)
 
-            if 'float' == rule and val and not util.is_float(val):
-                _die('%s must be a float' % key, redir_to)
+#             if 'float' == rule and val and not util.is_float(val):
+#                 _die('%s must be a float' % key, redir_to)
 
-            if 'int' == rule and val and not util.is_int(val):
-                _die('%s must be a integer' % key, redir_to)
+#             if 'int' == rule and val and not util.is_int(val):
+#                 _die('%s must be a integer' % key, redir_to)
 
-        return func(self, *args, **kwargs)
-    return decorator(wrap)
+#         return func(self, *args, **kwargs)
+#     return decorator(wrap)

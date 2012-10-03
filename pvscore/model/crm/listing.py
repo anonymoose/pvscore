@@ -9,7 +9,7 @@ from pvscore.model.core.asset import Asset
 #from pvscore.lib.sphinx.sphinxapi import *
 import pvscore.lib.db as db
 
-from pvscore.model.core.attribute import Attribute, AttributeValue
+from pvscore.model.core.attribute import AttributeValue
 from hashlib import md5
 
 log = logging.getLogger(__name__)
@@ -85,29 +85,6 @@ class Listing(ORMBase, BaseModel):
         listing_id = AttributeValue.find_fk_id_by_value('Listing', attr_name, attr_value)
         if listing_id:
             return Listing.load(listing_id)
-
-
-    def clear_attributes(self):
-        if self.listing_id:
-            Attribute.clear_all('Listing', self.listing_id)
-
-
-    def set_attr(self, name, value):
-        attr = Attribute.find('Listing', name)
-        if not attr:
-            attr = Attribute.create_new('Listing', name)
-        attr.set(self, value)
-
-
-    def get_attr(self, name):
-        attr = Attribute.find('Listing', name)
-        if attr:
-            return attr.get(self)
-        return None
-
-
-    def get_attrs(self):
-        return Attribute.find_values(self)
 
 
     @staticmethod

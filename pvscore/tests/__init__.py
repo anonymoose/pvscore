@@ -117,8 +117,6 @@ class TestController(TestCase):
         resp = self.app.get(url, params=params, headers=self._get_headers(headers))
         if resp.status_int in [302, 301]:
             resp = resp.follow()
-            if resp.status_int in [302, 301]:
-                resp = resp.follow()
         return resp
 
 
@@ -128,8 +126,6 @@ class TestController(TestCase):
         resp = self.app.post(url, params=params, headers=self._get_headers(headers))
         if resp.status_int in [302, 301]:
             resp = resp.follow()
-            if resp.status_int in [302, 301]:
-                resp = resp.follow()
         return resp
 
 
@@ -156,11 +152,11 @@ def secure(func, username='kenneth.bedwell@gmail.com', password='Zachary234'):
     return wrap
 
 
-def quiet(func):
-    def wrap(self):
-        self.quiet()
-        ret = func(self)
-        self.unquiet()
-        return ret
-    wrap.__name__ = func.__name__
-    return wrap
+# def quiet(func):
+#     def wrap(self):
+#         self.quiet()
+#         ret = func(self)
+#         self.unquiet()
+#         return ret
+#     wrap.__name__ = func.__name__
+#     return wrap

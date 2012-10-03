@@ -69,14 +69,15 @@ def _remember_site(request):
     if 'site_id' in request.session:
         request.ctx.site = Site.load(request.session['site_id'])
     else:
-        if '__sid' in request.params:
-            request.ctx.site = Site.find_by_host(request.params['__sid'])
-        else:
-            request.ctx.site = Site.find_by_host(request.host)
-        if not request.ctx.site:
-            return False
-        request.session['site_id'] = request.ctx.site.site_id
-    return True
+        #if '__sid' in request.params:
+        #    request.ctx.site = Site.find_by_host(request.params['__sid'])
+        #else:
+        request.ctx.site = Site.find_by_host(request.host)
+        if request.ctx.site:
+            request.session['site_id'] = request.ctx.site.site_id
+
+    if request.ctx.site:
+        return True
 
 
 def _remember_campaign(request):
@@ -84,9 +85,10 @@ def _remember_campaign(request):
         request.ctx.campaign = Campaign.load(request.session['campaign_id'])
     else:
         if '__cid' in request.params:
-            request.ctx.campaign = Campaign.load(request.params['campaign_id'])
+            request.ctx.campaign = Campaign.load(request.params['__cid'])
         else:
-            request.ctx.campaign = Campaign.load(request.ctx.site.company.default_campaign_id)
+            if request.ctx.site:
+                request.ctx.campaign = Campaign.load(request.ctx.site.company.default_campaign_id)
         request.session['campaign_id'] = request.ctx.campaign.campaign_id
 
 

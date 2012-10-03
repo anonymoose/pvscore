@@ -220,16 +220,14 @@ class ProductController(BaseController):
     @view_config(route_name='crm.product.ac.name', renderer='string')
     @authorize(IsLoggedIn())
     def autocomplete_by_name(self):
-        if not 'search_key' in self.request.GET or not self.request.GET.get('search_key'):
-            return
-        srch = self.request.GET.get('search_key')
-        # customer_id = self.request.GET.get('customer_id')
-        # if customer_id:
-        #     customer = Customer.load(customer_id)
-        #     lnames = Product.find_names_by_name_and_campaign(self.enterprise_id, srch, self.request.GET.get('max_rows', 10), customer.campaign)
-
-        lnames = Product.find_names_by_name(self.enterprise_id, srch, self.request.GET.get('max_rows', 10))
-        return json.dumps(lnames)
+        if 'search_key' in self.request.GET and self.request.GET.get('search_key'):
+            srch = self.request.GET.get('search_key')
+            # customer_id = self.request.GET.get('customer_id')
+            # if customer_id:
+            #     customer = Customer.load(customer_id)
+            #     lnames = Product.find_names_by_name_and_campaign(self.enterprise_id, srch, self.request.GET.get('max_rows', 10), customer.campaign)
+            lnames = Product.find_names_by_name(self.enterprise_id, srch, self.request.GET.get('max_rows', 10))
+            return json.dumps(lnames)
 
 
     @view_config(route_name='crm.product.show_orders', renderer='/crm/product.orders_list.mako')

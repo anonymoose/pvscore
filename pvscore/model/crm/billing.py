@@ -3,7 +3,7 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.types import Integer, String, Date, Boolean
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
-from pvscore.model.meta import ORMBase, BaseModel, Session
+from pvscore.model.meta import ORMBase, BaseModel
 from pvscore.model.core.users import Users
 
 class Billing(ORMBase, BaseModel):
@@ -36,7 +36,7 @@ class Billing(ORMBase, BaseModel):
     _cc_cvv = None
 
 
-    def set_cc_num(self, num, cvv):
+    def set_cc_info(self, num, cvv):
         self._cc_num = num
         self._cc_cvv = cvv
 
@@ -76,12 +76,12 @@ class Billing(ORMBase, BaseModel):
     # def get_credit_card_cvv(self):
     #     return self._cc_cvv
 
-    def delete_billing(self, customer):
-        #pylint: disable-msg=E1101
-        customer.billing = None
-        customer.save()
-        Session.execute('delete from crm_billing_history where billing_id = %s' % self.billing_id)
-        Session.delete(self)
+    # def delete_billing(self, customer):
+    #     #pylint: disable-msg=E1101
+    #     customer.billing = None
+    #     customer.save()
+    #     Session.execute('delete from crm_billing_history where billing_id = %s' % self.billing_id)
+    #     Session.delete(self)
 
 
 class BillingHistory(ORMBase, BaseModel):

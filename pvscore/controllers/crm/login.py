@@ -82,17 +82,10 @@ class LoginController(BaseController):
             self.session['username'] = uid
             cust = Customer.find_by_company(uid, self.request.ctx.site.company)
             self.session['customer_id'] = cust.customer_id
-            if 'redir' in self.request.POST:
-                return HTTPFound(self.request.POST.get('redir'))
-            elif self.request.referrer:
-                return HTTPFound(self.request.referrer)
-            else:
-                return HTTPFound('/')
+            return self.find_redirect()
         else:
             self.flash('Invalid User or Password')
-            raise HTTPFound(self.request.referrer if self.request.referrer else '/')
-
-
+            return self.raise_redirect()
 
 
     # @validate((('username', 'string'),

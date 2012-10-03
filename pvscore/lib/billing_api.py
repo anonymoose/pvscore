@@ -1,12 +1,11 @@
 #pylint: disable-msg=W0221,W0613
-from abc import ABCMeta
 import stripe
 import logging
 
 log = logging.getLogger(__name__)
 
 class BaseBillingApi(object):
-    __metaclass__ = ABCMeta
+
 
 
     @staticmethod
@@ -58,14 +57,31 @@ class StripeBillingApi(BaseBillingApi):
         self.payment_method = 'Credit Card'
         self.coupon = None
 
+
+    def create_token(self, enterprise, ccnum, month, year, cvc):  #pylint: disable-msg=R0913
+        stripe.api_key = enterprise.get_attr('stripe_private_key')
+        token = stripe.Token.create(
+            card={
+                "number": ccnum,
+                "exp_month": month,
+                "exp_year": year,
+                "cvc": cvc
+                },
+            )
+        return token['id']
+
+
     def set_coupon(self, coupon):
         self.coupon = coupon
+
 
     def purchase(self, order, billing, remote_ip=None):
         """ KB: [2012-09-10]: 
         If it's subscription, then subscribe this customer to the plan.
         Otherwise just hit them up non-recurring.
         """
+        if not billing.cc_token:
+            raise Exception("No stripe cc_token present")
         campaign = order.campaign
         cust = order.customer
         stripe.api_key = cust.campaign.company.enterprise.get_attr('stripe_private_key')
@@ -86,21 +102,20 @@ class StripeBillingApi(BaseBillingApi):
             for oitem in order.active_items:
                 prod = oitem.product
                 if prod.subscription:
-                    if (self.coupon):
-                        coup = stripe.Coupon.retrieve(self.coupon)
-                        if coup:
-                            discount_amount = (float(order.total) * (float(coup.percent_off)/float(100)))
-                            order.apply_discount(discount_amount, "Discount code = "+self.coupon)
-                        else:
-                            self.coupon = None
-                    else: self.coupon = None
-
-                    stripe_cust.update_subscription(plan=prod.sku,
-                                                    coupon=self.coupon)
+                    # if (self.coupon):
+                    #     coup = stripe.Coupon.retrieve(self.coupon)
+                    #     if coup:
+                    #         discount_amount = (float(order.total) * (float(coup.percent_off)/float(100)))
+                    #         order.apply_discount(discount_amount, "Discount code = "+self.coupon)
+                    #     else:
+                    #         self.coupon = None
+                    # else:
+                    self.coupon = None
+                    stripe_cust.update_subscription(plan=prod.sku, coupon=self.coupon)
                 else:
                     stripe.InvoiceItem.create(
                         customer=stripe_cust.id,
-                        amount=campaign.get_product_price(prod),
+                        amount=int(prod.get_price(campaign)*100),  # must be amount in cents.  whatever.
                         currency="usd",
                         description=prod.name)
             return True
@@ -115,13 +130,22 @@ class StripeBillingApi(BaseBillingApi):
 
     def update_billing(self, cust, bill):
         stripe.api_key = cust.campaign.company.enterprise.get_attr('stripe_private_key')
-        if cust.third_party_id:
-            stripe_cust = stripe.Customer.retrieve(cust.third_party_id)
-        else:
-            return False
-        stripe_cust.card = bill.cc_token
-        stripe_cust.save()
-        return True
+        try:
+            if cust.third_party_id:
+                stripe_cust = stripe.Customer.retrieve(cust.third_party_id)
+            else:
+                return False
+            stripe_cust.card = bill.cc_token
+            stripe_cust.save()
+            return True
+        except stripe.CardError as exc:
+            self.last_status = exc.code
+            self.last_note = exc.message
+        except Exception as exc2:
+            self.last_status = -1
+            self.last_note = exc2.message
+        return False
+
 
     def cancel_order(self, order, billing):
         try:

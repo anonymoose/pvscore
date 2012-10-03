@@ -138,8 +138,7 @@ class TestCrmProduct(TestController):
     @secure
     def test_save_inventory(self):
         ent = Enterprise.find_all()[0]
-        comp = Company.find_all(ent.enterprise_id)[0]
-        cmpn = comp.default_campaign
+        cmpns = Campaign.find_all(ent.enterprise_id)
 
         R = self.get('/crm/product/inventory_list')
         self.assertEqual(R.status_int, 200)
@@ -147,7 +146,7 @@ class TestCrmProduct(TestController):
         self.assertGreater(prods['records'], 100)
         self.assertEqual(prods['records'], len(prods['rows']))
         # get the first product ID
-        prod = prods['rows'][0]['cell']         # ['', '1451', '5-HTP 100 mg- Pharmax', 'SUP-1003', 'Seroyal', '123', '8.0', '15.0', '25.00', '', '25.00', '25.00']
+        prod = prods['rows'][1]['cell']         # ['', '1451', '5-HTP 100 mg- Pharmax', 'SUP-1003', 'Seroyal', '123', '8.0', '15.0', '25.00', '', '25.00', '25.00']
         pid = prod[1]
         name = prod[2]
         #sku = prod[3]
@@ -161,13 +160,15 @@ class TestCrmProduct(TestController):
                        'inventory_par' : inventory_par,
                        'name' : name + ' xxx',
                        'unit_cost' : unitcost,
-                       'cmp_%s' % cmpn.campaign_id : '999'})
+                       'cmp_%s' % cmpns[0].campaign_id : '999',
+                       'cmp_%s' % cmpns[1].campaign_id : ''})
 
         self.assertEquals(R.body, 'True')
         prod = Product.load(pid)
         tot = InventoryJournal.total(prod)
         self.assertEqual(tot, inventory + 10)
-        self.assertEqual(999, prod.campaign_prices[cmpn.campaign_id].retail_price)
+        self.assertEqual(999, prod.campaign_prices[cmpns[0].campaign_id].retail_price)
+        self.assertEqual(True, cmpns[1].campaign_id not in prod.campaign_prices.keys())
 
         R = self.get('/crm/product/edit/%s' % pid)
         self.assertEqual(R.status_int, 200)
@@ -179,6 +180,9 @@ class TestCrmProduct(TestController):
     
     @secure
     def test_save_existing(self):
+        ent = Enterprise.find_all()[0]
+        cmpns = Campaign.find_all(ent.enterprise_id)
+
         product_id = self._create_new()
         R = self.get('/crm/product/list')
         self.assertEqual(R.status_int, 200)
@@ -199,6 +203,9 @@ class TestCrmProduct(TestController):
             f.set('child_incl_%s' % prod.product_id, prod.product_id)
             f.set('child_quantity_%s' % prod.product_id, prod.product_id)
 
+        f.set('campaign_price[%s]' % cmpns[0].campaign_id, "123")
+        f.set('campaign_price[%s]' % cmpns[1].campaign_id, None)
+
         f.set('prod_inventory', 25)
 
         #cat = ProductCategory.find_all(ent.enterprise_id)[0]
@@ -214,6 +221,9 @@ class TestCrmProduct(TestController):
         self.assertEqual(f['product_id'].value, product_id)
         self.assertEqual(f['name'].value, 'Test Product New')
         self.assertEqual(f['seo_keywords'].value, 'SEO Test New')
+        self.assertEqual(f['campaign_price[%s]' % cmpns[0].campaign_id].value, "123.00")
+        self.assertEqual(f['campaign_price[%s]' % cmpns[1].campaign_id].value, "-1.00")
+
         #self.assertEqual(f['category_id'].value, cat.category_id)
 
         prod = Product.load(product_id)
@@ -221,6 +231,22 @@ class TestCrmProduct(TestController):
 
         for prod in Product.find_all_except(Product.load(product_id))[:3]:
             self.assertEqual(int(f['child_quantity_%s' % prod.product_id].value), prod.product_id)
+
+        #put pricing back.
+        R = self.get('/crm/product/edit/%s' % product_id)
+        R.mustcontain('Edit Product')
+        f = R.forms['frm_product']
+        self.assertEqual(f['product_id'].value, product_id)
+        f.set('campaign_price[%s]' % cmpns[0].campaign_id, "123")
+        f.set('campaign_price[%s]' % cmpns[1].campaign_id, "234")
+        R = f.submit('submit')
+        self.assertEqual(R.status_int, 302)
+        R = R.follow()
+        self.assertEqual(R.status_int, 200)
+        f = R.forms['frm_product']
+        R.mustcontain('Edit Product')
+        self.assertEqual(f['product_id'].value, product_id)
+        self.assertEqual(f['campaign_price[%s]' % cmpns[1].campaign_id].value, "234.00")
 
         self._delete_new(product_id)
 

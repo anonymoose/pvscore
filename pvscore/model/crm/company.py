@@ -4,13 +4,11 @@ from sqlalchemy.types import Integer, String, Date, Text
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from pvscore.model.core.asset import Asset
 from hashlib import md5
 import pvscore.lib.util as util
-import os, shutil
 from pvscore.lib.dbcache import FromCache, invalidate
 import pvscore.lib.db as db
-from pvscore.model.core.attribute import Attribute
+
 
 class Company(ORMBase, BaseModel):
     __tablename__ = 'crm_company'
@@ -108,29 +106,6 @@ class Company(ORMBase, BaseModel):
                          Company.enterprise_id == enterprise_id)).first()
 
 
-    def clear_attributes(self):
-        if self.company_id:
-            Attribute.clear_all('Company', self.company_id)
-
-
-    def set_attr(self, name, value):
-        attr = Attribute.find('Company', name)
-        if not attr:
-            attr = Attribute.create_new('Company', name)
-        attr.set(self, value)
-
-
-    def get_attr(self, name):
-        attr = Attribute.find('Company', name)
-        if attr:
-            return attr.get(self)
-        return None
-
-
-    def get_attrs(self):
-        return Attribute.find_values(self)
-
-
     def invalidate_caches(self, **kwargs):
         from pvscore.model.cms.site import Site
         invalidate(self, 'Company.find_all_all')
@@ -173,32 +148,32 @@ class Company(ORMBase, BaseModel):
         util.mkdir_p("%s/cache" % dirname)
 
 
-    def company_web_directory(self, subdir):
-        """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
-        return "/companies/{dirname}/{subdir}".format(dirname=self.web_directory, subdir=subdir)
+    # def company_web_directory(self, subdir):
+    #     """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
+    #     return "/companies/{dirname}/{subdir}".format(dirname=self.web_directory, subdir=subdir)
 
 
-    def store_asset(self, asset_data, folder, fk_type, fk_id):
-        """ KB: [2010-11-18]:
-        called from pvscore.controllers.cms.asset::upload_to_company()
-        http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
-        """
+    # def store_asset(self, asset_data, folder, fk_type, fk_id):
+    #     """ KB: [2010-11-18]:
+    #     called from pvscore.controllers.cms.asset::upload_to_company()
+    #     http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
+    #     """
 
-        fs_path = os.path.join(
-            '%s%s' % (self.web_full_directory, folder),
-            asset_data.filename.replace(os.sep, '_')
-            )
-        permanent_file = open(fs_path, 'wb')
-        shutil.copyfileobj(asset_data.file, permanent_file)
-        asset_data.file.close()
-        permanent_file.close()
-        # at this point everything is saved to disk. Create an asset object in
-        # the DB to remember it.
-        return Asset.create_new(asset_data.filename,
-                             fs_path,
-                             '{base}/{f}'.format(base=self.company_web_directory('images'),
-                                                 f=asset_data.filename),
-                             fk_type, fk_id).flush()
+    #     fs_path = os.path.join(
+    #         '%s%s' % (self.web_full_directory, folder),
+    #         asset_data.filename.replace(os.sep, '_')
+    #         )
+    #     permanent_file = open(fs_path, 'wb')
+    #     shutil.copyfileobj(asset_data.file, permanent_file)
+    #     asset_data.file.close()
+    #     permanent_file.close()
+    #     # at this point everything is saved to disk. Create an asset object in
+    #     # the DB to remember it.
+    #     return Asset.create_new(asset_data.filename,
+    #                          fs_path,
+    #                          '{base}/{f}'.format(base=self.company_web_directory('images'),
+    #                                              f=asset_data.filename),
+    #                          fk_type, fk_id).flush()
 
 
 class Enterprise(ORMBase, BaseModel):
@@ -245,14 +220,14 @@ class Enterprise(ORMBase, BaseModel):
         return ['PayPal', 'CCEAccounts', 'Stripe', 'Invoice', 'Offline']
 
 
-    @staticmethod
-    def find_by_customer(customer):
-        """ KB: [2012-01-15]: If we are in one enterprise (the root [ie: wealthmakers]) and we want to find the customer's enterprise
-        call this method
-        """
-        return Session.query(Enterprise)\
-            .filter(and_(Enterprise.customer_id == customer.customer_id,
-                         Enterprise.delete_dt == None)).first()
+    # @staticmethod
+    # def find_by_customer(customer):
+    #     """ KB: [2012-01-15]: If we are in one enterprise (the root [ie: wealthmakers]) and we want to find the customer's enterprise
+    #     call this method
+    #     """
+    #     return Session.query(Enterprise)\
+    #         .filter(and_(Enterprise.customer_id == customer.customer_id,
+    #                      Enterprise.delete_dt == None)).first()
 
 
     @property
@@ -289,11 +264,11 @@ class Enterprise(ORMBase, BaseModel):
             .filter(Enterprise.delete_dt == None).order_by(Enterprise.name).all()
 
 
-    @staticmethod
-    def find_all_non_customer():
-        return Session.query(Enterprise) \
-            .filter(and_(Enterprise.delete_dt == None,
-                         Enterprise.customer_id == None)).order_by(Enterprise.name).all()
+    # @staticmethod
+    # def find_all_non_customer():
+    #     return Session.query(Enterprise) \
+    #         .filter(and_(Enterprise.delete_dt == None,
+    #                      Enterprise.customer_id == None)).order_by(Enterprise.name).all()
 
 
     @staticmethod
@@ -301,29 +276,6 @@ class Enterprise(ORMBase, BaseModel):
         return Session.query(Enterprise) \
             .filter(and_(Enterprise.delete_dt == None,
                          Enterprise.name == name)).first()
-
-
-    def clear_attributes(self):
-        if self.enterprise_id:
-            Attribute.clear_all('Enterprise', self.enterprise_id)
-
-
-    def set_attr(self, name, value):
-        attr = Attribute.find('Enterprise', name)
-        if not attr:
-            attr = Attribute.create_new('Enterprise', name)
-        attr.set(self, value)
-
-
-    def get_attr(self, name):
-        attr = Attribute.find('Enterprise', name)
-        if attr:
-            return attr.get(self)
-        return None
-
-
-    def get_attrs(self):
-        return Attribute.find_values(self)
 
 
     @staticmethod
