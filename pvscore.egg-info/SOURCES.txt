@@ -3,7 +3,6 @@ development.ini
 production.ini
 setup.cfg
 setup.py
-unittest-exclude.txt
 unittest-web.ini
 unittest.ini
 pvscore/__init__.py
@@ -16,13 +15,14 @@ pvscore.egg-info/requires.txt
 pvscore.egg-info/top_level.txt
 pvscore/bin/__init__.py
 pvscore/bin/delete_enterprise.py
-pvscore/bin/fake_cleanup.py
 pvscore/bin/load_products.py
 pvscore/config/__init__.py
 pvscore/config/routes.py
 pvscore/controllers/__init__.py
 pvscore/controllers/base.py
 pvscore/controllers/tweens.py
+pvscore/controllers/_test/__init__.py
+pvscore/controllers/_test/tsst.py
 pvscore/controllers/cms/__init__.py
 pvscore/controllers/cms/site.py
 pvscore/controllers/crm/__init__.py
@@ -46,6 +46,8 @@ pvscore/lib/catalog.py
 pvscore/lib/db.py
 pvscore/lib/dbcache.py
 pvscore/lib/helpers.py
+pvscore/lib/mail.py
+pvscore/lib/plugin.py
 pvscore/lib/util.py
 pvscore/lib/validate.py
 pvscore/lib/auth_conditions/__init__.py
@@ -5667,6 +5669,8 @@ pvscore/templates/crm/discount.list.mako
 pvscore/templates/crm/event.base.mako
 pvscore/templates/crm/event.edit.mako
 pvscore/templates/crm/event.list.mako
+pvscore/templates/crm/listing.add_picture.mako
+pvscore/templates/crm/listing.json.mako
 pvscore/templates/crm/local_base.mako
 pvscore/templates/crm/login.mako
 pvscore/templates/crm/login.pick_enterprise.mako
@@ -5717,9 +5721,15 @@ pvscore/tests/controllers/test_crm_company.py
 pvscore/tests/controllers/test_crm_customer.py
 pvscore/tests/controllers/test_crm_dashboard.py
 pvscore/tests/controllers/test_crm_event.py
+pvscore/tests/controllers/test_crm_listing.py
 pvscore/tests/controllers/test_crm_login.py
 pvscore/tests/controllers/test_crm_product.py
 pvscore/tests/controllers/test_crm_purchase.py
 pvscore/tests/controllers/test_crm_report.py
 pvscore/tests/controllers/test_crm_users.py
 pvscore/tests/functional/__init__.py
+pvscore/tests/functional/test_base.py
+pvscore/tests/functional/test_bin.py
+pvscore/tests/functional/test_helpers.py
+pvscore/tests/functional/test_plugin.py
+pvscore/tests/functional/test_validate.py

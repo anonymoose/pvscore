@@ -36,17 +36,17 @@ class BaseModel(object):
         """ KB: [2010-08-13]: Pass the primary key, get back an object"""
         if pkey is None or pkey == '':
             return None
-        try:
-            if not cache:
-                obj = Session.query(cls).filter("%s.%s = :val" % (cls.__tablename__, cls.__pk__)).params(val=pkey).first()    #pylint: disable-msg=E1101
-            else:
-                obj = Session.query(cls).options(FromCache('%s.load' % cls.__name__, pkey)).filter("%s.%s = :val" % (cls.__tablename__, cls.__pk__)).params(val=pkey).first()    #pylint: disable-msg=E1101
-            if obj:
-                obj.post_load()
-            return obj
-        except Exception as exc:
-            log.error(exc)
-            raise exc
+
+        if not cache:
+            obj = Session.query(cls).filter("%s.%s = :val" % (cls.__tablename__, cls.__pk__)).params(val=pkey).first()    #pylint: disable-msg=E1101
+        else:
+            obj = Session.query(cls).options(FromCache('%s.load' % cls.__name__, pkey)).filter("%s.%s = :val" % (cls.__tablename__, cls.__pk__)).params(val=pkey).first()    #pylint: disable-msg=E1101
+        if obj:
+            obj.post_load()
+        return obj
+
+
+
 
 
     # @classmethod
@@ -77,24 +77,20 @@ class BaseModel(object):
         # invalidate the single load cache from load() and tell the object to
         # invalidate itself.
         self.invalidate_self()
-        try:
-            self.invalidate_caches()
-        except Exception as exc:   #pylint: disable-msg=W0703
-            log.debug(exc)
+        #try:
+        self.invalidate_caches()
+        #except Exception as exc:   #pylint: disable-msg=W0703
+        #    log.debug(exc)
         Session.delete(self)    #pylint: disable-msg=E1101
 
 
     def soft_delete(self):
         # If there is a delete_dt attribute, then set it to "now" and save it.
         self.invalidate_self()
-        try:
-            self.invalidate_caches()
-            self.delete_dt = util.today()   #pylint: disable-msg=W0201
-            self.save()
-            return True
-        except Exception as exc:   #pylint: disable-msg=W0703
-            log.debug(exc)
-        return False
+        self.invalidate_caches()
+        self.delete_dt = util.today()   #pylint: disable-msg=W0201
+        self.save()
+        return True
 
 
     # @classmethod
@@ -216,7 +212,7 @@ class BaseAnalytic(object):
     def run(self):
         import pvscore.lib.db as db
         self.results = db.get_result_set(self.columns, self.query)
-        return self.results
+        return self.results 
 
 
     def col_max(self, colname, convert=float):
@@ -224,12 +220,12 @@ class BaseAnalytic(object):
         return max(seq) if len(seq) else 0
 
 
-    def col_min(self, colname, convert=float):
-        seq = [convert(util.nvl(getattr(r, colname), 0)) for r in self.results if hasattr(r, colname)]
-        return min(seq) if len(seq) else 0
+    # def col_min(self, colname, convert=float):
+    #     seq = [convert(util.nvl(getattr(r, colname), 0)) for r in self.results if hasattr(r, colname)]
+    #     return min(seq) if len(seq) else 0
 
 
-    @property
-    def numrows(self):
-        return len(self.results)
+    # @property
+    # def numrows(self):
+    #     return len(self.results)
 

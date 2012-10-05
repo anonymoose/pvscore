@@ -23,8 +23,8 @@ log = logging.getLogger(__name__)
 #     Session.bind.execute(sql)
 
 
-# def get_object_list(cls, sql):
-#     return Session.query(cls).from_statement(sql).all()
+def get_object_list(cls, sql):
+    return Session.query(cls).from_statement(sql).all()
 
 
 # def get_object(cls, sql):

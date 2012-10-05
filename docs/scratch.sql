@@ -3637,3 +3637,30 @@ SELECT
   (sum(heap_blks_hit) - sum(heap_blks_read)) / sum(heap_blks_hit) as ratio
 FROM 
   pg_statio_user_tables;
+
+
+
+insert into core_status_event
+(event_type, short_name, display_name, claim, finalize, is_system,
+milestone_complete, note_req, dashboard, reason_req, change_status, touch)
+values
+('Listing', 'APPROVED', 'APPROVED', false, false, true,
+true, false, false, false, true, false);
+
+insert into core_status_event
+(event_type, short_name, display_name, claim, finalize, is_system,
+milestone_complete, note_req, dashboard, reason_req, change_status, touch)
+values
+('Listing', 'DECLINED', 'DECLINED', false, false, true,
+true, true, false, false, true, false);
+
+
+
+select a.name, e.short_name, l.listing_id, l.title, l.status_id
+from pvs_listing l, core_status s, core_status_event e, crm_company c, crm_enterprise ent, core_asset a
+where l.status_id = s.status_id
+and a.fk_type = 'Listing'
+and a.fk_id = l.listing_id
+and s.event_id = e.event_id
+and l.company_id = c.company_id
+and c.enterprise_id = ent.enterprise_id;

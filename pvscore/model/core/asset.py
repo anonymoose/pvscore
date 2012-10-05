@@ -1,4 +1,4 @@
-#import os
+import os
 from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String, Date
 from sqlalchemy.orm import relation
@@ -24,9 +24,9 @@ class Asset(ORMBase, BaseModel):
 
     status = relation('Status')
 
-    # @property
-    # def exists(self):
-    #     return os.path.exists(self.fs_path)
+    @property
+    def exists(self):
+        return os.path.exists(self.fs_path)
 
     # def delete(self):
     #     if os.path.exists(self.fs_path):

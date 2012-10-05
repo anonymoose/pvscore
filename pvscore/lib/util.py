@@ -87,12 +87,12 @@ def now():
     return datetime.datetime.today()
 
 
-def str_now():
-    d = datetime.datetime.today()
-    fmt = "%Y-%m-%d %H:%M:%S"
-    if d == '' or d == None:
-        return ''
-    return d.strftime(fmt)
+# def str_now():
+#     d = datetime.datetime.today()
+#     fmt = "%Y-%m-%d %H:%M:%S"
+#     if d == '' or d == None:
+#         return ''
+#     return d.strftime(fmt)
 
 
 def today_date():
@@ -466,7 +466,7 @@ def request_ip(request):
 #def in_test_mode():
 #    from pylons import request
 #    try:
-#        return 'paste.testing_variables' in request.environ
+#        return 'PVS_TESTING' in request.environ
 #    except Exception as exc:
 #        log.debug(exc)
 #        return False

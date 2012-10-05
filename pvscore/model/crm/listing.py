@@ -81,6 +81,30 @@ class Listing(ORMBase, BaseModel):
 
 
     @staticmethod
+    def find_last_n(last_n):
+        return db.get_list("""select a.id from core_asset a
+                              where a.fk_type = 'Listing'
+                              and a.fk_id is not null
+                              and create_dt > (current_date - %s)
+                              order by create_dt desc """ % last)
+
+    @staticmethod
+    def find_all_pending_approval(enterprise_id):
+        return db.get_object_list(Listing,
+                                  """select l.*
+                                    from pvs_listing l, core_status s, core_status_event e, crm_company c, crm_enterprise ent, core_asset a
+                                    where l.status_id = s.status_id
+                                    and a.fk_type = 'Listing'
+                                    and a.fk_id = l.listing_id
+                                    and s.event_id = e.event_id
+                                    and l.company_id = c.company_id
+                                    and c.enterprise_id = ent.enterprise_id
+                                    and l.delete_dt is null
+                                    and e.short_name not in ('CLOSED', 'OPEN')
+                                    and ent.enterprise_id = %s order by l.create_dt""" % enterprise_id)
+
+
+    @staticmethod
     def find_by_attr(attr_name, attr_value):
         listing_id = AttributeValue.find_fk_id_by_value('Listing', attr_name, attr_value)
         if listing_id:
