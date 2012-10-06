@@ -3655,6 +3655,17 @@ values
 true, true, false, false, true, false);
 
 
+insert into core_status_event
+(event_type, short_name, display_name, claim, finalize, is_system,
+milestone_complete, note_req, dashboard, reason_req, change_status, touch)
+values
+('Listing', 'ASSET_PROCESSED', 'ASSET_PROCESSED', false, false, true,
+false, false, false, false, true, false);
+
+
+update core_status_event set event_type = 'Listing' where event_type = 'ASSET_PROCESSED';
+
+
 
 select a.name, e.short_name, l.listing_id, l.title, l.status_id
 from pvs_listing l, core_status s, core_status_event e, crm_company c, crm_enterprise ent, core_asset a
@@ -3664,3 +3675,17 @@ and a.fk_id = l.listing_id
 and s.event_id = e.event_id
 and l.company_id = c.company_id
 and c.enterprise_id = ent.enterprise_id;
+
+
+select * from core_status_event where short_name = 'ASSET_PROCESSED';
+
+
+
+select e.short_name from 
+core_status_event e, core_status s, pvs_listing l
+where l.status_id = s.status_id
+and s.event_id = e.event_id
+and l.listing_id = 96;
+
+delete from core_status where status_id = (select max(status_id) from core_status);
+

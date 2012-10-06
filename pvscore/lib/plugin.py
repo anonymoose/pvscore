@@ -11,6 +11,7 @@ class PluginRegistry(object):
             self.registry[category] = {}
         self.registry[category][name] = obj
 
+
     def category(self, category):
         if category in self.registry:
             return self.registry[category].keys()
@@ -40,16 +41,19 @@ def init_controllers(cfg, pkg):
     cfg.scan(pkg, plugin_registry=plugin_registry)
 
 
-# class plugin_customer_sidebar_link(object):
-#     def __init__(self):
-#         pass
+class plugin_customer_sidebar_link(object):
+    def __init__(self, link_text=None, href=None):
+        self.link_text = link_text
+        self.href = href
 
-#     def __call__(self, wrapped):
-#         decorator = self
-#         def callback(scanner, name, obj):  #pylint: disable-msg=W0613
-#             pass #scanner.plugin_registry.add('customer_sidebar_link', decorator.link_text, PluginRegistryItem(decorator))
-#         venusian.attach(wrapped, callback, category='pvs.plugins')
-#         return wrapped
+
+    def __call__(self, wrapped):
+        decorator = self
+        def callback(scanner, name, obj):  #pylint: disable-msg=W0613
+            if hasattr(scanner, 'plugin_registry'):
+                scanner.plugin_registry.add('customer_sidebar_link', decorator.link_text, PluginRegistryItem(decorator))
+        venusian.attach(wrapped, callback, category='pvs.plugins')
+        return wrapped
 
 
 class plugin_administration_link(object):
@@ -58,6 +62,7 @@ class plugin_administration_link(object):
     def __init__(self, link_text=None, href=None):
         self.link_text = link_text
         self.href = href
+
 
     def __call__(self, wrapped):
         decorator = self

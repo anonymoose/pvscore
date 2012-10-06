@@ -2,6 +2,7 @@
 import logging
 from pvscore.model.meta import Session
 from pvscore.lib.util import DataObj
+import transaction
 
 log = logging.getLogger(__name__)
 
@@ -14,9 +15,9 @@ log = logging.getLogger(__name__)
 #     return True
 
 
-# def commit():
-#     Session.commit()
-#     return True
+def commit():
+    transaction.commit()
+    return True
 
 
 # def execute_raw(sql):

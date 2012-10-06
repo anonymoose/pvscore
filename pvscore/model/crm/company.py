@@ -99,7 +99,7 @@ class Company(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_by_name(name, enterprise_id):
+    def find_by_name(enterprise_id, name):
         return Session.query(Company) \
             .filter(and_(Company.name == name,
                          Company.enterprise_id == enterprise_id)).first()

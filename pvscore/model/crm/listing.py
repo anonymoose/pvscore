@@ -100,7 +100,7 @@ class Listing(ORMBase, BaseModel):
                                     and l.company_id = c.company_id
                                     and c.enterprise_id = ent.enterprise_id
                                     and l.delete_dt is null
-                                    and e.short_name not in ('CLOSED', 'OPEN')
+                                    and e.short_name not in ('CLOSED', 'OPEN', 'APPROVED', 'DECLINED')
                                     and ent.enterprise_id = %s order by l.create_dt""" % enterprise_id)
 
 
