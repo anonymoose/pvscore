@@ -3695,3 +3695,4 @@ select * from crm_enterprise;
 
 select * from cms_site;
 
+select * from crm_customer where email = 'unittest@test.com';
