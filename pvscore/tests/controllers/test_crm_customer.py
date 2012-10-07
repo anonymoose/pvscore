@@ -569,6 +569,7 @@ class TestCrmCustomer(TestController):
         self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
         self._delete_new(customer_id)        
 
+
     def test_save_and_purchase_invalid_sku(self):
         ent = Enterprise.find_all()[0]
         api = StripeBillingApi()

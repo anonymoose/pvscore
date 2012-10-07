@@ -3689,3 +3689,9 @@ and l.listing_id = 96;
 
 delete from core_status where status_id = (select max(status_id) from core_status);
 
+select * from crm_enterprise;
+
+
+
+select * from cms_site;
+

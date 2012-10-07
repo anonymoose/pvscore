@@ -86,7 +86,7 @@ class Listing(ORMBase, BaseModel):
                               where a.fk_type = 'Listing'
                               and a.fk_id is not null
                               and create_dt > (current_date - %s)
-                              order by create_dt desc """ % last)
+                              order by create_dt desc """ % last_n)
 
     @staticmethod
     def find_all_pending_approval(enterprise_id):

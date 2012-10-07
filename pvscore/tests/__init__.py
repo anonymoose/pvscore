@@ -1,5 +1,5 @@
 #pylint:disable-msg=C0103
-import pdb, os, transaction
+import os, transaction
 from unittest import TestCase
 from webtest import TestApp
 from pvscore.model.meta import Session
@@ -20,8 +20,11 @@ import ConfigParser
 import paste.deploy
 from pyramid import testing
 import logging
+from pvscore import command_line_main
 
 logger = logging.getLogger(__name__)
+#logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
+#logging.getLogger('sqlalchemy.orm.unitofwork').setLevel(logging.DEBUG)
 
 environ = {}
 
@@ -30,16 +33,17 @@ PWD = 'Zachary234'
 TEST_UID = 'test_kwbedwell@hotmail.com'
 TEST_UID_PASSWORD = 'swordfish'
 T_PRODUCT = 'Test Product for Nose'
-SITEDOMAIN = 'healthyustore.net'
 
 class TestController(TestCase):
 
+    def init_app(self, settings):
+        return command_line_main(settings)
+
     def setUp(self):
-        from pvscore import command_line_main
         settings = paste.deploy.appconfig('config:unittest.ini', relative_to='.')
-        app = command_line_main(settings)
+        app = self.init_app(settings)
         self.app = TestApp(app)
-        self.site = Site.find_by_host(SITEDOMAIN)
+        self.site = Site.find_by_host(self.get_host())
 
 
     def tearDown(self):
@@ -59,7 +63,7 @@ class TestController(TestCase):
 
 
     def get_host(self):
-        return os.environ['PVS_HOST'] if 'PVS_HOST' in os.environ else 'www.healthyustore.net' #'ww.wealthmakers.com'
+        return os.environ['PVS_HOST'] if 'PVS_HOST' in os.environ else 'healthyustore.net' #'ww.wealthmakers.com'
 
 
     def _get_headers(self, headers):
