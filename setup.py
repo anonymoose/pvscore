@@ -27,6 +27,7 @@ requires = [
     'webhelpers',
     'beaker',
     'pyramid_beaker',
+    'beaker_extensions==0.1.2dev',
     'decorator',
     'webtest',
     'nose',

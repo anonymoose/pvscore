@@ -10,7 +10,13 @@ sudo yum -y install libxml2 libxml2-devel libxslt libxslt-devel
 #
 # set up virtualenv of python 2.7, download everything and install libs.
 #
+cd /apps
+mkdir pvs
+chown -R kbedwell:web pvs
+
 cd /apps/pvs
+mkdir log
+chown -R kbedwell:web log
 wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
 
 python virtualenv.py --no-site-packages .
