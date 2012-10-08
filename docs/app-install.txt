@@ -1,0 +1,62 @@
+
+# Ensure python 2.7.x installed on local system.
+python --version
+
+# ensure dev libs for XML are installed
+sudo yum -y install libxml2 libxml2-devel libxslt libxslt-devel
+
+#
+# configure ssh to talk to github
+#
+cd ~/.ssh
+[kbedwell@pvs03 .ssh]$ ssh-keygen -t rsa
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/kbedwell/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /home/kbedwell/.ssh/id_rsa.
+Your public key has been saved in /home/kbedwell/.ssh/id_rsa.pub.
+The key fingerprint is:
+58:c7:72:fa:a9:b5:55:7a:85:84:c0:7b:a7:9d:7f:cb kbedwell@pvs03
+The key's randomart image is:
++--[ RSA 2048]----+
+|         ..      |
+|         ... .   |
+|        o +.. .  |
+|       o =. .... |
+|      . S  . +o..|
+|         . ..oo. |
+|          + o .. |
+|         o o .. o|
+|        . .    Eo|
++-----------------+
+[kbedwell@pvs03 .ssh]$ tail /home/kbedwell/.ssh/id_rsa.pub 
+# copy this output verbatim 
+
+[kbedwell@pvs03 .ssh]$ ssh -T git@github.com
+Permission denied (publickey).
+
+# go to github.  Profile -> SSH Keys -> Add SSH Key
+  -> name it server name
+  -> paste the key generated on the server.
+
+(python)[kbedwell@pvs03 .ssh]$ ssh -T git@github.com
+Hi anonymoose! You've successfully authenticated, but GitHub does not provide shell access.
+
+
+#
+# set up virtualenv of python 2.7
+#
+cd /apps/pvs
+wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
+
+python virtualenv.py --no-site-packages 
+source python/bin/activate
+easy_install pyramid
+
+git clone git@github.com:anonymoose/pvscore.git
+git clone git@github.com:anonymoose/pvs.git
+
+python setup.py develop
+poplate_app development.ini
+pserve development.ini

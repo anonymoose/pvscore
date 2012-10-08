@@ -1,5 +1,24 @@
+
 yum -y upgrade
-wget http://mirror.rackspace.com/fedora/releases/14/Fedora/x86_64/os/Packages/fedora-release-14-1.noarch.rpm
-rpm -Uvh fedora-release-14-1.noarch.rpm
+rpm -Uvh http://mirror.rackspace.com/fedora/releases/14/Fedora/x86_64/os/Packages/fedora-release-14-1.noarch.rpm
 yum -y install yum
 yum -y upgrade
+reboot
+
+# check /etc/redhat-release to confirm that you are now on 14.
+
+wget http://mirror.rackspace.com/fedora/releases/15/Fedora/x86_64/os/Packages/fedora-release-rawhide-15-1.noarch.rpm
+wget http://mirror.rackspace.com/fedora/releases/15/Fedora/x86_64/os/Packages/fedora-release-15-1.noarch.rpm
+rpm -Uvh fedora-release-15-1.noarch.rpm fedora-release-rawhide-15-1.noarch.rpm 
+yum -y install yum
+yum -y upgrade
+reboot
+
+# check /etc/redhat-release to confirm that you are now on 15
+
+rpm -Uvh http://mirror.rackspace.com/fedora/releases/16/Fedora/x86_64/os/Packages/fedora-release-16-1.noarch.rpm
+yum -y install yum
+yum -y upgrade
+reboot
+
+# check /etc/redhat-release to confirm that you are now on 16
