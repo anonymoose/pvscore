@@ -15,7 +15,7 @@ requires = [
     'zope.sqlalchemy',
     'waitress',
     'psycopg2',
-    'redis=2.6.0',
+    'redis==2.6.0',
     'html5lib',
     'lxml',
     'suds',

@@ -45,13 +45,13 @@ Hi anonymoose! You've successfully authenticated, but GitHub does not provide sh
 
 
 #
-# set up virtualenv of python 2.7
+# set up virtualenv of python 2.7, download everything and install libs.
 #
 cd /apps/pvs
 wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
 
-python virtualenv.py --no-site-packages 
-source python/bin/activate
+python virtualenv.py --no-site-packages .
+source bin/activate
 easy_install pyramid
 
 git clone git@github.com:anonymoose/pvscore.git
