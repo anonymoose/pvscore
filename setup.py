@@ -34,7 +34,8 @@ requires = [
     'pylint',
     'pyflakes',
     'feedparser',
-    'selenium'
+    'selenium',
+    'stripe'
     ]
 
 setup(name='pvscore',
