@@ -1,1 +1,1 @@
-
+http://wwww.palmvalleysoftware.com/download/beaker_extensions-0.1.2dev.tar.gz#egg=beaker_extension-0.1.2dev

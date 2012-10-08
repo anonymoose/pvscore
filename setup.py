@@ -43,6 +43,7 @@ setup(name='pvscore',
       version='0.0',
       description='pvscore',
       long_description=README,
+      dependency_links = ['http://wwww.palmvalleysoftware.com/download/beaker_extensions-0.1.2dev.tar.gz#egg=beaker_extension-0.1.2dev'],
       classifiers=[
         "Programming Language :: Python",
         "Framework :: Pylons",
