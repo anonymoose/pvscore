@@ -16,7 +16,12 @@ chown -R kbedwell:web pvs
 
 cd /apps/pvs
 mkdir log
-chown -R kbedwell:web log
+mkdir .python-eggs
+mkdir -p storage/sites
+mkdir -p storage/companies
+chown -R kbedwell:web .
+export PYTHON_EGG_CACHE=/apps/pvs/.python-eggs
+
 wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
 
 python virtualenv.py --no-site-packages .
@@ -26,11 +31,12 @@ easy_install pyramid
 git clone git@github.com:anonymoose/pvscore.git
 git clone git@github.com:anonymoose/pvs.git
 
+chmod g+wx pvs
+
 cd pvscore
 python setup.py develop
 cd ../pvs
 python setup.py develop
 
-mkdir -p storage/sites
-mkdir -p storage/companies
-
+cd /apps/pvs
+chown -R kbedwell:web .

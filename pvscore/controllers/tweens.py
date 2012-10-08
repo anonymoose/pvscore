@@ -7,7 +7,11 @@ from pvscore.model.cms.site import Site
 from pvscore.model.core.users import Users
 from pvscore.model.crm.customer import Customer
 from pyramid.httpexceptions import HTTPFound, HTTPForbidden
+from pvscore.model.schema import SchemaMap
 import pvscore.lib.util as util
+import pvscore.lib.db as db
+from sqlalchemy import MetaData
+from pvscore.model.meta import Session
 
 log = logging.getLogger(__name__)
 

@@ -3696,3 +3696,65 @@ select * from crm_enterprise;
 select * from cms_site;
 
 select * from crm_customer where email = 'unittest@test.com';
+
+
+-- as postgres
+alter table unittest owner to unittest;
+
+create schema eyefoundit;
+
+alter table cms_content                   set schema eyefoundit;
+alter table cms_content_type              set schema eyefoundit;
+alter table cms_page                      set schema eyefoundit;
+alter table cms_site                      set schema eyefoundit;
+alter table cms_template                  set schema eyefoundit;
+alter table core_asset                    set schema eyefoundit;
+alter table core_association              set schema eyefoundit;
+alter table core_attribute                set schema eyefoundit;
+alter table core_attribute_value          set schema eyefoundit;
+alter table core_key_value                set schema eyefoundit;
+alter table core_status                   set schema eyefoundit;
+alter table core_status_event             set schema eyefoundit;
+alter table core_status_event_reason      set schema eyefoundit;
+alter table core_user                     set schema eyefoundit;
+alter table core_user_priv                set schema eyefoundit;
+alter table crm_appointment               set schema eyefoundit;
+alter table crm_billing                   set schema eyefoundit;
+alter table crm_billing_history           set schema eyefoundit;
+alter table crm_campaign                  set schema eyefoundit;
+alter table crm_communication             set schema eyefoundit;
+alter table crm_company                   set schema eyefoundit;
+alter table crm_customer                  set schema eyefoundit;
+alter table crm_customer_order            set schema eyefoundit;
+alter table crm_discount                  set schema eyefoundit;
+alter table crm_enterprise                set schema eyefoundit;
+alter table crm_journal                   set schema eyefoundit;
+alter table crm_oi_terms_acceptance       set schema eyefoundit;
+alter table crm_order_item                set schema eyefoundit;
+alter table crm_product                   set schema eyefoundit;
+alter table crm_product_category          set schema eyefoundit;
+alter table crm_product_category_join     set schema eyefoundit;
+alter table crm_product_child             set schema eyefoundit;
+alter table crm_product_inventory_journal set schema eyefoundit;
+alter table crm_product_pricing           set schema eyefoundit;
+alter table crm_product_return            set schema eyefoundit;
+alter table crm_purchase_order            set schema eyefoundit;
+alter table crm_purchase_order_item       set schema eyefoundit;
+alter table crm_report                    set schema eyefoundit;
+alter table crm_report_company_join       set schema eyefoundit;
+alter table crm_vendor                    set schema eyefoundit;
+alter table pvs_listing                   set schema eyefoundit;
+alter table pvs_listing_favorite          set schema eyefoundit;
+alter table pvs_listing_message           set schema eyefoundit;
+
+
+create table pvs_schema_map (
+   schema_id serial not null,
+   domain_name varchar(50) not null,
+   schema_name varchar(50) not null,
+   create_dt date DEFAULT now(),
+   CONSTRAINT pvs_schema_map_pkey PRIMARY KEY (schema_id)
+);
+
+insert into pvs_schema_map (domain_name, schema_name) values ('eyefound.it', 'eyefoundit');
+

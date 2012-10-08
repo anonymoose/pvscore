@@ -15,6 +15,12 @@ log = logging.getLogger(__name__)
 #     return True
 
 
+# http://stackoverflow.com/questions/9298296/sqlalchemy-support-of-postgres-schemas
+# http://www.postgresql.org/docs/9.1/static/ddl-schemas.html
+def set_search_path(new_search_path):
+    Session.bind.execute("set search_path to %s" % new_search_path)
+
+
 def commit():
     transaction.commit()
     return True

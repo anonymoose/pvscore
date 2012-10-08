@@ -1,6 +1,7 @@
 import logging
 from pyramid.config import Configurator
-from sqlalchemy import engine_from_config
+from sqlalchemy import create_engine, event
+import sqlalchemy.pool as pool
 from pvscore.model import init_model
 from pyramid.events import BeforeRender
 from pvscore.lib import helpers
@@ -19,7 +20,7 @@ def add_renderer_globals(event):
 
 
 def _config_impl(cfg, settings):
-    engine = engine_from_config(settings, 'sqlalchemy.')
+    engine = create_engine(settings['sqlalchemy.url'], poolclass=pool.SingletonThreadPool)
     init_model(engine, settings)
     cfg.include("pyramid_beaker")
     cfg.add_subscriber(add_renderer_globals, BeforeRender)
