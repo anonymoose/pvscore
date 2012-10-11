@@ -3,11 +3,11 @@ import smtplib
 import mimetypes
 from email.MIMEMultipart import MIMEMultipart   #pylint: disable-msg=F0401,E0611
 from email.MIMEText import MIMEText   #pylint: disable-msg=F0401,E0611
-from email.MIMEImage import MIMEImage   #pylint: disable-msg=F0401,E0611
-from email.MIMEAudio import MIMEAudio   #pylint: disable-msg=F0401,E0611
+#from email.MIMEImage import MIMEImage   #pylint: disable-msg=F0401,E0611
+#from email.MIMEAudio import MIMEAudio   #pylint: disable-msg=F0401,E0611
+#import email
 from email.MIMEBase import MIMEBase   #pylint: disable-msg=F0401,E0611
 from email.Encoders import encode_base64  #pylint: disable-msg=F0401,E0611
-import email
 import logging
 import os
 

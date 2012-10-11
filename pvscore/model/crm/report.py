@@ -52,10 +52,10 @@ class Report(ORMBase, BaseModel):
         return Session.query(Report).filter(and_(Report.delete_dt == None,
                                                  Report.is_vendor == True)).order_by(Report.name).all()
 
-    @staticmethod
-    def find_default_by_company(company):
-        return Session.query(Campaign).filter(and_(Campaign.delete_dt == None,
-                                                   Campaign.company == company)).order_by(Campaign.create_dt.asc()).first()
+    # @staticmethod
+    # def find_default_by_company(company):
+    #     return Session.query(Campaign).filter(and_(Campaign.delete_dt == None,
+    #                                                Campaign.company == company)).order_by(Campaign.create_dt.asc()).first()
 
 
     # @staticmethod
@@ -79,8 +79,8 @@ class Report(ORMBase, BaseModel):
     #         ReportCompanyJoin.clear_by_report(self)
 
 
-    def add_company(self, company_id):
-        return ReportCompanyJoin.create_new(self.report_id, company_id)
+    # def add_company(self, company_id):
+    #     return ReportCompanyJoin.create_new(self.report_id, company_id)
 
 
     # @staticmethod

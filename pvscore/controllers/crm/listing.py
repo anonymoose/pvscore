@@ -111,12 +111,12 @@ class ListingController(BaseController):
         lis.save()
         self.db_flush()
 
-        for key in self.request.POST.keys():
-            if key.startswith('asset_'):
-                ass = Asset.load(key[6:])
-                ass.fk_type = 'Listing'
-                ass.fk_id = lis.listing_id
-                ass.save()
+        # for key in self.request.POST.keys():
+        #     if key.startswith('asset_'):
+        #         ass = Asset.load(key[6:])
+        #         ass.fk_type = 'Listing'
+        #         ass.fk_id = lis.listing_id
+        #         ass.save()
 
         Status.add(cust, lis, Status.find_event(self.enterprise_id, lis, 'OPEN'),
                    'Listing Created: %s' % self.request.POST.get('title'))

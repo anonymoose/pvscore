@@ -35,6 +35,7 @@ class TestCrmListing(TestController):
         listings = Listing.find_by_customer(cust)
         assert len(listings) == 1
         assert str(listings[0].listing_id) == listing_id
+        assert Listing.find_last_n_assets(10) == 1
         self._delete_new(listing_id)
 
 

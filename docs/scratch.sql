@@ -3793,4 +3793,6 @@ update core_asset set fs_path = substring(fs_path from 54) where fk_type = 'List
 -- find . -name "*.png" -exec rm -f {} \;
 update core_asset set status_id = null where fk_type = 'Listing';
 -- python -c 'from pvs.bin.eye_process import process_upload; process_upload()' -I development.ini
+/****** end ********/
+
 

@@ -26,10 +26,6 @@ class BaseModel(object):
     __pk__ = ''
     __tablename__ = ''
 
-    # def __init__(self):
-    #     pass
-
-
     @classmethod
     def load(cls, pkey, cache=True):
         """ KB: [2010-08-13]: Pass the primary key, get back an object"""
@@ -45,28 +41,8 @@ class BaseModel(object):
         return obj
 
 
-    # @classmethod
-    # def load_ids(cls, pk_list):
-    #     return Session.query(cls).from_statement("SELECT * FROM %s where %s in (%s)" % (cls.__tablename__, cls.__pk__, ','.join([str(pk) for pk in pk_list]))).all()    #pylint: disable-msg=E1101
-
-
     def post_load(self):
         pass
-
-
-    # def expire(self):
-    #     Session.expire(self)    #pylint: disable-msg=E1101
-    #     Session.flush()    #pylint: disable-msg=E1101
-
-
-    # def expunge(self):
-    #     Session.expunge(self)    #pylint: disable-msg=E1101
-    #     Session.flush()    #pylint: disable-msg=E1101
-
-
-    # @classmethod
-    # def delete_all(cls, where=''):
-    #     Session.execute('delete from %s %s' % (cls.__tablename__, where))    #pylint: disable-msg=E1101
 
 
     def delete(self):
@@ -87,12 +63,6 @@ class BaseModel(object):
         self.delete_dt = util.today()   #pylint: disable-msg=W0201
         self.save()
         return True
-
-
-    # @classmethod
-    # def count(cls, where=''):
-    #     ret = Session.query("c").from_statement("SELECT count(0) c FROM %s %s" % (cls.__tablename__, where)).one()    #pylint: disable-msg=E1101
-    #     return ret[0]
 
 
     def bind(self, dic, clear=False, prefix=None):     #pylint: disable-msg=R0912
@@ -225,3 +195,29 @@ class BaseAnalytic(object):
     # def numrows(self):
     #     return len(self.results)
 
+
+    
+    # @classmethod
+    # def load_ids(cls, pk_list):
+    #     return Session.query(cls).from_statement("SELECT * FROM %s where %s in (%s)" % (cls.__tablename__, cls.__pk__, ','.join([str(pk) for pk in pk_list]))).all()    #pylint: disable-msg=E1101
+
+
+    # def expire(self):
+    #     Session.expire(self)    #pylint: disable-msg=E1101
+    #     Session.flush()    #pylint: disable-msg=E1101
+
+
+    # def expunge(self):
+    #     Session.expunge(self)    #pylint: disable-msg=E1101
+    #     Session.flush()    #pylint: disable-msg=E1101
+
+
+    # @classmethod
+    # def delete_all(cls, where=''):
+    #     Session.execute('delete from %s %s' % (cls.__tablename__, where))    #pylint: disable-msg=E1101
+
+
+    # @classmethod
+    # def count(cls, where=''):
+    #     ret = Session.query("c").from_statement("SELECT count(0) c FROM %s %s" % (cls.__tablename__, where)).one()    #pylint: disable-msg=E1101
+    #     return ret[0]

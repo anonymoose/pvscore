@@ -7,7 +7,7 @@ from pvscore.lib.billing_api import BaseBillingApi
 class TestBillingApi(TestController):
 
     def test_null_api(self):
-        """ KB: [2012-10-11]: Contrived test to get coverage up. """
+        """ KB: [2012-10-11]: Contrived to get coverage up. """
         api = BaseBillingApi.create_api(None)
         api.purchase(None, None, None)
         api.get_last_status()

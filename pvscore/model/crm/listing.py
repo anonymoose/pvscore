@@ -81,12 +81,13 @@ class Listing(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_last_n(last_n):
+    def find_last_n_assets(last_n):
         return db.get_list("""select a.id from core_asset a
                               where a.fk_type = 'Listing'
                               and a.fk_id is not null
                               and create_dt > (current_date - %s)
                               order by create_dt desc """ % last_n)
+
 
     @staticmethod
     def find_all_pending_approval(enterprise_id):
@@ -97,6 +98,7 @@ class Listing(ORMBase, BaseModel):
                                     and a.fk_type = 'Listing'
                                     and a.fk_id = l.listing_id
                                     and s.event_id = e.event_id
+
                                     and l.company_id = c.company_id
                                     and c.enterprise_id = ent.enterprise_id
                                     and l.delete_dt is null

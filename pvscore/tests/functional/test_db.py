@@ -1,6 +1,7 @@
 #pylint: disable-msg=W0612,C0103,R0903
 import pvscore.lib.db as db
 from pvscore.tests import TestController
+from pvscore.model.crm.customer import Customer
 
 # bin/T pvscore.tests.functional.test_db
 
@@ -19,5 +20,12 @@ class TestDb(TestController):
     def test_get_result_set(self):
         custs = db.get_result_set(['customer_id', 'fname', 'lname'],
                                   "select customer_id, fname, lname from crm_customer where lname = 'Bedwell'")
+        assert len(custs) > 0
+        assert custs[0].lname == 'Bedwell'
+
+
+    def test_get_object_list(self):
+        custs = db.get_object_list(Customer,
+                                   "select customer_id, fname, lname from crm_customer where lname = 'Bedwell'")
         assert len(custs) > 0
         assert custs[0].lname == 'Bedwell'

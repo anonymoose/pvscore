@@ -14,30 +14,29 @@ class BaseBillingApi(object):
             ret = StripeBillingApi()
         return ret
 
+
     def purchase(self, order, billing, remote_ip):
         return True
 
+
     def get_last_status(self):
-        """ KB: [2010-10-21]: Return a (status, note) tuple """
         pass
+
 
     def set_coupon(self, coupon):
         pass
 
+
     def is_declined(self):
         return False
+
 
     def create_token(self, enterprise, ccnum, month, year, cvc):  #pylint: disable-msg=R0913
         pass
 
+
     def cancel_order(self, order, billing):
         pass
-
-    def is_declined(self):
-        return False
-
-    def get_last_status(self):
-        return (None, None)
 
 
 class NullBillingApi(BaseBillingApi):
@@ -139,18 +138,15 @@ class StripeBillingApi(BaseBillingApi):
         try:
             if cust.third_party_id:
                 stripe_cust = stripe.Customer.retrieve(cust.third_party_id)
-            else:
-                return False
-            stripe_cust.card = bill.cc_token
-            stripe_cust.save()
-            return True
+                stripe_cust.card = bill.cc_token
+                stripe_cust.save()
+                return True
         except stripe.CardError as exc:
             self.last_status = exc.code
             self.last_note = exc.message
         except Exception as exc2:
             self.last_status = -1
             self.last_note = exc2.message
-        return False
 
 
     def cancel_order(self, order, billing):

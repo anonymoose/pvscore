@@ -94,6 +94,9 @@ class TestCrmCampaign(TestController):
         R.mustcontain('Edit Campaign')
         campaign_id = f['campaign_id'].value
         self.assertNotEqual(f['campaign_id'].value, '')
+        cmpn = Campaign.load(campaign_id)
+        assert cmpn is not None
+        assert cmpn.get_email_info() is not None
         return campaign_id
 
 

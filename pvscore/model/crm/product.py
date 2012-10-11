@@ -367,16 +367,6 @@ class Product(ORMBase, BaseModel):
     @staticmethod
     def find_by_name(campaign, name):  #, for_web=True):
         enterprise_id = campaign.company.enterprise_id
-        # if for_web:
-        #     return Session.query(Product).join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
-        #         .filter(and_(Product.delete_dt == None,
-        #                      Product.enabled == True,
-        #                      Product.name == name,
-        #                      Company.company_id == campaign.company_id,
-        #                      Company.enterprise_id == enterprise_id,
-        #                      Product.web_visible == True,
-        #                      ProductPricing.delete_dt == None)).first()
-        # else:
         return Session.query(Product).join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
                          Product.enabled == True,
@@ -397,6 +387,18 @@ class Product(ORMBase, BaseModel):
                          Company.enterprise_id == campaign.company.enterprise_id,
                          or_(Product.web_visible == True, Product.web_visible==for_web),
                          ProductPricing.delete_dt == None)).first()
+
+
+        # if for_web:
+        #     return Session.query(Product).join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
+        #         .filter(and_(Product.delete_dt == None,
+        #                      Product.enabled == True,
+        #                      Product.name == name,
+        #                      Company.company_id == campaign.company_id,
+        #                      Company.enterprise_id == enterprise_id,
+        #                      Product.web_visible == True,
+        #                      ProductPricing.delete_dt == None)).first()
+        # else:
 
 
     # @staticmethod

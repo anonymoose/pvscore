@@ -160,7 +160,7 @@ class TestCrmPurchase(TestController):
         oitem = json.loads(R.body)
         self.assertEqual(R.status_int, 200)
         order_item_id = oitem['id']
-        
+
         # get the json from it
         R = self.get('/crm/purchase/order_item_json/%s/%s' % (purchase_order_id, order_item_id))
         self.assertEqual(R.status_int, 200)
