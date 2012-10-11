@@ -12,10 +12,12 @@ cd Pound-2.6
 make
 make install
 
+# edit /usr/local/etc/pound.cfg
+
     #
     # http://www.cyberciti.biz/faq/linux-http-https-reverse-proxy-load-balancer/
     #
-    # edit /usr/local/etc/pound.cfg
+
     User            "web"
     Group           "web"
     LogLevel        1

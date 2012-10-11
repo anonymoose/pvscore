@@ -77,7 +77,6 @@ class LoginController(BaseController):
         location specified in the POST """
         uid = self.request.POST.get('username')
         pwd = self.request.POST.get('password')
-
         if uid and pwd and Customer.authenticate(uid, pwd, self.request.ctx.site.company):
             self.session['username'] = uid
             cust = Customer.find_by_company(uid, self.request.ctx.site.company)

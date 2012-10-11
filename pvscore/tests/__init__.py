@@ -40,8 +40,8 @@ class TestController(TestCase):
         return command_line_main(settings)
 
     def setUp(self):
-        settings = paste.deploy.appconfig('config:unittest.ini', relative_to='.')
-        app = self.init_app(settings)
+        self.settings = paste.deploy.appconfig('config:unittest.ini', relative_to='.')
+        app = self.init_app(self.settings)
         self.app = TestApp(app)
         self.site = Site.find_by_host(self.get_host())
 

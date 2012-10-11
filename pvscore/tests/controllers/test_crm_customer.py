@@ -266,11 +266,39 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_cancel_order(self):
-        customer_id = self._create_new()
+        ent = Enterprise.find_all()[0]
+        api = StripeBillingApi()
+        R = self.post('/crm/customer/signup',
+                      {'fname' : 'Ken',
+                       'lname' : 'Bedwell',
+                       'email' : 'test@test.com',
+                       'password' : 'password',
+                       'confirmpassword' : 'password',
+                       'redir' : '/'
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params 
+        customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
+        self.assertEqual(str(cust.customer_id), str(customer_id))
+        self.assertEqual(cust.fname, 'Ken')
+        self.assertEqual(cust.lname, 'Bedwell')
+        self.assertEqual(cust.email, 'test@test.com')
+
+        R = self.post('/crm/customer/save_and_purchase',
+                      {'fname' : 'Ken Test',
+                       'accept_terms' : '1',
+                       'product_sku' : 'NDN-VID-001',  # known test plan at stripe test account
+                       'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
+                       })
+        self.assertEqual(R.status_int, 200)
+        assert 'customer_id' in R.request.params
+        self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Order List')
+        cust.invalidate_caches()
+        cust = Customer.load(customer_id)
         ordr = cust.get_active_orders()[0]
         url = '/crm/customer/cancel_order_dialog/%s/%s' % (customer_id, ordr.order_id)
         R.mustcontain(url)
@@ -284,7 +312,7 @@ class TestCrmCustomer(TestController):
         R = R.follow()
         self.assertEqual(R.status_int, 200)
         assert url not in R.body
-        self._delete_new(customer_id)
+        self._delete_new(customer_id)        
 
     
     def _test_return_impl(self, return_type, customer_id):
@@ -556,7 +584,6 @@ class TestCrmCustomer(TestController):
         self.assertEqual(cust.fname, 'Ken')
         self.assertEqual(cust.lname, 'Bedwell')
         self.assertEqual(cust.email, 'test@test.com')
-
         products = Product.find_by_campaign(self.site.default_campaign)
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',

@@ -138,17 +138,18 @@ class ListingController(BaseController):
         asset_data = self.request.POST['Filedata']
         filename = md5('%s%s' % (asset_data.filename, listing_id)).hexdigest()
         extension = os.path.splitext(asset_data.filename)[1]
-        folder = '/images/%s/%s/%s' % (filename[0], filename[1], filename[2])
-        util.mkdir_p('%s%s' % (site.site_full_directory, folder))
-        fs_path = os.path.join('%s%s' % (site.site_full_directory, folder), filename+extension)
-        permanent_file = open(fs_path, 'wb')
+        folder = 'images/%s/%s/%s' % (filename[0], filename[1], filename[2])
+        util.mkdir_p('%s/%s' % (site.site_full_directory, folder))
+        fs_path = os.path.join(folder, filename+extension)
+        fs_path_real = os.path.join('%s/%s' % (site.site_full_directory, folder), filename+extension)
+        permanent_file = open(fs_path_real, 'wb')
         shutil.copyfileobj(asset_data.file, permanent_file)
         asset_data.file.close()
         permanent_file.close()
 
         # at this point everything is saved to disk. Create an asset object in
         # the DB to remember it.
-        if os.path.exists(fs_path):
+        if os.path.exists(fs_path_real):
             ass = Asset()
             ass.fs_path = fs_path
             ass.web_path = '%s/%s/%s/%s/%s' % (site.site_web_directory('images'),

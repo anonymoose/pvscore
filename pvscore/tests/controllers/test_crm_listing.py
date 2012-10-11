@@ -1,6 +1,11 @@
 from pvscore.tests import TestController, customer_logged_in
 from pvscore.model.crm.listing import Listing
+from pvscore.model.core.asset import Asset
 import simplejson as json
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
+import time
 
 # bin/T pvscore.tests.controllers.test_crm_listing
 
@@ -57,3 +62,35 @@ class TestCrmListing(TestController):
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Please choose an image')
 
+
+    @customer_logged_in
+    def test_upload_asset(self):
+        listing_id = self._create_new()
+        # http://stackoverflow.com/questions/2488978/nose-tests-file-uploads
+        listing = Listing.load(listing_id)
+        assert listing is not None
+        files = [("Filedata", "testfile.txt", "testfile.txt contents")]
+        R = self.app.post('/crm/listing/upload/%s/%s' % (listing_id, listing.hash),
+                          upload_files=files)
+        assert R.status_int == 200
+        asset_id = R.body
+        ass = Asset.load(asset_id)
+        assert ass is not None
+        assert ass.get_listing().listing_id == listing.listing_id
+        self._delete_new(listing_id)
+
+
+
+#    def test_selenium(self):
+#        import pdb; pdb.set_trace()
+#        browser = webdriver.Firefox() # Get local session of firefox
+#        browser.get("http://www.yahoo.com") # Load page
+#        assert "Yahoo!" in browser.title
+#        elem = browser.find_element_by_name("p") # Find the query box
+#        elem.send_keys("seleniumhq" + Keys.RETURN)
+#        time.sleep(0.2) # Let the page load, will be added to the API
+#        try:
+#            browser.find_element_by_xpath("//a[contains(@href,'http://seleniumhq.org')]")
+#        except NoSuchElementException:
+#            assert 0, "can't find seleniumhq"
+#        browser.close()

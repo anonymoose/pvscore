@@ -1,8 +1,9 @@
 #!/bin/bash
 
 rm -f .coverage
-
+rm -f .noseids
 rm -rf ./data/cache ./data/sessions #./data/templates/crm/*
+
 export PVS_TESTING='TRUE'
 nosetests -x -v \
     --cover-package=pvscore.model \

@@ -35,52 +35,16 @@ class Communication(ORMBase, BaseModel):
     _other_tokens = {}
 
 
-    # @staticmethod
-    # def create(name):
-    #     com = Communication()
-    #     com.name = name
-    #     com.save()
-    #     return com
-
-
     @staticmethod
     def find_all(enterprise_id):
-        # if user_sendable_only:
-        #     return Session.query(Communication) \
-        #         .filter(and_(Communication.delete_dt == None,
-        #                      Communication.user_sendable == True,
-        #                      Communication.enterprise_id == enterprise_id)) \
-        #                      .order_by(Communication.name).all()
-        # else:
         return Session.query(Communication) \
                 .filter(and_(Communication.delete_dt == None,
                              Communication.enterprise_id == enterprise_id)) \
                              .order_by(Communication.name).all()
 
 
-    # @staticmethod
-    # def find_by_company(name, company):
-    #     # if user_sendable_only:
-    #     #     return Session.query(Communication) \
-    #     #         .filter(and_(Communication.delete_dt == None,
-    #     #                      Communication.name == name,
-    #     #                      Communication.user_sendable == True,
-    #     #                      Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).first()
-    #     # else:
-    #     return Session.query(Communication) \
-    #             .filter(and_(Communication.delete_dt == None,
-    #                          Communication.name == name,
-    #                          Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).first()
-
-
     @staticmethod
     def find_all_by_company(company):
-        # if user_sendable_only:
-        #     return Session.query(Communication) \
-        #         .filter(and_(Communication.delete_dt == None,
-        #                      Communication.user_sendable == True,
-        #                      Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).all()
-        # else:
         return Session.query(Communication) \
                 .filter(and_(Communication.delete_dt == None,
                              Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).all()
@@ -89,17 +53,6 @@ class Communication(ORMBase, BaseModel):
     def invalidate_caches(self, **kwargs):
         invalidate(self, 'Communication.find_all', self.enterprise_id)
         invalidate(self, 'Communication.find_all_by_company', self.company_id)
-
-
-    # @staticmethod
-    # def search(enterprise_id, name):
-    #     n_clause = ''
-    #     if name:
-    #         n_clause = "and comm.name like '%s%%'" % name
-    #     sql = """SELECT comm.* FROM crm_communication comm, crm_company com
-    #              where comm.company_id = com.company_id
-    #              and com.enterprise_id = {ent_id} {n}""".format(n=n_clause, ent_id=enterprise_id)
-    #     return Session.query(Communication).from_statement(sql).all()
 
 
     @staticmethod
@@ -149,18 +102,6 @@ class Communication(ORMBase, BaseModel):
                    'Sent %s (%s)' % (self.name, subject))
         return True
 
-
-   # def send_internal(self, sender, customer, order=None, extra_message=None, subject=None):
-   #     pass
-   #     """
-   #     if not sender.email: return
-   #     output = self.render(customer, order, extra_message)
-   #     subject = subject if subject else self.tokenize(self.subject, customer, order)
-   #     mail = UserMail(sender)
-   #     mail.send_internal(customer.email,
-   #                        sender.email,
-   #                        subject, output)
-   #     return True
 
     @staticmethod
     def get_tokens():
@@ -219,3 +160,49 @@ class Communication(ORMBase, BaseModel):
     @staticmethod
     def full_delete(comm_id):
         Session.execute('delete from crm_communication where comm_id = %s' % comm_id)
+
+
+    # @staticmethod
+    # def create(name):
+    #     com = Communication()
+    #     com.name = name
+    #     com.save()
+    #     return com
+
+    # @staticmethod
+    # def find_by_company(name, company):
+    #     # if user_sendable_only:
+    #     #     return Session.query(Communication) \
+    #     #         .filter(and_(Communication.delete_dt == None,
+    #     #                      Communication.name == name,
+    #     #                      Communication.user_sendable == True,
+    #     #                      Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).first()
+    #     # else:
+    #     return Session.query(Communication) \
+    #             .filter(and_(Communication.delete_dt == None,
+    #                          Communication.name == name,
+    #                          Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).first()
+
+    # @staticmethod
+    # def search(enterprise_id, name):
+    #     n_clause = ''
+    #     if name:
+    #         n_clause = "and comm.name like '%s%%'" % name
+    #     sql = """SELECT comm.* FROM crm_communication comm, crm_company com
+    #              where comm.company_id = com.company_id
+    #              and com.enterprise_id = {ent_id} {n}""".format(n=n_clause, ent_id=enterprise_id)
+    #     return Session.query(Communication).from_statement(sql).all()
+
+   # def send_internal(self, sender, customer, order=None, extra_message=None, subject=None):
+   #     pass
+   #     """
+   #     if not sender.email: return
+   #     output = self.render(customer, order, extra_message)
+   #     subject = subject if subject else self.tokenize(self.subject, customer, order)
+   #     mail = UserMail(sender)
+   #     mail.send_internal(customer.email,
+   #                        sender.email,
+   #                        subject, output)
+   #     return True
+
+        

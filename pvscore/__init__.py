@@ -1,6 +1,6 @@
 import logging
 from pyramid.config import Configurator
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine
 import sqlalchemy.pool as pool
 from pvscore.model import init_model
 from pyramid.events import BeforeRender

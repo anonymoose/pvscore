@@ -3758,3 +3758,39 @@ create table pvs_schema_map (
 
 insert into pvs_schema_map (domain_name, schema_name) values ('eyefound.it', 'eyefoundit');
 
+select is_generated from information_schema.columns where table_name = 'crm_customer' and column_name = 'customer_id';
+
+        SELECT
+            tc.constraint_name, tc.table_name, kcu.column_name, 
+            ccu.table_name AS foreign_table_name,
+            ccu.column_name AS foreign_column_name 
+        FROM 
+            information_schema.table_constraints AS tc 
+            JOIN information_schema.key_column_usage AS kcu ON tc.constraint_name = kcu.constraint_name
+            JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = tc.constraint_name
+        WHERE constraint_type = 'FOREIGN KEY' and ccu.table_name = 'crm_customer';
+
+
+
+SELECT * FROM information_schema.tables WHERE table_schema = 'public';
+
+select substring(fs_path from 54) from core_asset where fk_type = 'Listing';
+
+
+
+select fs_path from core_asset where id = 626;
+
+
+
+
+/****** porting fcm to eyefound.it **/
+-- upload db from pvs02
+-- zip up files under sites/6512bd43d9caa6e02c990b0a82652dca and copy tarball to sites/c51ce410c124a10e0db5e4b97fc2af39/
+update crm_customer set campaign_id = 17 where campaign_id = 14;
+update core_asset set fs_path = substring(fs_path from 54) where fk_type = 'Listing';
+-- cd sites/c51ce410c124a10e0db5e4b97fc2af39/
+-- find . -name "*.jpg" -exec rm -f {} \;
+-- find . -name "*.png" -exec rm -f {} \;
+update core_asset set status_id = null where fk_type = 'Listing';
+-- python -c 'from pvs.bin.eye_process import process_upload; process_upload()' -I development.ini
+
