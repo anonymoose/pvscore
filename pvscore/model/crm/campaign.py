@@ -44,14 +44,6 @@ class Campaign(ORMBase, BaseModel):
             return self.company.get_email_info()  #pylint: disable-msg=E1101
     
 
-    # @staticmethod
-    # def create(name, company):
-    #     camp = Campaign()
-    #     camp.company = company
-    #     camp.name = name
-    #     return camp
-
-
     @staticmethod
     def find_all(enterprise_id):
         #pylint: disable-msg=E1101
@@ -86,36 +78,29 @@ class Campaign(ORMBase, BaseModel):
         return Session.query(Campaign).from_statement(sql).all()  #pylint: disable-msg=E1101
 
 
-    # def get_products(self):
-    #     from pvscore.model.crm.product import Product
-    #     return Product.find_by_campaign(self)
 
+
+    def _send_impl(self, customer, order, comm_id):
+        if comm_id:
+            from pvscore.model.crm.comm import Communication
+            comm = Communication.load(comm_id)
+            comm.send_to_customer(self, customer, order)
+            
 
     def send_post_purchase_comm(self, order):
-        if self.comm_post_purchase_id:
-            from pvscore.model.crm.comm import Communication
-            comm = Communication.load(self.comm_post_purchase_id)
-            comm.send_to_customer(self, order.customer, order)
-            #if cc_internal:
-            #    comm.send_internal(self, order.customer, None)
+        return self._send_impl(order.customer, order, self.comm_post_purchase_id)
 
 
     def send_post_cancel_comm(self, customer):
-        if self.comm_post_cancel_id:
-            from pvscore.model.crm.comm import Communication
-            comm = Communication.load(self.comm_post_cancel_id)
-            comm.send_to_customer(self, customer, None)
-            #if cc_internal:
-            #    comm.send_internal(self, customer, None)
+        return self._send_impl(customer, None, self.comm_post_cancel_id)
 
 
     def send_forgot_password_comm(self, customer):
-        if self.comm_forgot_password_id:
-            from pvscore.model.crm.comm import Communication
-            comm = Communication.load(self.comm_forgot_password_id)
-            comm.send_to_customer(self, customer, None)
-            #if cc_internal:
-            #    comm.send_internal(self, customer, None)
+        return self._send_impl(customer, None, self.comm_forgot_password_id)
+
+
+    def invalidate_caches(self, **kwargs):
+        invalidate(self, 'Campaign.find_all', self.company.enterprise_id)    #pylint: disable-msg=E1101
 
 
     # def get_product_specials(self):
@@ -128,7 +113,13 @@ class Campaign(ORMBase, BaseModel):
     #     return Product.find_featured_by_campaign(self)
 
 
-    def invalidate_caches(self, **kwargs):
-        invalidate(self, 'Campaign.find_all', self.company.enterprise_id)    #pylint: disable-msg=E1101
+    # @staticmethod
+    # def create(name, company):
+    #     camp = Campaign()
+    #     camp.company = company
+    #     camp.name = name
+    #     return camp
 
-
+    # def get_products(self):
+    #     from pvscore.model.crm.product import Product
+    #     return Product.find_by_campaign(self)

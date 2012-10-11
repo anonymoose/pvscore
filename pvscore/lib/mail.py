@@ -51,18 +51,20 @@ class UserMail(object):
             content_type = 'application/octet-stream'
         main_type, sub_type = content_type.split('/', 1)
         with open(attachment_path, 'rb') as attachment_file:
-            if main_type == 'text':
-                attachment = MIMEText(attachment_file.read())
-            elif main_type == 'message':
-                attachment = email.message_from_file(attachment_file)
-            elif main_type == 'image':
-                attachment = MIMEImage(attachment_file.read(), _subType=sub_type)
-            elif main_type == 'audio':
-                attachment = MIMEAudio(attachment_file.read(), _subType=sub_type)
-            else:
-                attachment = MIMEBase(main_type, sub_type)
+            attachment = MIMEBase(main_type, sub_type)
             attachment.set_payload(attachment_file.read())
             encode_base64(attachment)
             attachment.add_header('Content-Disposition', 'attachment',   filename=os.path.basename(attachment_path))
             return attachment
-    
+
+
+            #if main_type == 'text':
+            #    attachment = MIMEText(attachment_file.read())
+            #elif main_type == 'message':
+            #    attachment = email.message_from_file(attachment_file)
+            #elif main_type == 'image':
+            #    attachment = MIMEImage(attachment_file.read(), _subType=sub_type)
+            #elif main_type == 'audio':
+            #    attachment = MIMEAudio(attachment_file.read(), _subType=sub_type)
+            #else:
+

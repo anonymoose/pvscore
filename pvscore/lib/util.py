@@ -474,8 +474,7 @@ def request_ip(request):
 
 def page_list(arr, offset, limit):
     if offset is not None and limit is not None and limit:
-        if arr and len(arr) > 10:
-            return arr[offset:offset+limit]
+        return arr[offset:offset+limit]
     return arr
 
 

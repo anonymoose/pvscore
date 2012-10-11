@@ -1,3 +1,4 @@
+import random
 from webhelpers.html import literal
 from webhelpers.html.tags import * #pylint: disable-msg=W0614,W0401,W0602,W0622
 
@@ -29,9 +30,7 @@ def money(dbl):
 
 
 def google_analytics(site, script_tags=True):
-    if not site:
-        return ''
-    if site.google_analytics_id:
+    if site and site.google_analytics_id:
         return literal("""
     {st_start}
       var _gaq = _gaq || [];
@@ -47,8 +46,10 @@ def google_analytics(site, script_tags=True):
     """.format(st_start='<script type="text/javascript">' if script_tags else '',
                st_end = '</script>' if script_tags else '',
                googid=site.google_analytics_id))
-    else:
-        return ''
+    return ''
+
+
+
 
 
 def date_time(d8e, fmt="%Y-%m-%d %H:%M:%S"):
@@ -93,11 +94,11 @@ def words_date(d8e):
 
 
 def javascript_link_ex(url, request):
-    return javascript_link(url+'?rnd='+str(request.session['_creation_time']))
+    return javascript_link(url+'?rnd='+str(request.session.get('_creation_time', random.random())))
 
 
 def stylesheet_link_ex(url, request):
-    return stylesheet_link(url+'?rnd='+str(request.session['_creation_time']))
+    return stylesheet_link(url+'?rnd='+str(request.session.get('_creation_time', random.random())))
 
 
 def nl2br(val):

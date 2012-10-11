@@ -28,11 +28,6 @@ class Asset(ORMBase, BaseModel):
     def exists(self):
         return os.path.exists(self.fs_path)
 
-    # def delete(self):
-    #     if os.path.exists(self.fs_path):
-    #         os.remove(self.fs_path)
-    #     self.invalidate_caches()
-    #     Session.delete(self)   #pylint: disable-msg=E1101
 
     @staticmethod
     def find_for_object(obj):
@@ -49,6 +44,20 @@ class Asset(ORMBase, BaseModel):
         invalidate(self, 'Asset.find_for_object', '%s/%s' % (self.fk_type, self.fk_id))
 
 
+    def get_listing(self):
+        # KB: [2012-09-27]: if this is applicable you'll know it.
+        # otherwise it will barf.
+        from pvscore.model.crm.listing import Listing
+        return Listing.load(self.fk_id)
+
+
+    # def delete(self):
+    #     if os.path.exists(self.fs_path):
+    #         os.remove(self.fs_path)
+    #     self.invalidate_caches()
+    #     Session.delete(self)   #pylint: disable-msg=E1101
+
+
     # @staticmethod
     # def create_new(name, fs_path, web_path, fk_type, fk_id):
     #     if os.path.exists(fs_path):
@@ -60,10 +69,3 @@ class Asset(ORMBase, BaseModel):
     #         ast.fk_id = fk_id
     #         ast.save()
     #         return ast
-
-
-    def get_listing(self):
-        # KB: [2012-09-27]: if this is applicable you'll know it.
-        # otherwise it will barf.
-        from pvscore.model.crm.listing import Listing
-        return Listing.load(self.fk_id)

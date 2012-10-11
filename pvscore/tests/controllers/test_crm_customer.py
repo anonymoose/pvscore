@@ -7,6 +7,7 @@ from pvscore.model.core.status import Status
 from pvscore.model.crm.product import Product
 from pvscore.lib.billing_api import StripeBillingApi
 from pvscore.model.crm.company import Enterprise
+from pvscore.model.crm.journal import Journal
 
 # bin/T pvscore.tests.controllers.test_crm_customer
 
@@ -16,6 +17,9 @@ def find_customer(campaign):
     return Customer.find('amers_j@yahoo.com', campaign)
 
 class TestCrmCustomer(TestController):
+    def test_misc(self):
+        assert 'FullPayment' in Journal.get_types()
+
     @secure
     def test_show_new(self):
         R = self.get('/crm/customer/new')
@@ -60,6 +64,7 @@ class TestCrmCustomer(TestController):
         self.assertEqual(R.status_int, 200)
         order_id = R.body
         order = CustomerOrder.load(order_id)
+        assert str(order.customer.customer_id) in str(order.customer)
         self.assertNotEqual(order, None)
         oids = []
         for item in order.items:
@@ -232,7 +237,6 @@ class TestCrmCustomer(TestController):
         R = self.get('/crm/customer/add_order_dialog/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Add Order')
-
         R = self.post('/crm/customer/add_order/%s' % str(customer_id),
                       {'products[1451]' : '1.0',
                        'products[1450]' : '2.0',
@@ -243,12 +247,11 @@ class TestCrmCustomer(TestController):
         self.assertNotEqual(order, None)
         for item in order.items:
             self.assertEqual(item.product_id in (1451, 1450, 2090), True)
-
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Edit Order (%s)' % order_id)
-
         self._delete_new(customer_id)
+
 
     @secure
     def test_show_billing_dialog(self):
@@ -258,9 +261,21 @@ class TestCrmCustomer(TestController):
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Customer Billing Activity')
         journal_entry = cust.get_active_orders()[0].journal_entries[0]
+        assert str(journal_entry.journal_id) in str(journal_entry)
         R = self.get('/crm/customer/show_billing_dialog/%s/%s?dialog=1' % (customer_id, journal_entry.journal_id))
         self.assertEqual(R.status_int, 200)
         R.mustcontain('%.2f' % journal_entry.amount)
+
+        # some misc stuff here for coverage.
+        order = CustomerOrder.load(cust.get_active_orders()[0].order_id)
+        Journal.total_credit_increases(order)
+        Journal.total_refunds(order)
+        Journal.find_refunds_by_order(order)
+        Journal.find_all_by_order(order)
+        Journal.find_refunds_by_order(order)
+        Journal.find_payments_by_order(order)
+        Journal.find_discounts_by_order(order)
+        Journal.find_credits_by_order(order)
         self._delete_new(customer_id)
 
 
@@ -284,13 +299,13 @@ class TestCrmCustomer(TestController):
         self.assertEqual(cust.fname, 'Ken')
         self.assertEqual(cust.lname, 'Bedwell')
         self.assertEqual(cust.email, 'test@test.com')
-
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',
                        'accept_terms' : '1',
                        'product_sku' : 'NDN-VID-001',  # known test plan at stripe test account
                        'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
                        })
+        assert api.get_last_status() == (None, None)
         self.assertEqual(R.status_int, 200)
         assert 'customer_id' in R.request.params
         self.assertEqual(str(R.request.params['customer_id']), str(customer_id))

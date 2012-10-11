@@ -50,19 +50,19 @@ class Listing(ORMBase, BaseModel):
         return md5('%s%s%s%s' % (self.company_id, self.customer_id, self.listing_id, salt)).hexdigest()
 
 
-    @staticmethod
-    def find_by_title_and_description_and_keywords(title, description, keywords, company):
-        """ KB: [2012-07-20]: This sucks completely. """
-        olist = db.get_object_list(Listing, """
-                    select * from pvs_listing where
-                     trim(both from title) = trim(both from '{title}')
-                    and company_id = {company_id} and delete_dt is null
-                    """.format(title=db.clean(title),
-                               description=db.clean(description),
-                               keywords=db.clean(keywords),
-                               company_id=company.company_id))
-        if olist:
-            return olist[0]
+    # @staticmethod
+    # def find_by_title_and_description_and_keywords(title, description, keywords, company):
+    #     """ KB: [2012-07-20]: This sucks completely. """
+    #     olist = db.get_object_list(Listing, """
+    #                 select * from pvs_listing where
+    #                  trim(both from title) = trim(both from '{title}')
+    #                 and company_id = {company_id} and delete_dt is null
+    #                 """.format(title=db.clean(title),
+    #                            description=db.clean(description),
+    #                            keywords=db.clean(keywords),
+    #                            company_id=company.company_id))
+    #     if olist:
+    #         return olist[0]
 
     @staticmethod
     def find_by_customer(customer):

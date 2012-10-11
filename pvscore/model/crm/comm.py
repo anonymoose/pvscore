@@ -9,6 +9,7 @@ from pvscore.lib.dbcache import invalidate
 from pvscore.lib.mail import UserMail
 from pvscore.model.core.status import Status
 import logging
+import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +34,6 @@ class Communication(ORMBase, BaseModel):
     creator = relation('Users')
 
     _other_tokens = {}
-
 
     @staticmethod
     def find_all(enterprise_id):
@@ -61,17 +61,16 @@ class Communication(ORMBase, BaseModel):
 
 
     def render(self, customer, order, extra_message=None):
+        ret = ''
         if self.data:
             if 'html' == self.type:
                 dat = self.data
-                if extra_message:
-                    dat = dat.replace('{message}', extra_message)
+                dat = dat.replace('{message}', util.nvl(extra_message, ''))
                 dat = self.tokenize(dat, customer, order)
                 for otok in self._other_tokens.keys():
                     dat = dat.replace(otok, self._other_tokens[otok])
-                return literal(dat)
-        else:
-            return ''
+                ret = literal(dat)
+        return ret
 
 
     def tokenize(self, dat, customer, order):

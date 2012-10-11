@@ -1,7 +1,7 @@
 from pvscore.controllers.base import BaseController
 from pyramid.view import view_config
 from pvscore.lib.validate import validate
-from pvscore.lib.plugin import plugin_administration_link
+from pvscore.lib.plugin import plugin_administration_link, plugin_customer_sidebar_link
 import os
 
 if 'PVS_TESTING' in os.environ and os.environ['PVS_TESTING'] == 'TRUE':
@@ -74,4 +74,10 @@ if 'PVS_TESTING' in os.environ and os.environ['PVS_TESTING'] == 'TRUE':
         @view_config(route_name='test.2', renderer="string")
         def tsst_admin_link(self):
             return "Admin link landing page"
-    
+
+
+        @plugin_customer_sidebar_link(link_text="customer sidebar test 1", href="/tsst/test_customer_sidebar_link")
+        @view_config(route_name='test.2', renderer="string")
+        def tsst_customer_sidebar_link(self):
+            return "Customer sidebar landing page"
+

@@ -33,6 +33,7 @@ PWD = 'Zachary234'
 TEST_UID = 'test_kwbedwell@hotmail.com'
 TEST_UID_PASSWORD = 'swordfish'
 T_PRODUCT = 'Test Product for Nose'
+TEST_CUSTOMER_EMAIL = 'amers_j@yahoo.com'
 
 class TestController(TestCase):
 

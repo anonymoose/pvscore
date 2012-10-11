@@ -180,6 +180,7 @@ def crm_routes(config):
     # KB: [2011-09-02]: Don't let /test into the nginx proxying namespace. 
     adrt('test.1', '/tsst/tsst_validate') #, controller='crm/tsst', action='tsst_validate')
     adrt('test.2', '/tsst/tsst_admin_link')
+    adrt('test.10', '/tsst/tsst_customer_sidebar_link')
     adrt('test.3', '/tsst/tsst_float') #, controller='crm/tsst', action='tsst_float')
     adrt('test.4', '/tsst/tsst_int') #, controller='crm/tsst', action='tsst_int')
     adrt('test.5', '/tsst/tsst_string') #, controller='crm/tsst', action='tsst_string')

@@ -6,32 +6,38 @@ log = logging.getLogger(__name__)
 
 class BaseBillingApi(object):
 
-
-
     @staticmethod
     def create_api(enterprise):
         """ KB: [2010-10-20]: this is called to get the right api for the application """
-        if ('Stripe' == enterprise.billing_method):
-            return StripeBillingApi()
-        else:
-            return NullBillingApi()
-
+        ret = NullBillingApi()
+        if (enterprise is not None and 'Stripe' == enterprise.billing_method):
+            ret = StripeBillingApi()
+        return ret
 
     def purchase(self, order, billing, remote_ip):
         return True
-
 
     def get_last_status(self):
         """ KB: [2010-10-21]: Return a (status, note) tuple """
         pass
 
-
     def set_coupon(self, coupon):
         pass
 
+    def is_declined(self):
+        return False
+
+    def create_token(self, enterprise, ccnum, month, year, cvc):  #pylint: disable-msg=R0913
+        pass
+
+    def cancel_order(self, order, billing):
+        pass
 
     def is_declined(self):
         return False
+
+    def get_last_status(self):
+        return (None, None)
 
 
 class NullBillingApi(BaseBillingApi):
@@ -162,10 +168,6 @@ class StripeBillingApi(BaseBillingApi):
         except Exception as exc2:
             self.last_note = exc2.message
         return False
-
-
-    def _create_history(self, resp, order, billing, customer):
-        pass
 
 
     def is_declined(self):

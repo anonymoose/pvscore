@@ -7,6 +7,18 @@ import os, shutil
 
 class TestCrmCompany(TestController):
 
+    def test_misc(self):
+        ent = Enterprise.find_all()[0]
+        comps = Company.find_all(ent.enterprise_id)
+        assert len(comps) > 0
+        comp = comps[0]
+        comp_ = Company.find_by_name(ent.enterprise_id, comp.name)
+        assert comp_ is not None
+        assert comp.company_id == comp_.company_id
+        assert str(ent.enterprise_id) in str(ent) 
+        assert ent.get_email_info() is not None
+        assert Enterprise.find_by_name(ent.name).name == ent.name
+
     @secure
     def test_show_new(self):
         R = self.get('/crm/company/new')

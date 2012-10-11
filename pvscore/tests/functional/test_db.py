@@ -1,7 +1,6 @@
 #pylint: disable-msg=W0612,C0103,R0903
 import pvscore.lib.db as db
 from pvscore.tests import TestController
-from pvscore.model.meta import Session
 
 # bin/T pvscore.tests.functional.test_db
 
@@ -9,8 +8,8 @@ class TestDb(TestController):
 
     def test_commit(self):
         db.execute("drop table if exists testtable")
-        db.execute("create table testtable ( x int not null )");
-        db.execute("insert into testtable (x) values (123)");
+        db.execute("create table testtable ( x int not null )")
+        db.execute("insert into testtable (x) values (123)")
         db.commit()
         v = db.get_value("select x from testtable")
         assert v == 123

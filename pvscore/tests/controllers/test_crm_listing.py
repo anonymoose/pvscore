@@ -1,11 +1,13 @@
-from pvscore.tests import TestController, customer_logged_in
+from pvscore.tests import TestController, customer_logged_in, TEST_CUSTOMER_EMAIL
 from pvscore.model.crm.listing import Listing
+from pvscore.model.crm.customer import Customer
+from pvscore.model.crm.campaign import Campaign
 from pvscore.model.core.asset import Asset
 import simplejson as json
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.keys import Keys
-import time
+#from selenium import webdriver
+#from selenium.common.exceptions import NoSuchElementException
+#from selenium.webdriver.common.keys import Keys
+#import time
 
 # bin/T pvscore.tests.controllers.test_crm_listing
 
@@ -29,6 +31,10 @@ class TestCrmListing(TestController):
     @customer_logged_in
     def test_create_new(self):
         listing_id = self._create_new()
+        cust = Customer.find(TEST_CUSTOMER_EMAIL, Campaign.load(self.site.default_campaign_id))
+        listings = Listing.find_by_customer(cust)
+        assert len(listings) == 1
+        assert str(listings[0].listing_id) == listing_id
         self._delete_new(listing_id)
 
 
@@ -78,7 +84,6 @@ class TestCrmListing(TestController):
         assert ass is not None
         assert ass.get_listing().listing_id == listing.listing_id
         self._delete_new(listing_id)
-
 
 
 #    def test_selenium(self):
