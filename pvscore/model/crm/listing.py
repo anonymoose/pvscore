@@ -8,8 +8,7 @@ from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.core.asset import Asset
 #from pvscore.lib.sphinx.sphinxapi import *
 import pvscore.lib.db as db
-
-from pvscore.model.core.attribute import AttributeValue
+#from pvscore.model.core.attribute import AttributeValue
 from hashlib import md5
 
 log = logging.getLogger(__name__)
@@ -98,7 +97,6 @@ class Listing(ORMBase, BaseModel):
                                     and a.fk_type = 'Listing'
                                     and a.fk_id = l.listing_id
                                     and s.event_id = e.event_id
-
                                     and l.company_id = c.company_id
                                     and c.enterprise_id = ent.enterprise_id
                                     and l.delete_dt is null
@@ -107,15 +105,15 @@ class Listing(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_by_attr(attr_name, attr_value):
-        listing_id = AttributeValue.find_fk_id_by_value('Listing', attr_name, attr_value)
-        if listing_id:
-            return Listing.load(listing_id)
-
-
-    @staticmethod
     def full_delete(listing_id):
         Session.execute('delete from pvs_listing where listing_id = %s' % listing_id)
+
+
+    # @staticmethod
+    # def find_by_attr(attr_name, attr_value):
+    #     listing_id = AttributeValue.find_fk_id_by_value('Listing', attr_name, attr_value)
+    #     if listing_id:
+    #         return Listing.load(listing_id)
 
 
     # """ KB: [2011-07-13]: For now, just stuff it in Redis. """

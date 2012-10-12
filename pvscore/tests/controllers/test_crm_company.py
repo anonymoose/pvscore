@@ -17,6 +17,7 @@ class TestCrmCompany(TestController):
         assert comp.company_id == comp_.company_id
         assert str(ent.enterprise_id) in str(ent) 
         assert ent.get_email_info() is not None
+        assert comp.get_email_info() is not None
         assert Enterprise.find_by_name(ent.name).name == ent.name
 
     @secure

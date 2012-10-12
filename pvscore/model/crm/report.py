@@ -5,7 +5,6 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.crm.company import Company
-from pvscore.model.crm.campaign import Campaign
 import logging
 
 log = logging.getLogger(__name__)
@@ -52,6 +51,30 @@ class Report(ORMBase, BaseModel):
         return Session.query(Report).filter(and_(Report.delete_dt == None,
                                                  Report.is_vendor == True)).order_by(Report.name).all()
 
+
+class ReportCompanyJoin(ORMBase, BaseModel):
+    __tablename__ = 'crm_report_company_join'
+    __pk__ = 'rcj_id'
+
+    rcj_id = Column(Integer, primary_key = True)
+    report_id = Column(Integer, ForeignKey('crm_report.report_id'))
+    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
+
+    report = relation('Report')
+    company = relation('Company', lazy='joined', primaryjoin=Company.company_id == company_id)
+
+
+    # @staticmethod
+    # def clear_by_company(company):
+    #     Session.execute("delete from crm_report_company_join where company_id = %d" % int(company.company_id))
+
+
+    # @staticmethod
+    # def clear_by_report(report):
+    #     Session.execute("delete from crm_report_company_join where report_id = %d" % int(report.report_id))
+
+
+
     # @staticmethod
     # def find_default_by_company(company):
     #     return Session.query(Campaign).filter(and_(Campaign.delete_dt == None,
@@ -87,26 +110,3 @@ class Report(ORMBase, BaseModel):
     # def full_delete(report_id):
     #     Session.execute('delete from crm_report_company_join where report_id = %s' % report_id) 
     #     Session.execute('delete from crm_report where report_id = %s' % report_id)
-
-class ReportCompanyJoin(ORMBase, BaseModel):
-    __tablename__ = 'crm_report_company_join'
-    __pk__ = 'rcj_id'
-
-    rcj_id = Column(Integer, primary_key = True)
-    report_id = Column(Integer, ForeignKey('crm_report.report_id'))
-    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
-
-    report = relation('Report')
-    company = relation('Company', lazy='joined', primaryjoin=Company.company_id == company_id)
-
-
-    # @staticmethod
-    # def clear_by_company(company):
-    #     Session.execute("delete from crm_report_company_join where company_id = %d" % int(company.company_id))
-
-
-    # @staticmethod
-    # def clear_by_report(report):
-    #     Session.execute("delete from crm_report_company_join where report_id = %d" % int(report.report_id))
-
-

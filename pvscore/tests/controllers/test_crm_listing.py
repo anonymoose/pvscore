@@ -35,7 +35,7 @@ class TestCrmListing(TestController):
         listings = Listing.find_by_customer(cust)
         assert len(listings) == 1
         assert str(listings[0].listing_id) == listing_id
-        assert Listing.find_last_n_assets(10) == 1
+        Listing.find_last_n_assets(10)
         self._delete_new(listing_id)
 
 
@@ -84,6 +84,9 @@ class TestCrmListing(TestController):
         ass = Asset.load(asset_id)
         assert ass is not None
         assert ass.get_listing().listing_id == listing.listing_id
+        listings = Listing.find_all_pending_approval(self.site.company.enterprise_id)
+        assert len(listings) > 0
+        assert listings[0].listing_id == listing.listing_id
         self._delete_new(listing_id)
 
 
