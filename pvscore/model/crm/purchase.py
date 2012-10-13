@@ -101,11 +101,8 @@ class PurchaseOrderItem(ORMBase, BaseModel):
 
 
     def total(self):
-        try:
+        if self.unit_cost is not None and self.quantity is not None:
             return self.unit_cost * self.quantity
-        except Exception as exc:
-            log.debug(exc)
-            return 0.0
 
 
     @staticmethod

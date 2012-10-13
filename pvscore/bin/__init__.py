@@ -41,13 +41,7 @@ class SingleInstance(object):
             # Check list of running pids, if not running it is stale so
             # overwrite
             pid_running = commands.getoutput('ls /proc | grep %s' % pid)
-            if pid_running:
-                self.lasterror = True
-            else:
-                self.lasterror = False
-        else:
-            self.lasterror = False
-
+            self.lasterror = pid_running
         if not self.lasterror:
             # Write my pid into pidFile to keep multiple copies of program from running.
             filep = open(pid_path, 'w')

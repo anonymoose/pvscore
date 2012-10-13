@@ -102,12 +102,12 @@ class CustomerOrder(ORMBase, BaseModel):
         discount = product.get_discount_price(campaign)
         retail = product.get_price(campaign)
         item.unit_price = (discount if discount else retail)
-        if campaign.tax_rate and incl_tax:
-            item.tax = (item.unit_price * item.quantity) * campaign.tax_rate
         item.unit_cost = product.unit_cost
         item.unit_discount_price = (discount if discount else 0.0)
         item.unit_retail_price = retail
         item.quantity = quantity
+        if campaign.tax_rate and incl_tax:
+            item.tax = (item.unit_price * item.quantity) * campaign.tax_rate
         if quantity > 0:
             InventoryJournal.create_new(product, 'Sale', item.quantity, item)
         item.save()

@@ -5,6 +5,10 @@ from pvscore.model.crm.report import Report
 # T pvscore.tests.controllers.test_crm_report
 
 class TestCrmReport(TestController):
+    def test_misc(self):
+        Report.find_vendor_reports()
+
+
     @secure
     def test_show_new(self):
         R = self.get('/crm/report/new')
