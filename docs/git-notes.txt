@@ -100,7 +100,7 @@ The key's randomart image is:
 |        . .    Eo|
 +-----------------+
 [kbedwell@pvs03 .ssh]$ tail /home/kbedwell/.ssh/id_rsa.pub 
-# copy this output verbatim 
+# Copy this output verbatim 
 
 [kbedwell@pvs03 .ssh]$ ssh -T git@github.com
 Permission denied (publickey).

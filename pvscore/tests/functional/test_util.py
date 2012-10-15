@@ -14,6 +14,9 @@ class TestUtil(TestController):
         assert util.float_('8') == None
         assert util.page_list([1, 2, 3, 4, 5, 6, 7, 8, 9], 2, 2) == [3, 4]
         assert util.page_list([1, 2, 3, 4, 5, 6, 7, 8, 9], None, None) == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert util.parse_date('2012-05-06') == datetime.datetime.strptime('2012-05-06', '%Y-%m-%d')
+
+
 
 
 
