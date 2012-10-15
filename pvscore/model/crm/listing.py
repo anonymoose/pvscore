@@ -5,6 +5,7 @@ from sqlalchemy.types import Integer, String, Date, Text, Boolean, DateTime, Flo
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
+from pvscore.model.cms.site import Site
 from pvscore.model.core.asset import Asset
 #from pvscore.lib.sphinx.sphinxapi import *
 import pvscore.lib.db as db
@@ -20,6 +21,7 @@ class Listing(ORMBase, BaseModel):
     listing_id = Column(Integer, primary_key = True)
     customer_id = Column(Integer, ForeignKey('crm_customer.customer_id'))
     company_id = Column(Integer, ForeignKey('crm_company.company_id'))
+    site_id = Column(Integer, ForeignKey('cms_site.site_id'))
     title = Column(String(255))
     description = Column(Text)
     category = Column(String(50))
@@ -41,6 +43,7 @@ class Listing(ORMBase, BaseModel):
     customer = relation('Customer')
     company = relation('Company')
     status = relation('Status')
+    site = relation("Site")
 
 
     @property

@@ -90,10 +90,10 @@ class ListingController(BaseController):
         cust = self.request.ctx.customer
         lis = Listing.load(self.request.POST.get('listing_id'))
         if not lis:
-            site = self.request.ctx.site
             lis = Listing()
             lis.customer = cust
-            lis.company = site.company
+            lis.company = self.request.ctx.campaign.company
+            lis.site = self.request.ctx.site
             # l.ip = util.self.request_ip()
             # g = Geo()
             # gip = g.by_ip(l.ip)
