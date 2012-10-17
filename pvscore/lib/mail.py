@@ -14,16 +14,30 @@ import os
 log = logging.getLogger(__name__)
 
 
+class MailInfo(object):
+    def __init__(self, target):
+        self.email = target.email
+        self.smtp_server = target.smtp_server
+        self.smtp_username = target.smtp_username
+        self.smtp_password = target.smtp_password
+
+    def check(self):
+        return self.email and self.smtp_server and self.smtp_username and self.smtp_password \
+            and len(self.smtp_server.split(':')) == 2
+
+
 class UserMail(object):
     def __init__(self, sender=None):
         self.sender = sender
 
 
     def send(self, to_addr, subject, text, *attachment_file_paths):
-        from_addr, server_info, username, password = self.sender.get_email_info()
-        server, port = server_info.split(':')
+        email_info = self.sender.get_email_info()
+        if not email_info.check():
+            raise Exception('Invalid email info')
+        server, port = email_info.smtp_server.split(':')
         msg = MIMEMultipart()
-        msg['From'] = from_addr
+        msg['From'] = email_info.email
         msg['To'] = to_addr
         msg['Subject'] = subject
         msg.attach(MIMEText(text, 'html'))
@@ -39,8 +53,8 @@ class UserMail(object):
         except Exception as exc:
             log.info(exc)
         mail_server.ehlo()
-        mail_server.login(username, password)
-        retval = mail_server.sendmail(from_addr, to_addr, msg.as_string())
+        mail_server.login(email_info.smtp_username, email_info.smtp_password)
+        retval = mail_server.sendmail(email_info.email, to_addr, msg.as_string())
         mail_server.close()
         return retval
 

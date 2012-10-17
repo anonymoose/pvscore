@@ -5,6 +5,7 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.crm.company import Company
 from pvscore.lib.dbcache import FromCache, invalidate
+from pvscore.lib.mail import MailInfo
 
 class Campaign(ORMBase, BaseModel):
     __tablename__ = 'crm_campaign'
@@ -39,7 +40,7 @@ class Campaign(ORMBase, BaseModel):
 
     def get_email_info(self):
         if self.smtp_server is not None and self.smtp_username is not None:
-            return self.email, self.smtp_server, self.smtp_username, self.smtp_password
+            return MailInfo(self)
         if self.company:
             return self.company.get_email_info()  #pylint: disable-msg=E1101
     

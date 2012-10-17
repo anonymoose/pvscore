@@ -872,5 +872,36 @@ class TestCrmCustomer(TestController):
         self._delete_new(customer_id)
 
 
+    def test_contact(self):
+        custs = Customer.find_all_by_email('testcontact@test.com')
+        assert len(custs) == 0
+        R = self.post('/crm/customer/contact',
+                      {'fname'   : 'Ken',
+                       'lname'   : 'Bedwell',
+                       'email'   : 'testcontact@test.com',
+                       'phone'   : '1234567890',
+                       'message' : 'This is the message',
+                       'redir'   : '/crm'
+                       })
+        assert R.status_int == 200
+        custs = Customer.find_all_by_email('testcontact@test.com')
+        assert len(custs) == 0
+        
 
+    def test_contact_save(self):
+        custs = Customer.find_all_by_email('testcontact@test.com')
+        assert len(custs) == 0
+        R = self.post('/crm/customer/contact',
+                      {'fname'   : 'Ken',
+                       'lname'   : 'Bedwell',
+                       'email'   : 'testcontact@test.com',
+                       'phone'   : '1234567890',
+                       'message' : 'This is the message',
+                       'save'    : '1',
+                       'redir'   : '/crm'
+                       })
+        assert R.status_int == 200
+        custs = Customer.find_all_by_email('testcontact@test.com')
+        assert len(custs) == 1
+        Customer.full_delete(custs[0].customer_id)
 

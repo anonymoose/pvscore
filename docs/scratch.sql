@@ -3815,3 +3815,8 @@ update pvs_listing set site_id = 13 where customer_id = 1078;
 
 select * from cms_site;
 
+select s.domain, c.name, substring(c.data from 0 for 100) 
+from cms_content c, cms_page p, cms_site s
+where c.page_id = p.page_id
+and p.site_id = s.site_id
+and s.domain = 'wealthmakers.com';

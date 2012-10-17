@@ -5,7 +5,6 @@ from sqlalchemy.types import Integer, String, Date, Text, Boolean, DateTime, Flo
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from pvscore.model.cms.site import Site
 from pvscore.model.core.asset import Asset
 #from pvscore.lib.sphinx.sphinxapi import *
 import pvscore.lib.db as db

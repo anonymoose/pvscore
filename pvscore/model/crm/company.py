@@ -8,6 +8,7 @@ from hashlib import md5
 import pvscore.lib.util as util
 from pvscore.lib.dbcache import FromCache, invalidate
 import pvscore.lib.db as db
+from pvscore.lib.mail import MailInfo
 
 
 class Company(ORMBase, BaseModel):
@@ -54,7 +55,7 @@ class Company(ORMBase, BaseModel):
 
     def get_email_info(self):
         if self.smtp_server is not None and self.smtp_username is not None:
-            return self.email, self.smtp_server, self.smtp_username, self.smtp_password
+            return MailInfo(self)
         if self.enterprise:
             return self.enterprise.get_email_info()
 
@@ -211,7 +212,7 @@ class Enterprise(ORMBase, BaseModel):
 
 
     def get_email_info(self):
-        return self.email, self.smtp_server, self.smtp_username, self.smtp_password
+        return MailInfo(self)
 
 
     @staticmethod

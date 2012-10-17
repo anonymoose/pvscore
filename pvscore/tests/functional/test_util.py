@@ -1,6 +1,7 @@
 #pylint: disable-msg=W0612,C0103,R0903
 import pvscore.lib.util as util
 from pvscore.tests import TestController
+import datetime
 
 # bin/T pvscore.tests.functional.test_util
 

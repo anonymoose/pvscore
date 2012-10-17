@@ -96,6 +96,13 @@ class Customer(ORMBase, BaseModel):
 
 
     @staticmethod
+    def find_all_by_email(email):
+        return Session.query(Customer) \
+            .filter(and_(Customer.delete_dt == None,
+                         Customer.email.ilike(email))).all()
+
+
+    @staticmethod
     def find_last_names_autocomplete(enterprise_id, user_input, limit):
         return db.get_result_dict(['customer_id', 'name'],
                                   """select cust.customer_id,

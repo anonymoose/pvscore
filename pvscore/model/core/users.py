@@ -5,6 +5,7 @@ from sqlalchemy.types import Integer, String, Date, Boolean
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
+from pvscore.lib.mail import MailInfo
 from hashlib import md5
 
 class Users(ORMBase, BaseModel):
@@ -42,9 +43,9 @@ class Users(ORMBase, BaseModel):
 
     def get_email_info(self):
         if self.smtp_server is not None and self.smtp_username is not None:
-            return self.email, self.smtp_server, self.smtp_username, self.smtp_password
+            return MailInfo(self)
         if self.enterprise:
-            return self.enterprise.get_email_info
+            return self.enterprise.get_email_info()
 
 
     def is_vendor_user(self):

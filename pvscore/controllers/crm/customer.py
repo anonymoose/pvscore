@@ -19,6 +19,7 @@ from pvscore.lib.billing_api import BaseBillingApi
 import simplejson as json
 import pvscore.lib.util as util
 from pvscore.lib.catalog import Cart
+from pvscore.lib.mail import UserMail
 
 log = logging.getLogger(__name__)
 
@@ -811,6 +812,37 @@ class CustomerController(BaseController):
         self.forbid_if(not customer or str(self.request.ctx.customer.customer_id) != str(customer_id) or customer.campaign.company.enterprise_id != self.enterprise_id)
         return str(customer.get_current_balance())
 
+
+    @view_config(route_name='crm.customer.contact')
+    def contact(self):
+        """ KB: [2011-04-26]: Page posts to /cms/account/contact
+        Sends out email and redirects to redir URL.
+        If POST["save"] is not null we save the customer and a status about
+        the interaction
+        """
+        camp = self.request.ctx.campaign
+        message = self.request.POST.get('message')
+        email = self.request.POST.get('email')
+        msg = "%s %s<br>(%s)<br><br>%s<br><br>%s" % (self.request.POST.get('fname'),
+                                                     self.request.POST.get('lname'),
+                                                     email,
+                                                     self.request.POST.get('phone'),
+                                                     message)
+        if util.nvl(self.request.POST.get('save')):
+            cust = Customer.find(email, camp)
+            if not cust:
+                cust = Customer()
+                cust.campaign = camp
+                cust.bind(self.request.POST)
+                cust.phone = cust.phone[:20] if cust.phone else None # prevents people from putting in "904-716-7487 (mobile)" and it barfs
+                cust.save()
+            Status.add(cust, cust, Status.find_event(self.enterprise_id, cust, 'NOTE'),
+                       'NOTE FROM CUSTOMER\n%s' % message)
+
+        email_info = camp.get_email_info()
+        mail = UserMail(camp)
+        mail.send(email_info.email, 'SITE CONTACT FORM %s' % self.request.host, msg)
+        return self.find_redirect()
 
 
 #    def signup_and_purchase(self):

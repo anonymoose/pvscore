@@ -160,6 +160,7 @@ def crm_routes(config):
     adrt('crm.customer.save_status', '/crm/customer/save_status/{customer_id}') # controller='crm/customer', action='save_status')
     adrt('crm.customer.get_balance', '/crm/customer/get_balance/{customer_id}') #controller='crm/customer', action='get_balance')
     adrt('crm.customer.self_get_balance', '/crm/customer/self_get_balance/{customer_id}')
+    adrt('crm.customer.contact', '/crm/customer/contact')
 
     adrt('cms.site.new', '/cms/site/new') #, controller='cms/siteedit', action='new')
     adrt('cms.site.edit', '/cms/site/edit/{site_id}') #, controller='cms/siteedit', action='edit')
