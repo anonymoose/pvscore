@@ -1,5 +1,6 @@
 from pvscore.tests import TestController, secure
 from pvscore.model.crm.company import Company, Enterprise
+from pvscore.model.crm.campaign import Campaign
 from pvscore.model.core.users import Users
 import os, shutil
 
@@ -19,6 +20,11 @@ class TestCrmCompany(TestController):
         assert ent.get_email_info() is not None
         assert comp.get_email_info() is not None
         assert Enterprise.find_by_name(ent.name).name == ent.name
+        camps = Campaign.find_by_company(comp)
+        assert len(camps) > 1
+        ids = sorted([camp.campaign_id for camp in camps])
+        ids2 = sorted([camp.campaign_id for camp in Campaign.load_ids(ids)])
+        assert ids == ids2
 
     @secure
     def test_show_new(self):

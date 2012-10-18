@@ -41,6 +41,11 @@ class BaseModel(object):
         return obj
 
 
+    @classmethod
+    def load_ids(cls, pk_list):
+        return Session.query(cls).from_statement("SELECT * FROM %s where %s in (%s)" % (cls.__tablename__, cls.__pk__, ','.join([str(pk) for pk in pk_list]))).all()    #pylint: disable-msg=E1101
+
+
     def post_load(self):
         pass
 
@@ -197,9 +202,6 @@ class BaseAnalytic(object):
 
 
     
-    # @classmethod
-    # def load_ids(cls, pk_list):
-    #     return Session.query(cls).from_statement("SELECT * FROM %s where %s in (%s)" % (cls.__tablename__, cls.__pk__, ','.join([str(pk) for pk in pk_list]))).all()    #pylint: disable-msg=E1101
 
 
     # def expire(self):
