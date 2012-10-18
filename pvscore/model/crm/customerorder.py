@@ -132,67 +132,16 @@ class CustomerOrder(ORMBase, BaseModel):
         return item
 
 
-    # @staticmethod
-    # def has_customer_purchased_product(customer, product):
-    #     ret = Session.query("c").from_statement("""select count(0) c from crm_customer_order co, crm_order_item oi
-    #                                                where co.customer_id = %d
-    #                                                and co.cancel_dt is null
-    #                                                and co.order_id = oi.order_id
-    #                                                and oi.delete_dt is null
-    #                                                and oi.product_id = %d """ % (customer.customer_id,
-    #                                                                              product.product_id)).one()
-    #     return ret[0]
-
-
-    # @staticmethod
-    # def find_by_external_cart_id(external_cart_id):
-    #     return Session.query(CustomerOrder).filter(and_(CustomerOrder.external_cart_id == external_cart_id,
-    #                                                     CustomerOrder.delete_dt == None,
-    #                                                     CustomerOrder.cancel_dt == None)).first()
-
-
     @staticmethod
     def find_by_customer(customer, order_id):  #=None, start_dt=None, end_dt=None):
         if order_id:
             return Session.query(CustomerOrder).filter(and_(CustomerOrder.customer==customer,
                                                             CustomerOrder.order_id==order_id)).first()
-        # else:
-        #     if start_dt and end_dt:
-        #         return Session.query(CustomerOrder).filter(and_(CustomerOrder.customer==customer,
-        #                                                         CustomerOrder.delete_dt==None,
-        #                                                         CustomerOrder.cancel_dt==None,
-        #                                                         CustomerOrder.create_dt >= start_dt,
-        #                                                         CustomerOrder.create_dt >= end_dt))\
-        #                                                        .order_by(CustomerOrder.create_dt.desc()).all()
-        #     else:
-        #         return Session.query(CustomerOrder).filter(and_(CustomerOrder.customer==customer,
-        #                                                         CustomerOrder.delete_dt==None,
-        #                                                         CustomerOrder.cancel_dt==None))\
-        #                                                        .order_by(CustomerOrder.create_dt.desc()).all()
-
-
-    # @property
-    # def has_subscription(self):
-    #     for oitem in self.active_items:
-    #         if oitem.product.subscription:
-    #             return True
-    #     return False
 
 
     @property
     def active_items(self):
         return [oitem for oitem in self.items if oitem.delete_dt is None]
-
-
-    # @property
-    # def payments_applied(self):
-    #     return len(Journal.filter_payments(self)) > 0
-
-
-    # def apply_discount(self, amount, note=None):
-    #     Journal.create_new(amount, self.customer, self, None, 'Discount', 'Discount', note)
-    #     Status.add(self.customer, self, Status.find_event(self.customer.campaign.company.enterprise_id, self, 'DISCOUNT_APPLIED'),
-    #                '%s applied: %s' % ('Discount', util.money(amount)))
 
 
     @property
@@ -239,10 +188,6 @@ class CustomerOrder(ORMBase, BaseModel):
 
     def total_shipping_price(self):
         return (self.shipping_total if self.shipping_total else 0.0)
-
-
-    # def is_customer_deletable(self):
-    #     return True
 
 
     def cancel(self, reason, by_customer=False):
@@ -465,3 +410,64 @@ class PeriodOrderSummary(BaseAnalytic):
                     group by o.create_dt
                     order by o.create_dt asc""".format(d=self.days, entid=self.request.ctx.enterprise.enterprise_id)
 
+    # @staticmethod
+    # def find_by_customer(customer, order_id):  #=None, start_dt=None, end_dt=None):
+    #     if order_id:
+    #         return Session.query(CustomerOrder).filter(and_(CustomerOrder.customer==customer,
+    #                                                         CustomerOrder.order_id==order_id)).first()
+    #     else:
+    #         if start_dt and end_dt:
+    #             return Session.query(CustomerOrder).filter(and_(CustomerOrder.customer==customer,
+    #                                                             CustomerOrder.delete_dt==None,
+    #                                                             CustomerOrder.cancel_dt==None,
+    #                                                             CustomerOrder.create_dt >= start_dt,
+    #                                                             CustomerOrder.create_dt >= end_dt))\
+    #                                                            .order_by(CustomerOrder.create_dt.desc()).all()
+    #         else:
+    #             return Session.query(CustomerOrder).filter(and_(CustomerOrder.customer==customer,
+    #                                                             CustomerOrder.delete_dt==None,
+    #                                                             CustomerOrder.cancel_dt==None))\
+    #                                                            .order_by(CustomerOrder.create_dt.desc()).all()
+        
+
+
+    # @staticmethod
+    # def has_customer_purchased_product(customer, product):
+    #     ret = Session.query("c").from_statement("""select count(0) c from crm_customer_order co, crm_order_item oi
+    #                                                where co.customer_id = %d
+    #                                                and co.cancel_dt is null
+    #                                                and co.order_id = oi.order_id
+    #                                                and oi.delete_dt is null
+    #                                                and oi.product_id = %d """ % (customer.customer_id,
+    #                                                                              product.product_id)).one()
+    #     return ret[0]
+
+
+    # @staticmethod
+    # def find_by_external_cart_id(external_cart_id):
+    #     return Session.query(CustomerOrder).filter(and_(CustomerOrder.external_cart_id == external_cart_id,
+    #                                                     CustomerOrder.delete_dt == None,
+    #                                                     CustomerOrder.cancel_dt == None)).first()
+
+
+    # @property
+    # def has_subscription(self):
+    #     for oitem in self.active_items:
+    #         if oitem.product.subscription:
+    #             return True
+    #     return False
+
+
+    # @property
+    # def payments_applied(self):
+    #     return len(Journal.filter_payments(self)) > 0
+
+
+    # def apply_discount(self, amount, note=None):
+    #     Journal.create_new(amount, self.customer, self, None, 'Discount', 'Discount', note)
+    #     Status.add(self.customer, self, Status.find_event(self.customer.campaign.company.enterprise_id, self, 'DISCOUNT_APPLIED'),
+    #                '%s applied: %s' % ('Discount', util.money(amount)))
+
+
+    # def is_customer_deletable(self):
+    #     return True

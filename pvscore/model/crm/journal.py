@@ -1,5 +1,4 @@
-#pylint: disable-msg=E1101
-#pylint: disable-msg=C0103
+#pylint: disable-msg=E1101,C0103
 from sqlalchemy import Column, ForeignKey, and_, or_
 from sqlalchemy.types import Integer, String, Date, Float, Text
 from sqlalchemy.orm import relation

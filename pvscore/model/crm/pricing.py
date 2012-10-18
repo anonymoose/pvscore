@@ -38,10 +38,6 @@ class ProductPricing(ORMBase, BaseModel):
                          ProductPricing.delete_dt == None)).all()
 
 
-    # def delete(self):
-    #     self.delete_dt = datetime.datetime.date(datetime.datetime.now()) 
-    #     self.save()
-
     def invalidate_caches(self, **kwargs):
         pid = self.product_id if self.product_id else (self.product.product_id if self.product else None)
         if pid:
@@ -55,3 +51,7 @@ class ProductPricing(ORMBase, BaseModel):
                          ProductPricing.delete_dt == None)).order_by(ProductPricing.retail_price.desc()).first()
 
             
+    # def delete(self):
+    #     self.delete_dt = datetime.datetime.date(datetime.datetime.now()) 
+    #     self.save()
+

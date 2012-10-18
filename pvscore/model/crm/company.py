@@ -60,15 +60,6 @@ class Company(ORMBase, BaseModel):
             return self.enterprise.get_email_info()
 
 
-    # def get_all_active_products(self):
-    #     from pvscore.model.crm.product import Product
-    #     return Product.find_all_active(self)
-
-
-    # def is_email_ready(self):
-    #     return (self.smtp_server and self.smtp_server.find(':') >= 0)
-
-
     @property
     def default_campaign(self):
         from pvscore.model.crm.campaign import Campaign
@@ -76,12 +67,6 @@ class Company(ORMBase, BaseModel):
             .options(FromCache('Company.default_campaign', self.company_id)) \
             .filter(and_(Campaign.delete_dt == None,
                          Campaign.campaign_id == self.default_campaign_id)).first()
-
-    # @staticmethod
-    # def create(name):
-    #     comp = Company()
-    #     comp.name = name
-    #     return comp
 
 
     @staticmethod
@@ -148,34 +133,6 @@ class Company(ORMBase, BaseModel):
         util.mkdir_p("%s/cache" % dirname)
 
 
-    # def company_web_directory(self, subdir):
-    #     """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
-    #     return "/companies/{dirname}/{subdir}".format(dirname=self.web_directory, subdir=subdir)
-
-
-    # def store_asset(self, asset_data, folder, fk_type, fk_id):
-    #     """ KB: [2010-11-18]:
-    #     called from pvscore.controllers.cms.asset::upload_to_company()
-    #     http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
-    #     """
-
-    #     fs_path = os.path.join(
-    #         '%s%s' % (self.web_full_directory, folder),
-    #         asset_data.filename.replace(os.sep, '_')
-    #         )
-    #     permanent_file = open(fs_path, 'wb')
-    #     shutil.copyfileobj(asset_data.file, permanent_file)
-    #     asset_data.file.close()
-    #     permanent_file.close()
-    #     # at this point everything is saved to disk. Create an asset object in
-    #     # the DB to remember it.
-    #     return Asset.create_new(asset_data.filename,
-    #                          fs_path,
-    #                          '{base}/{f}'.format(base=self.company_web_directory('images'),
-    #                                              f=asset_data.filename),
-    #                          fk_type, fk_id).flush()
-
-
 class Enterprise(ORMBase, BaseModel):
     __tablename__ = 'crm_enterprise'
     __pk__ = 'enterprise_id'
@@ -220,16 +177,6 @@ class Enterprise(ORMBase, BaseModel):
         return ['PayPal', 'CCEAccounts', 'Stripe', 'Invoice', 'Offline']
 
 
-    # @staticmethod
-    # def find_by_customer(customer):
-    #     """ KB: [2012-01-15]: If we are in one enterprise (the root [ie: wealthmakers]) and we want to find the customer's enterprise
-    #     call this method
-    #     """
-    #     return Session.query(Enterprise)\
-    #         .filter(and_(Enterprise.customer_id == customer.customer_id,
-    #                      Enterprise.delete_dt == None)).first()
-
-
     @property
     def customer(self):
         from pvscore.model.crm.customer import Customer
@@ -262,13 +209,6 @@ class Enterprise(ORMBase, BaseModel):
     def find_all():
         return Session.query(Enterprise) \
             .filter(Enterprise.delete_dt == None).order_by(Enterprise.name).all()
-
-
-    # @staticmethod
-    # def find_all_non_customer():
-    #     return Session.query(Enterprise) \
-    #         .filter(and_(Enterprise.delete_dt == None,
-    #                      Enterprise.customer_id == None)).order_by(Enterprise.name).all()
 
 
     @staticmethod
@@ -334,3 +274,67 @@ class Enterprise(ORMBase, BaseModel):
         Session.execute('delete from crm_vendor where enterprise_id = %s' % enterprise_id)
         Session.execute('delete from crm_enterprise where enterprise_id = %s' % enterprise_id)
 
+
+
+
+    ############################## Company
+    # def company_web_directory(self, subdir):
+    #     """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
+    #     return "/companies/{dirname}/{subdir}".format(dirname=self.web_directory, subdir=subdir)
+
+
+    # def store_asset(self, asset_data, folder, fk_type, fk_id):
+    #     """ KB: [2010-11-18]:
+    #     called from pvscore.controllers.cms.asset::upload_to_company()
+    #     http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
+    #     """
+
+    #     fs_path = os.path.join(
+    #         '%s%s' % (self.web_full_directory, folder),
+    #         asset_data.filename.replace(os.sep, '_')
+    #         )
+    #     permanent_file = open(fs_path, 'wb')
+    #     shutil.copyfileobj(asset_data.file, permanent_file)
+    #     asset_data.file.close()
+    #     permanent_file.close()
+    #     # at this point everything is saved to disk. Create an asset object in
+    #     # the DB to remember it.
+    #     return Asset.create_new(asset_data.filename,
+    #                          fs_path,
+    #                          '{base}/{f}'.format(base=self.company_web_directory('images'),
+    #                                              f=asset_data.filename),
+    #                          fk_type, fk_id).flush()
+
+    # def get_all_active_products(self):
+    #     from pvscore.model.crm.product import Product
+    #     return Product.find_all_active(self)
+
+
+    # def is_email_ready(self):
+    #     return (self.smtp_server and self.smtp_server.find(':') >= 0)
+
+
+    # @staticmethod
+    # def create(name):
+    #     comp = Company()
+    #     comp.name = name
+    #     return comp
+
+    ######################### Enterprise
+    # @staticmethod
+    # def find_by_customer(customer):
+    #     """ KB: [2012-01-15]: If we are in one enterprise (the root [ie: wealthmakers]) and we want to find the customer's enterprise
+    #     call this method
+    #     """
+    #     return Session.query(Enterprise)\
+    #         .filter(and_(Enterprise.customer_id == customer.customer_id,
+    #                      Enterprise.delete_dt == None)).first()
+
+
+    # @staticmethod
+    # def find_all_non_customer():
+    #     return Session.query(Enterprise) \
+    #         .filter(and_(Enterprise.delete_dt == None,
+    #                      Enterprise.customer_id == None)).order_by(Enterprise.name).all()
+
+        

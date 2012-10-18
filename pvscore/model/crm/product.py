@@ -57,14 +57,6 @@ class Product(ORMBase, BaseModel):
     _pricing = None
     _images = None
 
-    #@property
-    #def inventory(self):
-    #    try:
-    #        return InventoryJournal.total(self)
-    #    except:
-    #        return 0.0
-
-
     @staticmethod
     def find_names_by_name(enterprise_id, name, limit):
         sql = """select p.product_id, p.name,
@@ -84,44 +76,8 @@ class Product(ORMBase, BaseModel):
         return db.get_result_dict(['product_id', 'name', 'unit_cost', 'retail_price', 'wholesale_price', 'discount_price'], sql)
 
 
-    # @staticmethod
-    # def find_names_by_name_and_campaign(enterprise_id, name, limit, campaign):
-    #     sql = """select p.product_id, p.name, p.unit_cost, pp.retail_price, pp.wholesale_price, pp.discount_price from
-    #                                              crm_product p, crm_company com, crm_enterprise ent,
-    #                                              crm_product_pricing pp
-    #                                              where lower(p.name) like '%%{n}%%'
-    #                                              and p.delete_dt is null
-    #                                              and p.company_id = com.company_id
-    #                                              and pp.campaign_id = {campaign_id}
-    #                                              and pp.product_id = p.product_id
-    #                                              and com.enterprise_id = {ent_id}
-    #                                              order by p.name limit {lim}""".format(n=name.lower(),
-    #                                                                                    lim=limit,
-    #                                                                                    campaign_id=campaign.campaign_id,
-    #                                                                                    ent_id=enterprise_id)
-    #     return db.get_result_dict(['product_id', 'name', 'unit_cost', 'retail_price', 'wholesale_price', 'discount_price'], sql)
-
-
-    # @staticmethod
-    # def find_all_active(company):
-    #     return Session.query(Product) \
-    #         .filter(and_(Product.delete_dt == None,
-    #                      Product.company_id == company.company_id))\
-    #                      .order_by(Product.vendor_id, Product.name) \
-    #                  .all()
-
-
     @staticmethod
     def find_all(enterprise_id):
-        # if for_web:
-        #     return Session.query(Product).options(FromCache('Product.find_all_for_web', enterprise_id)) \
-        #         .join((Company, Product.company_id == Company.company_id)) \
-        #         .filter(and_(Product.delete_dt == None,
-        #                      Company.enterprise_id == enterprise_id,
-        #                      Product.web_visible == True)) \
-        #                      .order_by(Product.name) \
-        #                      .all()
-        # else:
         return Session.query(Product).options(FromCache('Product.find_all', enterprise_id)) \
             .join((Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
@@ -144,13 +100,10 @@ class Product(ORMBase, BaseModel):
 
     @staticmethod
     def find_all_except(product):
-        #if product.product_id:
         return Session.query(Product).join((Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
                          Company.enterprise_id == product.company.enterprise_id,
                          Product.product_id != product.product_id)).order_by(Product.name).all()
-        #else:
-        #    return Product.find_all(product.company.enterprise_id)
 
 
     def find_eligible_children(self):
@@ -168,89 +121,9 @@ class Product(ORMBase, BaseModel):
         else: return []
 
 
-    # @staticmethod
-    # def find_by_manufacturer(enterprise_id, mfr_name, for_web=True):
-    #     return Session.query(Product) \
-    #         .options(FromCache('Product.find_by_manufacturer', '%s/%s' % (mfr_name, enterprise_id))) \
-    #         .join((Company, Product.company_id == Company.company_id)) \
-    #         .filter(and_(Product.delete_dt == None,
-    #                      Product.enabled == True,
-    #                      Product.manufacturer.like('%'+mfr_name+'%'),
-    #                      Company.enterprise_id == enterprise_id,
-    #                      or_(Product.web_visible == True, Product.web_visible==for_web)
-    #                      )) \
-    #                      .order_by(Product.name).all()
-
     @staticmethod
     def find_by_campaign(campaign, for_catalog=False):
         return Product._find_by_campaign_impl(campaign, for_catalog)
-
-
-    # @staticmethod
-    # def find_specials_by_campaign(campaign, for_catalog=False):
-    #     return Product._find_by_campaign_impl(campaign, for_catalog, True, False)
-
-
-    # @staticmethod
-    # def find_featured_by_campaign(campaign, for_catalog=False):
-    #     return Product._find_by_campaign_impl(campaign, for_catalog, False, True)
-
-
-    # @staticmethod
-    # def find_best_sellers_by_campaign(campaign, for_web=True):
-    #     enterprise_id = campaign.company.enterprise_id
-    #     return Session.query(Product) \
-    #         .options(FromCache('Product.BestSellers', campaign.campaign_id)) \
-    #         .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
-    #         .filter(and_(Product.delete_dt == None,
-    #                      Product.enabled == True,
-    #                      Company.enterprise_id == enterprise_id, 
-    #                      ProductPricing.delete_dt == None,
-    #                      ProductPricing.campaign == campaign,
-    #                      #or_(Product.inventory == None, Product.inventory > 0, Product.show_negative_inventory == True),
-    #                      or_(Product.web_visible == True, Product.web_visible==for_web),
-    #                      ProductPricing.retail_price != None,
-    #                      ProductPricing.retail_price > 0)) \
-    #                      .order_by(Product.name) \
-    #                      .all()
-
-
-    # @staticmethod
-    # def find_web_ready_by_campaign(campaign):
-    #     enterprise_id = campaign.company.enterprise_id
-    #     return Session.query(Product) \
-    #         .options(FromCache('Product.WebReady', campaign.campaign_id)) \
-    #         .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
-    #         .filter(and_(Product.delete_dt == None,
-    #                      Product.enabled == True,
-    #                      Company.enterprise_id == enterprise_id, 
-    #                      ProductPricing.delete_dt == None,
-    #                      ProductPricing.campaign == campaign,
-    #                      Product.web_visible == True,
-    #                      Product.detail_description != None,
-    #                      ProductPricing.retail_price != None,
-    #                      ProductPricing.retail_price > 0,
-    #                      exists().where(and_(Asset.fk_type == 'Product', Asset.fk_id == Product.product_id)))) \
-    #                      .order_by(Product.name) \
-    #                      .all()
-
-
-    # @staticmethod
-    # def find_products_with_pictures_by_campaign(campaign):
-    #     """ KB: [2011-09-28]: Just has a picture.  Fuck it. """
-    #     enterprise_id = campaign.company.enterprise_id
-    #     return Session.query(Product) \
-    #         .options(FromCache('Product.HasPicture', campaign.campaign_id)) \
-    #         .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
-    #         .filter(and_(Product.delete_dt == None,
-    #                      Product.enabled == True,
-    #                      Company.enterprise_id == enterprise_id,
-    #                      ProductPricing.delete_dt == None,
-    #                      ProductPricing.campaign == campaign,
-    #                      Product.web_visible == True,
-    #                      exists().where(and_(Asset.fk_type == 'Product', Asset.fk_id == Product.product_id)))) \
-    #                      .order_by(Product.name) \
-    #                      .all()
 
 
     @staticmethod
@@ -293,47 +166,6 @@ class Product(ORMBase, BaseModel):
             .filter(clause).order_by(Product.name) \
             .all()
 
-
-    # @staticmethod
-    # def find_manufacturers_by_campaign(enterprise_id, campaign, for_web=True):
-    #     eid = enterprise_id
-    #     cid = campaign.campaign_id
-    #     mfrs = db.get_raw_value_list('mfr', """SELECT distinct(manufacturer) mfr
-    #                                                      FROM crm_product_pricing pp,
-    #                                                      crm_product p, crm_company c
-    #                                                      where pp.product_id = p.product_id
-    #                                                            and p.company_id = c.company_id
-    #                                                            and (p.web_visible=true or p.web_visible = {wv})
-    #                                                            and c.enterprise_id = {eid}
-    #                                                            and pp.campaign_id = {cid}
-    #                                                            and p.delete_dt is null
-    #                                                            and p.manufacturer is not null
-    #                                                            and pp.delete_dt is null order by mfr""".format(eid=eid,
-    #                                                                                                            cid=cid,
-    #                                                                                                            wv='true' if for_web else 'false'))
-    #     return mfrs
-
-
-    # @staticmethod
-    # def find_next(enterprise_id, product_id):
-    #     return Session.query(Product) \
-    #         .join((Company, Product.company_id == Company.company_id)) \
-    #         .filter(and_(Product.delete_dt == None,
-    #                      Company.enterprise_id == enterprise_id,
-    #                      Product.product_id > int(product_id))) \
-    #                      .order_by(Product.product_id.asc()) \
-    #                      .first()
-
-
-    # @staticmethod
-    # def find_previous(enterprise_id, product_id):
-    #     return Session.query(Product) \
-    #         .join((Company, Product.company_id == Company.company_id)) \
-    #         .filter(and_(Product.delete_dt == None,
-    #                      Company.enterprise_id == enterprise_id,
-    #                      Product.product_id < int(product_id))) \
-    #                      .order_by(Product.product_id.desc()) \
-    #                      .first()
 
 
     def invalidate_caches(self, **kwargs):
@@ -387,108 +219,6 @@ class Product(ORMBase, BaseModel):
                          Company.enterprise_id == campaign.company.enterprise_id,
                          or_(Product.web_visible == True, Product.web_visible==for_web),
                          ProductPricing.delete_dt == None)).first()
-
-
-        # if for_web:
-        #     return Session.query(Product).join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
-        #         .filter(and_(Product.delete_dt == None,
-        #                      Product.enabled == True,
-        #                      Product.name == name,
-        #                      Company.company_id == campaign.company_id,
-        #                      Company.enterprise_id == enterprise_id,
-        #                      Product.web_visible == True,
-        #                      ProductPricing.delete_dt == None)).first()
-        # else:
-
-
-    # @staticmethod
-    # def find_by_attr(attr_name, attr_value):
-    #     product_id = AttributeValue.find_fk_id_by_value('Product', attr_name, attr_value)
-    #     if product_id:
-    #         return Product.load(product_id)
-
-
-    # @staticmethod
-    # def search(enterprise_id, name, description, company_id, sku, current_user):
-    #     n_clause = cid_clause = d_clause = s_clause = v_clause = ''
-    #     if name:
-    #         n_clause = "and lower(p.name) like '%{name}%'".format(name=name.lower())
-    #     if description:
-    #         d_clause = "and lower(p.description) like '%{desc}%'".format(desc=description.lower())
-    #     if company_id:
-    #         cid_clause = "and p.company_id = %d" % int(company_id)
-    #     if sku:
-    #         s_clause = "and p.sku like '%{sku}%'".format(sku=sku)
-    #     if current_user and current_user.is_vendor_user():
-    #         v_clause = "and p.vendor_id = %s" % current_user.vendor_id
-
-    #     sql = """SELECT p.* FROM crm_product p, crm_company com
-    #              where  p.company_id = com.company_id
-    #              and com.enterprise_id = {ent_id}
-    #              {n} {d} {s} {v} {cid} order by p.name""".format(n=n_clause, d=d_clause,
-    #                                          s=s_clause, cid=cid_clause, v=v_clause,
-    #                                          ent_id=enterprise_id)
-    #     return Session.query(Product).from_statement(sql).all()
-
-
-    # @staticmethod
-    # def catalog_search(enterprise_id, search):
-    #     srch = '%'+search.lower().replace("\'", '').replace("\\", '')+'%'
-    #     res = Session.query(Product)\
-    #         .join((Company, Product.company_id == Company.company_id))\
-    #         .filter(and_(Product.web_visible == True,
-    #                      Company.enterprise_id == enterprise_id,
-    #                      or_(Product.description.ilike(srch),
-    #                          Product.name.ilike(srch),
-    #                          Product.sku.ilike(srch))))\
-    #                      .all()
-    #     return res
-
-
-    # def get_customers(self):
-    #     from pvscore.model.crm.customer import Customer
-    #     sql = """SELECT cu.*
-    #              FROM crm_product p, crm_company com, crm_campaign cam, crm_customer cu, crm_customer_order co, crm_order_item oi
-    #              where p.company_id = com.company_id
-    #              and cam.company_id = com.company_id
-    #              and cam.campaign_id = cu.campaign_id
-    #              and cu.customer_id = co.customer_id
-    #              and co.order_id = oi.order_id
-    #              and oi.product_id = p.product_id
-    #              and cam.delete_dt is null
-    #              and co.cancel_dt is null
-    #              and cu.delete_dt is null
-    #              and oi.delete_dt is null
-    #              and p.product_id = {prodid}
-    #              and com.enterprise_id = {ent_id}
-    #              and p.company_id={cid}""".format(prodid=self.product_id,
-    #                                               cid=self.company_id,
-    #                                               ent_id=self.company.enterprise_id)
-    #     return Session.query(Customer) \
-    #         .from_statement(sql).all()
-
-
-    # def get_customers_created_today(self):
-    #     from pvscore.model.crm.customer import Customer
-    #     sql = """SELECT cu.*
-    #              FROM crm_product p, crm_company com, crm_campaign cam, crm_customer cu, crm_customer_order co, crm_order_item oi
-    #              where p.company_id = com.company_id
-    #              and cam.company_id = com.company_id
-    #              and cam.campaign_id = cu.campaign_id
-    #              and cu.customer_id = co.customer_id
-    #              and co.order_id = oi.order_id
-    #              and oi.product_id = p.product_id
-    #              and cam.delete_dt is null
-    #              and cu.delete_dt is null
-    #              and oi.delete_dt is null
-    #              and p.product_id = {prodid}
-    #              and com.enterprise_id = {ent_id}
-    #              and p.company_id={cid}
-    #              and oi.create_dt > now()::date - 1""".format(prodid=self.product_id,
-    #                                               cid=self.company_id,
-    #                                               ent_id=self.company.enterprise_id)
-    #     return Session.query(Customer) \
-    #         .from_statement(sql).all()
 
 
     @property
@@ -559,12 +289,6 @@ class Product(ORMBase, BaseModel):
         return ppri.retail_price if ppri else 0.0
 
 
-    # def _init_pricing(self, campaign):
-    #     if self._pricing == None:
-    #         self._pricing = ProductPricing.find(campaign, self)
-    #     return self._pricing != None
-
-
     def get_price(self, campaign):
         """ KB: [2011-02-02]: Returns the discounted price if there is one, otherwise returns retail price """
         if not campaign.campaign_id in self.campaign_prices:
@@ -585,10 +309,6 @@ class Product(ORMBase, BaseModel):
         if not campaign.campaign_id in self.campaign_prices:
             return -1
         return self.campaign_prices[campaign.campaign_id].discount_price
-
-
-    # def get_default_price(self):
-    #     return self.get_unit_price(self.company.default_campaign)
 
 
     def set_price(self, campaign, price, discount=None):
@@ -711,11 +431,6 @@ class ProductCategory(ORMBase, BaseModel):
             ProductCategoryJoin.clear_by_category(self)
 
 
-    # @staticmethod
-    # def clear_by_product(product):
-    #     ProductCategoryJoin.clear_by_product(product)
-
-
     @property
     def products(self):
         if not self.category_id:
@@ -749,16 +464,6 @@ class ProductCategory(ORMBase, BaseModel):
                          Company.enterprise_id == enterprise_id)) \
                          .order_by(ProductCategory.name) \
                          .all()
-
-
-    # @staticmethod
-    # def find_by_campaign(campaign):
-    #     return Session.query(ProductCategory) \
-    #         .join((Company, ProductCategory.company_id == Company.company_id)) \
-    #         .filter(and_(ProductCategory.delete_dt == None,
-    #                      Company.company_id == campaign.company_id)) \
-    #                      .order_by(ProductCategory.name) \
-    #                      .all()
 
 
     def invalidate_caches(self, **kwargs):
@@ -797,10 +502,6 @@ class ProductCategoryJoin(ORMBase, BaseModel):
     def clear_by_category(category):
         Session.execute("delete from crm_product_category_join where category_id = %d" % int(category.category_id))
 
-
-    # @staticmethod
-    # def clear_by_product(product):
-    #     Session.execute("delete from crm_product_category_join where product_id = %d" % int(product.product_id))
 
 
 class ProductReturn(ORMBase, BaseModel):
@@ -864,17 +565,6 @@ class InventoryJournal(ORMBase, BaseModel):
     creator = relation('Users')
     ret = relation('ProductReturn')
 
-    # @staticmethod
-    # def get_types():
-    #     return ['Sale',              # customer purchased item
-    #             'Item Receipt',      # item received after purchasing it from vendor
-    #             'Inventory Adjust',  # manual inventory change.
-    #             'Return',            # someone returned an item after having taken possession
-    #             'Cancelled Order',   # user cancelled an entire order
-    #             'Cancelled Item'     # user removed a single item from the order
-    #             ]
-
-
     @staticmethod
     def total(product):
         ret = Session.query("c").from_statement("SELECT sum(quantity) c FROM crm_product_inventory_journal where product_id = %s" % product.product_id).one()
@@ -912,3 +602,325 @@ class InventoryJournal(ORMBase, BaseModel):
         product.save()
         return jrnl
 
+
+
+
+
+
+        # if for_web:
+        #     return Session.query(Product).join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
+        #         .filter(and_(Product.delete_dt == None,
+        #                      Product.enabled == True,
+        #                      Product.name == name,
+        #                      Company.company_id == campaign.company_id,
+        #                      Company.enterprise_id == enterprise_id,
+        #                      Product.web_visible == True,
+        #                      ProductPricing.delete_dt == None)).first()
+        # else:
+
+
+    # @staticmethod
+    # def find_manufacturers_by_campaign(enterprise_id, campaign, for_web=True):
+    #     eid = enterprise_id
+    #     cid = campaign.campaign_id
+    #     mfrs = db.get_raw_value_list('mfr', """SELECT distinct(manufacturer) mfr
+    #                                                      FROM crm_product_pricing pp,
+    #                                                      crm_product p, crm_company c
+    #                                                      where pp.product_id = p.product_id
+    #                                                            and p.company_id = c.company_id
+    #                                                            and (p.web_visible=true or p.web_visible = {wv})
+    #                                                            and c.enterprise_id = {eid}
+    #                                                            and pp.campaign_id = {cid}
+    #                                                            and p.delete_dt is null
+    #                                                            and p.manufacturer is not null
+    #                                                            and pp.delete_dt is null order by mfr""".format(eid=eid,
+    #                                                                                                            cid=cid,
+    #                                                                                                            wv='true' if for_web else 'false'))
+    #     return mfrs
+
+
+    # @staticmethod
+    # def find_next(enterprise_id, product_id):
+    #     return Session.query(Product) \
+    #         .join((Company, Product.company_id == Company.company_id)) \
+    #         .filter(and_(Product.delete_dt == None,
+    #                      Company.enterprise_id == enterprise_id,
+    #                      Product.product_id > int(product_id))) \
+    #                      .order_by(Product.product_id.asc()) \
+    #                      .first()
+
+
+    # @staticmethod
+    # def find_previous(enterprise_id, product_id):
+    #     return Session.query(Product) \
+    #         .join((Company, Product.company_id == Company.company_id)) \
+    #         .filter(and_(Product.delete_dt == None,
+    #                      Company.enterprise_id == enterprise_id,
+    #                      Product.product_id < int(product_id))) \
+    #                      .order_by(Product.product_id.desc()) \
+    #                      .first()
+
+    # @staticmethod
+    # def find_by_attr(attr_name, attr_value):
+    #     product_id = AttributeValue.find_fk_id_by_value('Product', attr_name, attr_value)
+    #     if product_id:
+    #         return Product.load(product_id)
+
+
+    # @staticmethod
+    # def search(enterprise_id, name, description, company_id, sku, current_user):
+    #     n_clause = cid_clause = d_clause = s_clause = v_clause = ''
+    #     if name:
+    #         n_clause = "and lower(p.name) like '%{name}%'".format(name=name.lower())
+    #     if description:
+    #         d_clause = "and lower(p.description) like '%{desc}%'".format(desc=description.lower())
+    #     if company_id:
+    #         cid_clause = "and p.company_id = %d" % int(company_id)
+    #     if sku:
+    #         s_clause = "and p.sku like '%{sku}%'".format(sku=sku)
+    #     if current_user and current_user.is_vendor_user():
+    #         v_clause = "and p.vendor_id = %s" % current_user.vendor_id
+
+    #     sql = """SELECT p.* FROM crm_product p, crm_company com
+    #              where  p.company_id = com.company_id
+    #              and com.enterprise_id = {ent_id}
+    #              {n} {d} {s} {v} {cid} order by p.name""".format(n=n_clause, d=d_clause,
+    #                                          s=s_clause, cid=cid_clause, v=v_clause,
+    #                                          ent_id=enterprise_id)
+    #     return Session.query(Product).from_statement(sql).all()
+
+
+    # @staticmethod
+    # def catalog_search(enterprise_id, search):
+    #     srch = '%'+search.lower().replace("\'", '').replace("\\", '')+'%'
+    #     res = Session.query(Product)\
+    #         .join((Company, Product.company_id == Company.company_id))\
+    #         .filter(and_(Product.web_visible == True,
+    #                      Company.enterprise_id == enterprise_id,
+    #                      or_(Product.description.ilike(srch),
+    #                          Product.name.ilike(srch),
+    #                          Product.sku.ilike(srch))))\
+    #                      .all()
+    #     return res
+
+
+    # def get_customers(self):
+    #     from pvscore.model.crm.customer import Customer
+    #     sql = """SELECT cu.*
+    #              FROM crm_product p, crm_company com, crm_campaign cam, crm_customer cu, crm_customer_order co, crm_order_item oi
+    #              where p.company_id = com.company_id
+    #              and cam.company_id = com.company_id
+    #              and cam.campaign_id = cu.campaign_id
+    #              and cu.customer_id = co.customer_id
+    #              and co.order_id = oi.order_id
+    #              and oi.product_id = p.product_id
+    #              and cam.delete_dt is null
+    #              and co.cancel_dt is null
+    #              and cu.delete_dt is null
+    #              and oi.delete_dt is null
+    #              and p.product_id = {prodid}
+    #              and com.enterprise_id = {ent_id}
+    #              and p.company_id={cid}""".format(prodid=self.product_id,
+    #                                               cid=self.company_id,
+    #                                               ent_id=self.company.enterprise_id)
+    #     return Session.query(Customer) \
+    #         .from_statement(sql).all()
+
+
+    # def get_customers_created_today(self):
+    #     from pvscore.model.crm.customer import Customer
+    #     sql = """SELECT cu.*
+    #              FROM crm_product p, crm_company com, crm_campaign cam, crm_customer cu, crm_customer_order co, crm_order_item oi
+    #              where p.company_id = com.company_id
+    #              and cam.company_id = com.company_id
+    #              and cam.campaign_id = cu.campaign_id
+    #              and cu.customer_id = co.customer_id
+    #              and co.order_id = oi.order_id
+    #              and oi.product_id = p.product_id
+    #              and cam.delete_dt is null
+    #              and cu.delete_dt is null
+    #              and oi.delete_dt is null
+    #              and p.product_id = {prodid}
+    #              and com.enterprise_id = {ent_id}
+    #              and p.company_id={cid}
+    #              and oi.create_dt > now()::date - 1""".format(prodid=self.product_id,
+    #                                               cid=self.company_id,
+    #                                               ent_id=self.company.enterprise_id)
+    #     return Session.query(Customer) \
+    #         .from_statement(sql).all()
+
+    # @staticmethod
+    # def find_all(enterprise_id):
+    #     if for_web:
+    #         return Session.query(Product).options(FromCache('Product.find_all_for_web', enterprise_id)) \
+    #             .join((Company, Product.company_id == Company.company_id)) \
+    #             .filter(and_(Product.delete_dt == None,
+    #                          Company.enterprise_id == enterprise_id,
+    #                          Product.web_visible == True)) \
+    #                          .order_by(Product.name) \
+    #                          .all()
+    #     else:
+    #     return Session.query(Product).options(FromCache('Product.find_all', enterprise_id)) \
+    #         .join((Company, Product.company_id == Company.company_id)) \
+    #         .filter(and_(Product.delete_dt == None,
+    #                      Company.enterprise_id == enterprise_id
+    #                      )) \
+    #                      .order_by(Product.name) \
+    #                      .all()
+
+
+    #@property
+    #def inventory(self):
+    #    try:
+    #        return InventoryJournal.total(self)
+    #    except:
+    #        return 0.0
+
+
+    # @staticmethod
+    # def find_names_by_name_and_campaign(enterprise_id, name, limit, campaign):
+    #     sql = """select p.product_id, p.name, p.unit_cost, pp.retail_price, pp.wholesale_price, pp.discount_price from
+    #                                              crm_product p, crm_company com, crm_enterprise ent,
+    #                                              crm_product_pricing pp
+    #                                              where lower(p.name) like '%%{n}%%'
+    #                                              and p.delete_dt is null
+    #                                              and p.company_id = com.company_id
+    #                                              and pp.campaign_id = {campaign_id}
+    #                                              and pp.product_id = p.product_id
+    #                                              and com.enterprise_id = {ent_id}
+    #                                              order by p.name limit {lim}""".format(n=name.lower(),
+    #                                                                                    lim=limit,
+    #                                                                                    campaign_id=campaign.campaign_id,
+    #                                                                                    ent_id=enterprise_id)
+    #     return db.get_result_dict(['product_id', 'name', 'unit_cost', 'retail_price', 'wholesale_price', 'discount_price'], sql)
+
+
+    # @staticmethod
+    # def find_all_active(company):
+    #     return Session.query(Product) \
+    #         .filter(and_(Product.delete_dt == None,
+    #                      Product.company_id == company.company_id))\
+    #                      .order_by(Product.vendor_id, Product.name) \
+    #                  .all()
+
+
+    # @staticmethod
+    # def find_by_manufacturer(enterprise_id, mfr_name, for_web=True):
+    #     return Session.query(Product) \
+    #         .options(FromCache('Product.find_by_manufacturer', '%s/%s' % (mfr_name, enterprise_id))) \
+    #         .join((Company, Product.company_id == Company.company_id)) \
+    #         .filter(and_(Product.delete_dt == None,
+    #                      Product.enabled == True,
+    #                      Product.manufacturer.like('%'+mfr_name+'%'),
+    #                      Company.enterprise_id == enterprise_id,
+    #                      or_(Product.web_visible == True, Product.web_visible==for_web)
+    #                      )) \
+    #                      .order_by(Product.name).all()
+
+    # @staticmethod
+    # def find_specials_by_campaign(campaign, for_catalog=False):
+    #     return Product._find_by_campaign_impl(campaign, for_catalog, True, False)
+
+
+    # @staticmethod
+    # def find_featured_by_campaign(campaign, for_catalog=False):
+    #     return Product._find_by_campaign_impl(campaign, for_catalog, False, True)
+
+
+    # @staticmethod
+    # def find_best_sellers_by_campaign(campaign, for_web=True):
+    #     enterprise_id = campaign.company.enterprise_id
+    #     return Session.query(Product) \
+    #         .options(FromCache('Product.BestSellers', campaign.campaign_id)) \
+    #         .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
+    #         .filter(and_(Product.delete_dt == None,
+    #                      Product.enabled == True,
+    #                      Company.enterprise_id == enterprise_id, 
+    #                      ProductPricing.delete_dt == None,
+    #                      ProductPricing.campaign == campaign,
+    #                      #or_(Product.inventory == None, Product.inventory > 0, Product.show_negative_inventory == True),
+    #                      or_(Product.web_visible == True, Product.web_visible==for_web),
+    #                      ProductPricing.retail_price != None,
+    #                      ProductPricing.retail_price > 0)) \
+    #                      .order_by(Product.name) \
+    #                      .all()
+
+
+    # @staticmethod
+    # def find_web_ready_by_campaign(campaign):
+    #     enterprise_id = campaign.company.enterprise_id
+    #     return Session.query(Product) \
+    #         .options(FromCache('Product.WebReady', campaign.campaign_id)) \
+    #         .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
+    #         .filter(and_(Product.delete_dt == None,
+    #                      Product.enabled == True,
+    #                      Company.enterprise_id == enterprise_id, 
+    #                      ProductPricing.delete_dt == None,
+    #                      ProductPricing.campaign == campaign,
+    #                      Product.web_visible == True,
+    #                      Product.detail_description != None,
+    #                      ProductPricing.retail_price != None,
+    #                      ProductPricing.retail_price > 0,
+    #                      exists().where(and_(Asset.fk_type == 'Product', Asset.fk_id == Product.product_id)))) \
+    #                      .order_by(Product.name) \
+    #                      .all()
+
+
+    # @staticmethod
+    # def find_products_with_pictures_by_campaign(campaign):
+    #     """ KB: [2011-09-28]: Just has a picture.  Fuck it. """
+    #     enterprise_id = campaign.company.enterprise_id
+    #     return Session.query(Product) \
+    #         .options(FromCache('Product.HasPicture', campaign.campaign_id)) \
+    #         .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
+    #         .filter(and_(Product.delete_dt == None,
+    #                      Product.enabled == True,
+    #                      Company.enterprise_id == enterprise_id,
+    #                      ProductPricing.delete_dt == None,
+    #                      ProductPricing.campaign == campaign,
+    #                      Product.web_visible == True,
+    #                      exists().where(and_(Asset.fk_type == 'Product', Asset.fk_id == Product.product_id)))) \
+    #                      .order_by(Product.name) \
+    #                      .all()
+
+
+    # def _init_pricing(self, campaign):
+    #     if self._pricing == None:
+    #         self._pricing = ProductPricing.find(campaign, self)
+    #     return self._pricing != None
+
+
+    # def get_default_price(self):
+    #     return self.get_unit_price(self.company.default_campaign)
+
+
+    # @staticmethod
+    # def clear_by_product(product):
+    #     ProductCategoryJoin.clear_by_product(product)
+
+
+    # @staticmethod
+    # def find_by_campaign(campaign):
+    #     return Session.query(ProductCategory) \
+    #         .join((Company, ProductCategory.company_id == Company.company_id)) \
+    #         .filter(and_(ProductCategory.delete_dt == None,
+    #                      Company.company_id == campaign.company_id)) \
+    #                      .order_by(ProductCategory.name) \
+    #                      .all()
+
+
+    # @staticmethod
+    # def clear_by_product(product):
+    #     Session.execute("delete from crm_product_category_join where product_id = %d" % int(product.product_id))
+
+    # @staticmethod
+    # def get_types():
+    #     return ['Sale',              # customer purchased item
+    #             'Item Receipt',      # item received after purchasing it from vendor
+    #             'Inventory Adjust',  # manual inventory change.
+    #             'Return',            # someone returned an item after having taken possession
+    #             'Cancelled Order',   # user cancelled an entire order
+    #             'Cancelled Item'     # user removed a single item from the order
+    #             ]
+
+    
