@@ -9,6 +9,13 @@ def nvl(val, default=''):
     return val
 
 
+def onvl(obj, attr, default=''):
+    """ KB: [2012-10-18]: NVL for objects "object nvl" """
+    if obj and hasattr(obj, attr):
+        return getattr(obj, attr)
+    return default
+
+
 def is_dialog(request):
     return (request.GET.get('dialog') == '1')
 
@@ -23,10 +30,6 @@ def money(dbl):
     if dbl or type(dbl) == float:
         return '%.2f' % float(dbl)
     else: return ''
-
-
-# def flt(dbl):
-#     return money(dbl)
 
 
 def google_analytics(site, script_tags=True):
@@ -47,9 +50,6 @@ def google_analytics(site, script_tags=True):
                st_end = '</script>' if script_tags else '',
                googid=site.google_analytics_id))
     return ''
-
-
-
 
 
 def date_time(d8e, fmt="%Y-%m-%d %H:%M:%S"):
@@ -88,11 +88,6 @@ def words_date(d8e):
     return d8e.strftime("%B %d, %Y")
 
 
-#def request_ip():
-#    from pylons import request
-#    return request.headers['X-Real-Ip']
-
-
 def javascript_link_ex(url, request):
     return javascript_link(url+'?rnd='+str(request.session.get('_creation_time', random.random())))
 
@@ -113,3 +108,14 @@ def get(obj, attr, default=''):
 def chkbox(ident, **kwargs):
     # we wrap this so that bootstrap can format our checkboxes properly
     return literal('<label class="checkbox">%s</label>' % checkbox(ident, **kwargs))
+
+
+# def flt(dbl):
+#     return money(dbl)
+
+
+#def request_ip():
+#    from pylons import request
+#    return request.headers['X-Real-Ip']
+
+

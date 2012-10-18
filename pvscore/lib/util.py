@@ -501,6 +501,74 @@ def country_select_list():
         <option value="ZW">ZIMBABWE</option>
 """)
 
+def state_select_list(selected_st=None):
+    states = state_abbrev_to_state_dict()
+    ret = ''
+    for st8 in sorted(states.keys()):
+        ret += '\t<option value="{key}" {selected}>{name}</option>\n'.format(key=st8,
+                                                                              selected='selected' if st8 == selected_st else '',
+                                                                             name=states[st8])
+    return literal(ret)
+
+
+def state_abbrev_to_state_dict():
+    return {'AL' : 'Alabama',
+            'AK' : 'Alaska',
+            'AZ' : 'Arizona',
+            'AR' : 'Arkansas',
+            'CA' : 'California',
+            'CO' : 'Colorado',
+            'CT' : 'Connecticut',
+            'DE' : 'Delaware',
+            'DC' : 'District Of Columbia',
+            'FL' : 'Florida',
+            'GA' : 'Georgia',
+            'HI' : 'Hawaii',
+            'ID' : 'Idaho',
+            'IL' : 'Illinois',
+            'IN' : 'Indiana',
+            'IA' : 'Iowa',
+            'KS' : 'Kansas',
+            'KY' : 'Kentucky',
+            'LA' : 'Louisiana',
+            'ME' : 'Maine',
+            'MD' : 'Maryland',
+            'MA' : 'Massachusetts',
+            'MI' : 'Michigan',
+            'MN' : 'Minnesota',
+            'MS' : 'Mississippi',
+            'MO' : 'Missouri',
+            'MT' : 'Montana',
+            'NE' : 'Nebraska',
+            'NV' : 'Nevada',
+            'NH' : 'New Hampshire',
+            'NJ' : 'New Jersey',
+            'NM' : 'New Mexico',
+            'NY' : 'New York',
+            'NC' : 'North Carolina',
+            'ND' : 'North Dakota',
+            'OH' : 'Ohio',
+            'OK' : 'Oklahoma',
+            'OR' : 'Oregon',
+            'PA' : 'Pennsylvania',
+            'RI' : 'Rhode Island',
+            'SC' : 'South Carolina',
+            'SD' : 'South Dakota',
+            'TN' : 'Tennessee',
+            'TX' : 'Texas',
+            'UT' : 'Utah',
+            'VT' : 'Vermont',
+            'VA' : 'Virginia',
+            'WA' : 'Washington',
+            'WV' : 'West Virginia',
+            'WI' : 'Wisconsin',
+            'WY' : 'Wyoming'}
+
+
+def state_abbrev_to_state(abbrev):
+    states = state_abbrev_to_state_dict()
+    if abbrev in states:
+        return states[abbrev]
 
 
 class DataObj(object):    #pylint: disable-msg=R0903
@@ -514,6 +582,52 @@ class DataObj(object):    #pylint: disable-msg=R0903
     def __setattr__(self, name, val):
         self._obj[name] = val
 
+
+def month_list():
+    return [['1', 'January'],
+            ['2', 'February'],
+            ['3', 'March'],
+            ['4', 'April'],
+            ['5', 'May'],
+            ['6', 'June'],
+            ['7', 'July'],
+            ['8', 'August'],
+            ['9', 'September'],
+            ['10', 'October'],
+            ['11', 'November'],
+            ['12', 'December']]
+
+
+def year_list():
+    arr = []
+    today_ = datetime.date.today()
+    for year in range(today_.year, today_.year + 11):
+        arr.append([year, year])
+    return arr
+
+
+# def contains(lst, val):
+#     try:
+#         lst.index(val)
+#         return True
+#     except ValueError as exc:
+#         log.debug(exc)
+#         return False
+
+
+# def unique(seq, idfun=None):
+#     seen = {}
+#     result = []
+#     for item in seq:
+#         marker = idfun(item)
+#         # in old Python versions:
+#         # if seen.has_key(marker)
+#         # but in new ones:
+#         if marker in seen:
+#             continue
+#         seen[marker] = 1
+#         result.append(item)
+#     return result
 
 # def index_of_max(lst):
 #     return max(enumerate(lst), key=itemgetter(1))[0]
@@ -606,30 +720,7 @@ class DataObj(object):    #pylint: disable-msg=R0903
 
 # def nl2br(val):
 #     return val.replace('\n','<br>\n')
-
-
-# def month_list():
-#     return [['1', 'January'],
-#             ['2', 'February'],
-#             ['3', 'March'],
-#             ['4', 'April'],
-#             ['5', 'May'],
-#             ['6', 'June'],
-#             ['7', 'July'],
-#             ['8', 'August'],
-#             ['9', 'September'],
-#             ['10', 'October'],
-#             ['11', 'November'],
-#             ['12', 'December']]
-
-
-# def year_list():
-#     arr = []
-#     today_ = datetime.date.today()
-#     for year in range(today_.year, today_.year + 10):
-#         arr.append([year, year])
-#     return arr
-
+        
 
 # def to_dict(obj, maxlevel=2, level=0, data=None):
 #     """ KB: [2010-09-23]: Recursively traverse trees of objects to attach dicts in order
@@ -702,30 +793,6 @@ class DataObj(object):    #pylint: disable-msg=R0903
 #     return out
 
 
-# def contains(lst, val):
-#     try:
-#         lst.index(val)
-#         return True
-#     except ValueError as exc:
-#         log.debug(exc)
-#         return False
-
-
-# def unique(seq, idfun=None):
-#     seen = {}
-#     result = []
-#     for item in seq:
-#         marker = idfun(item)
-#         # in old Python versions:
-#         # if seen.has_key(marker)
-#         # but in new ones:
-#         if marker in seen:
-#             continue
-#         seen[marker] = 1
-#         result.append(item)
-#     return result
-
-
 #def strip_unicode(val):
 #    return ''.join(filter(lambda x:x in string.printable, val))
 
@@ -739,71 +806,4 @@ class DataObj(object):    #pylint: disable-msg=R0903
 #        return False
 
 
-# def state_abbrev_to_state_dict():
-#     return {'AL' : 'Alabama',
-#             'AK' : 'Alaska',
-#             'AZ' : 'Arizona',
-#             'AR' : 'Arkansas',
-#             'CA' : 'California',
-#             'CO' : 'Colorado',
-#             'CT' : 'Connecticut',
-#             'DE' : 'Delaware',
-#             'DC' : 'District Of Columbia',
-#             'FL' : 'Florida',
-#             'GA' : 'Georgia',
-#             'HI' : 'Hawaii',
-#             'ID' : 'Idaho',
-#             'IL' : 'Illinois',
-#             'IN' : 'Indiana',
-#             'IA' : 'Iowa',
-#             'KS' : 'Kansas',
-#             'KY' : 'Kentucky',
-#             'LA' : 'Louisiana',
-#             'ME' : 'Maine',
-#             'MD' : 'Maryland',
-#             'MA' : 'Massachusetts',
-#             'MI' : 'Michigan',
-#             'MN' : 'Minnesota',
-#             'MS' : 'Mississippi',
-#             'MO' : 'Missouri',
-#             'MT' : 'Montana',
-#             'NE' : 'Nebraska',
-#             'NV' : 'Nevada',
-#             'NH' : 'New Hampshire',
-#             'NJ' : 'New Jersey',
-#             'NM' : 'New Mexico',
-#             'NY' : 'New York',
-#             'NC' : 'North Carolina',
-#             'ND' : 'North Dakota',
-#             'OH' : 'Ohio',
-#             'OK' : 'Oklahoma',
-#             'OR' : 'Oregon',
-#             'PA' : 'Pennsylvania',
-#             'RI' : 'Rhode Island',
-#             'SC' : 'South Carolina',
-#             'SD' : 'South Dakota',
-#             'TN' : 'Tennessee',
-#             'TX' : 'Texas',
-#             'UT' : 'Utah',
-#             'VT' : 'Vermont',
-#             'VA' : 'Virginia',
-#             'WA' : 'Washington',
-#             'WV' : 'West Virginia',
-#             'WI' : 'Wisconsin',
-#             'WY' : 'Wyoming'}
 
-
-# def state_abbrev_to_state(abbrev):
-#     states = state_abbrev_to_state_dict()
-#     if abbrev in states:
-#         return states[abbrev]
-
-
-# def state_select_list(selected_st=None):
-#     states = state_abbrev_to_state_dict()
-#     ret = ''
-#     for st8 in sorted(states.keys()):
-#         ret += '\t<option value="{key}" {selected}>{name}</option>\n'.format(key=st8,
-#                                                                              selected='selected' if st8 == selected_st else '',
-#                                                                              name=states[st8])
-#     return literal(ret)

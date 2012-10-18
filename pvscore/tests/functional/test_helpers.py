@@ -45,6 +45,13 @@ class TestHelpers(TestController):
         assert '?rnd' in h.stylesheet_link_ex('fuz', req)
         assert 'fuz'  in h.stylesheet_link_ex('fuz', req)
 
+    def test_misc(self):
+        dobj = TestObj()
+        assert h.onvl(dobj, 'a', '_default_') == 'aa'
+        assert h.onvl(dobj, 'x', '_default_') == '_default_'
+        assert h.onvl(None, 'x', '_default_') == '_default_'
+
+
 class TestObj(object):
     def __init__(self):
         self.a = 'aa'
