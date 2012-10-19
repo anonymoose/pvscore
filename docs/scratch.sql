@@ -3820,3 +3820,8 @@ from cms_content c, cms_page p, cms_site s
 where c.page_id = p.page_id
 and p.site_id = s.site_id
 and s.domain = 'wealthmakers.com';
+
+
+select count(0) from crm_enterprise;
+
+select * from crm_enterprise where enterprise_id < 50;
