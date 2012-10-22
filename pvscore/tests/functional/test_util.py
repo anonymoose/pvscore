@@ -26,4 +26,3 @@ class TestUtil(TestController):
         assert '<option value="TN" selected>Tennessee</option>' in sl
         assert util.state_abbrev_to_state('TN') == 'Tennessee'
 
-

@@ -3780,25 +3780,6 @@ select substring(fs_path from 54) from core_asset where fk_type = 'Listing';
 
 select fs_path from core_asset where id = 626;
 
-
-
-
-/****** porting fcm to eyefound.it **/
--- upload db from pvs02
--- zip up files under sites/6512bd43d9caa6e02c990b0a82652dca and copy tarball to sites/c51ce410c124a10e0db5e4b97fc2af39/
-update crm_customer set campaign_id = 17 where campaign_id = 14;
-update pvs_listing set site_id = 13 where customer_id = 1010;
-update core_asset set fs_path = substring(fs_path from 54) where fk_type = 'Listing';
--- cd sites/c51ce410c124a10e0db5e4b97fc2af39/
--- find . -name "*.jpg" -exec rm -f {} \;
--- find . -name "*.png" -exec rm -f {} \;
-update core_asset set status_id = null where fk_type = 'Listing';
--- python -c 'from pvs.bin.eye_process import process_upload; process_upload()' -I development.ini
-/****** end ********/
-
-
-
-
  update core_asset set fs_path = substring(fs_path from 25) where id in (628 ,629 ,630 );
 
 
@@ -3825,3 +3806,68 @@ and s.domain = 'wealthmakers.com';
 select count(0) from crm_enterprise;
 
 select * from crm_enterprise where enterprise_id < 50;
+
+
+
+
+/****** porting fcm to eyefound.it **/
+-- upload db from pvs02
+-- zip up files under sites/6512bd43d9caa6e02c990b0a82652dca and copy tarball to sites/c51ce410c124a10e0db5e4b97fc2af39/
+update crm_customer set campaign_id = 17 where campaign_id = 14;
+update pvs_listing set site_id = 13 where customer_id = 1010;
+update core_asset set fs_path = substring(fs_path from 54) where fk_type = 'Listing';
+-- cd sites/c51ce410c124a10e0db5e4b97fc2af39/
+-- find . -name "*.jpg" -exec rm -f {} \;
+-- find . -name "*.png" -exec rm -f {} \;
+update core_asset set status_id = null where fk_type = 'Listing';
+-- python -c 'from pvs.bin.eye_process import process_upload; process_upload()' -I development.ini
+/****** end ********/
+
+
+
+
+select
+            t.relname as table_name,
+            i.relname as index_name,
+            array_to_string(array_agg(a.attname), ', ') as column_names
+        from
+            pg_class t,
+            pg_class i,
+            pg_index ix,
+            pg_attribute a
+        where
+            t.oid = ix.indrelid
+            and i.oid = ix.indexrelid
+            and a.attrelid = t.oid
+            and a.attnum = ANY(ix.indkey)
+            and t.relkind = 'r'
+            and t.relname = 'crm_customer_order'
+            and i.relname not like '%_pkey'
+        group by
+            t.relname,
+            i.relname
+        order by
+            t.relname,
+            i.relname;
+
+
+select count(0) from 
+            pg_class t,
+            pg_class i,
+            pg_index ix,
+            pg_attribute a
+        where
+            t.oid = ix.indrelid
+            and i.oid = ix.indexrelid
+            and a.attrelid = t.oid
+            and a.attnum = ANY(ix.indkey)
+            and t.relkind = 'r'
+            and t.relname = 'crm_customer_order'
+            and i.relname = '%_pkey'
+        group by
+            t.relname,
+            i.relname
+        order by
+            t.relname,
+            i.relname;
+

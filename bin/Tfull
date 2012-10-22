@@ -9,4 +9,20 @@ rm -f .noseids
 rm -rf ./data/cache ./data/sessions #./data/templates/crm/*
 
 export PVS_TESTING='TRUE'
-nosetests -x -v --cover-package=pvscore.model --cover-package=pvscore.controllers --cover-package=pvscore.lib --cover-package=pvscore.config --with-id $*
+rm -f .test.log
+nosetests -x -v --cover-package=pvscore.model --cover-package=pvscore.controllers --cover-package=pvscore.lib --cover-package=pvscore.config --with-id $* 
+if [ $? -ne 0 ]; then
+    exit $?
+fi
+
+if test -z "$1"
+then
+    echo ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  >> test.log
+    echo `date`                                             >> test.log
+    echo ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  >> test.log
+    coverage report --show-missing >> test.log
+    echo  >> test.log
+    echo  >> test.log
+    echo  >> test.log
+    find . -name "*,cover" -exec rm {} \;
+fi
