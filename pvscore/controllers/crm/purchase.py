@@ -49,7 +49,7 @@ class PurchaseController(BaseController):
         ent.save()
         ent.flush()
         self.flash('Successfully saved %s.' % ent.name)
-        return HTTPFound('/crm/purchase/vendor/edit/%d' % int(ent.vendor_id))
+        return HTTPFound('/crm/purchase/vendor/edit/%s' % ent.vendor_id)
 
 
     @view_config(route_name='crm.purchase.new', renderer='/crm/purchase.edit.mako')
@@ -135,7 +135,7 @@ class PurchaseController(BaseController):
                    self.request.ctx.user)
         self.db_flush()
         self.flash('Successfully saved PO %s.' % porder.purchase_order_id)
-        return HTTPFound('/crm/purchase/edit/%d' % int(porder.purchase_order_id))
+        return HTTPFound('/crm/purchase/edit/%s' % porder.purchase_order_id)
 
 
     @view_config(route_name='crm.purchase.order_item_json', renderer="string")
@@ -147,7 +147,7 @@ class PurchaseController(BaseController):
         self.forbid_if(not porder)
         poi = PurchaseOrderItem.load(order_item_id)
         self.forbid_if(not poi or poi.purchase_order != porder)
-        return json.dumps({'order_item_id':poi.order_item_id, 
+        return json.dumps({'order_item_id':str(poi.order_item_id), 
                            'note':poi.note,
                            'quantity':poi.quantity, 
                            'unit_cost':poi.unit_cost,
@@ -173,7 +173,7 @@ class PurchaseController(BaseController):
                    'Purchase Order %s. "%s" added.' % ('MODIFIED', poi.product.name),
                    self.request.ctx.user)
         self.db_flush()
-        return '{"id": %s}' % poi.order_item_id
+        return '{"id": "%s"}' % poi.order_item_id
 
 
     @view_config(route_name='crm.purchase.delete_purchase_order_item', renderer="string")

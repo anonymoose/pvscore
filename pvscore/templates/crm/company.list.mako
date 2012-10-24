@@ -10,7 +10,7 @@
     % for cmp in companies:
     <tr>
       <td>${cmp.company_id}</td>
-      <td nowrap>${h.link_to(cmp.name, '/crm/company/edit/%d' % cmp.company_id)}</td>
+      <td nowrap>${h.link_to(cmp.name, '/crm/company/edit/%s' % cmp.company_id)}</td>
       <td nowrap>${cmp.create_dt}</td>
     </tr>
     % endfor

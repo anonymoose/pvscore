@@ -10,29 +10,32 @@ from pvscore.model.core.users import Users
 from pvscore.model.crm.journal import Journal
 import pvscore.lib.db as db
 import pvscore.lib.util as util
+import uuid
+from pvscore.lib.sqla import GUID
+from pvscore.model.core.status import Status
 
 class Customer(ORMBase, BaseModel):
 
     __tablename__ = 'crm_customer'
     __pk__ = 'customer_id'
 
-    customer_id = Column(Integer, primary_key = True)
+    customer_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    campaign_id = Column(GUID, ForeignKey('crm_campaign.campaign_id'))
+    billing_id = Column(GUID, ForeignKey('crm_billing.billing_id'))
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
+    user_created = Column(GUID, ForeignKey('core_user.user_id'))
+    user_assigned = Column(GUID, ForeignKey('core_user.user_id'))
     fname = Column(String(50))
     lname = Column(String(50))
     title = Column(String(50))
     company_name = Column(String(50))
     password = Column(String(50))
-    campaign_id = Column(Integer, ForeignKey('crm_campaign.campaign_id'))
-    billing_id = Column(Integer, ForeignKey('crm_billing.billing_id'))
     orig_campaign_id = Column(Integer)
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
     email = Column(String(50))
-    create_dt = Column(DateTime, server_default = text('now()'))
     delete_dt = Column(Date)
     email_optout_dt = Column(DateTime)
+    create_dt = Column(DateTime, server_default = text('now()'))
     mod_dt = Column(DateTime, server_default=text('now()'))
-    user_created = Column(String(50), ForeignKey('core_user.username'))
-    user_assigned = Column(String(50), ForeignKey('core_user.username'))
     addr1 = Column(String(50))
     addr2 = Column(String(50))
     city = Column(String(50))
@@ -62,11 +65,11 @@ class Customer(ORMBase, BaseModel):
     ref_1 = Column(String(50))
     ref_2 = Column(String(50))
 
-    creator = relation('Users', primaryjoin=Users.username == user_created)
-    assigned_to = relation('Users', primaryjoin=Users.username == user_assigned)
+    creator = relation('Users', primaryjoin=Users.user_id == user_created)
+    assigned_to = relation('Users', primaryjoin=Users.user_id == user_assigned)
     orders = relation('CustomerOrder', lazy="joined", order_by="desc(CustomerOrder.order_id)")
     campaign = relation('Campaign', lazy="joined")
-    status = relation('Status', backref=backref('customer'))
+    status = relation('Status', primaryjoin=Status.status_id == status_id)
     billing = relation('Billing', lazy="joined")
 
     def __repr__(self):
@@ -112,7 +115,7 @@ class Customer(ORMBase, BaseModel):
                                                  and cust.delete_dt is null
                                                  and cust.campaign_id = cam.campaign_id
                                                  and cam.company_id = com.company_id
-                                                 and com.enterprise_id = {ent_id}
+                                                 and com.enterprise_id = '{ent_id}'
                                                  order by cust.lname, cust.fname limit {lim}""".format(l=user_input.lower(),
                                                                                            lim=limit,
                                                                                            ent_id=enterprise_id))
@@ -144,7 +147,7 @@ class Customer(ORMBase, BaseModel):
         sql = """SELECT cc.* FROM crm_customer cc, crm_campaign cam, crm_company com
                  where cc.campaign_id = cam.campaign_id
                  and cam.company_id = com.company_id
-                 and com.enterprise_id = {ent_id}
+                 and com.enterprise_id = '{ent_id}'
                  and cc.delete_dt is null
                  {cn} {f} {l} {e} {p}
               """.format(cn=cn_clause, f=f_clause, l=l_clause, e=e_clause, p=p_clause, ent_id=enterprise_id)
@@ -201,23 +204,25 @@ class Customer(ORMBase, BaseModel):
         from pvscore.model.crm.customer import Customer
         Customer.delete_newest_customer()
         """
-        Session.execute('delete from core_asset where status_id in (select status_id from core_status where customer_id = %s)' % customer_id)
-        Session.execute('delete from crm_billing_history where customer_id = %s' % customer_id)
-        Session.execute('delete from crm_product_inventory_journal where return_id in (select return_id from crm_product_return where journal_id in (select journal_id from crm_journal where customer_id = %s))' % customer_id)
-        Session.execute('delete from crm_product_return where journal_id in (select journal_id from crm_journal where customer_id = %s)' % customer_id)
-        Session.execute('delete from crm_journal where customer_id = %s' % customer_id)
-        Session.execute('delete from crm_product_inventory_journal where order_item_id in (select order_item_id from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id = %s))' % customer_id)
-        Session.execute('delete from crm_oi_terms_acceptance where order_id in (select order_id from crm_customer_order where customer_id = %s)' % customer_id)
-        Session.execute('delete from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id = %s)' % customer_id)
-        Session.execute('delete from crm_customer_order where customer_id = %s' % customer_id)
-        #Session.execute('delete from wm_portfolio where customer_id = %s' % customer_id)
-        #Session.execute('delete from pvs_listing where customer_id = %s' % customer_id)
-        Session.execute('delete from crm_customer where customer_id = %s' % customer_id)
+        Session.execute("delete from core_asset where status_id in (select status_id from core_status where customer_id = '%s')" % customer_id)
+        Session.execute("delete from crm_billing_history where customer_id = '%s'" % customer_id)
+        Session.execute("delete from crm_product_inventory_journal where return_id in (select return_id from crm_product_return where journal_id in (select journal_id from crm_journal where customer_id = '%s'))" % customer_id)
+        Session.execute("delete from crm_product_return where journal_id in (select journal_id from crm_journal where customer_id = '%s')" % customer_id)
+        Session.execute("delete from crm_journal where customer_id = '%s'" % customer_id)
+        Session.execute("delete from crm_product_inventory_journal where order_item_id in (select order_item_id from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id = '%s'))" % customer_id)
+        Session.execute("delete from crm_oi_terms_acceptance where order_id in (select order_id from crm_customer_order where customer_id = '%s')" % customer_id)
+        Session.execute("delete from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id = '%s')" % customer_id)
+        Session.execute("delete from crm_customer_order where customer_id = '%s'" % customer_id)
+        #Session.execute("delete from wm_portfolio where customer_id = '%s'" % customer_id)
+        #Session.execute("delete from pvs_listing where customer_id = #'%s'" % customer_id)
+        Session.execute("update crm_customer set status_id = null where customer_id = '%s'" % customer_id)
+        Session.execute("delete from core_status where customer_id = '%s'" % customer_id)
+        Session.execute("delete from crm_billing_history where customer_id = '%s'" % customer_id)
+        billing_ids = db.get_column("select billing_id from crm_customer where customer_id = '%s'" % customer_id)
+        Session.execute("delete from crm_customer where customer_id = '%s'" % customer_id)
+        for bill_id in billing_ids:
+            Session.execute("delete from crm_billing where billing_id = '%s'" % bill_id)
 
-        Session.execute('delete from crm_billing_history where customer_id = %s' % customer_id)
-        Session.execute('delete from crm_billing where billing_id = (select billing_id from crm_customer where customer_id = %s)' % customer_id)
-        Session.execute('delete from core_status where customer_id = %s' % customer_id)
-        
         
 class PeriodCustomerCountSummary(BaseAnalytic):
     """ KB: [2011-11-02]: Google charts report for customer count over a period """
@@ -277,16 +282,11 @@ class PeriodCustomerCountSummary(BaseAnalytic):
                     where
                     cust.campaign_id = cmp.campaign_id and
                     cmp.company_id = co.company_id and
-                    co.enterprise_id = {entid} and
+                    co.enterprise_id = '{entid}' and
                     cust.delete_dt is null and
                     cust.create_dt between current_date - {d} and current_date
                     group by cust.create_dt
                     order by cust.create_dt asc""".format(d=self.days, entid=self.request.ctx.enterprise.enterprise_id)
-
-
-
-
-
 
 
 

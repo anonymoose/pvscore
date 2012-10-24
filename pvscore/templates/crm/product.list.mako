@@ -20,7 +20,7 @@
     <tbody>
       % for p in products:
       <tr>
-        <td nowrap>${h.link_to(p.name, '/crm/product/edit/%d' % p.product_id)}</td>
+        <td nowrap>${h.link_to(p.name, '/crm/product/edit/%s' % p.product_id)}</td>
         <td nowrap>${p.sku}</td>
         <td class="rt" nowrap>${h.money(p.get_max_retail_price())}</td>
 

@@ -67,7 +67,7 @@ class SiteController(BaseController):
         site = Site.load(self.request.POST.get('site_id'))
         if not site:
             site = Site()
-            site.user_created = self.request.ctx.user.username
+            site.user_created = self.request.ctx.user.user_id
         else:
             self.forbid_if(site.company.enterprise_id != self.enterprise_id)
         site.bind(self.request.POST, True)

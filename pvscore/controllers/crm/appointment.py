@@ -110,7 +110,7 @@ class AppointmentPlugin(BaseController):
         apt = Appointment.load(self.request.POST.get('appointment_id'))
         if not apt:
             apt = Appointment()
-            apt.user_created = self.request.ctx.user.username
+            apt.user_created = self.request.ctx.user.user_id
         apt.bind(self.request.POST, False)
         if customer_id != '':
             apt.customer_id = customer_id 

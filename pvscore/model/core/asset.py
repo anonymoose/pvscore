@@ -5,13 +5,15 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.lib.dbcache import invalidate , FromCache
-
+import uuid
+from pvscore.lib.sqla import GUID
 
 class Asset(ORMBase, BaseModel):
     __tablename__ = "core_asset"
     __pk__ = 'id'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
     name = Column(String(100))
     description = Column(String(1000))
     mimetype = Column(String(30))
@@ -20,7 +22,6 @@ class Asset(ORMBase, BaseModel):
     fk_type = Column(String(50))
     fk_id = Column(Integer)
     create_dt = Column(Date, server_default = text('now()'))
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
 
     status = relation('Status')
 

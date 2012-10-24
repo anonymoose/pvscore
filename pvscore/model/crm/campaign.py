@@ -6,13 +6,20 @@ from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.crm.company import Company
 from pvscore.lib.dbcache import FromCache, invalidate
 from pvscore.lib.mail import MailInfo
+import uuid
+from pvscore.lib.sqla import GUID
+
 
 class Campaign(ORMBase, BaseModel):
     __tablename__ = 'crm_campaign'
     __pk__ = 'campaign_id'
 
-    campaign_id = Column(Integer, primary_key = True)
-    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
+    campaign_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    company_id = Column(GUID, ForeignKey('crm_company.company_id'))
+    comm_post_purchase_id = Column(GUID, ForeignKey('crm_communication.comm_id'))
+    comm_post_cancel_id = Column(GUID, ForeignKey('crm_communication.comm_id'))
+    comm_packing_slip_id = Column(GUID, ForeignKey('crm_communication.comm_id'))
+    comm_forgot_password_id = Column(GUID, ForeignKey('crm_communication.comm_id'))
     name = Column(String(100))
     create_dt = Column(Date, server_default = text('now()'))
     delete_dt = Column(Date)
@@ -27,12 +34,7 @@ class Campaign(ORMBase, BaseModel):
     imap_username = Column(String(50))
     imap_password = Column(String(50))
 
-    comm_post_purchase_id = Column(Integer, ForeignKey('crm_communication.comm_id'))
-    comm_post_cancel_id = Column(Integer, ForeignKey('crm_communication.comm_id'))
-    comm_packing_slip_id = Column(Integer, ForeignKey('crm_communication.comm_id'))
-    comm_forgot_password_id = Column(Integer, ForeignKey('crm_communication.comm_id'))
-
-    company = relation('Company', lazy='joined')
+    company = relation('Company', lazy='joined', primaryjoin=Company.company_id == company_id)
 
     def __repr__(self):
         return '%s : %s' % (self.campaign_id, self.name)
@@ -70,10 +72,10 @@ class Campaign(ORMBase, BaseModel):
         if name:
             n_clause = "and cam.name like '%s%%'" % name
         if company_id:
-            cid_clause = "and cam.company_id = %d" % int(company_id)
+            cid_clause = "and cam.company_id = '%s'" % company_id
         sql = """SELECT cam.* FROM crm_campaign cam, crm_company com
                  where cam.company_id = com.company_id
-                 and com.enterprise_id = {ent_id}
+                 and com.enterprise_id = '{ent_id}'
                  {n} {cid}
               """.format(n=n_clause, cid=cid_clause, ent_id=enterprise_id)
         return Session.query(Campaign).from_statement(sql).all()  #pylint: disable-msg=E1101

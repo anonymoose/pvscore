@@ -84,8 +84,8 @@
               </td>
               <td><a href="/crm/customer/return_item_dialog/${customer.customer_id}/${oi.order_id}/${oi.order_item_id}"><img src="/static/icons/silk/arrow_refresh.png" title="Return Item" alt="Return Item" border="0"/></td>
               <td width="40%">${oi.product.name}</td>
-              <td style="text-align:right;" >${h.text('quantity[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.quantity), onblur='customer_order_recalc()', disabled=True)}</td>
-              <td style="text-align:right;">$${h.text('unit_price[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.unit_price), onblur='customer_order_recalc()', disabled=True)}</td>
+              <td style="text-align:right;" >${h.text('quantity[%s]' % oi.order_item_id, class_="input-small", value=h.money(oi.quantity), onblur='customer_order_recalc()', disabled=True)}</td>
+              <td style="text-align:right;">$${h.text('unit_price[%s]' % oi.order_item_id, class_="input-small", value=h.money(oi.unit_price), onblur='customer_order_recalc()', disabled=True)}</td>
               <td style="text-align:right;" id="oi_total_${oi.order_item_id}">$${h.money(oi.total())}</td>
             % else:
               <td>
@@ -103,8 +103,8 @@
               <td><a disabled="true" href="/crm/customer/return_item_dialog/${customer.customer_id}/${oi.order_id}/${oi.order_item_id}">
                   <img src="/static/icons/silk/arrow_refresh.png" title="Return Item" alt="Return Item" border="0" style="visibility:hidden;"/></td>
               <td width="40%">${oi.product.name}</td>
-              <td style="text-align:right;" >${h.text('quantity[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.quantity), onblur='customer_order_recalc()')}</td>
-              <td style="text-align:right;">$${h.text('unit_price[%d]' % oi.order_item_id, class_="input-small", value=h.money(oi.unit_price), onblur='customer_order_recalc()')}</td>
+              <td style="text-align:right;" >${h.text('quantity[%s]' % oi.order_item_id, class_="input-small", value=h.money(oi.quantity), onblur='customer_order_recalc()')}</td>
+              <td style="text-align:right;">$${h.text('unit_price[%s]' % oi.order_item_id, class_="input-small", value=h.money(oi.unit_price), onblur='customer_order_recalc()')}</td>
               <td style="text-align:right;" id="oi_total_${oi.order_item_id}">$${h.money(oi.total())}</td>
             % endif
           </tr>

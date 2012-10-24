@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 class CustomerController(BaseController):
     @view_config(route_name='crm.customer.edit', renderer='/crm/customer.edit.mako')
     @authorize(IsLoggedIn())
-    @validate((('customer_id', 'int'),
+    @validate((('customer_id', 'string'),
                ('customer_id', 'required')))
     def edit(self):
         return self._edit_impl()
@@ -71,13 +71,13 @@ class CustomerController(BaseController):
 
 
     def _save(self, customer_id=None, do_redir=True):
-        username = None
+        user_id = None
         if self.request.ctx.user:
-            username = self.request.ctx.user.username
+            user_id = self.request.ctx.user.user_id
         cust = Customer.load(customer_id)
         if not cust:
             cust = Customer()
-            cust.user_created = cust.user_assigned = username
+            cust.user_created = cust.user_assigned = user_id
         else:
             self.forbid_if(cust.campaign.company.enterprise_id != self.enterprise_id)
         cust.bind(self.request.POST)
@@ -471,7 +471,7 @@ class CustomerController(BaseController):
                 if match:
                     order_item_id = match.group(1)
                     attr = match.group(2)
-                    new_val = float(self.request.POST.get(key))
+                    new_val = float(self.request.POST.get(key)) if attr != 'product_id' else self.request.POST.get(key)
                     # KB: [2011-03-07]: If the ID ends in '_', its not really an ID but a new item.
                     # product_id will only show up as non-null in the hash of a new product
                     if order_item_id[-1] == '_':
@@ -482,6 +482,7 @@ class CustomerController(BaseController):
                                                                              customer.campaign,
                                                                              self.request.ctx.user)
                         oitem = order_items[order_item_id]
+                        assert oitem.product is not None
                         if 'quantity' == attr:
                             new_val = float(new_val)
                             InventoryJournal.create_new(order_item_product, 'Sale', new_val, oitem)
@@ -772,7 +773,7 @@ class CustomerController(BaseController):
     @authorize(IsCustomerLoggedIn())
     def self_cancel_order(self):
         """ KB: [2011-04-07]: If the order id is specified, then cancel that order, otherwise, cancel every active order.
-        User has to specify username and password to confirm cancellation.
+        User has to specify user_id and password to confirm cancellation.
         """
         cust = self.request.ctx.customer
         self.forbid_if(cust.campaign.company.enterprise_id != self.enterprise_id)

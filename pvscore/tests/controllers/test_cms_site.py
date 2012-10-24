@@ -4,6 +4,7 @@ from pyramid.httpexceptions import HTTPForbidden
 from pvscore.model.crm.campaign import Campaign
 from pvscore.model.crm.company import Enterprise
 import logging, shutil, os
+import uuid
 
 log = logging.getLogger(__name__)
 
@@ -139,19 +140,21 @@ Disallow: /cms/cart/add/*""")
         
 
     def test_customer_found(self):
-        R = self.get('/customer?customer_id=220')
-        R.mustcontain('fname = Amy lname = Bedwell id = 220')
+        cust = self.get_customer()
+        R = self.get('/customer?customer_id=%s' % cust.customer_id )
+        R.mustcontain('fname = %s lname = %s id = %s' % (cust.fname, cust.lname, cust.customer_id))
 
 
     def test_customer_found_post(self):
+        cust = self.get_customer()
         R = self.post('/customer',
-                      {'customer_id' : '220'})
-        R.mustcontain('fname = Amy lname = Bedwell id = 220')
+                      {'customer_id' : cust.customer_id})
+        R.mustcontain('fname = %s lname = %s id = %s' % (cust.fname, cust.lname, cust.customer_id))
 
 
     def test_customer_not_found(self):
         try:
-            self.get('/customer?customer_id=9999')
+            self.get('/customer?customer_id=%s' % uuid.uuid4())
         except HTTPForbidden as forbid:
             log.debug(forbid)
             return

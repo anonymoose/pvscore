@@ -23,46 +23,43 @@ class LoginController(BaseController):
         uid = self.request.POST.get('username')
         pwd = self.request.POST.get('password')
 
-        if uid and pwd and Users.authenticate(uid, pwd):
-            log.debug("%s logging in to %s" % (uid, self.request.url))
-            self.session['user_id'] = uid
-            self.session['customer_logged_in'] = False
-            self.session['crm_logged_in'] = True
-            user = Users.load(uid)
-            # this ensures that they are logging in from the web and not crawling
-            # to get in brute force.
-            self.forbid_if(not user)
-
-            # If they were on a page and got timed out, send them 
-            # back where they were as a convenience.
-            if util.get(self.request.POST, 'path'):
-                if util.get(self.request.POST, 'vars'):
-                    return HTTPFound('%s?%s' % (self.request.POST['path'], self.request.POST['vars']))
+        if uid and pwd:
+            user = Users.authenticate(uid, pwd)
+            if user:
+                log.debug("%s logging in to %s" % (uid, self.request.url))
+                self.session['user_id'] = user.user_id
+                self.session['customer_logged_in'] = False
+                self.session['crm_logged_in'] = True
+                # If they were on a page and got timed out, send them 
+                # back where they were as a convenience.
+                if util.get(self.request.POST, 'path'):
+                    if util.get(self.request.POST, 'vars'):
+                        return HTTPFound('%s?%s' % (self.request.POST['path'], self.request.POST['vars']))
+                    else:
+                        return HTTPFound(self.request.POST['path'])
                 else:
-                    return HTTPFound(self.request.POST['path'])
-            else:
-                return HTTPFound('/crm/dashboard')
-                # If the user is an external vendor, send them to the reports
-                #if user.is_vendor_user():
-                #    log.debug("%s redirecting to vendor user" % uid)
-                #    return HTTPFound('/crm/report/list')
-                #else:
-                #    # if the user is required to accept terms, then send
-                #    # them to the right place.  Terms handling is up to
-                #    # the page.
-                #    if user.enterprise and user.enterprise.terms_required and not user.enterprise.terms_accepted:
-                #        return HTTPFound(user.enterprise.terms_link)
-                #
-                #    # If the user has been provisioned with a specific
-                #    # place to log in, then send them there.
-                #    if user.login_link:
-                #        return HTTPFound(user.login_link)
-                #    else:
-                #        return HTTPFound('/crm/dashboard')
-        else:
-            log.debug("%s failed login in to %s" % (uid, self.request.url))
-            self.flash('Invalid User or Password')
-            return {}
+                    return HTTPFound('/crm/dashboard')
+                    # If the user is an external vendor, send them to the reports
+                    #if user.is_vendor_user():
+                    #    log.debug("%s redirecting to vendor user" % uid)
+                    #    return HTTPFound('/crm/report/list')
+                    #else:
+                    #    # if the user is required to accept terms, then send
+                    #    # them to the right place.  Terms handling is up to
+                    #    # the page.
+                    #    if user.enterprise and user.enterprise.terms_required and not user.enterprise.terms_accepted:
+                    #        return HTTPFound(user.enterprise.terms_link)
+                    #
+                    #    # If the user has been provisioned with a specific
+                    #    # place to log in, then send them there.
+                    #    if user.login_link:
+                    #        return HTTPFound(user.login_link)
+                    #    else:
+                    #        return HTTPFound('/crm/dashboard')
+
+        log.debug("%s failed login in to %s" % (uid, self.request.url))
+        self.flash('Invalid User or Password')
+        return {}
 
 
     @view_config(route_name="crm.login.logout")

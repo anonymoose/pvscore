@@ -12,16 +12,21 @@ import pvscore.lib.db as db
 from pvscore.lib.dbcache import FromCache, invalidate
 from sqlalchemy.orm.collections import attribute_mapped_collection
 import pvscore.lib.util as util
+import uuid
+from pvscore.lib.sqla import GUID
 
 class Product(ORMBase, BaseModel):
     __tablename__ = 'crm_product'
     __pk__ = 'product_id'
 
-    product_id = Column(Integer, primary_key = True)
+    product_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    company_id = Column(GUID, ForeignKey('crm_company.company_id'))
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
+    vendor_id = Column(GUID, ForeignKey('crm_vendor.vendor_id'))
     name = Column(String(200))
     detail_description = Column(Text)
     description = Column(Text)
-    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
+
     create_dt = Column(Date, server_default=text('now()'))
     delete_dt = Column(Date)
     mod_dt = Column(DateTime, server_default=text('now()'))
@@ -42,8 +47,6 @@ class Product(ORMBase, BaseModel):
     seo_title = Column(String(512))
     seo_keywords = Column(String(1000))
     seo_description = Column(String(1000))
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
-    vendor_id = Column(Integer, ForeignKey('crm_vendor.vendor_id'))
     subscription = Column(Boolean, default=False)
     inventory = Column(Integer) # this is derived from InventoryJournal and updated in "create_new"
 
@@ -69,7 +72,7 @@ class Product(ORMBase, BaseModel):
                 and cmp.campaign_id = com.default_campaign_id
                 and pp.campaign_id = cmp.campaign_id
                 and pp.product_id = p.product_id
-                and com.enterprise_id = {ent_id}
+                and com.enterprise_id = '{ent_id}'
                 order by p.name limit {lim}""".format(n=name.lower(),
                                                       lim=limit,
                                                       ent_id=enterprise_id)
@@ -244,9 +247,9 @@ class Product(ORMBase, BaseModel):
                                o.customer_id = cust.customer_id and
                                o.order_id = oi.order_id and
                                o.campaign_id = cmp.campaign_id and
-                               cmp.company_id = {company_id}
+                               cmp.company_id = '{company_id}'
                                and oi.product_id = p.product_id
-                               and p.product_id= {product_id}
+                               and p.product_id = '{product_id}'
                                and o.delete_dt is null
                                and oi.delete_dt is null
                                group by o.create_dt, cmp.name
@@ -267,9 +270,9 @@ class Product(ORMBase, BaseModel):
                      o.customer_id = cust.customer_id and
                      o.order_id = oi.order_id and
                      o.campaign_id = cmp.campaign_id and
-                     cmp.company_id = {company_id}
+                     cmp.company_id = '{company_id}'
                      and oi.product_id = p.product_id
-                     and p.product_id = {product_id}
+                     and p.product_id = '{product_id}'
                      and o.delete_dt is null
                      and oi.delete_dt is null
                      order by o.create_dt desc""".format(company_id=self.company_id,
@@ -364,19 +367,19 @@ class Product(ORMBase, BaseModel):
     @staticmethod
     def full_delete(product_id):
         """ KB: [2011-01-28]: This only works for products that have never been purchased. """
-        Session.execute('delete from crm_product_child where parent_id = %d or child_id = %d' % (product_id, product_id))
-        Session.execute('delete from crm_product_pricing where product_id = %d' % product_id)
-        Session.execute('delete from crm_product_inventory_journal where product_id = %d' % product_id)
-        Session.execute('delete from crm_product where product_id = %d' % product_id)
+        Session.execute("delete from crm_product_child where parent_id = '%s' or child_id = '%s'" % (product_id, product_id))
+        Session.execute("delete from crm_product_pricing where product_id = '%s'" % product_id)
+        Session.execute("delete from crm_product_inventory_journal where product_id = '%s'" % product_id)
+        Session.execute("delete from crm_product where product_id = '%s'" % product_id)
 
 
 class ProductChild(ORMBase, BaseModel):
     __tablename__ = 'crm_product_child'
     __pk__ = 'product_child_id'
 
-    product_child_id = Column(Integer, primary_key=True)
-    parent_id = Column(Integer, ForeignKey('crm_product.product_id'))
-    child_id = Column(Integer, ForeignKey('crm_product.product_id'))
+    product_child_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    parent_id = Column(GUID, ForeignKey('crm_product.product_id'))
+    child_id = Column(GUID, ForeignKey('crm_product.product_id'))
     child_quantity = Column(Integer, server_default=text('1'))
 
     parent = relation('Product', primaryjoin=Product.product_id == parent_id)
@@ -391,7 +394,7 @@ class ProductChild(ORMBase, BaseModel):
 
     @staticmethod
     def clear_by_parent(parent_id):
-        Session.execute("delete from crm_product_child where parent_id = %d" % int(parent_id))
+        Session.execute("delete from crm_product_child where parent_id = '%s'" % parent_id)
         invalidate(ProductChild(), 'ProductChild.find_children', parent_id) # not my finest moment.
 
 
@@ -413,10 +416,10 @@ class ProductCategory(ORMBase, BaseModel):
     __tablename__ = 'crm_product_category'
     __pk__ = 'category_id'
 
-    category_id = Column(Integer, primary_key = True)
+    category_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    company_id = Column(GUID, ForeignKey('crm_company.company_id'))
     name = Column(String(200))
     description = Column(Text)
-    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
     create_dt = Column(Date, server_default=text('now()'))
     delete_dt = Column(Date)
     mod_dt = Column(DateTime, server_default=text('now()'))
@@ -474,17 +477,17 @@ class ProductCategory(ORMBase, BaseModel):
     @staticmethod
     def full_delete(category_id):
         """ KB: [2011-01-28]: This only works for products that have never been purchased. """
-        Session.execute('delete from crm_product_category_join where category_id = %d' % category_id)
-        Session.execute('delete from crm_product_category where category_id = %d' % category_id)
+        Session.execute("delete from crm_product_category_join where category_id = '%s'" % category_id)
+        Session.execute("delete from crm_product_category where category_id = '%s'" % category_id)
 
 
 class ProductCategoryJoin(ORMBase, BaseModel):
     __tablename__ = 'crm_product_category_join'
     __pk__ = 'pcj_id'
 
-    pcj_id = Column(Integer, primary_key = True)
-    product_id = Column(Integer, ForeignKey('crm_product.product_id'))
-    category_id = Column(Integer, ForeignKey('crm_product_category.category_id'))
+    pcj_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    product_id = Column(GUID, ForeignKey('crm_product.product_id'))
+    category_id = Column(GUID, ForeignKey('crm_product_category.category_id'))
 
     product = relation('Product')
     category = relation('ProductCategory', lazy='joined')
@@ -500,7 +503,7 @@ class ProductCategoryJoin(ORMBase, BaseModel):
 
     @staticmethod
     def clear_by_category(category):
-        Session.execute("delete from crm_product_category_join where category_id = %d" % int(category.category_id))
+        Session.execute("delete from crm_product_category_join where category_id = '%s'" % category.category_id)
 
 
 
@@ -508,13 +511,13 @@ class ProductReturn(ORMBase, BaseModel):
     __tablename__ = 'crm_product_return'
     __pk__ = 'return_id'
 
-    return_id = Column(Integer, primary_key = True)
-    product_id = Column(Integer, ForeignKey('crm_product.product_id'))
-    order_id = Column(Integer, ForeignKey('crm_customer_order.order_id'))
-    journal_id = Column(Integer, ForeignKey('crm_journal.journal_id'))
+    return_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    product_id = Column(GUID, ForeignKey('crm_product.product_id'))
+    order_id = Column(GUID, ForeignKey('crm_customer_order.order_id'))
+    journal_id = Column(GUID, ForeignKey('crm_journal.journal_id'))
     quantity = Column(Float, server_default=text('0.0'))
     credit_amount = Column(Float, server_default=text('0.0'))
-    user_created = Column(String(50), ForeignKey('core_user.username'))
+    user_created = Column(GUID, ForeignKey('core_user.user_id'))
     create_dt = Column(Date, server_default=text('now()'))
     delete_dt = Column(Date)
 
@@ -549,14 +552,14 @@ class InventoryJournal(ORMBase, BaseModel):
     __tablename__ = 'crm_product_inventory_journal'
     __pk__ = 'inv_journal_id'
 
-    inv_journal_id = Column(Integer, primary_key=True)
-    product_id = Column(Integer, ForeignKey('crm_product.product_id'))
-    return_id = Column(Integer, ForeignKey('crm_product_return.return_id'))
-    order_item_id = Column(Integer, ForeignKey('crm_order_item.order_item_id'))
+    inv_journal_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    product_id = Column(GUID, ForeignKey('crm_product.product_id'))
+    return_id = Column(GUID, ForeignKey('crm_product_return.return_id'))
+    order_item_id = Column(GUID, ForeignKey('crm_order_item.order_item_id'))
     quantity = Column(Float, server_default=text('0.0'))
     type = Column(String(20), default='Sale')
     note = Column(String(150))
-    user_created = Column(String(50), ForeignKey('core_user.username'))
+    user_created = Column(GUID, ForeignKey('core_user.user_id'))
     create_dt = Column(Date, server_default=text('now()'))
     delete_dt = Column(Date)
 
@@ -567,13 +570,13 @@ class InventoryJournal(ORMBase, BaseModel):
 
     @staticmethod
     def total(product):
-        ret = Session.query("c").from_statement("SELECT sum(quantity) c FROM crm_product_inventory_journal where product_id = %s" % product.product_id).one()
+        ret = Session.query("c").from_statement("SELECT sum(quantity) c FROM crm_product_inventory_journal where product_id = '%s'" % product.product_id).one()
         return ret[0] if ret != None else 0.0
 
 
     @staticmethod
     def cleanup(order_item, tipe):
-        Session.execute("delete from crm_product_inventory_journal where order_item_id = %s and type = '%s'" % (order_item.order_item_id, tipe))
+        Session.execute("delete from crm_product_inventory_journal where order_item_id = '%s' and type = '%s'" % (order_item.order_item_id, tipe))
 
 
     @staticmethod

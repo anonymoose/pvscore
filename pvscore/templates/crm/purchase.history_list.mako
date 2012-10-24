@@ -24,7 +24,7 @@
               <td><!--img src="/static/icons/silk/page_edit.png" border="0" onclick="customer_show_status(${s.status_id})"--></td>
               <td nowrap>${s.fk_type} ${s.event.display_name}</td>
               <td nowrap>${s.create_dt}</td>
-              <td nowrap>${s.username[:11]+'...' if len(s.username)>11 else s.username}</td>
+              <td nowrap>${str(s.username)}</td>
               <td nowrap>${s.note[0:60]+'...' if s.note else ''}</td>
             </tr>
             % endfor

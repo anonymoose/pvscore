@@ -43,7 +43,7 @@ class BaseModel(object):
 
     @classmethod
     def load_ids(cls, pk_list):
-        return Session.query(cls).from_statement("SELECT * FROM %s where %s in (%s)" % (cls.__tablename__, cls.__pk__, ','.join([str(pk) for pk in pk_list]))).all()    #pylint: disable-msg=E1101
+        return Session.query(cls).from_statement("SELECT * FROM %s where %s in (%s)" % (cls.__tablename__, cls.__pk__, ','.join(["'%s'" % str(pk) for pk in pk_list]))).all()    #pylint: disable-msg=E1101
 
 
     def post_load(self):

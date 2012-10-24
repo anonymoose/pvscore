@@ -74,6 +74,11 @@ class TestController(TestCase):
                                         }
 
 
+    def get_customer(self, username="amers_j@yahoo.com"):
+        custs = Customer.find_all_by_email(username)
+        assert custs is not None and len(custs) > 0
+        return custs[0]
+
     def login_customer(self, username='amers_j@yahoo.com', password='geology'):
         # this sets the site it.
         self.post('/crm/customer_login',
@@ -97,7 +102,8 @@ class TestController(TestCase):
         assert self.site
         os.environ['enterprise_id'] = str(self.site.company.enterprise_id)
 
-        user = Users.load(username)
+        user = Users.authenticate(username, password)
+        #user = Users.load(username)
         assert user is not None
         return user
 

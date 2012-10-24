@@ -16,7 +16,7 @@
           </div>
           <div class="span3">
             <label for="company_id">Company</label>
-            ${h.select('company_id', campaign.company_id, companies)}
+            ${h.select('company_id', str(campaign.company_id), companies)}
           </div>
           <div class="span3">
             <label for="tax_rate">Tax Rate</label>
@@ -93,19 +93,19 @@
           <h3>Customer Communications</h3>
           <div>
             <label for="comm_post_purchase_id">Post-purchase Communication</label>
-            ${h.select('comm_post_purchase_id', campaign.comm_post_purchase_id, comms)}
+            ${h.select('comm_post_purchase_id', str(campaign.comm_post_purchase_id), comms)}
           </div>
           <div>
             <label for="comm_post_cancel_id">Post-cancellation Communication</label>
-            ${h.select('comm_post_cancel_id', campaign.comm_post_cancel_id, comms)}
+            ${h.select('comm_post_cancel_id', str(campaign.comm_post_cancel_id), comms)}
           </div>
           <div>
             <label for="comm_packing_slip_id">Packing Slip Communication</label>
-            ${h.select('comm_packing_slip_id', campaign.comm_packing_slip_id, comms)}
+            ${h.select('comm_packing_slip_id', str(campaign.comm_packing_slip_id), comms)}
           </div>
           <div>
             <label for="comm_forgot_password_id">Forgot Password Communication</label>
-            ${h.select('comm_forgot_password_id', campaign.comm_forgot_password_id, comms)}
+            ${h.select('comm_forgot_password_id', str(campaign.comm_forgot_password_id), comms)}
           </div>
         </div>
       </div>

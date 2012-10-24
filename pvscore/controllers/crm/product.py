@@ -184,17 +184,17 @@ class ProductController(BaseController):
                 if match:
                     campaign = Campaign.load(match.group(1))
                     price = self.request.POST.get(k)
-                    discount = self.request.POST.get('campaign_discount[%d]' % campaign.campaign_id)
+                    discount = self.request.POST.get('campaign_discount[%s]' % campaign.campaign_id)
                     if price:
                         price = util.float_(price)
-                        discount = util.float_(discount)
+                        discount = util.float_(util.nvl(discount, 0.0))
                         prod.set_price(campaign, price, discount)
                     else:
                         prod.remove_price(campaign)
 
             if k.startswith('child_incl'):
                 child_product_id = self.request.POST.get(k)
-                child_product_quantity = self.request.POST.get('child_quantity_%d' % int(child_product_id))
+                child_product_quantity = self.request.POST.get('child_quantity_%s' % child_product_id)
                 prod.add_child(child_product_id, child_product_quantity)
 
         prod.save()

@@ -42,7 +42,7 @@
     <tbody>
       % for po in purchases:
       <tr>
-        <td nowrap>${h.link_to(po.vendor.name, '/crm/purchase/edit/%d' % po.purchase_order_id)}</td>
+        <td nowrap>${h.link_to(po.vendor.name, '/crm/purchase/edit/%s' % po.purchase_order_id)}</td>
         <td nowrap>${po.create_dt}</td>
         <td>${po.total()}</td>
       </tr>

@@ -5,14 +5,16 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.lib.dbcache import FromCache, invalidate
+import uuid
+from pvscore.lib.sqla import GUID
 
 class ProductPricing(ORMBase, BaseModel):
     __tablename__ = 'crm_product_pricing'
     __pk__ = 'product_pricing_id'
 
-    product_pricing_id = Column(Integer, primary_key = True)
-    campaign_id = Column(Integer, ForeignKey('crm_campaign.campaign_id'))
-    product_id = Column(Integer, ForeignKey('crm_product.product_id'))
+    product_pricing_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    campaign_id = Column(GUID, ForeignKey('crm_campaign.campaign_id'))
+    product_id = Column(GUID, ForeignKey('crm_product.product_id'))
     wholesale_price = Column(Float)
     retail_price = Column(Float)
     discount_price = Column(Float)

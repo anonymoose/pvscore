@@ -1,10 +1,9 @@
 from pvscore.tests import TestController, secure
 from pvscore.model.crm.comm import Communication
 from pvscore.model.crm.customer import Customer
+from pvscore.model.crm.company import Enterprise
 
 # T pvscore.tests.controllers.test_crm_comm
-
-TEST_CUSTOMER_ID = 220
 
 class TestCrmCommunication(TestController):
     
@@ -89,16 +88,19 @@ class TestCrmCommunication(TestController):
 
     @secure
     def test_view_comm_dialog(self):
-        cust = Customer.load(TEST_CUSTOMER_ID)
+        ent = Enterprise.find_all()[0]
+        cust = self.get_customer()
+        comm = Communication.find_all(ent.enterprise_id)[0]
         order = cust.get_active_orders()[0]
-        R = self.get('/crm/communication/view_comm_dialog/%s/3?order_id=%s&dialog=1' % (TEST_CUSTOMER_ID, order.order_id))
+        R = self.get('/crm/communication/view_comm_dialog/%s/%s?order_id=%s&dialog=1' % (cust.customer_id, comm.comm_id, order.order_id))
         self.assertEqual(R.status_int, 200)
         R.mustcontain('%s %s' % (cust.fname, cust.lname))
 
 
     @secure
     def test_send_comm_dialog(self):
-        R = self.get('/crm/communication/send_comm_dialog?customer_id=%s&dialog=1' % TEST_CUSTOMER_ID)
+        cust = self.get_customer()
+        R = self.get('/crm/communication/send_comm_dialog?customer_id=%s&dialog=1' % cust.customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Invoice')
 

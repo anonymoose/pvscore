@@ -15,7 +15,7 @@ class UsersController(BaseController):
     @view_config(route_name='crm.users.edit', renderer='/crm/users.edit.mako')
     @authorize(IsLoggedIn())
     def edit(self):
-        return self._edit_impl(self.request.matchdict.get('username'))
+        return self._edit_impl(self.request.matchdict.get('user_id'))
 
         
     @view_config(route_name='crm.users.new', renderer='/crm/users.edit.mako')
@@ -27,13 +27,13 @@ class UsersController(BaseController):
     @view_config(route_name='crm.users.edit_current', renderer='/crm/users.edit.mako')
     @authorize(IsLoggedIn())
     def edit_current(self):
-        return self._edit_impl(self.request.ctx.user.username)
+        return HTTPFound('/crm/users/edit/%s' % self.request.ctx.user.user_id)
 
 
-    def _edit_impl(self, username=None):
+    def _edit_impl(self, user_id=None):
         user = priv = None
-        if username:
-            user = self.request.ctx.user if self.request.ctx.user.username == username else Users.load(username)
+        if user_id:
+            user = self.request.ctx.user if self.request.ctx.user.user_id == user_id else Users.load(user_id)
             priv = user.priv if user.priv else UserPriv()
         else:
             user = Users()
@@ -63,7 +63,7 @@ class UsersController(BaseController):
                ('email', 'email'),
                ('password', 'equals', 'confirm')))
     def save(self):
-        usr = Users.find_by_uid(self.request.POST.get('username'))
+        usr = Users.load(self.request.POST.get('user_id'))
         if not usr:
             usr = Users()
             usr.enterprise_id = self.enterprise_id
@@ -83,18 +83,19 @@ class UsersController(BaseController):
         else:
             usr.password = orig_pass
         usr.save()
+        usr.flush()
 
-        self.request.session.flash('Saved user %s' % usr.username)
-        return HTTPFound('/crm/users/edit/%s' % usr.username)
+        self.request.session.flash('Saved user %s' % usr.user_id)
+        return HTTPFound('/crm/users/edit/%s' % usr.user_id)
 
 
     @view_config(route_name='crm.users.save_password', renderer='string')
     @authorize(IsLoggedIn())
-    @validate((('username', 'required'),
+    @validate((('user_id', 'required'),
                ('password', 'required')))
     def save_password(self):
-        username = self.request.POST.get('username')
-        usr = Users.load(username)
+        user_id = self.request.POST.get('user_id')
+        usr = Users.load(user_id)
         self.forbid_if(not usr or usr.enterprise_id != self.enterprise_id)
         usr.bind(self.request.POST, False, self.request.GET.get('pfx'))
         usr.password = Users.encode_password(usr.password)

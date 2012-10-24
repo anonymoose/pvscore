@@ -10,6 +10,8 @@ from pvscore.model.core.asset import Asset
 import pvscore.lib.db as db
 #from pvscore.model.core.attribute import AttributeValue
 from hashlib import md5
+import uuid
+from pvscore.lib.sqla import GUID
 
 log = logging.getLogger(__name__)
 
@@ -17,10 +19,11 @@ class Listing(ORMBase, BaseModel):
     __tablename__ = 'pvs_listing'
     __pk__ = 'listing_id'
 
-    listing_id = Column(Integer, primary_key = True)
-    customer_id = Column(Integer, ForeignKey('crm_customer.customer_id'))
-    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
-    site_id = Column(Integer, ForeignKey('cms_site.site_id'))
+    listing_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    customer_id = Column(GUID, ForeignKey('crm_customer.customer_id'))
+    company_id = Column(GUID, ForeignKey('crm_company.company_id'))
+    site_id = Column(GUID, ForeignKey('cms_site.site_id'))
+    status_id = Column(Integer, ForeignKey('core_status.status_id'))
     title = Column(String(255))
     description = Column(Text)
     category = Column(String(50))
@@ -37,7 +40,6 @@ class Listing(ORMBase, BaseModel):
     dma = Column(Integer)
     create_dt = Column(DateTime, server_default = text('now()'))
     delete_dt = Column(Date)
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
 
     customer = relation('Customer')
     company = relation('Company')
@@ -85,12 +87,12 @@ class Listing(ORMBase, BaseModel):
                                     and c.enterprise_id = ent.enterprise_id
                                     and l.delete_dt is null
                                     and e.short_name not in ('CLOSED', 'OPEN', 'APPROVED', 'DECLINED')
-                                    and ent.enterprise_id = %s order by l.create_dt""" % enterprise_id)
+                                    and ent.enterprise_id = '%s' order by l.create_dt""" % enterprise_id)
 
 
     @staticmethod
     def full_delete(listing_id):
-        Session.execute('delete from pvs_listing where listing_id = %s' % listing_id)
+        Session.execute("delete from pvs_listing where listing_id = '%s'" % listing_id)
 
 
 

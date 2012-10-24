@@ -61,7 +61,7 @@ class ReportController(BaseController):
             companies = util.select_list(Company.find_all(self.enterprise_id), 'company_id', 'name', True)
 
         if report.show_user_id:
-            users = util.select_list(Users.find_all(self.enterprise_id), 'username', 'username', True)
+            users = util.select_list(Users.find_all(self.enterprise_id), 'user_id', 'user_id', True)
 
         if report.show_product_id:
             products = util.select_list(Product.find_all(self.enterprise_id), 'product_id', 'name', True)

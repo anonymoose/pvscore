@@ -9,9 +9,9 @@
     % for a in appointments:
     <tr>
       % if a.customer_id:
-      <td nowrap>${h.link_to(a.title, '/crm/appointment/edit_for_customer/%d/%d' % (a.customer_id, a.appointment_id))}</td>
+      <td nowrap>${h.link_to(a.title, '/crm/appointment/edit_for_customer/%s/%s' % (a.customer_id, a.appointment_id))}</td>
       % else:
-      <td nowrap>${h.link_to(a.title, '/crm/appointment/edit/%d' % a.appointment_id)}</td>
+      <td nowrap>${h.link_to(a.title, '/crm/appointment/edit/%s' % a.appointment_id)}</td>
       % endif
       <td nowrap>${a.start_dt} @ ${a.start_time}</td>
     </tr>

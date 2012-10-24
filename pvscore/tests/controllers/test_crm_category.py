@@ -29,20 +29,18 @@ class TestCrmCategory(TestController):
 
 
     def _delete_new(self, category_id):
-        ProductCategory.full_delete(int(str(category_id)))
+        ProductCategory.full_delete(category_id)
         self.commit()
 
 
     @secure
     def test_save_existing(self):
         ent = Enterprise.find_all()[0]
-
         category_id = self._create_new()
         R = self.get('/crm/product/category/list')
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Test Category')
         R.mustcontain('Product Search')
-
         R = self.get('/crm/product/category/edit/%s' % category_id)
         R.mustcontain('Edit Product Category')
         f = R.forms['frm_category']
@@ -50,27 +48,21 @@ class TestCrmCategory(TestController):
         self.assertEqual(f['name'].value, 'Test Category')
         self.assertEqual(f['seo_keywords'].value, 'SEO Test')
         self.assertEqual(f['description'].value, 'Test Description')
-        
         f.set('name', 'Test Category New')
         f.set('seo_keywords', 'SEO Test New')
-
         for prd in Product.find_all(ent.enterprise_id)[:3]:
             f.set('child_incl_%s' % prd.product_id, prd.product_id)
-
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
         self.assertEqual(R.status_int, 200)
         f = R.forms['frm_category']
         R.mustcontain('Edit Product Category')
-
         self.assertEqual(f['category_id'].value, category_id)
         self.assertEqual(f['name'].value, 'Test Category New')
         self.assertEqual(f['seo_keywords'].value, 'SEO Test New')
-
         for prd in Product.find_all(ent.enterprise_id)[:3]:
             self.assertEqual(f['child_incl_%s' % prd.product_id].checked, True)
-
         self._delete_new(category_id)
 
 

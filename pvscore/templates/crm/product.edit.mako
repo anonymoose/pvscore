@@ -29,7 +29,7 @@
               <div class="span3">
                 % if len(product_categories) >= 1:
                 <label for="category_id">Category</label>
-                ${h.select('category_id', product_categories[0].category_id if len(product_categories) == 1 else None, categories)}
+                ${h.select('category_id', str(product_categories[0].category_id) if len(product_categories) == 1 else None, categories)}
                 % endif
               </div>
             </div> 
@@ -78,7 +78,7 @@
                 <div class="row">
                   <div class="span3">
                     <label for="company_id">Company</label>
-                    ${h.select('company_id', product.company_id, companies)}
+                    ${h.select('company_id', str(product.company_id), companies)}
                   </div>
                   <div class="span3">
                     <label for="type">Product Type</label>
@@ -171,7 +171,7 @@
                   % if not request.ctx.user.is_vendor_user():
                   <div class="span3">
                     <label for="vendor_id">Supplier</label>
-                    ${h.select('vendor_id', product.vendor_id, vendors)}
+                    ${h.select('vendor_id', str(product.vendor_id), vendors)}
                   </div>
                   % endif
                 </div>
@@ -218,8 +218,8 @@
                 % for cmp in campaigns:
                 <tr>
                   <td nowrap>${cmp.name}</td>
-                  <td>${h.text('campaign_price[%d]' % cmp.campaign_id, class_="input-small", value=h.money(product.get_retail_price(cmp)))}</td>
-                  <td>${h.text('campaign_discount[%d]' % cmp.campaign_id, class_="input-small", value=h.money(product.get_discount_price(cmp)))}</td>
+                  <td>${h.text('campaign_price[%s]' % cmp.campaign_id, class_="input-small", value=h.money(product.get_retail_price(cmp)))}</td>
+                  <td>${h.text('campaign_discount[%s]' % cmp.campaign_id, class_="input-small", value=h.money(product.get_discount_price(cmp)))}</td>
                 </tr>
                 % endfor
               </table>
@@ -239,16 +239,16 @@
                   % for p in children:
                   <tr>
                     <td>${p.child.name}</td>
-                    <td nowrap>${h.checkbox('child_incl_%d' % p.child.product_id, checked=True, value=p.child.product_id, class_='product_chk')}</td>
-                    <td nowrap>${h.text('child_quantity_%d' % p.child.product_id, value=p.child_quantity, class_="input-small")}</td>
+                    <td nowrap>${h.checkbox('child_incl_%s' % p.child.product_id, checked=True, value=p.child.product_id, class_='product_chk')}</td>
+                    <td nowrap>${h.text('child_quantity_%s' % p.child.product_id, value=p.child_quantity, class_="input-small")}</td>
                   </tr>
                   % endfor
                   
                   % for p in non_children:
                   <tr>
                     <td>${p.name}</td>
-                    <td nowrap>${h.checkbox('child_incl_%d' % p.product_id, value=p.product_id, class_='product_chk')}</td>
-                    <td nowrap>${h.text('child_quantity_%d' % p.product_id, class_="input-small")}</td>
+                    <td nowrap>${h.checkbox('child_incl_%s' % p.product_id, value=p.product_id, class_='product_chk')}</td>
+                    <td nowrap>${h.text('child_quantity_%s' % p.product_id, class_="input-small")}</td>
                   </tr>
                   % endfor
                 </table>

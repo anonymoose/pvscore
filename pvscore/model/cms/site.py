@@ -12,6 +12,8 @@ from pvscore.model.crm.company import Company
 from hashlib import md5
 from pvscore.lib.dbcache import FromCache, invalidate
 import logging
+import uuid
+from pvscore.lib.sqla import GUID
 
 log = logging.getLogger(__name__)
 
@@ -20,18 +22,18 @@ class Site(ORMBase, BaseModel):
     __tablename__ = 'cms_site'
     __pk__ = 'site_id'
 
-    site_id = Column(Integer, primary_key = True)
+    site_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    company_id = Column(GUID, ForeignKey('crm_company.company_id'))
+    default_campaign_id = Column(GUID, ForeignKey('crm_campaign.campaign_id'))
+    user_created = Column(GUID, ForeignKey('core_user.user_id'))
     domain = Column(String(50))
     domain_alias0 = Column(String(50))
     domain_alias1 = Column(String(50))
     domain_alias2 = Column(String(50))
-    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
-    default_campaign_id = Column(Integer, ForeignKey('crm_campaign.campaign_id'))
     description = Column(String(100))
     root_page_id = Column(Integer)
     create_dt = Column(Date, server_default = text('now()'))
     delete_dt = Column(Date)
-    user_created = Column(String(50), ForeignKey('core_user.username'))
     header_code = Column(String(1000))
     footer_code = Column(String(1000))
     seo_title = Column(String(512))
@@ -46,30 +48,10 @@ class Site(ORMBase, BaseModel):
 
     company = relation('Company', lazy='joined')
     default_campaign = relation('Campaign', lazy='joined')
-    creator = relation('Users', primaryjoin=Users.username == user_created)
+    creator = relation('Users', primaryjoin=Users.user_id == user_created)
 
     def __repr__(self):
         return '%s : %s' % (self.domain, self.company.name)
-
-
-    # def get_config(self):
-    #     #dir = '/Users/kbedwell/dev/pydev/wm/app/sites/' + self.site_directory
-    #     #cache_key = 'site.config.%s' % self.site_id
-    #     #if not util.cache_has_key(cache_key):
-    #     directory = self.site_full_directory
-    #     cfgfile = directory + '/site.config'
-    #     if os.path.exists(cfgfile):
-    #         config = ConfigParser.ConfigParser()
-    #         config.read(cfgfile)
-    #         return config
-
-
-    # def get_shipping(self):
-    #     from pvscore.lib.plugin import plugin_registry
-    #     cfg = self.get_config()
-    #     shipping_type = cfg.get('SHIPPING', 'type')
-    #     pe = plugin_registry[shipping_type]
-    #     return pe.obj
 
 
     @staticmethod
@@ -164,3 +146,21 @@ class Site(ORMBase, BaseModel):
     #                                              f=asset_data.filename),
     #                          self).flush()
 
+    # def get_config(self):
+    #     #dir = '/Users/kbedwell/dev/pydev/wm/app/sites/' + self.site_directory
+    #     #cache_key = 'site.config.%s' % self.site_id
+    #     #if not util.cache_has_key(cache_key):
+    #     directory = self.site_full_directory
+    #     cfgfile = directory + '/site.config'
+    #     if os.path.exists(cfgfile):
+    #         config = ConfigParser.ConfigParser()
+    #         config.read(cfgfile)
+    #         return config
+
+
+    # def get_shipping(self):
+    #     from pvscore.lib.plugin import plugin_registry
+    #     cfg = self.get_config()
+    #     shipping_type = cfg.get('SHIPPING', 'type')
+    #     pe = plugin_registry[shipping_type]
+    #     return pe.obj

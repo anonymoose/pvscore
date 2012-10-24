@@ -21,7 +21,7 @@
           </div>
           <div class="span3">
             <label for="default_campaign_id">Default Campaign</label>
-            ${h.select('default_campaign_id', company.default_campaign_id, campaigns)}
+            ${h.select('default_campaign_id', str(company.default_campaign_id), campaigns)}
           </div>
         </div>
       </div>

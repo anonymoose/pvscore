@@ -60,7 +60,7 @@
     <tbody>
       % for cust in customers:
       <tr>
-        <td>${h.link_to(cust.email if cust.email else '*no email*', '/crm/customer/edit/%d' % cust.customer_id)}</td>
+        <td>${h.link_to(cust.email if cust.email else '*no email*', '/crm/customer/edit/%s' % cust.customer_id)}</td>
         <td>${cust.fname}</td>
         <td>${cust.lname}</td>
         <td>${cust.phone}</td>

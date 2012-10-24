@@ -17,7 +17,7 @@
       % for v in vendors:
       <tr>
         <td>${v.vendor_id}</td>
-        <td>${h.link_to(v.name, '/crm/purchase/vendor/edit/%d' % v.vendor_id)}</td>
+        <td>${h.link_to(v.name, '/crm/purchase/vendor/edit/%s' % v.vendor_id)}</td>
         <td nowrap>${v.create_dt}</td>
       </tr>
       % endfor

@@ -6,6 +6,8 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.core.users import Users
 import logging
+import uuid
+from pvscore.lib.sqla import GUID
 
 log = logging.getLogger(__name__)
 
@@ -13,15 +15,16 @@ class Appointment(ORMBase, BaseModel):
     __tablename__ = 'crm_appointment'
     __pk__ = 'appointment_id'
 
-    appointment_id = Column(Integer, primary_key = True)
-    customer_id = Column(Integer, ForeignKey('crm_customer.customer_id'))
+    appointment_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    customer_id = Column(GUID, ForeignKey('crm_customer.customer_id'))
+    user_created = Column(GUID, ForeignKey('core_user.user_id'))
+    user_assigned = Column(GUID, ForeignKey('core_user.user_id'))
+    user_completed = Column(GUID, ForeignKey('core_user.user_id'))
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
     title = Column(String(255))
     description = Column(Text)
     calendar_type = Column(String(50))
     remind = Column(Boolean)
-    user_created = Column(String(50), ForeignKey('core_user.username'))
-    user_assigned = Column(String(50), ForeignKey('core_user.username'))
-    user_completed = Column(String(50), ForeignKey('core_user.username'))
     create_dt = Column(Date, server_default = text('now()'))
     delete_dt = Column(Date)
     completed_dt = Column(Date)
@@ -33,11 +36,10 @@ class Appointment(ORMBase, BaseModel):
     phone = Column(String(20))
     data_1 = Column(String(250))
     data_2 = Column(String(250))
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
 
-    creator = relation('Users', primaryjoin=Users.username == user_created)
-    completor = relation('Users', primaryjoin=Users.username == user_completed)
-    assigned = relation('Users', primaryjoin=Users.username == user_assigned)
+    creator = relation('Users', primaryjoin=Users.user_id == user_created)
+    completor = relation('Users', primaryjoin=Users.user_id == user_completed)
+    assigned = relation('Users', primaryjoin=Users.user_id == user_assigned)
     customer = relation('Customer', backref=backref('appointments'))
     status = relation('Status')
 
@@ -50,8 +52,8 @@ class Appointment(ORMBase, BaseModel):
         if description:
             d_clause = "and appt.description like '%%%s%%'" % description
         sql = """SELECT appt.* FROM crm_appointment appt, core_user u where
-                 u.username = appt.user_created
-                 and (u.enterprise_id = {entid} or u.enterprise_id is null)
+                 u.user_id = appt.user_created
+                 and (u.enterprise_id = '{entid}' or u.enterprise_id is null)
                 {title} {descr}""".format(entid=enterprise_id, 
                                           title=t_clause, 
                                           descr=d_clause)
@@ -78,7 +80,7 @@ class Appointment(ORMBase, BaseModel):
                                                             (user_created = :creator or user_assigned = :creator)
                                                             and date_part('month', start_dt) = :month
                                                             and date_part('year', start_dt) = :year 
-                                                            order by start_time asc""" ).params(creator=user.username, year=year, month=month).all()
+                                                            order by start_time asc""" ).params(creator=user.user_id, year=year, month=month).all()
 
 
     @staticmethod
@@ -88,10 +90,10 @@ class Appointment(ORMBase, BaseModel):
                                                             and date_part('month', start_dt) = :month
                                                             and date_part('year', start_dt) = :year 
                                                             and date_part('day', start_dt) = :day
-                                                            order by start_time asc""").params(creator=user.username, year=year, month=month, day=day).all()
+                                                            order by start_time asc""").params(creator=user.user_id, year=year, month=month, day=day).all()
 
     @staticmethod
     def full_delete(appointment_id):
-        Session.execute("delete from crm_appointment where appointment_id = %s" % appointment_id)
+        Session.execute("delete from crm_appointment where appointment_id = '%s'" % appointment_id)
 
         

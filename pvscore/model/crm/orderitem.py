@@ -6,6 +6,8 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 import logging
 import pvscore.lib.util as util
+import uuid
+from pvscore.lib.sqla import GUID
 
 log = logging.getLogger(__name__)
 
@@ -13,8 +15,12 @@ class OrderItem(ORMBase, BaseModel):
     __tablename__ = 'crm_order_item'
     __pk__ = 'order_item_id'
 
-    order_item_id = Column(Integer, primary_key = True)
-    order_id = Column(Integer, ForeignKey('crm_customer_order.order_id'))
+    order_item_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    order_id = Column(GUID, ForeignKey('crm_customer_order.order_id'))
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
+    user_created = Column(GUID, ForeignKey('core_user.user_id'))
+    product_id = Column(GUID, ForeignKey('crm_product.product_id'))
+    parent_id = Column(GUID, ForeignKey('crm_order_item.order_item_id'))
     name = Column(String(100))
     unit_cost = Column(Float)
     unit_price = Column(Float)
@@ -23,10 +29,6 @@ class OrderItem(ORMBase, BaseModel):
     create_dt = Column(Date, server_default = text('now()'))
     delete_dt = Column(Date)
     quantity = Column(Float)
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
-    user_created = Column(String(50), ForeignKey('core_user.username'))
-    product_id = Column(Integer, ForeignKey('crm_product.product_id'))
-    parent_id = Column(Integer, ForeignKey('crm_order_item.order_item_id'))
     tax = Column(Float, default=0.0)
 
     order = relation('CustomerOrder', lazy="joined")
@@ -48,9 +50,9 @@ class OrderItemTermsAcceptance(ORMBase, BaseModel):
     __tablename__ = 'crm_oi_terms_acceptance'
     __pk__ = 'oi_terms_acceptance_id'
 
-    oi_terms_acceptance_id = Column(Integer, primary_key = True)
-    order_id = Column(Integer, ForeignKey('crm_customer_order.order_id'))
-    order_item_id = Column(Integer, ForeignKey('crm_order_item.order_item_id'))
+    oi_terms_acceptance_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    order_id = Column(GUID, ForeignKey('crm_customer_order.order_id'))
+    order_item_id = Column(GUID, ForeignKey('crm_order_item.order_item_id'))
     create_dt = Column(DateTime, server_default = text('now()'))
     delete_dt = Column(Date)
     signature = Column(String(100))
@@ -86,4 +88,3 @@ class OrderItemTermsAcceptance(ORMBase, BaseModel):
     #     from pvscore.model.core.status import Status
     #     sts = Status.find_by_event(self.order.customer, self, event)
     #     return (sts and len(sts) > 0)
-    

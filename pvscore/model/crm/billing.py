@@ -5,14 +5,18 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel
 from pvscore.model.core.users import Users
+import uuid
+from pvscore.lib.sqla import GUID
+
 
 class Billing(ORMBase, BaseModel):
     __tablename__ = 'crm_billing'
     __pk__ = 'billing_id'
 
-    billing_id = Column(Integer, primary_key = True)
+    billing_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
+    user_created = Column(GUID, ForeignKey('core_user.user_id'))
     note = Column(String(50))
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
     type = Column(String(50), server_default='Credit Card')
     account_holder = Column(String(50))
     account_addr = Column(String(50))
@@ -27,9 +31,8 @@ class Billing(ORMBase, BaseModel):
     is_primary = Column(Boolean, default = True)
     create_dt = Column(Date, server_default = text('now()'))
     delete_dt = Column(Date)
-    user_created = Column(String(50), ForeignKey('core_user.username'))
 
-    creator = relation('Users', primaryjoin=Users.username == user_created)
+    creator = relation('Users', primaryjoin=Users.user_id == user_created)
     status = relation('Status')
 
     _cc_num = None
@@ -66,10 +69,10 @@ class BillingHistory(ORMBase, BaseModel):
     __tablename__ = 'crm_billing_history'
     __pk__ = 'billing_history_id'
 
-    billing_history_id = Column(Integer, primary_key = True)
-    billing_id = Column(Integer, ForeignKey('crm_billing.billing_id'))
-    order_id = Column(Integer, ForeignKey('crm_customer_order.order_id'))
-    customer_id = Column(Integer, ForeignKey('crm_customer.customer_id'))
+    billing_history_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    billing_id = Column(GUID, ForeignKey('crm_billing.billing_id'))
+    order_id = Column(GUID, ForeignKey('crm_customer_order.order_id'))
+    customer_id = Column(GUID, ForeignKey('crm_customer.customer_id'))
     status_msg = Column(String(50))
     parent = Column(String(50))
     reference = Column(String(50))

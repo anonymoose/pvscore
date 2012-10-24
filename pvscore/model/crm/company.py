@@ -9,16 +9,19 @@ import pvscore.lib.util as util
 from pvscore.lib.dbcache import FromCache, invalidate
 import pvscore.lib.db as db
 from pvscore.lib.mail import MailInfo
+import uuid
+from pvscore.lib.sqla import GUID
 
 
 class Company(ORMBase, BaseModel):
     __tablename__ = 'crm_company'
     __pk__ = 'company_id'
 
-    company_id = Column(Integer, primary_key = True)
-    enterprise_id = Column(Integer, ForeignKey('crm_enterprise.enterprise_id'))
+    company_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
+    default_campaign_id = Column(GUID, ForeignKey('crm_campaign.campaign_id'))
     name = Column(String(50))
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
     paypal_id = Column(String(256))
     create_dt = Column(Date, server_default = text('now()'))
     delete_dt = Column(Date)
@@ -44,7 +47,6 @@ class Company(ORMBase, BaseModel):
     imap_username = Column(String(50))
     imap_password = Column(String(50))
 
-    default_campaign_id = Column(Integer)
 
     enterprise = relation('Enterprise', lazy="joined", backref=backref('companies', order_by='Company.name'))
     status = relation('Status')
@@ -122,7 +124,7 @@ class Company(ORMBase, BaseModel):
 
     @property
     def web_directory(self):
-        return md5(str(self.company_id)).hexdigest()
+        return str(self.company_id)
 
 
     def create_dir_structure(self):
@@ -137,7 +139,7 @@ class Enterprise(ORMBase, BaseModel):
     __tablename__ = 'crm_enterprise'
     __pk__ = 'enterprise_id'
 
-    enterprise_id = Column(Integer, primary_key = True)
+    enterprise_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     name = Column(String(50))
     crm_style = Column(Text)
     # KB: [2011-12-04]: If this enterprise is created because of a customer relationship in another enterprise, put that FK here.
@@ -221,58 +223,58 @@ class Enterprise(ORMBase, BaseModel):
     @staticmethod
     def full_delete(enterprise_id):
         from pvscore.model.crm.customer import Customer
-        company_ids = db.get_list('select company_id from crm_company where enterprise_id = %s' % enterprise_id)
+        company_ids = db.get_list("select company_id from crm_company where enterprise_id = '%s'" % enterprise_id)
         campaign_ids = db.get_list("""select campaign_id from crm_campaign where
-                                      company_id in (select company_id from crm_company where enterprise_id = %s)""" % enterprise_id)
+                                      company_id in (select company_id from crm_company where enterprise_id = '%s')""" % enterprise_id)
 
         customer_ids = db.get_list("""select customer_id from crm_customer where
                                       campaign_id in (select campaign_id from crm_campaign where
-                                          company_id in (select company_id from crm_company where enterprise_id = %s))""" % enterprise_id)
+                                          company_id in (select company_id from crm_company where enterprise_id = '%s'))""" % enterprise_id)
         product_ids = db.get_list("""select product_id from crm_product where
-                                     company_id in (select company_id from crm_company where enterprise_id = %s)""" % enterprise_id)
+                                     company_id in (select company_id from crm_company where enterprise_id = '%s')""" % enterprise_id)
 
         for cid in customer_ids:
             Customer.full_delete(cid[0])
 
         for pid in product_ids:
             product_id = pid[0]
-            Session.execute('delete from crm_product_return where product_id = %s' % product_id)
-            Session.execute('delete from crm_product_category_join where product_id = %s' % product_id)
-            Session.execute('delete from crm_product_child where parent_id = %s' % product_id)
-            Session.execute('delete from crm_product_child where child_id = %s' % product_id)
-            Session.execute('delete from crm_product_pricing where product_id = %d' % product_id)
-            Session.execute('delete from crm_product_inventory_journal where product_id = %d' % product_id)
-            Session.execute('delete from crm_purchase_order_item where product_id = %d' % product_id)
-            Session.execute('delete from crm_order_item where product_id = %d' % product_id)
-            Session.execute('delete from crm_product where product_id = %d' % product_id)
+            Session.execute("delete from crm_product_return where product_id = '%s'" % product_id)
+            Session.execute("delete from crm_product_category_join where product_id = '%s'" % product_id)
+            Session.execute("delete from crm_product_child where parent_id = '%s'" % product_id)
+            Session.execute("delete from crm_product_child where child_id = '%s'" % product_id)
+            Session.execute("delete from crm_product_pricing where product_id = '%d'" % product_id)
+            Session.execute("delete from crm_product_inventory_journal where product_id = '%d'" % product_id)
+            Session.execute("delete from crm_purchase_order_item where product_id = '%d'" % product_id)
+            Session.execute("delete from crm_order_item where product_id = '%d'" % product_id)
+            Session.execute("delete from crm_product where product_id = '%d'" % product_id)
 
         for cid in campaign_ids:
             campaign_id = cid[0]
-            Session.execute('delete from crm_product_pricing where campaign_id = %s' % campaign_id)
+            Session.execute("delete from crm_product_pricing where campaign_id = '%s'" % campaign_id)
 
         for cid in company_ids:
             company_id = cid[0]
-            Session.execute('delete from crm_product_category where company_id = %s' % company_id)
-            Session.execute('delete from crm_report where company_id = %s' % company_id)
+            Session.execute("delete from crm_product_category where company_id = '%s'" % company_id)
+            Session.execute("delete from crm_report where company_id = '%s'" % company_id)
             Session.execute("""delete from cms_content
                                 where page_id in (select page_id from cms_page where site_id in
-                                                      (select site_id from cms_site where company_id = %s))""" % company_id)
-            Session.execute('delete from cms_page where site_id in (select site_id from cms_site where company_id = %s)' % company_id)
-            Session.execute('delete from cms_site where company_id = %s' % company_id)
-            Session.execute('update crm_company set default_campaign_id = null where company_id = %s' % company_id)
-            Session.execute('delete from crm_campaign where company_id = %s' % company_id)
-            Session.execute('delete from crm_purchase_order where company_id = %s' % company_id)
+                                                      (select site_id from cms_site where company_id = '%s'))""" % company_id)
+            Session.execute("delete from cms_page where site_id in (select site_id from cms_site where company_id = '%s')" % company_id)
+            Session.execute("delete from cms_site where company_id = '%s'" % company_id)
+            Session.execute("update crm_company set default_campaign_id = null where company_id = '%s'" % company_id)
+            Session.execute("delete from crm_campaign where company_id = '%s'" % company_id)
+            Session.execute("delete from crm_purchase_order where company_id = '%s'" % company_id)
 
-        Session.execute('delete from crm_communication where enterprise_id = %s' % enterprise_id)
-        Session.execute('delete from core_status where event_id in (select event_id from core_status_event where enterprise_id = %s)' % enterprise_id)
-        Session.execute('delete from core_status_event_reason where event_id in (select event_id from core_status_event where enterprise_id = %s)' % enterprise_id)
-        Session.execute('delete from core_status_event where enterprise_id = %s' % enterprise_id)
-        Session.execute('delete from cms_template where enterprise_id = %s' % enterprise_id)
-        Session.execute('delete from crm_company where enterprise_id = %s' % enterprise_id)
-        #Session.execute('update core_user set enterprise_id = null where enterprise_id = %s' % enterprise_id)
-        Session.execute('delete from core_user where enterprise_id = %s' % enterprise_id)
-        Session.execute('delete from crm_vendor where enterprise_id = %s' % enterprise_id)
-        Session.execute('delete from crm_enterprise where enterprise_id = %s' % enterprise_id)
+        Session.execute("delete from crm_communication where enterprise_id = '%s'" % enterprise_id)
+        Session.execute("delete from core_status where event_id in (select event_id from core_status_event where enterprise_id = '%s')" % enterprise_id)
+        Session.execute("delete from core_status_event_reason where event_id in (select event_id from core_status_event where enterprise_id = '%s')" % enterprise_id)
+        Session.execute("delete from core_status_event where enterprise_id = '%s'" % enterprise_id)
+        Session.execute("delete from cms_template where enterprise_id = '%s'" % enterprise_id)
+        Session.execute("delete from crm_company where enterprise_id = '%s'" % enterprise_id)
+        #Session.execute('update core_user set enterprise_id = null where enterprise_id = '%s'" % enterprise_id)
+        Session.execute("delete from core_user where enterprise_id = '%s'" % enterprise_id)
+        Session.execute("delete from crm_vendor where enterprise_id = '%s'" % enterprise_id)
+        Session.execute("delete from crm_enterprise where enterprise_id = '%s'" % enterprise_id)
 
 
 

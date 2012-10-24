@@ -37,8 +37,8 @@ class TestCrmProduct(TestController):
         f.set('attr_value[1]', 'attr1val')
 
         for camp in Campaign.find_by_company(comp):
-            f.set('campaign_price[%s]' % camp.campaign_id, camp.campaign_id)
-            f.set('campaign_discount[%s]' % camp.campaign_id, round(float(camp.campaign_id * 0.50), 2))
+            f.set('campaign_price[%s]' % camp.campaign_id, 20.0)
+            f.set('campaign_discount[%s]' % camp.campaign_id, 10.0)
 
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
@@ -52,7 +52,7 @@ class TestCrmProduct(TestController):
 
 
     def _delete_new(self, product_id):
-        Product.full_delete(int(str(product_id)))
+        Product.full_delete(product_id)
         self.commit()
 
 
@@ -201,7 +201,7 @@ class TestCrmProduct(TestController):
 
         for prod in Product.find_all_except(Product.load(product_id))[:3]:
             f.set('child_incl_%s' % prod.product_id, prod.product_id)
-            f.set('child_quantity_%s' % prod.product_id, prod.product_id)
+            f.set('child_quantity_%s' % prod.product_id, 2)
 
         f.set('campaign_price[%s]' % cmpns[0].campaign_id, "123")
         f.set('campaign_price[%s]' % cmpns[1].campaign_id, None)
@@ -230,7 +230,7 @@ class TestCrmProduct(TestController):
         self.assertEqual(25, InventoryJournal.total(prod))
 
         for prod in Product.find_all_except(Product.load(product_id))[:3]:
-            self.assertEqual(int(f['child_quantity_%s' % prod.product_id].value), prod.product_id)
+            self.assertEqual(int(f['child_quantity_%s' % prod.product_id].value), 2)
 
         #put pricing back.
         R = self.get('/crm/product/edit/%s' % product_id)

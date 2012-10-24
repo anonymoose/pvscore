@@ -28,7 +28,7 @@
               </div>
               <div class="span2">
                 <label for="campaign_id">Campaign</label>
-                ${h.select('campaign_id', customer.campaign.campaign_id, campaigns)}
+                ${h.select('campaign_id', str(customer.campaign.campaign_id), campaigns)}
               </div>
             </div>
             <div class="row">

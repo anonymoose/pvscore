@@ -112,7 +112,7 @@ class TestCrmPurchase(TestController):
         R.mustcontain('Purchase Order Search')
         
         f = R.forms['frm_purchase_search']
-        f.set('vendor_id', 21)
+        #f.set('vendor_id', 21)
         f.set('from_dt', '2000-01-01')
         f.set('to_dt', '2040-01-01')
         R = f.submit()

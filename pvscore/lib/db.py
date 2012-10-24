@@ -3,6 +3,7 @@ import logging
 from pvscore.model.meta import Session
 from pvscore.lib.util import DataObj
 import transaction
+import uuid
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +30,8 @@ def get_result_set(cols, sql, **kwargs):
     for row in get_list(sql, **kwargs):
         obj = {}
         for i in range(len(cols)):
-            obj[cols[i]] = row[i]
+            val = row[i]
+            obj[cols[i]] = val if type(val) != uuid.UUID else str(val)
         results.append(DataObj(obj))
     return results
 
@@ -39,7 +41,8 @@ def get_result_dict(cols, sql, **kwargs):
     for row in get_list(sql, **kwargs):
         obj = {}
         for i in range(len(cols)):
-            obj[cols[i]] = row[i]
+            val = row[i]
+            obj[cols[i]] = val if type(val) != uuid.UUID else str(val)
         results.append(obj)
     return results
 
@@ -49,11 +52,9 @@ def get_value(sql, **kwargs):
     if ret:
         return ret[0]
 
-
-
-
-# def get_column(sql, **kwargs):
-#     return [c[0] for c in Session.bind.execute(sql, **kwargs).fetchall()]
+def get_column(sql, **kwargs):
+    ret = [c[0] for c in Session.bind.execute(sql, **kwargs).fetchall()]
+    return ret if ret != [None] else []
 
 
 # def count(tbl, where=''):

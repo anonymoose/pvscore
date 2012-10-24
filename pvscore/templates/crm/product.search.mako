@@ -50,7 +50,7 @@ if hasattr(c, 'products') and len(c.products) == 1:
   <table class="results sortable">
     % for p in c.products:
     <tr>
-      <td nowrap>${h.link_to(p.name, '/crm/product/edit/%d' % p.product_id)}</td>
+      <td nowrap>${h.link_to(p.name, '/crm/product/edit/%s' % p.product_id)}</td>
       <td>${p.sku}</td>
       <td nowrap>${p.create_dt}</td>
     </tr>

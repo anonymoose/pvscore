@@ -120,7 +120,7 @@ select c.customer_id,
   where
   c.campaign_id = cmp.campaign_id
   and cmp.company_id = comp.company_id
-  and comp.enterprise_id = {enterprise_id}
+  and comp.enterprise_id = '{enterprise_id}'
 """)
         f.set('column_names', """
 ["Customer ID", "First Name", "Last Name", "Email", "Created",

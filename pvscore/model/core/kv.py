@@ -2,12 +2,15 @@ from sqlalchemy import Column
 from sqlalchemy.types import Integer, String, Date, Text
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel
+import uuid
+from pvscore.lib.sqla import GUID
+
 
 class KeyValue(ORMBase, BaseModel):
     __tablename__ = "core_key_value"
     __pk__ = 'id'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     key = Column(String(256))
     value = Column(Text)
     fk_type = Column(String(50))

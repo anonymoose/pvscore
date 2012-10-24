@@ -21,7 +21,7 @@
     % for d in c.discounts:
     <tr>
       <td>${d.discount_id}</td>
-      <td nowrap>${h.link_to(d.name, '/crm/discount/edit/%d' % d.discount_id)}</td>
+      <td nowrap>${h.link_to(d.name, '/crm/discount/edit/%s' % d.discount_id)}</td>
       <td nowrap>${d.name}</td>
       <td class="rt" nowrap>${h.money(d.percent_off)}</td>
       <td class="rt" nowrap>${h.money(d.amount_off)}</td>

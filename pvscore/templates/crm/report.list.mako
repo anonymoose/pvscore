@@ -14,8 +14,8 @@
     <tbody>
       % for cmp in reports:
       <tr>
-        <td nowrap>${h.link_to(cmp.name, '/crm/report/show/%d' % cmp.report_id)}</td>
-        <td>${h.link_to('Edit', '/crm/report/edit/%d' % cmp.report_id)}</td>
+        <td nowrap>${h.link_to(cmp.name, '/crm/report/show/%s' % cmp.report_id)}</td>
+        <td>${h.link_to('Edit', '/crm/report/edit/%s' % cmp.report_id)}</td>
       </tr>
       % endfor
     </tbody>

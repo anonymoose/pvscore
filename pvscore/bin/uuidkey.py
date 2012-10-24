@@ -2,6 +2,7 @@ import psycopg2
 import sys
 import uuid
 from pprint import pprint
+from hashlib import md5
 
 def list_tables(cur):
     cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
@@ -37,7 +38,12 @@ def add_uuid_col(cur, table_name, base_column_name):
 def get_pk_vals(cur, table_name, pk_col_name):
     cur.execute("select {col} from {tab}".format(col=pk_col_name, tab=table_name))
     return [val[0] for val in cur.fetchall()]
-    
+
+
+def get_old_and_new_pk_vals(cur, table_name, pk_col_name):
+    cur.execute("select {col}, {col}_uuid from {tab}".format(col=pk_col_name, tab=table_name))
+    return cur.fetchall()
+
 
 def update_uuid_for_pk(cur, table_name, pk_col_name, pk_val):
     cur.execute("""update {tab} set {col}_uuid = '{uid}'
@@ -121,28 +127,129 @@ def analyze_table(cur, table):
     cur.execute('analyze %s' % table);
 
 
-#
-# T = table list
-# for all t in T
-#     PK = primary key (t)
-#     if len(PK) == 1 and PK.type == integer
-#         pk = PK[0]
-#         alter table $t.table_name add column $pk.column_name+uuid uuid not null;
-#         ROWS = select $pk.column_name from $t.table_name
-#         for all row in ROWS:
-#             update $t.table_name set $pk.column_name+uuid = uuid.uuid4()
-#
-# for all t in T
-#     FK = foreign keys (t)
-#     for all fk in FK
-#         
-#         alter table $t.table_name drop $fk.constraint_name
-#
-#
-#
+def fix_user_table_pre(conn, cur):
+    #cur.execute('alter table core_user add column username_x varchar(50)')
+    #cur.execute('update core_user set username_x = username')
+    cur.execute('alter table core_user add column user_id integer default round(random() * 10000000)')
+    cur.execute('alter table core_user add constraint user_id_unique unique (user_id)')
+    cur.execute('alter table crm_appointment drop constraint appointment_user_completed_fkey')
+    cur.execute('alter table crm_appointment drop constraint appointment_user_created_fkey')
+    cur.execute('alter table cms_content drop constraint cms_content_user_created_fkey')
+    cur.execute('alter table cms_page drop constraint cms_page_user_created_fkey')
+    cur.execute('alter table cms_site drop constraint cms_site_user_created_fkey')
+    cur.execute('alter table crm_appointment drop constraint crm_appointment_user_assigned_fkey')
+    cur.execute('alter table crm_billing drop constraint crm_billing_user_created_fkey')
+    cur.execute('alter table crm_communication drop constraint crm_communication_user_created_fkey')
+    cur.execute('alter table crm_journal drop constraint crm_journal_user_created_fkey')
+    cur.execute('alter table crm_product_inventory_journal drop constraint crm_product_inventory_journal_user_created_fkey')
+    cur.execute('alter table crm_product_return drop constraint crm_product_return_user_created_fkey')
+    cur.execute('alter table crm_customer_order drop constraint customer_order_user_created_fkey')
+    cur.execute('alter table crm_customer drop constraint customer_user_assigned_fkey')
+    cur.execute('alter table crm_customer drop constraint customer_user_created_fkey')
+    cur.execute('alter table crm_order_item drop constraint order_item_user_created_fkey')
+    cur.execute('alter table core_status drop constraint status_username_fkey')
+    cur.execute('alter table core_user drop constraint users_pkey')
+    cur.execute('alter table core_user add primary key (user_id)')
+    cur.execute("select user_id, username from core_user")
+    users = cur.fetchall()
+    for usr in users:
+        userid = usr[0]
+        username = usr[1]
+        cur.execute("update crm_appointment set user_completed = '%s' where user_completed = '%s'" % (userid, username))
+        cur.execute("update crm_appointment set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update cms_content set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update cms_page set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update cms_site set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update crm_appointment set user_assigned = '%s' where user_assigned = '%s'" % (userid, username))
+        cur.execute("update crm_billing set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update crm_communication set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update crm_journal set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update crm_product_inventory_journal set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update crm_product_return set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update crm_customer_order set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update crm_customer set user_assigned = '%s' where user_assigned = '%s'" % (userid, username))
+        cur.execute("update crm_customer set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update crm_order_item set user_created = '%s' where user_created = '%s'" % (userid, username))
+        cur.execute("update core_status set username = '%s' where username = '%s'" % (userid, username))
+            
+    conn.commit()
+    cur.execute('alter table crm_appointment alter column user_completed set data type integer using cast (user_completed as integer)')
+    cur.execute('alter table crm_appointment alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table cms_content alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table cms_page alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table cms_site alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table crm_appointment alter column user_assigned set data type integer using cast (user_assigned as integer)')
+    cur.execute('alter table crm_billing alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table crm_communication alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table crm_journal alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table crm_product_inventory_journal alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table crm_product_return alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table crm_customer_order alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table crm_customer alter column user_assigned set data type integer using cast (user_assigned as integer)')
+    cur.execute('alter table crm_customer alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table crm_order_item alter column user_created set data type integer using cast (user_created as integer)')
+    cur.execute('alter table core_status alter column username set data type integer using cast (username as integer)')
+    conn.commit()
+
+    cur.execute('alter table crm_appointment add foreign key (user_completed) REFERENCES core_user')
+    cur.execute('alter table crm_appointment add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table cms_content add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table cms_page add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table cms_site add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table crm_appointment add foreign key (user_assigned) REFERENCES core_user')
+    cur.execute('alter table crm_billing add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table crm_communication add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table crm_journal add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table crm_product_inventory_journal add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table crm_product_return add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table crm_customer_order add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table crm_customer add foreign key (user_assigned) REFERENCES core_user')
+    cur.execute('alter table crm_customer add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table crm_order_item add foreign key (user_created) REFERENCES core_user')
+    cur.execute('alter table core_status add foreign key (username) REFERENCES core_user')
+    conn.commit()
+    
+def fix_fk_type_table(conn, cur, table):
+    cur.execute("alter table {table} add column fk_id_uuid uuid".format(table=table))
+
+    fk_types = [
+        ('Asset', 'core_asset', 'id'),
+        ('Campaign', 'crm_campaign', 'campaign_id'),
+        ('Communication', 'crm_communication', 'comm_id'),
+        ('Company', 'crm_company', 'company_id'),
+        ('Customer', 'crm_customer', 'customer_id'),
+        ('CustomerOrder', 'crm_customer_order', 'order_id'),
+        ('Enterprise', 'crm_enterprise', 'enterprise_id'),
+        ('Listing', 'pvs_listing', 'listing_id'),
+        ('OrderItem', 'crm_order_item', 'order_item_id'),
+        ('Product', 'crm_product', 'product_id'),
+        ('PurchaseOrder', 'crm_purchase_order', 'purchase_order_id')]
+
+    for fk_type in fk_types:
+        typ = fk_type[0]
+        far_table = fk_type[1]
+        far_col = fk_type[2]
+        print 'fix_fk_type_table %s : %s' % (table, typ)
+
+        cur.execute("select count(0) from {table} where fk_type = '{typ}'".format(table=table, typ=typ))
+        cnt = cur.fetchone()
+        if cnt[0] > 0:
+            cur.execute("""update {table} set fk_id_uuid
+                           = (select {far_col}_uuid from {far_table} where {far_col} = fk_id) where fk_type = '{typ}'""".format(table=table,
+                                                                                                                                far_col=far_col,
+                                                                                                                                far_table=far_table,
+                                                                                                                                typ=typ))
+    cur.execute("alter table {table} drop column fk_id".format(table=table))
+    cur.execute("alter table {table} rename column fk_id_uuid to fk_id".format(table=table))
+    conn.commit()
+
+
 if __name__ == '__main__':
     conn = psycopg2.connect("dbname=%s user=%s password=%s host=localhost" % (sys.argv[1], sys.argv[1], sys.argv[2]))
     cur = conn.cursor()
+
+    fix_user_table_pre(conn, cur)
+    conn.commit()
 
     tables = list_tables(cur)
 
@@ -226,6 +333,26 @@ if __name__ == '__main__':
             drop_constraint(cur, table, fk_constraint_name)
             conn.commit()
 
+    # fix fk_type/fk_id faux foreign key references.
+    fix_fk_type_table(conn, cur, 'core_attribute_value')
+    fix_fk_type_table(conn, cur, 'core_status')
+    fix_fk_type_table(conn, cur, 'core_asset')
+    fix_fk_type_table(conn, cur, 'core_key_value')
+
+    # dump all the table_name : integer key -> uuid key
+    with open('%s-keys.log' % sys.argv[1], 'w') as f:
+        for table in tables:
+            if not table in primary_keys:
+                continue
+            print "\n\n\ndumping keys on %s" % table
+            pkey = primary_keys[table]
+            pk_col_name = pkey[2]
+            pk_vals = get_old_and_new_pk_vals(cur, table, pk_col_name)
+            for i, pk_val in enumerate(pk_vals):
+                f.write('%s : %s : %s   md5 = %s\n' % (table, pk_val[0], pk_val[1], md5(str(pk_val)).hexdigest()))
+                if (i % 1000) == 0:
+                    print "    %s %s/%s" % (table, i+1, len(pk_vals))
+
     # drop integer columns and rename the *_uuid colums to the name of
     # the old pk columns
     for table in tables:
@@ -262,7 +389,6 @@ if __name__ == '__main__':
             idx_cols = idx[2]
             recreate_index(cur, table, idx_name, idx_cols)
             conn.commit()
-
 
     conn.set_isolation_level(0)
     # analyze and vacuum tables

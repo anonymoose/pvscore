@@ -6,6 +6,8 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 import pvscore.lib.util as util
 from pvscore.lib.dbcache import invalidate
+import uuid
+from pvscore.lib.sqla import GUID
 
 class Journal(ORMBase, BaseModel):
     """ KB: [2012-09-03]: 
@@ -56,12 +58,12 @@ class Journal(ORMBase, BaseModel):
     __tablename__ = 'crm_journal'
     __pk__ = 'journal_id'
 
-    journal_id = Column(Integer, primary_key = True)
-    customer_id = Column(Integer, ForeignKey('crm_customer.customer_id'))
-    order_id = Column(Integer, ForeignKey('crm_customer_order.order_id'))
+    journal_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    customer_id = Column(GUID, ForeignKey('crm_customer.customer_id'))
+    order_id = Column(GUID, ForeignKey('crm_customer_order.order_id'))
+    user_created = Column(GUID, ForeignKey('core_user.user_id'))
     create_dt = Column(Date, server_default = text('now()'))
     delete_dt = Column(Date)
-    user_created = Column(String(50), ForeignKey('core_user.username'))
     type = Column(String(30))
     note = Column(Text)
     method = Column(String(25))

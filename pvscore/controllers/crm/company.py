@@ -78,7 +78,7 @@ class CompanyController(BaseController):
                 comp.set_attr(attr_name, attr_value)
 
         self.request.session.flash('Successfully saved %s.' % comp.name)
-        return HTTPFound('/crm/company/edit/%d' % int(comp.company_id))
+        return HTTPFound('/crm/company/edit/%s' % comp.company_id)
 
 
     @view_config(route_name="crm.company.enterprise.quickstart", renderer="/crm/company.quick_start.mako")
@@ -97,56 +97,54 @@ class CompanyController(BaseController):
     @view_config(route_name="crm.company.enterprise.provision", renderer="/crm/company.quick_start.mako")
     @authorize(IsLoggedIn())
     def provision(self):
-        uname = self.request.POST.get('u_username')
-        if Users.is_unique_username(uname):
-            ent = Enterprise()
-            ent.bind(self.request.POST, True, 'ent')
-            ent.save()
-            ent.flush()
+        ent = Enterprise()
+        ent.bind(self.request.POST, True, 'ent')
+        ent.save()
+        ent.flush()
 
-            comp = Company()
-            comp.bind(self.request.POST, True, 'cmp')
-            comp.enterprise_id = ent.enterprise_id
-            comp.save()
-            comp.flush()
+        comp = Company()
+        comp.bind(self.request.POST, True, 'cmp')
+        comp.enterprise_id = ent.enterprise_id
+        comp.save()
+        comp.flush()
 
-            campaign = Campaign()
-            campaign.name = comp.name + ' Default'
-            campaign.company_id = comp.company_id
-            campaign.save()
-            campaign.flush()
+        campaign = Campaign()
+        campaign.name = comp.name + ' Default'
+        campaign.company_id = comp.company_id
+        campaign.save()
+        campaign.flush()
 
-            comp.default_campaign_id = campaign.campaign_id
-            comp.save()
-            comp.flush()
+        comp.default_campaign_id = campaign.campaign_id
+        comp.save()
+        comp.flush()
 
-            user = Users()
-            user.bind(self.request.POST, True, 'u')
-            user.password = Users.encode_password('password')
-            user.enterprise_id = ent.enterprise_id
-            user.type = 'Admin'
-            user.save()
-            user.flush()
+        user = Users()
+        user.bind(self.request.POST, True, 'u')
+        user.password = Users.encode_password('password')
+        user.enterprise_id = ent.enterprise_id
+        user.type = 'Admin'
+        user.save()
+        user.flush()
 
-            site = Site()
-            site.bind(self.request.POST, True, 'st')
-            site.company = comp
-            site.description = comp.name + ' Site'
-            site.creator = user
-            #site.template = Template.find_by_name('default')
-            site.save()
-            site.flush()
+        site = Site()
+        site.bind(self.request.POST, True, 'st')
+        site.company = comp
+        site.description = comp.name + ' Site'
+        site.creator = user
+        #site.template = Template.find_by_name('default')
+        site.save()
+        site.flush()
 
-            site.create_dir_structure()
+        site.create_dir_structure()
 
-            return {
-                'enterprise' : ent,
-                'company' : comp,
-                'campaign' : campaign,
-                'user' : user,
-                'site' : site,
-                'done' : True
-                }
+        return {
+            'enterprise' : ent,
+            'company' : comp,
+            'campaign' : campaign,
+            'user' : user,
+            'site' : site,
+            'done' : True
+            }
 
 
     @view_config(route_name='crm.company.enterprise.edit', renderer='/crm/company.edit_enterprise.mako')
@@ -196,7 +194,7 @@ class CompanyController(BaseController):
                 ent.set_attr(attr_name, attr_value)
 
         self.request.session.flash('Successfully saved %s.' % ent.name)
-        return HTTPFound('/crm/company/enterprise/edit/%d' % int(ent.enterprise_id))
+        return HTTPFound('/crm/company/enterprise/edit/%s' % ent.enterprise_id)
 
     
 

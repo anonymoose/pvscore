@@ -11,8 +11,6 @@ from pvscore.model.crm.journal import Journal
 
 # bin/T pvscore.tests.controllers.test_crm_customer
 
-TEST_CUSTOMER_ID = 220
-
 def find_customer(campaign):
     return Customer.find('amers_j@yahoo.com', campaign)
 
@@ -53,14 +51,19 @@ class TestCrmCustomer(TestController):
         customer_id = f['customer_id'].value
         self.assertNotEqual(f['customer_id'].value, '')
 
+        cust = Customer.load(customer_id)
+        assert cust != None and str(cust.customer_id) == customer_id
+        prods = Product.find_by_campaign(cust.campaign)
+        assert prods and len(prods) > 3
+
         # order 3 things and make sure they are there.
         R = self.get('/crm/customer/add_order_dialog/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Add Order')
         R = self.post('/crm/customer/add_order/%s' % str(customer_id),
-                      {'products[1451]' : '1.0',
-                       'products[1450]' : '2.0',
-                       'products[2090]' : '1.0'})  # <-- this one has inventory = 0
+                      {'products[%s]' % prods[0].product_id : '1.0',
+                       'products[%s]' % prods[1].product_id : '2.0',
+                       'products[%s]' % prods[2].product_id : '1.0'})  # <-- this one has inventory = 0
         self.assertEqual(R.status_int, 200)
         order_id = R.body
         order = CustomerOrder.load(order_id)
@@ -68,7 +71,7 @@ class TestCrmCustomer(TestController):
         self.assertNotEqual(order, None)
         oids = []
         for item in order.items:
-            self.assertEqual(item.product_id in (1451, 1450, 2090), True)
+            self.assertEqual(item.product_id in (prods[0].product_id, prods[1].product_id, prods[2].product_id), True)
             oids.append(item.order_item_id)
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
@@ -92,7 +95,7 @@ class TestCrmCustomer(TestController):
             post_data['order_items[%s][quantity]' % oitem.order_item_id] = oitem.quantity + 1
         post_data['order_items[999_][unit_price]'] = 25
         post_data['order_items[999_][quantity]'] = 1.00
-        post_data['order_items[999_][product_id]'] = 2090
+        post_data['order_items[999_][product_id]'] = prods[2].product_id
         post_data['order_items_to_delete[]'] = oids[0]
         R = self.post('/crm/customer/edit_order/%s/%s' % (str(customer_id), str(order_id)), post_data)
         order.invalidate_self()
@@ -112,7 +115,7 @@ class TestCrmCustomer(TestController):
 
 
     def _delete_new(self, customer_id):
-        Customer.full_delete(int(str(customer_id)))
+        Customer.full_delete(customer_id)
         self.commit()
 
 
@@ -124,36 +127,39 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_show_history(self):
-        customer_id = TEST_CUSTOMER_ID
+        customer_id = self._create_new()
         R = self.get('/crm/customer/edit/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R = self.get('/crm/customer/show_history/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Customer History')
         R.mustcontain('CustomerOrder Payment Applied')
+        self._delete_new(customer_id)
 
 
     @secure
     def test_show_billing(self):
-        customer_id = TEST_CUSTOMER_ID
+        customer_id = self._create_new()
         R = self.get('/crm/customer/edit/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R = self.get('/crm/customer/show_billings/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Customer Billing Activity')
         R.mustcontain('FullPayment')
-        R.mustcontain('CreditDecrease')
+        #R.mustcontain('CreditDecrease')
+        self._delete_new(customer_id)
 
 
     @secure
     def test_show_attributes(self):
-        customer_id = TEST_CUSTOMER_ID
+        customer_id = self._create_new()
         R = self.get('/crm/customer/edit/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R = self.get('/crm/customer/show_attributes/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Customer Attributes')
-
+        self._delete_new(customer_id)
+        
 
     @secure
     def test_search(self):
@@ -237,16 +243,22 @@ class TestCrmCustomer(TestController):
         R = self.get('/crm/customer/add_order_dialog/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Add Order')
+
+        cust = Customer.load(customer_id)
+        assert cust != None and str(cust.customer_id) == customer_id
+        prods = Product.find_by_campaign(cust.campaign)
+        assert prods and len(prods) > 3
+
         R = self.post('/crm/customer/add_order/%s' % str(customer_id),
-                      {'products[1451]' : '1.0',
-                       'products[1450]' : '2.0',
-                       'products[2090]' : '1.0'})  # <-- this one has inventory = 0
+                      {'products[%s]' % prods[0].product_id : '1.0',
+                       'products[%s]' % prods[1].product_id : '2.0',
+                       'products[%s]' % prods[2].product_id : '1.0'})  # <-- this one has inventory = 0
         self.assertEqual(R.status_int, 200)
         order_id = R.body
         order = CustomerOrder.load(order_id)
         self.assertNotEqual(order, None)
         for item in order.items:
-            self.assertEqual(item.product_id in (1451, 1450, 2090), True)
+            self.assertEqual(item.product_id in (prods[0].product_id, prods[1].product_id, prods[2].product_id), True)
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Edit Order (%s)' % order_id)
@@ -392,13 +404,17 @@ class TestCrmCustomer(TestController):
         R = self.get('/crm/customer/add_order_dialog/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Add Order')
-        R = self.post('/crm/customer/add_order/%s' % str(customer_id), {'products[1451]' : '1.0'})
+        cust = Customer.load(customer_id)
+        assert cust != None and str(cust.customer_id) == customer_id
+        prods = Product.find_by_campaign(cust.campaign)
+        assert prods and len(prods) > 3
+        R = self.post('/crm/customer/add_order/%s' % str(customer_id), {'products[%s]' % prods[0].product_id : '1.0'})
         self.assertEqual(R.status_int, 200)
         order_id = R.body
         order = CustomerOrder.load(order_id)
         self.assertNotEqual(order, None)
         item = order.items[0]
-        self.assertEqual(item.product_id, 1451)
+        self.assertEqual(item.product_id, prods[0].product_id)
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Edit Order (%s)' % order_id)

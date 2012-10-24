@@ -6,6 +6,8 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.crm.company import Company
 import logging
+import uuid
+from pvscore.lib.sqla import GUID
 
 log = logging.getLogger(__name__)
 
@@ -13,7 +15,7 @@ class Report(ORMBase, BaseModel):
     __tablename__ = 'crm_report'
     __pk__ = 'report_id'
 
-    report_id = Column(Integer, primary_key = True)
+    report_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     name = Column(String(100))
     description = Column(String(200))
     type = Column(String(50))
@@ -56,9 +58,9 @@ class ReportCompanyJoin(ORMBase, BaseModel):
     __tablename__ = 'crm_report_company_join'
     __pk__ = 'rcj_id'
 
-    rcj_id = Column(Integer, primary_key = True)
-    report_id = Column(Integer, ForeignKey('crm_report.report_id'))
-    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
+    rcj_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    report_id = Column(GUID, ForeignKey('crm_report.report_id'))
+    company_id = Column(GUID, ForeignKey('crm_company.company_id'))
 
     report = relation('Report')
     company = relation('Company', lazy='joined', primaryjoin=Company.company_id == company_id)

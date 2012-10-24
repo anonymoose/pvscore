@@ -4,18 +4,21 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.core.statusevent import StatusEvent
+import uuid
+from pvscore.lib.sqla import GUID
+#from pvscore.model.crm.customer import Customer
 
 
 class Status(ORMBase, BaseModel):
     __tablename__ = 'core_status'
     __pk__ = 'status_id'
 
-    status_id = Column(Integer, primary_key = True)
-    event_id = Column(Integer, ForeignKey('core_status_event.event_id'))
-    customer_id = Column(Integer)
+    status_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    event_id = Column(GUID, ForeignKey('core_status_event.event_id'))
+    username = Column(GUID, ForeignKey('core_user.user_id'))
+    customer_id = Column(GUID, ForeignKey('crm_customer.customer_id'))
     fk_type = Column(String(50))
     fk_id = Column(Integer)
-    username = Column(String(75), ForeignKey('core_user.username'))
     note = Column(Text)
     create_dt = Column(DateTime, server_default=text('now()'))
 
@@ -46,15 +49,6 @@ class Status(ORMBase, BaseModel):
         return StatusEvent.find(enterprise_id, type(obj).__name__, short_name)
 
 
-    # @staticmethod
-    # def find_by_event(customer, obj, event):
-    #     #pylint: disable-msg=E1101
-    #     return Session.query(Status).filter(and_(Status.customer_id==customer.customer_id,
-    #                                              Status.fk_id == getattr(obj, obj.__pk__),
-    #                                              Status.fk_type == type(obj).__name__,
-    #                                              Status.event == event)).order_by(Status.status_id.desc()).all()
-
-
     @staticmethod
     def find(obj):
         #pylint: disable-msg=E1101
@@ -71,3 +65,12 @@ class Status(ORMBase, BaseModel):
             .filter(Status.customer_id==customer.customer_id)\
             .order_by(Status.status_id.desc()).offset(offset).limit(limit).all()
 
+
+
+    # @staticmethod
+    # def find_by_event(customer, obj, event):
+    #     #pylint: disable-msg=E1101
+    #     return Session.query(Status).filter(and_(Status.customer_id==customer.customer_id,
+    #                                              Status.fk_id == getattr(obj, obj.__pk__),
+    #                                              Status.fk_type == type(obj).__name__,
+    #                                              Status.event == event)).order_by(Status.status_id.desc()).all()

@@ -4,13 +4,16 @@ from sqlalchemy.types import Integer, String, Date, Boolean
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
+import uuid
+from pvscore.lib.sqla import GUID
 
 
 class StatusEvent(ORMBase, BaseModel):
     __tablename__ = 'core_status_event'
     __pk__ = 'event_id'
 
-    event_id = Column(Integer, primary_key = True)
+    event_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
     event_type = Column(String(50))
     short_name = Column(String(50))
     display_name = Column(String(50))
@@ -27,7 +30,6 @@ class StatusEvent(ORMBase, BaseModel):
     change_status = Column(Boolean, default = False)
     touch = Column(Boolean, default = False)
     position = Column(Integer, default = 1)
-    enterprise_id = Column(Integer, ForeignKey('crm_enterprise.enterprise_id'))
     color = Column(String(15))
 
     enterprise = relation('Enterprise')
@@ -45,19 +47,6 @@ class StatusEvent(ORMBase, BaseModel):
                 'PurchaseOrder']
 
     
-    # @staticmethod
-    # def search(enterprise_id, display_name, short_name):
-    #     dn_clause = sn_clause = ''
-    #     if display_name:
-    #         dn_clause = "and se.display_name like '%%%s%%'" % display_name
-    #     if short_name:
-    #         sn_clause = "and se.short_name like '%%%s%%'" % short_name
-    #     sql = """SELECT * FROM core_status_event se
-    #              where se.enterprise_id = {ent_id}
-    #              {dn} {sn}""".format(dn=dn_clause, sn=sn_clause, ent_id=enterprise_id)
-    #     return Session.query(StatusEvent).from_statement(sql).all()
-
-
     @staticmethod
     def find(enterprise_id, event_type, short_name):
         return Session.query(StatusEvent).filter(and_(StatusEvent.event_type == event_type, 
@@ -85,4 +74,18 @@ class StatusEvent(ORMBase, BaseModel):
 
     @staticmethod
     def full_delete(event_id):
-        Session.execute("delete from core_status_event where event_id = %s" % event_id)
+        Session.execute("delete from core_status_event where event_id = '%s'" % event_id)
+
+
+    # @staticmethod
+    # def search(enterprise_id, display_name, short_name):
+    #     dn_clause = sn_clause = ''
+    #     if display_name:
+    #         dn_clause = "and se.display_name like '%%%s%%'" % display_name
+    #     if short_name:
+    #         sn_clause = "and se.short_name like '%%%s%%'" % short_name
+    #     sql = """SELECT * FROM core_status_event se
+    #              where se.enterprise_id = {ent_id}
+    #              {dn} {sn}""".format(dn=dn_clause, sn=sn_clause, ent_id=enterprise_id)
+    #     return Session.query(StatusEvent).from_statement(sql).all()
+

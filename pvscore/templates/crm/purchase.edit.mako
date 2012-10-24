@@ -39,11 +39,11 @@
             <div class="row">
               <div class="span3">
                 <label for="vendor_id">Supplier</label>
-                ${h.select('vendor_id', purchase.vendor_id, vendors)}
+                ${h.select('vendor_id', str(purchase.vendor_id), vendors)}
               </div>
               <div class="span3">
                 <label for="company_id">Company</label>
-                ${h.select('company_id', purchase.company_id, companies)}
+                ${h.select('company_id', str(purchase.company_id), companies)}
               </div>
             </div>
             <div class="row">

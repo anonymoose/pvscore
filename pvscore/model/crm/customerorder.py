@@ -12,6 +12,8 @@ from pvscore.model.core.status import Status
 import pvscore.lib.util as util
 from pvscore.model.crm.journal import Journal
 import logging
+import uuid
+from pvscore.lib.sqla import GUID
 
 log = logging.getLogger(__name__)
 
@@ -19,14 +21,14 @@ class CustomerOrder(ORMBase, BaseModel):
     __tablename__ = 'crm_customer_order'
     __pk__ = 'order_id'
 
-    order_id = Column(Integer, primary_key = True)
-    customer_id = Column(Integer, ForeignKey('crm_customer.customer_id'))
-    campaign_id = Column(Integer, ForeignKey('crm_campaign.campaign_id'))
+    order_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    customer_id = Column(GUID, ForeignKey('crm_customer.customer_id'))
+    campaign_id = Column(GUID, ForeignKey('crm_campaign.campaign_id'))
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
+    user_created = Column(GUID, ForeignKey('core_user.user_id'))
     create_dt = Column(Date, server_default = text('now()'))
     delete_dt = Column(Date)
     cancel_dt = Column(Date)
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
-    user_created = Column(String(50), ForeignKey('core_user.username'))
     note = Column(Text)
     shipping_note = Column(String(50))
     shipping_total = Column(Float)
@@ -38,7 +40,7 @@ class CustomerOrder(ORMBase, BaseModel):
     campaign = relation('Campaign')
     creator = relation('Users')
     status = relation('Status', lazy="joined")
-    items = relation('OrderItem', lazy="joined", order_by='asc(OrderItem.order_item_id)')
+    items = relation('OrderItem', lazy="joined", order_by='asc(OrderItem.create_dt)')
     journal_entries = relation('Journal', lazy="joined", backref=backref('order'), order_by='asc(Journal.journal_id)')
 
     @staticmethod
@@ -320,7 +322,7 @@ class MTDSalesByVendor(BaseAnalytic):
                     o.campaign_id = cmp.campaign_id and
                     oi.product_id = p.product_id and
                     cmp.company_id = co.company_id and
-                    co.enterprise_id = {entid} and
+                    co.enterprise_id = '{entid}' and
                     o.delete_dt is null and
                     oi.delete_dt is null and
                     o.status_id = cs.status_id and
@@ -401,7 +403,7 @@ class PeriodOrderSummary(BaseAnalytic):
                     o.campaign_id = cmp.campaign_id and
                     oi.product_id = p.product_id and
                     cmp.company_id = co.company_id and
-                    co.enterprise_id = {entid} and
+                    co.enterprise_id = '{entid}' and
                     o.delete_dt is null and
                     oi.delete_dt is null and
                     o.status_id = cs.status_id and

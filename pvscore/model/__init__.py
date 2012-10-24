@@ -1,6 +1,7 @@
 import logging
 from pvscore.model.meta import Session
 import pvscore.lib.util as util
+import psycopg2.extras
 
 log = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ def init_model(engine, settings):
     # KB: [2011-09-05]: We make this check because when running under Nose,
     # It nags us that this has already been done.  This just eliminates the nag message.
     if Session.registry and not Session.registry.has():
+        psycopg2.extras.register_uuid()
         Session.configure(bind=engine)
 
     #load everything from the pvs.* keys in the config file into redis

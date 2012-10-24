@@ -14,7 +14,7 @@
         </div>
         <div class="span3">
           <label for="company_id">Company</label>
-          ${h.select('company_id', category.company_id, companies)}
+          ${h.select('company_id', str(category.company_id), companies)}
         </div>
       </div> 
 
@@ -56,7 +56,7 @@
                   % for p in category.products:
                   <tr>
                     <td>${p.name}</td>
-                    <td nowrap>${h.checkbox('child_incl_%d' % p.product_id, checked=True, value=p.product_id, class_='product_chk')}</td>
+                    <td nowrap>${h.checkbox('child_incl_%s' % p.product_id, checked=True, value=p.product_id, class_='product_chk')}</td>
                   </tr>
                   % endfor          
                   <%
@@ -75,7 +75,7 @@
                   % for p in non_kids:
                   <tr>
                     <td>${p.name}</td>
-                    <td nowrap>${h.checkbox('child_incl_%d' % p.product_id, checked=False, value=p.product_id, class_='product_chk')}</td>
+                    <td nowrap>${h.checkbox('child_incl_%s' % p.product_id, checked=False, value=p.product_id, class_='product_chk')}</td>
                   </tr>
                   % endfor          
                 </table>

@@ -7,6 +7,8 @@ from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.crm.company import Company
 from pvscore.lib.dbcache import FromCache, invalidate
 import logging
+import uuid
+from pvscore.lib.sqla import GUID
 
 log = logging.getLogger(__name__)
 
@@ -15,13 +17,13 @@ class PurchaseOrder(ORMBase, BaseModel):
     __tablename__ = 'crm_purchase_order'
     __pk__ = 'purchase_order_id'
 
-    purchase_order_id = Column(Integer, primary_key = True)
+    purchase_order_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    company_id = Column(GUID, ForeignKey('crm_company.company_id'))
+    vendor_id = Column(GUID, ForeignKey('crm_vendor.vendor_id'))
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
     note = Column(String(2000))
-    company_id = Column(Integer, ForeignKey('crm_company.company_id'))
     create_dt = Column(Date, server_default=text('now()'))
     delete_dt = Column(Date)
-    vendor_id = Column(Integer, ForeignKey('crm_vendor.vendor_id'))
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
     shipping_cost = Column(Float)
     tax_cost = Column(Float)
     complete_dt = Column(Date)
@@ -36,7 +38,7 @@ class PurchaseOrder(ORMBase, BaseModel):
     def search(enterprise_id, vendor_id, from_dt, to_dt):
         v_clause = f_clause = t_clause = ''
         if vendor_id:
-            v_clause = "and po.vendor_id = %s" % vendor_id
+            v_clause = "and po.vendor_id = '%s'" % vendor_id
         if from_dt:
             f_clause = "and po.create_dt >= '%s'" % from_dt
         if to_dt:
@@ -44,8 +46,8 @@ class PurchaseOrder(ORMBase, BaseModel):
 
         sql = """SELECT po.* FROM crm_purchase_order po, crm_company com
                  where  po.company_id = com.company_id
-                 and com.enterprise_id = {ent_id}
-                 {v} {f} {t} order by po.purchase_order_id""".format(v=v_clause, f=f_clause, 
+                 and com.enterprise_id = '{ent_id}'
+                 {v} {f} {t} order by po.create_dt""".format(v=v_clause, f=f_clause, 
                                                                      t=t_clause, ent_id=enterprise_id)
         return Session.query(PurchaseOrder).from_statement(sql).all()
 
@@ -83,13 +85,13 @@ class PurchaseOrderItem(ORMBase, BaseModel):
     __tablename__ = 'crm_purchase_order_item'
     __pk__ = 'order_item_id'
 
-    order_item_id = Column(Integer, primary_key=True)
-    purchase_order_id = Column(Integer, ForeignKey('crm_purchase_order.purchase_order_id'))
-    product_id = Column(Integer, ForeignKey('crm_product.product_id'))
+    order_item_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    purchase_order_id = Column(GUID, ForeignKey('crm_purchase_order.purchase_order_id'))
+    product_id = Column(GUID, ForeignKey('crm_product.product_id'))
     quantity = Column(Float, default=1.0)
     unit_cost = Column(Float, default=0.0)
     discount = Column(Float, default=0.0)
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
     note = Column(String(100))
     create_dt = Column(Date, server_default=text('now()'))
     delete_dt = Column(Date)
@@ -134,8 +136,8 @@ class Vendor(ORMBase, BaseModel):
     __tablename__ = 'crm_vendor'
     __pk__ = 'vendor_id'
 
-    vendor_id = Column(Integer, primary_key=True)
-    enterprise_id = Column(Integer, ForeignKey('crm_enterprise.enterprise_id'))
+    vendor_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
     name = Column(String(100))
     addr1 = Column(String(50))
     addr2 = Column(String(50))

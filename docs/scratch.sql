@@ -3871,3 +3871,20 @@ select count(0) from
             t.relname,
             i.relname;
 
+-- round 1
+alter table crm_customer add foreign key (status_id) references core_status;    
+alter table core_attribute_value add foreign key (attr_id) references core_attribute;
+alter table crm_appointment add foreign key (user_assigned) references core_user;
+alter table crm_campaign add foreign key (comm_forgot_password_id) references crm_communication;
+alter table crm_customer_order add foreign key (status_id) references core_status;
+alter table crm_order_item add foreign key (status_id) references core_status;
+alter table crm_journal add foreign key (order_id) references crm_customer_order;
+
+-- round 2
+delete from core_status where status_id in (select status_id from core_status where customer_id is not null and customer_id not in (select customer_id from crm_customer));
+alter table core_status add foreign key (customer_id) references crm_customer;
+
+
+
+
+

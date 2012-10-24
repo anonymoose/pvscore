@@ -76,7 +76,7 @@ def crm_routes(config):
     adrt('crm.communication.view_comm_dialog', '/crm/communication/view_comm_dialog/{customer_id}/{comm_id}') #, controller='crm/communication', action='view_comm_dialog')
 
     adrt('crm.users.new', '/crm/users/new') #controller='crm/users', action='new')
-    adrt('crm.users.edit', '/crm/users/edit/{username}') #controller='crm/users', action='edit')
+    adrt('crm.users.edit', '/crm/users/edit/{user_id}') #controller='crm/users', action='edit')
     adrt('crm.users.edit_current', '/crm/users/edit_current') #controller='crm/users', action='edit_current')
     adrt('crm.users.save', '/crm/users/save') #controller='crm/users', action='save')
     adrt('crm.users.save_password', '/crm/users/save_password') #controller='crm/users', action='save_password')

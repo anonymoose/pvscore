@@ -5,7 +5,7 @@
   <h1>Edit User</h1>
   <div class="container">
     <form id="frm_users" method="POST" action="/crm/users/save">
-      ${h.hidden('existing_username', value=user.username)}
+      ${h.hidden('user_id', value=user.user_id)}
       
       <h3>General Information</h3>
       <div class="well">
@@ -136,7 +136,7 @@
           
           <div class="span3">
             <label for="vendor_id">Vendor</label>
-            ${h.select('vendor_id', user.vendor_id, vendors)}
+            ${h.select('vendor_id', str(user.vendor_id), vendors)}
           </div>
           
           <div class="span2">

@@ -17,7 +17,7 @@
       % for cmp in comms:
       <tr>
         <td>${cmp.comm_id}</td>
-        <td>${h.link_to(cmp.name, '/crm/communication/edit/%d' % cmp.comm_id)}</td>
+        <td>${h.link_to(cmp.name, '/crm/communication/edit/%s' % cmp.comm_id)}</td>
         <td nowrap>${cmp.create_dt}</td>
       </tr>
       % endfor

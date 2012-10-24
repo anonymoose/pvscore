@@ -3,7 +3,8 @@ from sqlalchemy.types import Integer, String
 from sqlalchemy.orm import relation, joinedload
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.lib.dbcache import FromCache
-
+import uuid
+from pvscore.lib.sqla import GUID
 
 class Attribute(ORMBase, BaseModel):
     """
@@ -16,7 +17,7 @@ class Attribute(ORMBase, BaseModel):
     __tablename__ = 'core_attribute'
     __pk__ = 'attr_id'
 
-    attr_id = Column(Integer, primary_key = True)
+    attr_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     fk_type = Column(String(50))
     attr_name = Column(String(100))
     attr_type = Column(String(32))
@@ -73,8 +74,8 @@ class AttributeValue(ORMBase, BaseModel):
     __tablename__ = 'core_attribute_value'
     __pk__ = 'attr_value_id'
 
-    attr_value_id = Column(Integer, primary_key = True)
-    attr_id = Column(Integer, ForeignKey('core_attribute.attr_id'))
+    attr_value_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    attr_id = Column(GUID, ForeignKey('core_attribute.attr_id'))
     attr_value = Column(String(2000))
     fk_type = Column(String(50))
     fk_id = Column(Integer)
@@ -85,7 +86,7 @@ class AttributeValue(ORMBase, BaseModel):
     @staticmethod
     def clear_all(fk_type, fk_id):
         #pylint: disable-msg=E1101
-        Session.execute("delete from core_attribute_value where fk_type = '%s' and fk_id = %s" % (fk_type, fk_id))
+        Session.execute("delete from core_attribute_value where fk_type = '%s' and fk_id = '%s'" % (fk_type, fk_id))
 
 
     @staticmethod

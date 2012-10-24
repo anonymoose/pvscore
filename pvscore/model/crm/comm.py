@@ -10,6 +10,8 @@ from pvscore.lib.mail import UserMail
 from pvscore.model.core.status import Status
 import logging
 import pvscore.lib.util as util
+import uuid
+from pvscore.lib.sqla import GUID
 
 log = logging.getLogger(__name__)
 
@@ -17,15 +19,15 @@ class Communication(ORMBase, BaseModel):
     __tablename__ = 'crm_communication'
     __pk__ = 'comm_id'
 
-    comm_id = Column(Integer, primary_key = True)
-    enterprise_id = Column(Integer, ForeignKey('crm_enterprise.enterprise_id'))
+    comm_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
+    user_created = Column(GUID, ForeignKey('core_user.user_id'))
     name = Column(String(50))
     url = Column(String(256))
     data = Column(Text)
     type = Column(String(50), server_default='html')
     create_dt = Column(Date, server_default = text('now()'))
     delete_dt = Column(Date)
-    user_created = Column(String(50), ForeignKey('core_user.username'))
     from_addr = Column(String(50))
     subject = Column(String(256))
     user_sendable = Column(Boolean, default=False)
@@ -158,7 +160,7 @@ class Communication(ORMBase, BaseModel):
 
     @staticmethod
     def full_delete(comm_id):
-        Session.execute('delete from crm_communication where comm_id = %s' % comm_id)
+        Session.execute("delete from crm_communication where comm_id = '%s'" % comm_id)
 
 
     # @staticmethod

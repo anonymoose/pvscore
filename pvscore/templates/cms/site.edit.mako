@@ -33,11 +33,11 @@
         <div class="row">
           <div class="span3">
             <label for="">Company</label>
-            ${h.select('company_id', site.company_id, companies)}
+            ${h.select('company_id', str(site.company_id), companies)}
           </div>
           <div class="span3">
             <label for="">Default Campaign</label>
-            ${h.select('default_campaign_id', site.default_campaign_id, campaigns)}
+            ${h.select('default_campaign_id', str(site.default_campaign_id), campaigns)}
           </div>
           <div class="span3">
             <label for="">&nbsp;</label>

@@ -7,12 +7,18 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.lib.mail import MailInfo
 from hashlib import md5
+import uuid
+from pvscore.lib.sqla import GUID
 
 class Users(ORMBase, BaseModel):
     __tablename__ = 'core_user'
-    __pk__ = 'username'
+    __pk__ = 'user_id'
 
+    user_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     username = Column(String(50), primary_key=True)
+    enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
+    priv_id = Column(GUID, ForeignKey('core_user_priv.priv_id'))
+    vendor_id = Column(GUID, ForeignKey('crm_vendor.vendor_id'))
     password = Column(String(75))
     password_len = Column(Integer, default=0)
     fname = Column(String(50))
@@ -21,9 +27,6 @@ class Users(ORMBase, BaseModel):
     delete_dt = Column(Date)
     api_key = Column(String(50))
     type = Column(String(50))
-    enterprise_id = Column(Integer, ForeignKey('crm_enterprise.enterprise_id'))
-    priv_id = Column(Integer, ForeignKey('core_user_priv.priv_id'))
-    vendor_id = Column(Integer, ForeignKey('crm_vendor.vendor_id'))
     tz_offset = Column(Integer, default=5)
     login_link = Column(String(100))
 
@@ -62,9 +65,8 @@ class Users(ORMBase, BaseModel):
         """ KB: [2010-10-05]: See if there is a user that matches the UID and password supplied 
         Also determine if this guy is allowed into the crm/cms area of the app.
         """        
-        return None != Session.query(Users).filter(
-            and_(Users.username == username, 
-                 Users.password == Users.encode_password(pwd))).first()
+        return Session.query(Users).filter(and_(Users.username == username, 
+                                                Users.password == Users.encode_password(pwd))).first()
 
 
     @staticmethod
@@ -80,6 +82,55 @@ class Users(ORMBase, BaseModel):
     @staticmethod
     def encode_password(password):
         return md5(password).hexdigest()
+    
+
+    @staticmethod
+    def find_all(enterprise_id):
+        return Session.query(Users).filter(and_(Users.delete_dt == None,
+                                                Users.enterprise_id == enterprise_id)).order_by(Users.lname).all()
+
+
+    @staticmethod
+    def full_delete(username):
+        Session.execute("delete from core_user where username = '%s'" % username)
+
+
+
+class UserPriv(ORMBase, BaseModel):
+    __tablename__ = 'core_user_priv'
+    __pk__ = 'priv_id'
+
+    priv_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    view_customer = Column(Boolean, default=False)
+    edit_customer = Column(Boolean, default=False)
+    view_product = Column(Boolean, default=False)
+    edit_product = Column(Boolean, default=False)
+    view_users = Column(Boolean, default=False)
+    edit_users = Column(Boolean, default=False)
+    view_campaign = Column(Boolean, default=False)
+    edit_campaign = Column(Boolean, default=False)
+    view_event = Column(Boolean, default=False)
+    edit_event = Column(Boolean, default=False)
+    view_communication = Column(Boolean, default=False)
+    edit_communication = Column(Boolean, default=False)
+    view_report = Column(Boolean, default=False)
+    edit_report = Column(Boolean, default=False)
+    view_company = Column(Boolean, default=False)
+    edit_company = Column(Boolean, default=False)
+    view_enterprise = Column(Boolean, default=False)
+    edit_enterprise = Column(Boolean, default=False)
+    add_customer_order = Column(Boolean, default=False)
+    add_customer_billing = Column(Boolean, default=False)
+    send_customer_emails = Column(Boolean, default=False)
+    modify_customer_order = Column(Boolean, default=False)
+    view_purchasing = Column(Boolean, default=False)
+    edit_purchasing = Column(Boolean, default=False)
+    cms = Column(Boolean, default=False)    
+    edit_category = Column(Boolean, default=False)
+    barcode_order = Column(Boolean, default=False)
+    edit_discount = Column(Boolean, default=False)
+
+
 
     # def post_load(self):
     #     if not self.priv:
@@ -124,51 +175,4 @@ class Users(ORMBase, BaseModel):
     #                                                      email=e_clause, 
     #                                                      entid=enterprise_id)
     #     return Session.query(Users).from_statement(sql).all()
-
-
-    @staticmethod
-    def find_all(enterprise_id):
-        return Session.query(Users).filter(and_(Users.delete_dt == None,
-                                                Users.enterprise_id == enterprise_id)).order_by(Users.lname).all()
-
-
-    @staticmethod
-    def full_delete(username):
-        Session.execute("delete from core_user where username = '%s'" % username)
-
-
-
-class UserPriv(ORMBase, BaseModel):
-    __tablename__ = 'core_user_priv'
-    __pk__ = 'priv_id'
-
-    priv_id = Column(Integer, primary_key=True)
-    view_customer = Column(Boolean, default=False)
-    edit_customer = Column(Boolean, default=False)
-    view_product = Column(Boolean, default=False)
-    edit_product = Column(Boolean, default=False)
-    view_users = Column(Boolean, default=False)
-    edit_users = Column(Boolean, default=False)
-    view_campaign = Column(Boolean, default=False)
-    edit_campaign = Column(Boolean, default=False)
-    view_event = Column(Boolean, default=False)
-    edit_event = Column(Boolean, default=False)
-    view_communication = Column(Boolean, default=False)
-    edit_communication = Column(Boolean, default=False)
-    view_report = Column(Boolean, default=False)
-    edit_report = Column(Boolean, default=False)
-    view_company = Column(Boolean, default=False)
-    edit_company = Column(Boolean, default=False)
-    view_enterprise = Column(Boolean, default=False)
-    edit_enterprise = Column(Boolean, default=False)
-    add_customer_order = Column(Boolean, default=False)
-    add_customer_billing = Column(Boolean, default=False)
-    send_customer_emails = Column(Boolean, default=False)
-    modify_customer_order = Column(Boolean, default=False)
-    view_purchasing = Column(Boolean, default=False)
-    edit_purchasing = Column(Boolean, default=False)
-    cms = Column(Boolean, default=False)    
-    edit_category = Column(Boolean, default=False)
-    barcode_order = Column(Boolean, default=False)
-    edit_discount = Column(Boolean, default=False)
-
+    
