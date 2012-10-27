@@ -1,5 +1,5 @@
 #import pdb
-import logging, os
+import logging
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.controllers.base import BaseController
@@ -66,10 +66,8 @@ class CompanyController(BaseController):
         comp.bind(self.request.POST)
         comp.save()
         comp.flush()
-
-        if not os.path.isdir(comp.web_full_directory):
-            comp.create_dir_structure()
-
+        #if not os.path.isdir(comp.web_full_directory):
+        #    comp.create_dir_structure()
         comp.clear_attributes()
         for i in range(10):
             attr_name = self.request.POST.get('attr_name[%d]' % i)
@@ -134,8 +132,6 @@ class CompanyController(BaseController):
         #site.template = Template.find_by_name('default')
         site.save()
         site.flush()
-
-        site.create_dir_structure()
 
         return {
             'enterprise' : ent,

@@ -1,6 +1,5 @@
 from pvscore.tests import TestController, secure
 from pvscore.model.crm.comm import Communication
-from pvscore.model.crm.customer import Customer
 from pvscore.model.crm.company import Enterprise
 
 # T pvscore.tests.controllers.test_crm_comm

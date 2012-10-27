@@ -2,7 +2,7 @@
 import math
 import datetime
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Float, Text
+from sqlalchemy.types import String, Date, Float, Text
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session, BaseAnalytic

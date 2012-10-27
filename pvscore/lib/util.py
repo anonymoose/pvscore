@@ -8,10 +8,9 @@ from webhelpers.html import literal
 import re
 #from operator import itemgetter
 import logging
+import subprocess
 
 log = logging.getLogger(__name__)
-
-
 
 
 def parse_date(strdt, fmt='%Y-%m-%d'):
@@ -604,6 +603,25 @@ def year_list():
     for year in range(today_.year, today_.year + 11):
         arr.append([year, year])
     return arr
+
+
+# http://stackoverflow.com/questions/4760215/running-shell-command-from-python-and-capturing-the-output
+#
+# for line in runProcess(['mysqladmin', 'create', 'test', '-uroot', '-pmysqladmin12']):
+#     print line,
+#
+def run_process_loop(exe):    
+    proc = subprocess.Popen(exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while (True):
+        retcode = proc.poll() #returns None while subprocess is running
+        line = proc.stdout.readline()
+        yield line
+        if (retcode is not None):
+            break
+
+      
+def run_process(exe):
+    return [line for line in run_process_loop(exe)]
 
 
 # def contains(lst, val):

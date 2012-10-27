@@ -1,15 +1,11 @@
 #pylint: disable-msg=E1101
-#import shutil
-#from pvscore.model.core.asset import Asset
 from sqlalchemy import Column, ForeignKey, or_
 from sqlalchemy.types import Integer, String, Date, Text, Boolean
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
-import pvscore.lib.util as util
 from pvscore.model.core.users import Users
 from pvscore.model.crm.company import Company
-from hashlib import md5
 from pvscore.lib.dbcache import FromCache, invalidate
 import logging
 import uuid
@@ -100,31 +96,6 @@ class Site(ORMBase, BaseModel):
         invalidate(self, 'Site.find_all', self.company.enterprise_id)
 
 
-
-    @property
-    def site_full_directory(self):
-        return "{root_dir}/{dirname}".format(root_dir=util.nvl(util.cache_get('pvs.site.root.dir'), 'sites'),
-                                             dirname=self.site_directory)
-
-        
-    @property
-    def site_directory(self):
-        return md5(str(self.site_id)).hexdigest()
-
-
-    def create_dir_structure(self):
-        dirname = self.site_full_directory
-        util.mkdir_p(dirname)
-        util.mkdir_p("%s/images" % dirname)
-        util.mkdir_p("%s/script" % dirname)
-        util.mkdir_p("%s/cache" % dirname)
-
-
-    def site_web_directory(self, subdir=''):
-        """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
-        return "/sites/{dirname}/{subdir}".format(dirname=self.site_directory, subdir=subdir)
-
-
     # def store_asset(self, asset_data, folder):
     #     """ KB: [2010-11-18]:
     #     called from pvscore.controllers.cms.asset::upload()
@@ -164,3 +135,27 @@ class Site(ORMBase, BaseModel):
     #     shipping_type = cfg.get('SHIPPING', 'type')
     #     pe = plugin_registry[shipping_type]
     #     return pe.obj
+
+    # @property
+    # def site_full_directory(self):
+    #     return "{root_dir}/{dirname}".format(root_dir=util.nvl(util.cache_get('pvs.site.root.dir'), 'sites'),
+    #                                          dirname=self.site_directory)
+
+        
+    # @property
+    # def site_directory(self):
+    #     return str(self.site_id)
+
+
+    # def create_dir_structure(self):
+    #     dirname = self.site_full_directory
+    #     util.mkdir_p(dirname)
+    #     util.mkdir_p("%s/images" % dirname)
+    #     util.mkdir_p("%s/script" % dirname)
+    #     util.mkdir_p("%s/cache" % dirname)
+
+
+    # def site_web_directory(self, subdir=''):
+    #     """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
+    #     return "/sites/{dirname}/{subdir}".format(dirname=self.site_directory, subdir=subdir)
+        

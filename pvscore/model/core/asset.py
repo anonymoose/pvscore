@@ -1,4 +1,4 @@
-import os
+import os, shutil
 from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String, Date
 from sqlalchemy.orm import relation
@@ -7,6 +7,7 @@ from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.lib.dbcache import invalidate , FromCache
 import uuid
 from pvscore.lib.sqla import GUID
+import pvscore.lib.util as util
 
 class Asset(ORMBase, BaseModel):
     __tablename__ = "core_asset"
@@ -14,14 +15,17 @@ class Asset(ORMBase, BaseModel):
 
     id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     status_id = Column(GUID, ForeignKey('core_status.status_id'))
+    enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
+    extension = Column(String(10))
     name = Column(String(100))
     description = Column(String(1000))
-    mimetype = Column(String(30))
-    fs_path = Column(String(512))
-    web_path = Column(String(512))
     fk_type = Column(String(50))
     fk_id = Column(Integer)
     create_dt = Column(Date, server_default = text('now()'))
+    mimetype = Column(String(30)) #
+    fs_path = Column(String(512)) #
+    web_path = Column(String(512)) #
+
 
     status = relation('Status')
 
@@ -51,6 +55,39 @@ class Asset(ORMBase, BaseModel):
         from pvscore.model.crm.listing import Listing
         return Listing.load(self.fk_id)
 
+    @property
+    def path(self):
+        return "{reldir}/{assid}{ext}".format(reldir=self.relative_dir,
+                                              assid=self.id,
+                                              ext=self.extension)
+    @property
+    def relative_dir(self):
+        return "enterprises/{enterprise_id}/assets/{_0}/{_1}/{_2}".format(enterprise_id=self.enterprise_id,
+                                                                           _0=self.id[0],
+                                                                           _1=self.id[1],
+                                                                           _2=self.id[2])
+
+    @staticmethod
+    def create_new(obj, enterprise_id, request):
+        asset_data = request.POST['Filedata']
+        ass = Asset()
+        ass.fk_type = type(obj).__name__
+        ass.fk_id = getattr(obj, obj.__pk__)
+        ass.enterprise_id = enterprise_id
+        ass.name = asset_data.filename
+        ass.extension = os.path.splitext(asset_data.filename)[1]
+        ass.save()
+        ass.flush()        
+        storage_root = util.cache_get('pvs.enterprise.root.dir')
+        fs_real_dir = "{root}/enterprises/{reldir}".format(root=storage_root, reldir=ass.relative_dir)
+        util.mkdir_p(fs_real_dir)
+        fs_real_path = "{fs_real_dir}/{assid}{ext}".format(fs_real_dir=fs_real_dir,
+                                                           assid=ass.id,
+                                                           ext=ass.extension)
+        with open(fs_real_path, 'wb') as permanent_file: 
+            shutil.copyfileobj(asset_data.file, permanent_file)
+            asset_data.file.close()
+        return ass
 
     # def delete(self):
     #     if os.path.exists(self.fs_path):

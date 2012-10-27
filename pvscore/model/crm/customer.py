@@ -2,7 +2,7 @@
 import math
 from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String, Date, Text, Float, DateTime
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session, BaseAnalytic
 from pvscore.model.crm.customerorder import CustomerOrder

@@ -1,5 +1,4 @@
 import logging
-import os, shutil
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.controllers.base import BaseController
@@ -8,9 +7,6 @@ from pvscore.lib.auth_conditions import IsCustomerLoggedIn
 from pvscore.model.crm.listing import Listing
 from pvscore.model.core.status import Status
 from pvscore.model.core.asset import Asset
-from hashlib import md5
-
-import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
 
@@ -134,33 +130,22 @@ class ListingController(BaseController):
         listing_hash = self.request.matchdict.get('hash')
         lis = Listing.load(listing_id)
         self.forbid_if(not lis or lis.hash != listing_hash)
-        site = self.request.ctx.site
-        asset_data = self.request.POST['Filedata']
-        filename = md5('%s%s' % (asset_data.filename, listing_id)).hexdigest()
-        extension = os.path.splitext(asset_data.filename)[1]
-        folder = 'images/%s/%s/%s' % (filename[0], filename[1], filename[2])
-        util.mkdir_p('%s/%s' % (site.site_full_directory, folder))
-        fs_path = os.path.join(folder, filename+extension)
-        fs_path_real = os.path.join('%s/%s' % (site.site_full_directory, folder), filename+extension)
-        permanent_file = open(fs_path_real, 'wb')
-        shutil.copyfileobj(asset_data.file, permanent_file)
-        asset_data.file.close()
-        permanent_file.close()
+        ass = Asset.create_new(lis, self.enterprise_id, self.request)
+        Status.add(lis.customer, lis, Status.find_event(self.enterprise_id, lis, 'ASSET_UPLOAD'), ass.name)
+        #filename = md5('%s%s' % (asset_data.filename, listing_id)).hexdigest()
+        #extension = os.path.splitext(asset_data.filename)[1]
+        #folder = 'images/%s/%s/%s' % (filename[0], filename[1], filename[2])
+        #fs_path = os.path.join(folder, filename+extension)
+        #fs_path_real = os.path.join('%s/%s' % (site.site_full_directory, folder), filename+extension)
+        #permanent_file = open(fs_path_real, 'wb')
+        #shutil.copyfileobj(asset_data.file, permanent_file)
+        #asset_data.file.close()
+        #permanent_file.close()
 
         # at this point everything is saved to disk. Create an asset object in
         # the DB to remember it.
-        if os.path.exists(fs_path_real):
-            ass = Asset()
-            ass.fs_path = fs_path
-            ass.web_path = '%s/%s/%s/%s/%s' % (site.site_web_directory('images'),
-                                             filename[0], filename[1], filename[2], filename+extension)
-            ass.fk_type = 'Listing'
-            ass.fk_id = listing_id
-            ass.name = filename+extension
-            ass.save()
-            Status.add(lis.customer, lis, Status.find_event(self.enterprise_id, lis, 'ASSET_UPLOAD'),
-                       '%s = %s' % (asset_data.filename, filename))
-            return str(ass.id)
+        #if os.path.exists(fs_path_real):
+        return str(ass.id)
         
 
 

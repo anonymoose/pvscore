@@ -381,7 +381,7 @@ class TestCrmCustomer(TestController):
 
 
     @secure
-    def test_return_single_item(self):
+    def test_return_single_item(self):  #pylint: disable-msg=R0915
         R = self.get('/crm/customer/new')
         self.assertEqual(R.status_int, 200)
         R.mustcontain('New Customer')

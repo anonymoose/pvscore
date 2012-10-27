@@ -1,8 +1,9 @@
 import psycopg2
-import sys
+import sys, os
 import uuid
 from pprint import pprint
 from hashlib import md5
+import pvscore.lib.util as util
 
 def list_tables(cur):
     cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
@@ -123,8 +124,8 @@ def recreate_index(cur, table, idx_name, idx_cols):
 
 
 def analyze_table(cur, table):
-    cur.execute('vacuum %s' % table);
-    cur.execute('analyze %s' % table);
+    cur.execute('vacuum %s' % table)
+    cur.execute('analyze %s' % table)
 
 
 def fix_user_table_pre(conn, cur):
@@ -244,9 +245,109 @@ def fix_fk_type_table(conn, cur, table):
     conn.commit()
 
 
+def fix_assets(conn, cur, dbname, storage_root):
+    cur.execute("alter table core_asset add column extension varchar(10)")
+    cur.execute("alter table core_asset add column enterprise_id uuid")
+    cur.execute("alter table core_asset add foreign key (enterprise_id) references crm_enterprise")
+
+    conn.commit()
+    enterprises = []
+    assets = []
+
+    with open('%s-keys.log' % dbname, 'r') as keylog:
+        for lin in keylog.readlines():
+            parts = lin.split(':')
+            if parts[0] == 'crm_enterprise':
+                enterprises.append(parts[1:])
+            elif parts[0] == 'core_asset':
+                assets.append(parts[1:])
+        
+    for ent in enterprises:
+        dirname = "%s/enterprises/%s" % (storage_root, ent[1])
+        util.mkdir_p(dirname)
+        util.mkdir_p("%s/assets" % dirname)
+
+    for ass in assets:
+        cur.execute("select id, fk_type, fk_id, name, web_path from core_asset where id = '%s'" % ass[1][:-1]) #chop line feed
+        assid, fk_type, fk_id, name, web_path = cur.fetchone()
+        enterprise_id = ext = basename = None
+        if 'Listing' == fk_type:
+            if not fk_id:
+                print "** no fk_id for %s (%s)" % (ass[1][:-1], web_path)
+                continue
+            cur.execute("""select l.listing_id, l.company_id, c.enterprise_id
+                            from pvs_listing l, crm_company c
+                            where l.company_id = c.company_id and l.listing_id = '%s'""" % fk_id)
+            listing_id, company_id, enterprise_id = cur.fetchone()
+            basename = os.path.basename(web_path)
+            ext = os.path.splitext(web_path)[1]
+        elif 'Product' == fk_type:
+            if not fk_id:
+                print "** no fk_id for %s (%s)" % (ass[1][:-1], web_path)
+                continue
+            cur.execute("""select p.product_id, p.company_id, c.enterprise_id
+                            from crm_product p, crm_company c
+                            where p.company_id = c.company_id and p.product_id = '%s'""" % fk_id)
+            product_id, company_id, enterprise_id = cur.fetchone()
+        basename = os.path.basename(web_path)
+        ext = os.path.splitext(web_path)[1]
+        cmd = "mkdir -p {storage_root}/enterprises/{enterprise_id}/assets/{_0}/{_1}/{_2}".format(storage_root=storage_root,
+                                                                                                 enterprise_id=enterprise_id,
+                                                                                                 _0=assid[0],
+                                                                                                 _1=assid[1],
+                                                                                                 _2=assid[2])
+        util.run_process(cmd.split(' '))
+        cmd = "mv {storage_root}{web_path} {storage_root}/enterprises/{enterprise_id}/assets/{_0}/{_1}/{_2}/{assid}{ext}".format(storage_root=storage_root,
+                                                                                                                                 web_path=web_path,
+                                                                                                                                 enterprise_id=enterprise_id,
+                                                                                                                                 _0=assid[0],
+                                                                                                                                 _1=assid[1],
+                                                                                                                                 _2=assid[2],
+                                                                                                                                 assid=assid,
+                                                                                                                                 ext=ext)
+        util.run_process(cmd.split(' '))
+        cur.execute("update core_asset set enterprise_id = '{ent_id}', extension = '{ext}' where id = '{id}'".format(ent_id=enterprise_id,
+                                                                                                                     ext=ext,
+                                                                                                                     id=assid))
+
+        #    cur.execute("select 
+        #    print 'cp %s 
+    conn.commit()
+        
+# def dump_asset_keys(cur, dbname):
+#     with open("%s-filesystem-keys.log" % dbname, "w") as f:
+#         cur.execute("select site_id from cms_site")
+#         for site_id in [site_[0] for site_ in cur.fetchall()]:
+#             f.write("cms_site:%s:%s" % (site_id, md5(str(site_id)).hexdigest()))
+#    
+#         cur.execute("select company_id, customer_id, listing_id from pvs_listing")
+#         for listing in cur.fetchall():
+#             salt = 'derf'
+#             #md5('%s%s%s%s' % (self.company_id, self.customer_id, self.listing_id, salt)).hexdigest()
+#             f.write("pvs_listing:%s:%s:%s:%s" % (listing[0], listing[1], listing[2], md5('%s%s%s%s' % (listing[0], listing[1], listing[2], salt)).hexdigest()))
+#    
+#         cur.execute("select company_id from crm_company")
+#         for company_id in [comp[0] for comp in cur.fetchall()]:
+#             f.write("crm_company:%s:%s" % (str(company_id), md5(str(company_id)).hexdigest()))
+#
+#         cur.execute("select id, name, fk_type, fk_id from core_asset")
+#         for asset_id, filename, fk_type, fk_id in cur.fetchall():
+#             import pdb; pdb.set_trace()
+#             if "Listing" == fk_type:
+#                 filename = md5('%s%s' % (filename, fk_id)).hexdigest()
+#                 folder = 'images/%s/%s/%s' % (filename[0], filename[1], filename[2])
+#                 extension = os.path.splitext(filename)[1]
+#                 fs_path = os.path.join(folder, filename+extension)
+#                 fs_path_real = os.path.join('%s/%s' % (site.site_full_directory, folder), filename+extension)
+#             elif 'Product' == fk_type:
+#                 pass
+
+
 if __name__ == '__main__':
+    dbname = sys.argv[1]
     conn = psycopg2.connect("dbname=%s user=%s password=%s host=localhost" % (sys.argv[1], sys.argv[1], sys.argv[2]))
     cur = conn.cursor()
+    storage_root = sys.argv[3]
 
     fix_user_table_pre(conn, cur)
     conn.commit()
@@ -279,18 +380,18 @@ if __name__ == '__main__':
     # Go create PK mirror columns for every table where the PK is an
     # autoincrement integer.
     for table in tables:
-       if not table in primary_keys:
-           continue
-       print "\n\n\ncreating uuid primary key col for %s" % table
-       pkey = primary_keys[table]
-       pk_col_name = pkey[2]
-       add_uuid_col(cur, table, pk_col_name)
-       pk_vals = get_pk_vals(cur, table, pk_col_name)
-       for i, pk_val in enumerate(pk_vals):
-           update_uuid_for_pk(cur, table, pk_col_name, pk_val)
-           conn.commit()
-           if (i % 1000) == 0:
-               print "    %s %s/%s" % (table, i+1, len(pk_vals))
+        if not table in primary_keys:
+            continue
+        print "\n\n\ncreating uuid primary key col for %s" % table
+        pkey = primary_keys[table]
+        pk_col_name = pkey[2]
+        add_uuid_col(cur, table, pk_col_name)
+        pk_vals = get_pk_vals(cur, table, pk_col_name)
+        for i, pk_val in enumerate(pk_vals):
+            update_uuid_for_pk(cur, table, pk_col_name, pk_val)
+            conn.commit()
+            if (i % 1000) == 0:
+                print "    %s %s/%s" % (table, i+1, len(pk_vals))
 
     # Go create mirror foreign key columns for each table where the
     # foreign PK is an autoincrement integer
@@ -322,7 +423,7 @@ if __name__ == '__main__':
     for table in tables:
         if not table in primary_keys:
             continue
-        print "\n\n\ndropping constraintsing %s" % table
+        print "\n\n\ndropping constraints %s" % table
         pkey = primary_keys[table]
         pk_constraint_name = pkey[0]
         drop_constraint(cur, table, pk_constraint_name)
@@ -338,7 +439,7 @@ if __name__ == '__main__':
     fix_fk_type_table(conn, cur, 'core_status')
     fix_fk_type_table(conn, cur, 'core_asset')
     fix_fk_type_table(conn, cur, 'core_key_value')
-
+    
     # dump all the table_name : integer key -> uuid key
     with open('%s-keys.log' % sys.argv[1], 'w') as f:
         for table in tables:
@@ -349,10 +450,10 @@ if __name__ == '__main__':
             pk_col_name = pkey[2]
             pk_vals = get_old_and_new_pk_vals(cur, table, pk_col_name)
             for i, pk_val in enumerate(pk_vals):
-                f.write('%s : %s : %s   md5 = %s\n' % (table, pk_val[0], pk_val[1], md5(str(pk_val)).hexdigest()))
+                f.write('%s:%s:%s\n' % (table, pk_val[0], pk_val[1]))
                 if (i % 1000) == 0:
                     print "    %s %s/%s" % (table, i+1, len(pk_vals))
-
+                    
     # drop integer columns and rename the *_uuid colums to the name of
     # the old pk columns
     for table in tables:
@@ -389,7 +490,7 @@ if __name__ == '__main__':
             idx_cols = idx[2]
             recreate_index(cur, table, idx_name, idx_cols)
             conn.commit()
-
+                        
     conn.set_isolation_level(0)
     # analyze and vacuum tables
     for table in tables:
@@ -397,6 +498,9 @@ if __name__ == '__main__':
             continue
         print "\n\n\nvacuuming for %s" % table
         analyze_table(cur, table)
+
+    fix_assets(conn, cur, dbname, storage_root)
+    conn.commit()
 
     cur.close()
     conn.close()

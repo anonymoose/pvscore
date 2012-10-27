@@ -4,8 +4,6 @@ from sqlalchemy.types import Integer, String, Date, Text
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from hashlib import md5
-import pvscore.lib.util as util
 from pvscore.lib.dbcache import FromCache, invalidate
 import pvscore.lib.db as db
 from pvscore.lib.mail import MailInfo
@@ -114,25 +112,6 @@ class Company(ORMBase, BaseModel):
                  {n}
               """.format(n=n_clause)
         return Session.query(Company).from_statement(sql).all()
-
-
-    @property
-    def web_full_directory(self):
-        return "{root_dir}/{dirname}".format(root_dir=util.cache_get('pvs.company.web.root.dir'),
-                                             dirname=self.web_directory)
-
-
-    @property
-    def web_directory(self):
-        return str(self.company_id)
-
-
-    def create_dir_structure(self):
-        dirname = self.web_full_directory
-        util.mkdir_p(dirname)
-        util.mkdir_p("%s/images" % dirname)
-        util.mkdir_p("%s/script" % dirname)
-        util.mkdir_p("%s/cache" % dirname)
 
 
 class Enterprise(ORMBase, BaseModel):
@@ -340,3 +319,20 @@ class Enterprise(ORMBase, BaseModel):
     #                      Enterprise.customer_id == None)).order_by(Enterprise.name).all()
 
         
+    # @property
+    # def web_full_directory(self):
+    #     return "{root_dir}/{dirname}".format(root_dir=util.cache_get('pvs.company.web.root.dir'),
+    #                                          dirname=self.web_directory)
+
+
+    # @property
+    # def web_directory(self):
+    #     return str(self.company_id)
+
+
+    # def create_dir_structure(self):
+    #     dirname = self.web_full_directory
+    #     util.mkdir_p(dirname)
+    #     util.mkdir_p("%s/images" % dirname)
+    #     util.mkdir_p("%s/script" % dirname)
+    #     util.mkdir_p("%s/cache" % dirname)

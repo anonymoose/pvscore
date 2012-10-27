@@ -3888,3 +3888,20 @@ alter table core_status add foreign key (customer_id) references crm_customer;
 
 
 
+select * from crm_campaign;
+
+
+select * from core_asset;
+
+select distinct fk_type from core_asset;
+
+select fk_type, fk_id, name, web_path
+from core_asset where fk_type = 'Product'
+limit 10;
+
+
+select l.listing_id, l.company_id, c.enterprise_id
+from pvs_listing l, crm_company c
+where l.company_id = c.company_id;
+
+

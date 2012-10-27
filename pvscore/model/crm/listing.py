@@ -9,7 +9,6 @@ from pvscore.model.core.asset import Asset
 #from pvscore.lib.sphinx.sphinxapi import *
 import pvscore.lib.db as db
 #from pvscore.model.core.attribute import AttributeValue
-from hashlib import md5
 import uuid
 from pvscore.lib.sqla import GUID
 
@@ -23,7 +22,7 @@ class Listing(ORMBase, BaseModel):
     customer_id = Column(GUID, ForeignKey('crm_customer.customer_id'))
     company_id = Column(GUID, ForeignKey('crm_company.company_id'))
     site_id = Column(GUID, ForeignKey('cms_site.site_id'))
-    status_id = Column(Integer, ForeignKey('core_status.status_id'))
+    status_id = Column(GUID, ForeignKey('core_status.status_id'))
     title = Column(String(255))
     description = Column(Text)
     category = Column(String(50))
@@ -47,10 +46,10 @@ class Listing(ORMBase, BaseModel):
     site = relation("Site")
 
 
-    @property
-    def hash(self):
-        salt = 'derf'
-        return md5('%s%s%s%s' % (self.company_id, self.customer_id, self.listing_id, salt)).hexdigest()
+    # @property
+    # def hash(self):
+    #     salt = 'derf'
+    #     return md5('%s%s%s%s' % (self.company_id, self.customer_id, self.listing_id, salt)).hexdigest()
 
 
     @staticmethod

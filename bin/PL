@@ -2,5 +2,5 @@
 
 # http://turbogears.org/1.0/docs/UsingPylint.html
 
-pylint --ignore=bin --rcfile=../pvscore/bin/pylint.rc $*
+pylint --ignore=bin,rss.py --rcfile=../pvscore/bin/pylint.rc $*
 

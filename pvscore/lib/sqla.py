@@ -23,6 +23,10 @@ class GUID(TypeDecorator):
     """
     impl = CHAR
 
+    @property
+    def python_type(self):
+        return UUID
+
     def load_dialect_impl(self, dialect):
         if dialect.name == 'postgresql':
             return dialect.type_descriptor(UUID())

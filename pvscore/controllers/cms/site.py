@@ -73,8 +73,8 @@ class SiteController(BaseController):
         site.bind(self.request.POST, True)
         site.save()
         site.flush()
-        if not os.path.isdir(site.site_full_directory):
-            site.create_dir_structure()
+        #if not os.path.isdir(site.site_full_directory):
+        #    site.create_dir_structure()
         self.flash('Successfully saved %s.' % (site.domain))
         return HTTPFound('/cms/site/edit/%s' % site.site_id)
 

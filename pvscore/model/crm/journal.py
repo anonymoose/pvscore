@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101,C0103
 from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import Integer, String, Date, Float, Text
+from sqlalchemy.types import String, Date, Float, Text
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
