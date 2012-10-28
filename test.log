@@ -191,3 +191,197 @@ TOTAL                                                        13952   1615    88%
 
 
 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Sun Oct 28 15:07:35 EDT 2012
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Name                                                         Stmts   Miss  Cover   Missing
+------------------------------------------------------------------------------------------
+data/templates/_test/customer.mako                              29      2    93%   21-22
+data/templates/_test/dynamic1.mako                              25      2    92%   21-22
+data/templates/_test/index.mako                                 30      2    93%   21-22
+data/templates/_test/subdir1/in_subdir_1.mako                   29      2    93%   21-22
+data/templates/_test/subdir1/subdir2/in_subdir_2.mako           29      2    93%   21-22
+data/templates/cms/site.base.mako                               36      7    81%   16-20, 32-33
+data/templates/cms/site.edit.mako                               99     19    81%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57
+data/templates/cms/site.list.mako                               49      9    82%   16-20, 32-33, 36-37
+data/templates/crm/appointment.base.mako                        44      7    84%   16-20, 32-33
+data/templates/crm/appointment.cal_day.mako                     96     19    80%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57
+data/templates/crm/appointment.cal_month.mako                  135     27    80%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57, 60-61, 64-65, 68-69, 72-73
+data/templates/crm/appointment.cust_appointments_list.mako      57      9    84%   16-20, 32-33, 36-37
+data/templates/crm/appointment.edit.mako                        41      7    83%   16-20, 32-33
+data/templates/crm/appointment.edit_customer.mako               33      5    85%   16-20
+data/templates/crm/appointment.edit_impl.mako                   68     10    85%   21-22, 25-26, 29-30, 33-34, 37-38
+data/templates/crm/appointment.list.mako                        57      9    84%   16-20, 32-33, 36-37
+data/templates/crm/appointment.search.mako                      73     13    82%   16-20, 32-33, 36-37, 40-41, 44-45
+data/templates/crm/base.mako                                   446     75    83%   21-22, 25-26, 29-30, 33-34, 183-184, 187-188, 213-237, 250-270, 325-326, 370-371, 374-375, 394-401, 448-449, 452-453, 615-616, 647-648, 663-664, 667-668
+data/templates/crm/campaign.edit.mako                          113     17    85%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53
+data/templates/crm/campaign.list.mako                           51      9    82%   16-20, 32-33, 36-37
+data/templates/crm/category.edit.mako                          112     15    87%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49
+data/templates/crm/category.list.mako                           51      9    82%   16-20, 32-33, 36-37
+data/templates/crm/communication.base.mako                      36      7    81%   16-20, 32-33
+data/templates/crm/communication.edit.mako                      85     13    85%   16-20, 32-33, 36-37, 40-41, 44-45
+data/templates/crm/communication.list.mako                      51      9    82%   16-20, 32-33, 36-37
+data/templates/crm/communication.send.mako                      50     12    76%   16-20, 32-33, 36-37, 40-41, 60
+data/templates/crm/company.base.mako                            36      7    81%   16-20, 32-33
+data/templates/crm/company.edit.mako                           127     19    85%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57
+data/templates/crm/company.edit_enterprise.mako                105     13    88%   16-20, 32-33, 36-37, 40-41, 44-45
+data/templates/crm/company.list.mako                            51      9    82%   16-20, 32-33, 36-37
+data/templates/crm/company.list_enterprises.mako                50      9    82%   16-20, 32-33, 36-37
+data/templates/crm/company.quick_start.mako                     89     19    79%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57
+data/templates/crm/customer.add_order.mako                      58     11    81%   16-20, 32-33, 36-37, 40-41
+data/templates/crm/customer.apply_payment.mako                 108     33    69%   21-25, 37-38, 41-42, 45-46, 49-50, 53-54, 57-58, 61-62, 65-66, 69-70, 73-74, 91, 100-109
+data/templates/crm/customer.attributes.mako                     42      7    83%   16-20, 32-33
+data/templates/crm/customer.base.mako                           36      7    81%   16-20, 32-33
+data/templates/crm/customer.billings_list.mako                  79     18    77%   16-20, 32-33, 36-37, 40-41, 44-45, 86-90
+data/templates/crm/customer.cancel_order.mako                   53     11    79%   16-20, 32-33, 36-37, 40-41
+data/templates/crm/customer.edit.base.mako                     132     23    83%   16-20, 32-33, 52-53, 56-57, 60-61, 64-65, 103, 172-178
+data/templates/crm/customer.edit.mako                          150     19    87%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57
+data/templates/crm/customer.edit_order.mako                    180     33    82%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57, 60-61, 78, 97-100, 111-114, 205-211
+data/templates/crm/customer.history_list.mako                   79     20    75%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 83-87
+data/templates/crm/customer.orders_list.mako                   142     28    80%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 102, 140, 156-158, 171, 191-196
+data/templates/crm/customer.return_item.mako                    69     13    81%   16-20, 32-33, 36-37, 40-41, 44-45
+data/templates/crm/customer.search.mako                         85     33    61%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57, 81-102
+data/templates/crm/customer.status.mako                         80     20    75%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57, 95
+data/templates/crm/customer.view_billing.mako                   51      9    82%   16-20, 32-33, 36-37
+data/templates/crm/customer.view_status.mako                    51      9    82%   16-20, 32-33, 36-37
+data/templates/crm/dashboard.mako                               71     13    82%   16-20, 47-48, 64-65, 68-69, 72-73
+data/templates/crm/event.base.mako                              36      7    81%   16-20, 32-33
+data/templates/crm/event.edit.mako                              73     11    85%   16-20, 32-33, 36-37, 40-41
+data/templates/crm/event.list.mako                              55      9    84%   16-20, 32-33, 36-37
+data/templates/crm/listing.add_picture.mako                     19      0   100%   
+data/templates/crm/listing.json.mako                            37      2    95%   21-22
+data/templates/crm/login.mako                                   50      4    92%   21-22, 25-26
+data/templates/crm/passthru.mako                                28      4    86%   21-22, 25-26
+data/templates/crm/product.base.mako                            70     12    83%   16-20, 32-33, 54-55, 74, 87-88
+data/templates/crm/product.edit.base.mako                      116     20    83%   16-20, 32-33, 36-37, 40-41, 44-45, 75-76, 79-80, 83-84, 135
+data/templates/crm/product.edit.mako                           228     38    83%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57, 60-61, 64-65, 68-69, 72-73, 76-77, 80-81, 84-85, 88-89, 113-116
+data/templates/crm/product.history_list.mako                    54      9    83%   16-20, 32-33, 36-37
+data/templates/crm/product.inventory.mako                       85     15    82%   16-20, 32-33, 36-37, 40-41, 44-45, 101-102
+data/templates/crm/product.list.mako                            57      9    84%   16-20, 32-33, 36-37
+data/templates/crm/product.orders_list.mako                     62     28    55%   16-20, 32-33, 36-37, 40-41, 50-73
+data/templates/crm/product.purchases_list.mako                  60     26    57%   16-20, 32-33, 36-37, 40-41, 50-70
+data/templates/crm/product.returns_list.mako                    56     22    61%   16-20, 32-33, 36-37, 40-41, 50-65
+data/templates/crm/product.sales_list.mako                      54     22    59%   16-20, 32-33, 36-37, 46-64
+data/templates/crm/purchase.base.mako                           36      7    81%   16-20, 32-33
+data/templates/crm/purchase.edit.mako                          154     32    79%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 113-121, 173-174, 177-178, 181-182, 185-186
+data/templates/crm/purchase.edit_vendor.mako                    75     11    85%   16-20, 32-33, 36-37, 40-41
+data/templates/crm/purchase.history_list.mako                   62     11    82%   16-20, 32-33, 36-37, 40-41
+data/templates/crm/purchase.list.mako                           52      9    83%   16-20, 32-33, 36-37
+data/templates/crm/purchase.list_vendors.mako                   51      9    82%   16-20, 32-33, 36-37
+data/templates/crm/purchase.search.mako                         73     13    82%   16-20, 32-33, 36-37, 40-41, 87-88
+data/templates/crm/report.base.mako                             36      7    81%   16-20, 32-33
+data/templates/crm/report.edit.mako                             83     11    87%   16-20, 32-33, 36-37, 40-41
+data/templates/crm/report.export.mako                           40      4    90%   21-22, 25-26
+data/templates/crm/report.list.mako                             48      9    81%   16-20, 32-33, 36-37
+data/templates/crm/report.show.mako                            152     55    64%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57, 60-61, 64-65, 68-69, 72-73, 76-77, 80-81, 99-102, 110-112, 116-118, 152-156, 160-164, 168-172
+data/templates/crm/style_override.mako                          29      4    86%   21-22, 25-26
+data/templates/crm/users.base.mako                              36      7    81%   16-20, 32-33
+data/templates/crm/users.edit.mako                             158     21    87%   16-20, 32-33, 36-37, 40-41, 44-45, 48-49, 52-53, 56-57, 60-61
+data/templates/crm/users.list.mako                              66     11    83%   16-20, 32-33, 36-37, 79-80
+pvscore/__init__                                                41      3    93%   49-51
+pvscore/bin/__init__                                            72      1    99%   63
+pvscore/bin/delete_enterprise                                    2      0   100%   
+pvscore/bin/load_products                                        0      0   100%   
+pvscore/bin/uuidkey                                            328    301     8%   9-10, 14-24, 28-29, 32, 37-39, 43-45, 49-50, 54-55, 59, 67-76, 80-82, 86-110, 114-119, 122, 128-129, 136-137, 143-220, 223-254, 258-325, 328-329, 362-523
+pvscore/config/__init__                                          3      0   100%   
+pvscore/config/routes                                          171      0   100%   
+pvscore/controllers/__init__                                     0      0   100%   
+pvscore/controllers/_test/__init__                               0      0   100%   
+pvscore/controllers/_test/tsst                                  36      2    94%   76, 82
+pvscore/controllers/base                                        38      0   100%   
+pvscore/controllers/cms/__init__                                 0      0   100%   
+pvscore/controllers/cms/site                                    75      0   100%   
+pvscore/controllers/crm/__init__                                 0      0   100%   
+pvscore/controllers/crm/appointment                            109      0   100%   
+pvscore/controllers/crm/campaign                                54      0   100%   
+pvscore/controllers/crm/category                                46      0   100%   
+pvscore/controllers/crm/communication                           65      0   100%   
+pvscore/controllers/crm/company                                126      0   100%   
+pvscore/controllers/crm/customer                               555     10    98%   287, 435-438, 682, 718-719, 745, 751
+pvscore/controllers/crm/dashboard                               20      0   100%   
+pvscore/controllers/crm/event                                   38      0   100%   
+pvscore/controllers/crm/listing                                 58      0   100%   
+pvscore/controllers/crm/login                                   44      0   100%   
+pvscore/controllers/crm/product                                183      0   100%   
+pvscore/controllers/crm/purchase                               158      0   100%   
+pvscore/controllers/crm/report                                 118      0   100%   
+pvscore/controllers/crm/users                                   65      0   100%   
+pvscore/controllers/tweens                                      74      1    99%   110
+pvscore/lib/__init__                                             0      0   100%   
+pvscore/lib/auth_conditions/__init__                            21      0   100%   
+pvscore/lib/billing_api                                         99     11    89%   89, 98, 130-132, 147-149, 164-165, 170
+pvscore/lib/catalog                                             90     50    44%   7-14, 19, 24, 29, 34, 39, 43, 49-51, 55-57, 61-63, 67, 71, 74, 78-79, 83-84, 88-89, 102-105, 109-110, 130-131, 135-138, 142-148
+pvscore/lib/db                                                  40      0   100%   
+pvscore/lib/dbcache                                             94     28    70%   105-106, 120, 128-129, 153-154, 210-212, 223-229, 243-244, 256-269, 293
+pvscore/lib/decorators/__init__                                  0      0   100%   
+pvscore/lib/decorators/authorize                                11      0   100%   
+pvscore/lib/geoip/__init__                                       0      0   100%   
+pvscore/lib/geoip/geo                                           20     12    40%   12-18, 34, 38-41
+pvscore/lib/helpers                                             61      1    98%   52
+pvscore/lib/mail                                                56      3    95%   37, 53-54
+pvscore/lib/plugin                                              47      1    98%   27
+pvscore/lib/rss                                                266    202    24%   15-16, 21-26, 31-35, 38-40, 44-53, 56-58, 73, 94-95, 97-99, 109-110, 112, 118-119, 121-124, 130-134, 136, 148-153, 156-174, 183-184, 186-191, 200-203, 206-211, 217-219, 221, 230-231, 233, 242, 244-248, 257, 259-263, 300-326, 329-383, 388, 408-422, 426-451, 456
+pvscore/lib/sqla                                                25      5    80%   28, 34, 43-47
+pvscore/lib/util                                               172     14    92%   122-123, 205-207, 222, 614-620, 624
+pvscore/lib/validate                                            38      1    97%   43
+pvscore/model/__init__                                          13      0   100%   
+pvscore/model/cms/__init__                                       0      0   100%   
+pvscore/model/cms/site                                          57      1    98%   50
+pvscore/model/core/__init__                                      0      0   100%   
+pvscore/model/core/asset                                        64      3    95%   34, 60, 102
+pvscore/model/core/association                                  15      0   100%   
+pvscore/model/core/attribute                                    58      0   100%   
+pvscore/model/core/kv                                           15      0   100%   
+pvscore/model/core/status                                       44      0   100%   
+pvscore/model/core/statusevent                                  40      0   100%   
+pvscore/model/core/statuseventreason                            16      0   100%   
+pvscore/model/core/users                                        90      3    97%   49, 74, 79
+pvscore/model/crm/__init__                                       0      0   100%   
+pvscore/model/crm/appointment                                   57      0   100%   
+pvscore/model/crm/billing                                       74      0   100%   
+pvscore/model/crm/campaign                                      65      3    95%   46-47, 102
+pvscore/model/crm/comm                                          77      2    97%   73, 94
+pvscore/model/crm/company                                      158     13    92%   59-60, 216, 219-228
+pvscore/model/crm/customer                                     160      0   100%   
+pvscore/model/crm/customerorder                                251     28    89%   80-91, 114, 120-130, 228-229, 256-257
+pvscore/model/crm/discount                                      29      0   100%   
+pvscore/model/crm/journal                                       92      2    98%   81-82
+pvscore/model/crm/listing                                       53      0   100%   
+pvscore/model/crm/orderitem                                     51      2    96%   45, 65
+pvscore/model/crm/pricing                                       34      0   100%   
+pvscore/model/crm/product                                      312      6    98%   95, 181, 204-205, 298, 333
+pvscore/model/crm/purchase                                      96      0   100%   
+pvscore/model/crm/report                                        49      0   100%   
+pvscore/model/meta                                             111      3    97%   36, 175, 180
+pvscore/tests/__init__                                         101      2    98%   117-118
+pvscore/tests/controllers/__init__                               0      0   100%   
+pvscore/tests/controllers/test_cms_site                        115      1    99%   160
+pvscore/tests/controllers/test_crm_appointment                 176      0   100%   
+pvscore/tests/controllers/test_crm_campaign                     83      0   100%   
+pvscore/tests/controllers/test_crm_category                     71      0   100%   
+pvscore/tests/controllers/test_crm_comm                         79      0   100%   
+pvscore/tests/controllers/test_crm_company                     176      0   100%   
+pvscore/tests/controllers/test_crm_customer                    637      1    99%   15
+pvscore/tests/controllers/test_crm_dashboard                     7      0   100%   
+pvscore/tests/controllers/test_crm_event                        60      0   100%   
+pvscore/tests/controllers/test_crm_listing                      54      0   100%   
+pvscore/tests/controllers/test_crm_login                        57      0   100%   
+pvscore/tests/controllers/test_crm_product                     197      0   100%   
+pvscore/tests/controllers/test_crm_purchase                    199      0   100%   
+pvscore/tests/controllers/test_crm_report                      106      0   100%   
+pvscore/tests/controllers/test_crm_users                        81      0   100%   
+pvscore/tests/functional/__init__                                0      0   100%   
+pvscore/tests/functional/test_base                              19      1    95%   16
+pvscore/tests/functional/test_billing_api                       13      0   100%   
+pvscore/tests/functional/test_bin                               65      4    94%   13, 41-43
+pvscore/tests/functional/test_db                                20      0   100%   
+pvscore/tests/functional/test_helpers                           45      0   100%   
+pvscore/tests/functional/test_mail                              28      0   100%   
+pvscore/tests/functional/test_plugin                            15      0   100%   
+pvscore/tests/functional/test_util                              21      0   100%   
+pvscore/tests/functional/test_validate                          83      0   100%   
+------------------------------------------------------------------------------------------
+TOTAL                                                        14248   1880    87%   
+
+
+

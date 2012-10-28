@@ -348,7 +348,7 @@ class TestCrmCustomer(TestController):
         self.assertEqual(R.status_int, 200)
         R.mustcontain('Order List')
         ordr = cust.get_active_orders()[0]
-        jslink = 'customer_edit_order(%s)' % ordr.order_id
+        jslink = "customer_edit_order('%s')" % ordr.order_id
         R.mustcontain(jslink)
         R = self.get('/crm/customer/edit_order_dialog/%s/%s' % (customer_id, ordr.order_id))
         self.assertEqual(R.status_int, 200)
