@@ -1,7 +1,7 @@
 #pylint: disable-msg=E1101
 # Zachary234 = 4476212f8f185ba416fc0708bebcc91b
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Boolean
+from sqlalchemy.types import Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -23,8 +23,8 @@ class Users(ORMBase, BaseModel):
     password_len = Column(Integer, default=0)
     fname = Column(String(50))
     lname = Column(String(50))
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
     api_key = Column(String(50))
     type = Column(String(50))
     tz_offset = Column(Integer, default=5)

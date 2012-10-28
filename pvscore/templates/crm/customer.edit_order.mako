@@ -30,7 +30,7 @@
               &nbsp;
             </div>
             <div class="span2">
-              <a href="javascript:customer_view_packing_slip(${order.order_id}, ${comm_packing_slip_id})">View Receipt</a>
+              <a href="javascript:customer_view_packing_slip('${order.order_id}', '${comm_packing_slip_id}')">View Receipt</a>
             </div>
             % endif
             % if order.external_cart_id:

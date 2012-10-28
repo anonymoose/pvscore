@@ -1,6 +1,6 @@
 import os, shutil
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date
+from sqlalchemy.types import Integer, String, DateTime
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -21,7 +21,7 @@ class Asset(ORMBase, BaseModel):
     description = Column(String(1000))
     fk_type = Column(String(50))
     fk_id = Column(Integer)
-    create_dt = Column(Date, server_default = text('now()'))
+    create_dt = Column(DateTime, server_default = text('now()'))
     mimetype = Column(String(30)) #
     fs_path = Column(String(512)) #
     web_path = Column(String(512)) #
@@ -31,7 +31,7 @@ class Asset(ORMBase, BaseModel):
 
     @property
     def exists(self):
-        return os.path.exists(self.fs_path)
+        return os.path.exists(self.filesystem_path)
 
 
     @staticmethod
@@ -60,12 +60,15 @@ class Asset(ORMBase, BaseModel):
         return "{reldir}/{assid}{ext}".format(reldir=self.relative_dir,
                                               assid=self.id,
                                               ext=self.extension)
+
+    
     @property
     def relative_dir(self):
+        this_id = str(self.id)
         return "enterprises/{enterprise_id}/assets/{_0}/{_1}/{_2}".format(enterprise_id=self.enterprise_id,
-                                                                           _0=self.id[0],
-                                                                           _1=self.id[1],
-                                                                           _2=self.id[2])
+                                                                          _0=this_id[0],
+                                                                          _1=this_id[1],
+                                                                          _2=this_id[2])
 
     @staticmethod
     def create_new(obj, enterprise_id, request):
@@ -78,7 +81,7 @@ class Asset(ORMBase, BaseModel):
         ass.extension = os.path.splitext(asset_data.filename)[1]
         ass.save()
         ass.flush()        
-        storage_root = util.cache_get('pvs.enterprise.root.dir')
+        storage_root = Asset.get_storage_root()
         fs_real_dir = "{root}/enterprises/{reldir}".format(root=storage_root, reldir=ass.relative_dir)
         util.mkdir_p(fs_real_dir)
         fs_real_path = "{fs_real_dir}/{assid}{ext}".format(fs_real_dir=fs_real_dir,
@@ -88,6 +91,15 @@ class Asset(ORMBase, BaseModel):
             shutil.copyfileobj(asset_data.file, permanent_file)
             asset_data.file.close()
         return ass
+
+    @staticmethod
+    def get_storage_root():
+        return util.cache_get('pvs.enterprise.root.dir')
+
+
+    @property
+    def filesystem_path(self):
+        return '%s/%s' % (Asset.get_storage_root(), self.path)
 
     # def delete(self):
     #     if os.path.exists(self.fs_path):

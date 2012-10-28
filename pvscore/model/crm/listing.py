@@ -1,7 +1,7 @@
 #pylint: disable-msg=E1101,C0103
 import logging
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Text, Boolean, DateTime, Float
+from sqlalchemy.types import Integer, String, DateTime, Text, Boolean, DateTime, Float
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -10,6 +10,7 @@ from pvscore.model.core.asset import Asset
 import pvscore.lib.db as db
 #from pvscore.model.core.attribute import AttributeValue
 import uuid
+from md5 import md5
 from pvscore.lib.sqla import GUID
 
 log = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class Listing(ORMBase, BaseModel):
     ip = Column(String(15))
     dma = Column(Integer)
     create_dt = Column(DateTime, server_default = text('now()'))
-    delete_dt = Column(Date)
+    delete_dt = Column(DateTime)
 
     customer = relation('Customer')
     company = relation('Company')
@@ -46,10 +47,10 @@ class Listing(ORMBase, BaseModel):
     site = relation("Site")
 
 
-    # @property
-    # def hash(self):
-    #     salt = 'derf'
-    #     return md5('%s%s%s%s' % (self.company_id, self.customer_id, self.listing_id, salt)).hexdigest()
+    @property
+    def hash(self):
+        salt = 'derf'
+        return md5('%s%s%s%s' % (self.company_id, self.customer_id, self.listing_id, salt)).hexdigest()
 
 
     @staticmethod

@@ -92,14 +92,6 @@
             ${h.select('tax_method', site.tax_method, tax_methods)}
           </div>
         </div>
-        <div class="row">
-          <div class="span5">
-            % if not site_config:
-            <div class="_100"><font color="red"><b>site.config file is not present</b></font></div>
-            % endif
-            <div class="_100">Web Directory: ${site.site_web_directory('')}</div>
-          </div>
-        </div>
       </div>
       <div class="row">
         <div class="span2 offset10">

@@ -1,6 +1,6 @@
 #pylint: disable-msg=R0902,E1002
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.types import Integer, String, Date, Boolean
+from sqlalchemy.types import Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel
@@ -29,8 +29,8 @@ class Billing(ORMBase, BaseModel):
     cc_last_4 = Column(Integer)
     cc_exp = Column(String(7))
     is_primary = Column(Boolean, default = True)
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
 
     creator = relation('Users', primaryjoin=Users.user_id == user_created)
     status = relation('Status')
@@ -82,8 +82,8 @@ class BillingHistory(ORMBase, BaseModel):
     date = Column(String(50))
     transaction = Column(String(20))
     uid = Column(String(40))
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
 
     billing = relation('Billing')
     order = relation('CustomerOrder')

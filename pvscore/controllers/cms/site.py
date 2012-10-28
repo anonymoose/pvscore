@@ -1,4 +1,4 @@
-import logging, os
+import logging
 from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPForbidden
@@ -34,23 +34,15 @@ class SiteController(BaseController):
         if site_id:
             site = Site.load(site_id)
             self.forbid_if(not site or str(site.company.enterprise_id) != str(self.enterprise_id))
-            site_config = self._check_config(site)
         else:
             site = Site()
-            site_config = None
         return {
             'site' : site,
-            'site_config' : site_config,
             'shipping_methods' : Site.get_shipping_methods(),
             'tax_methods' : Site.get_tax_methods(),
             'companies' : util.select_list(Company.find_all(self.enterprise_id), 'company_id', 'name'),
             'campaigns' : util.select_list(Campaign.find_all(self.enterprise_id), 'campaign_id', 'name')
             }
-
-
-    def _check_config(self, site):
-        dirr = site.site_full_directory
-        return (os.path.exists(dirr) and os.path.exists(dirr + '/site.config'))
 
 
     @view_config(route_name='cms.site.list', renderer='/cms/site.list.mako')

@@ -29,7 +29,7 @@
             </td>
             <td>
               <img src="/static/icons/silk/delete.png" border="0" 
-                   title="Delete Billing" alt="Delete Billing" onclick="customer_cancel_billing(${b.journal_id})"/>
+                   title="Delete Billing" alt="Delete Billing" onclick="customer_cancel_billing('${b.journal_id}')"/>
             </td>
             <td nowrap>${b.type}</td>
             <td nowrap>${b.create_dt}</td>

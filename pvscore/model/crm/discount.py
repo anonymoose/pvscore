@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.types import String, Date, Text, Float, Boolean, DateTime
+from sqlalchemy.types import String, DateTime, Text, Float, Boolean, DateTime
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel
@@ -22,12 +22,12 @@ class Discount(ORMBase, BaseModel):
     percent_off = Column(Float)
     amount_off = Column(Float)
     which_item = Column(String(30))
-    end_dt = Column(Date)
+    end_dt = Column(DateTime)
     web_enabled = Column(Boolean, default=True)
     store_enabled = Column(Boolean, default=True)
-    create_dt = Column(Date, server_default=text('now()'))
-    delete_dt = Column(Date)
-    start_dt = Column(Date)
+    create_dt = Column(DateTime, server_default=text('now()'))
+    delete_dt = Column(DateTime)
+    start_dt = Column(DateTime)
 
     vendor = relation('Vendor')
     product = relation('Product')

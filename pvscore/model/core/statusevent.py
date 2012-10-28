@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import Integer, String, Date, Boolean
+from sqlalchemy.types import Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -18,8 +18,8 @@ class StatusEvent(ORMBase, BaseModel):
     short_name = Column(String(50))
     display_name = Column(String(50))
     phase = Column(String(50))
-    create_dt = Column(Date, server_default = text('now()'))
-    end_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    end_dt = Column(DateTime)
     claim = Column(Boolean, default = False)
     finalize = Column(Boolean, default = False)
     is_system = Column(Boolean, default = False)

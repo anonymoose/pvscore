@@ -50,7 +50,7 @@ ${next.body()}
       % for img in product.images:
       <img id="pi_${img.id}" width="100"
            src="/cms/asset/show/${img.id}"
-           onclick="product_picture_delete_image(${img.id}, true)"/>
+           onclick="product_picture_delete_image('${img.id}', true)"/>
       % endfor
     </div>
   </div>

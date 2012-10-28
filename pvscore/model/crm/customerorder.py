@@ -2,7 +2,7 @@
 import math
 import datetime
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import String, Date, Float, Text
+from sqlalchemy.types import String, DateTime, Float, Text
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session, BaseAnalytic
@@ -26,9 +26,9 @@ class CustomerOrder(ORMBase, BaseModel):
     campaign_id = Column(GUID, ForeignKey('crm_campaign.campaign_id'))
     status_id = Column(GUID, ForeignKey('core_status.status_id'))
     user_created = Column(GUID, ForeignKey('core_user.user_id'))
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
-    cancel_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
+    cancel_dt = Column(DateTime)
     note = Column(Text)
     shipping_note = Column(String(50))
     shipping_total = Column(Float)

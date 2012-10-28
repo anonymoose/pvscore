@@ -17,7 +17,7 @@
       % for pc in categories:
       <tr>
         <td>${pc.category_id}</td>
-        <td width="50%" nowrap>${h.link_to(pc.name, '/crm/product/category/edit/%d' % pc.category_id)}</td>
+        <td width="50%" nowrap>${h.link_to(pc.name, '/crm/product/category/edit/%s' % pc.category_id)}</td>
         <td nowrap>${pc.create_dt}</td>
       </tr>
       % endfor

@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101,C0103
 from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import String, Date, Float, Text
+from sqlalchemy.types import String, DateTime, Float, Text
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -62,8 +62,8 @@ class Journal(ORMBase, BaseModel):
     customer_id = Column(GUID, ForeignKey('crm_customer.customer_id'))
     order_id = Column(GUID, ForeignKey('crm_customer_order.order_id'))
     user_created = Column(GUID, ForeignKey('core_user.user_id'))
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
     type = Column(String(30))
     note = Column(Text)
     method = Column(String(25))

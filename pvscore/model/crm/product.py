@@ -1,7 +1,7 @@
 #pylint: disable-msg=E1101,C0103,R0913
 import math
 from sqlalchemy import Column, ForeignKey, and_, or_
-from sqlalchemy.types import Integer, String, Date, Text, Float, Boolean, DateTime
+from sqlalchemy.types import Integer, String, DateTime, Text, Float, Boolean, DateTime
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -27,8 +27,8 @@ class Product(ORMBase, BaseModel):
     detail_description = Column(Text)
     description = Column(Text)
 
-    create_dt = Column(Date, server_default=text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default=text('now()'))
+    delete_dt = Column(DateTime)
     mod_dt = Column(DateTime, server_default=text('now()'))
     type = Column(String(20), server_default=text('Parent or Child'))
     manufacturer = Column(String(100))
@@ -420,8 +420,8 @@ class ProductCategory(ORMBase, BaseModel):
     company_id = Column(GUID, ForeignKey('crm_company.company_id'))
     name = Column(String(200))
     description = Column(Text)
-    create_dt = Column(Date, server_default=text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default=text('now()'))
+    delete_dt = Column(DateTime)
     mod_dt = Column(DateTime, server_default=text('now()'))
     seo_title = Column(String(512))
     seo_keywords = Column(String(1000))
@@ -518,8 +518,8 @@ class ProductReturn(ORMBase, BaseModel):
     quantity = Column(Float, server_default=text('0.0'))
     credit_amount = Column(Float, server_default=text('0.0'))
     user_created = Column(GUID, ForeignKey('core_user.user_id'))
-    create_dt = Column(Date, server_default=text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default=text('now()'))
+    delete_dt = Column(DateTime)
 
     product = relation('Product')
     order = relation('CustomerOrder')
@@ -560,8 +560,8 @@ class InventoryJournal(ORMBase, BaseModel):
     type = Column(String(20), default='Sale')
     note = Column(String(150))
     user_created = Column(GUID, ForeignKey('core_user.user_id'))
-    create_dt = Column(Date, server_default=text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default=text('now()'))
+    delete_dt = Column(DateTime)
 
     product = relation('Product')
     order_item = relation('OrderItem')

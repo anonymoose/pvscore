@@ -3,7 +3,7 @@ from pvscore.model.cms.site import Site
 from pyramid.httpexceptions import HTTPForbidden
 from pvscore.model.crm.campaign import Campaign
 from pvscore.model.crm.company import Enterprise
-import logging, shutil, os
+import logging
 import uuid
 
 log = logging.getLogger(__name__)
@@ -89,8 +89,6 @@ Disallow: /cms/cart/add/*""")
     def _delete_new(self, site_id):
         site = Site.load(site_id)
         self.assertNotEqual(site, None)
-        if os.path.isdir(site.site_full_directory):
-            shutil.rmtree(site.site_full_directory)
         site.delete()
         self.commit()
 

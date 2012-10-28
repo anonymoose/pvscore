@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101,R0801
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Text
+from sqlalchemy.types import Integer, String, DateTime, Text
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -21,8 +21,8 @@ class Company(ORMBase, BaseModel):
     default_campaign_id = Column(GUID, ForeignKey('crm_campaign.campaign_id'))
     name = Column(String(50))
     paypal_id = Column(String(256))
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
 
     anon_customer_email = Column(String(75))
 
@@ -133,8 +133,8 @@ class Enterprise(ORMBase, BaseModel):
     logo_path_pdf = Column(String(200))
     support_email = Column(String(50))
     support_phone = Column(String(20))
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
     billing_method = Column(String(50))
 
     email = Column(String(50))

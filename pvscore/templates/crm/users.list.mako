@@ -16,7 +16,7 @@
     <tbody>
       % for u in users:
       <tr>
-        <td>${h.link_to(u.username, '/crm/users/edit/%s' % u.username)}</td>
+        <td>${h.link_to(u.username, '/crm/users/edit/%s' % u.user_id)}</td>
         <td>${u.fname}</td>
         <td>${u.lname}</td>
         <td>${u.vendor.name if u.vendor else ''}</td>

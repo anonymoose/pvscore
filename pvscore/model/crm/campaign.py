@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import String, Date, Float
+from sqlalchemy.types import String, DateTime, Float
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -21,8 +21,8 @@ class Campaign(ORMBase, BaseModel):
     comm_packing_slip_id = Column(GUID, ForeignKey('crm_communication.comm_id'))
     comm_forgot_password_id = Column(GUID, ForeignKey('crm_communication.comm_id'))
     name = Column(String(100))
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
     type = Column(String(50))
     default_url = Column(String(50))
     tax_rate = Column(Float)

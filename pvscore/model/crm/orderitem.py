@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import String, Date, Float, DateTime
+from sqlalchemy.types import String, DateTime, Float, DateTime
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -26,8 +26,8 @@ class OrderItem(ORMBase, BaseModel):
     unit_price = Column(Float)
     unit_discount_price = Column(Float)
     unit_retail_price = Column(Float)
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
     quantity = Column(Float)
     tax = Column(Float, default=0.0)
 
@@ -54,7 +54,7 @@ class OrderItemTermsAcceptance(ORMBase, BaseModel):
     order_id = Column(GUID, ForeignKey('crm_customer_order.order_id'))
     order_item_id = Column(GUID, ForeignKey('crm_order_item.order_item_id'))
     create_dt = Column(DateTime, server_default = text('now()'))
-    delete_dt = Column(Date)
+    delete_dt = Column(DateTime)
     signature = Column(String(100))
 
 

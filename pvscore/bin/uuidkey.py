@@ -24,6 +24,15 @@ def list_keys(cur, tablename, keytype):
     return cur.fetchall()
 
 
+def get_columns_of_type(cur, datatype):
+    cur.execute("select table_name, column_name, data_type from information_schema.columns where data_type = '%s'" % datatype)
+    return cur.fetchall()
+
+def change_type(cur, table_name, column_name, totype):
+    cur.execute("""alter table {tname} alter column {cname} set data type {totype}""".format(tname=table_name,
+                                                                                             cname=column_name,
+                                                                                             totype=totype))
+
 def get_column_type(cur, table_name, column_name):
     cur.execute("""select data_type from information_schema.columns where
                    table_name = '%s' and column_name = '%s'""" % (table_name, column_name))
@@ -306,14 +315,20 @@ def fix_assets(conn, cur, dbname, storage_root):
                                                                                                                                  assid=assid,
                                                                                                                                  ext=ext)
         util.run_process(cmd.split(' '))
-        cur.execute("update core_asset set enterprise_id = '{ent_id}', extension = '{ext}' where id = '{id}'".format(ent_id=enterprise_id,
-                                                                                                                     ext=ext,
-                                                                                                                     id=assid))
+        if enterprise_id:
+            cur.execute("update core_asset set enterprise_id = '{ent_id}', extension = '{ext}' where id = '{id}'".format(ent_id=enterprise_id,
+                                                                                                                         ext=ext,
+                                                                                                                         id=assid))
 
         #    cur.execute("select 
         #    print 'cp %s 
     conn.commit()
         
+def fix_date(conn, cur):
+    for table_name, column_name, data_type in get_columns_of_type(cur, 'date'):
+        change_type(cur, table_name, column_name, 'timestamp')
+        
+
 # def dump_asset_keys(cur, dbname):
 #     with open("%s-filesystem-keys.log" % dbname, "w") as f:
 #         cur.execute("select site_id from cms_site")
@@ -350,6 +365,8 @@ if __name__ == '__main__':
     storage_root = sys.argv[3]
 
     fix_user_table_pre(conn, cur)
+    fix_date(conn, cur)
+
     conn.commit()
 
     tables = list_tables(cur)

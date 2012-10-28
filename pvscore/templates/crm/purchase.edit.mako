@@ -112,9 +112,9 @@
                 % for poi in purchase.order_items:
                 <tr>
                   % if not purchase.complete_dt and not poi.complete_dt:
-                  <td><img src="/static/icons/silk/accept.png" class="clickable" title="Complete" alt="Complete" border="0" onclick="purchase_complete_order_item(this, ${poi.order_item_id})"></td>
-                  <td><img src="/static/icons/silk/delete.png" class="clickable" title="Delete" alt="Delete" border="0" onclick="purchase_delete_order_item(this, ${poi.order_item_id})"></td>
-                  <td><img src="/static/icons/silk/page_edit.png" class="clickable" title="Edit" alt="Edit" border="0" onclick="purchase_edit_order_item(this, ${poi.order_item_id})"></td>
+                  <td><img src="/static/icons/silk/accept.png" class="clickable" title="Complete" alt="Complete" border="0" onclick="purchase_complete_order_item(this, '${poi.order_item_id}')"></td>
+                  <td><img src="/static/icons/silk/delete.png" class="clickable" title="Delete" alt="Delete" border="0" onclick="purchase_delete_order_item(this, '${poi.order_item_id}')"></td>
+                  <td><img src="/static/icons/silk/page_edit.png" class="clickable" title="Edit" alt="Edit" border="0" onclick="purchase_edit_order_item(this, '${poi.order_item_id}')"></td>
                   % elif poi.complete_dt:
                   <td>&nbsp;</td> 
                   <td>&nbsp;</td>

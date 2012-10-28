@@ -9,7 +9,7 @@
     <tbody>
     % for s in sites:
     <tr>
-      <td nowrap>${h.link_to(s.domain, '/cms/site/edit/%d' % s.site_id)}</td>
+      <td nowrap>${h.link_to(s.domain, '/cms/site/edit/%s' % s.site_id)}</td>
       <td nowrap>${s.create_dt}</td>
     </tr>
     % endfor

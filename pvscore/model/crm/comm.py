@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import String, Date, Text, Boolean
+from sqlalchemy.types import String, DateTime, Text, Boolean
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -26,8 +26,8 @@ class Communication(ORMBase, BaseModel):
     url = Column(String(256))
     data = Column(Text)
     type = Column(String(50), server_default='html')
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
     from_addr = Column(String(50))
     subject = Column(String(256))
     user_sendable = Column(Boolean, default=False)

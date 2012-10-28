@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, or_
-from sqlalchemy.types import String, Date, Text, Boolean
+from sqlalchemy.types import String, DateTime, Text, Boolean
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -25,13 +25,13 @@ class Appointment(ORMBase, BaseModel):
     description = Column(Text)
     calendar_type = Column(String(50))
     remind = Column(Boolean)
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
-    completed_dt = Column(Date)
-    start_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
+    completed_dt = Column(DateTime)
+    start_dt = Column(DateTime)
     start_time = Column(String(20))
     end_time = Column(String(20))
-    end_dt = Column(Date)
+    end_dt = Column(DateTime)
     private = Column(Boolean)
     phone = Column(String(20))
     data_1 = Column(String(250))

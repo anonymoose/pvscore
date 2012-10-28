@@ -1,7 +1,7 @@
 #pylint: disable-msg=E1101
 import math
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import Integer, String, Date, Text, Float, DateTime
+from sqlalchemy.types import Integer, String, DateTime, Text, Float, DateTime
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session, BaseAnalytic
@@ -32,7 +32,7 @@ class Customer(ORMBase, BaseModel):
     password = Column(String(50))
     orig_campaign_id = Column(Integer)
     email = Column(String(50))
-    delete_dt = Column(Date)
+    delete_dt = Column(DateTime)
     email_optout_dt = Column(DateTime)
     create_dt = Column(DateTime, server_default = text('now()'))
     mod_dt = Column(DateTime, server_default=text('now()'))

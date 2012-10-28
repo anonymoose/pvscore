@@ -3809,17 +3809,17 @@ select * from crm_enterprise where enterprise_id < 50;
 
 
 
-
 /****** porting fcm to eyefound.it **/
 -- upload db from pvs02
 -- zip up files under sites/6512bd43d9caa6e02c990b0a82652dca and copy tarball to sites/c51ce410c124a10e0db5e4b97fc2af39/
 update crm_customer set campaign_id = 17 where campaign_id = 14;
 update pvs_listing set site_id = 13 where customer_id = 1010;
-update core_asset set fs_path = substring(fs_path from 54) where fk_type = 'Listing';
+-------- dont do this ------ update core_asset set fs_path = substring(fs_path from 54) where fk_type = 'Listing';
 -- cd sites/c51ce410c124a10e0db5e4b97fc2af39/
 -- find . -name "*.jpg" -exec rm -f {} \;
 -- find . -name "*.png" -exec rm -f {} \;
 update core_asset set status_id = null where fk_type = 'Listing';
+-- python ../pvscore/pvscore/bin/uuidkey.py retail retail /Users/kbedwell/dev/pydev/pvs/storage
 -- python -c 'from pvs.bin.eye_process import process_upload; process_upload()' -I development.ini
 /****** end ********/
 
@@ -3905,3 +3905,21 @@ from pvs_listing l, crm_company c
 where l.company_id = c.company_id;
 
 
+/*alter table core_asset add column extension varchar(10);
+#alter table core_asset add column enterprise_id uuid;
+#alter table core_asset add foreign key (enterprise_id) references crm_enterprise;
+*/
+
+select customer_id, email, password from crm_customer where email like '%denison%';
+
+select * from pvs_listing where listing_id = 'fdb2f3f5-2f9f-4d07-81ec-035d7c2bf971';
+select * from core_asset where fk_id = 'fdb2f3f5-2f9f-4d07-81ec-035d7c2bf971';
+
+
+\d crm_customer;
+
+select table_name, column_name, data_type from information_schema.columns where data_type = 'date';
+
+alter table core_asset add column extension varchar(10);
+alter table core_asset add column enterprise_id uuid;
+alter table core_asset add foreign key (enterprise_id) references crm_enterprise;

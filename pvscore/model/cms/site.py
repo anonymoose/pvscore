@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, or_
-from sqlalchemy.types import Integer, String, Date, Text, Boolean
+from sqlalchemy.types import Integer, String, DateTime, Text, Boolean
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -28,8 +28,8 @@ class Site(ORMBase, BaseModel):
     domain_alias2 = Column(String(50))
     description = Column(String(100))
     root_page_id = Column(Integer)
-    create_dt = Column(Date, server_default = text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime)
     header_code = Column(String(1000))
     footer_code = Column(String(1000))
     seo_title = Column(String(512))

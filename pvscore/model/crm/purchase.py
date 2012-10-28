@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101,R0913
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import String, Date, Text, Float, Boolean
+from sqlalchemy.types import String, DateTime, Text, Float, Boolean
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -22,12 +22,12 @@ class PurchaseOrder(ORMBase, BaseModel):
     vendor_id = Column(GUID, ForeignKey('crm_vendor.vendor_id'))
     status_id = Column(GUID, ForeignKey('core_status.status_id'))
     note = Column(String(2000))
-    create_dt = Column(Date, server_default=text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default=text('now()'))
+    delete_dt = Column(DateTime)
     shipping_cost = Column(Float)
     tax_cost = Column(Float)
-    complete_dt = Column(Date)
-    cancel_dt = Column(Date)
+    complete_dt = Column(DateTime)
+    cancel_dt = Column(DateTime)
 
     company = relation('Company', lazy='joined')
     status = relation('Status')
@@ -93,10 +93,10 @@ class PurchaseOrderItem(ORMBase, BaseModel):
     discount = Column(Float, default=0.0)
     status_id = Column(GUID, ForeignKey('core_status.status_id'))
     note = Column(String(100))
-    create_dt = Column(Date, server_default=text('now()'))
-    delete_dt = Column(Date)
-    complete_dt = Column(Date)
-    cancel_dt = Column(Date)
+    create_dt = Column(DateTime, server_default=text('now()'))
+    delete_dt = Column(DateTime)
+    complete_dt = Column(DateTime)
+    cancel_dt = Column(DateTime)
 
     product = relation('Product')
     purchase_order = relation('PurchaseOrder', lazy='joined', backref=backref('order_items', order_by='PurchaseOrderItem.order_item_id'))
@@ -152,8 +152,8 @@ class Vendor(ORMBase, BaseModel):
     url = Column(String(100))
     note = Column(Text)
     revshare = Column(Float)
-    create_dt = Column(Date, server_default=text('now()'))
-    delete_dt = Column(Date)
+    create_dt = Column(DateTime, server_default=text('now()'))
+    delete_dt = Column(DateTime)
     send_month_end_report = Column(Boolean, default=False)
     
     enterprise = relation('Enterprise')

@@ -35,13 +35,13 @@
           <tr order_id="${o.order_id}">
             % if request.ctx.user.priv.modify_customer_order:
             <td>
-              <img src="/public/images/icons/silk/page_edit.png" title="Edit Order (${o.order_id})" alt="Edit Order (${o.order_id})" border="0" onclick="customer_edit_order(${o.order_id})">
+              <img src="/public/images/icons/silk/page_edit.png" title="Edit Order (${o.order_id})" alt="Edit Order (${o.order_id})" border="0" onclick="customer_edit_order('${o.order_id}')">
             </td>
             <td>
-              <img src="/public/images/icons/silk/comment_add.png" border="0" title="Status Order" alt="Status Order" onclick="customer_status(${o.order_id})">
+              <img src="/public/images/icons/silk/comment_add.png" border="0" title="Status Order" alt="Status Order" onclick="customer_status('${o.order_id}')">
             </td>
             <td>
-              <img src="/public/images/icons/silk/delete.png" border="0" title="Delete Order" alt="Delete Order" onclick="customer_cancel_order(${o.order_id})">
+              <img src="/public/images/icons/silk/delete.png" border="0" title="Delete Order" alt="Delete Order" onclick="customer_cancel_order('${o.order_id}')">
             </td>
             % else:
             <td>&nbsp;</td>
@@ -59,7 +59,7 @@
             <td class="clickable" nowrap>${o.create_dt}</td>
             <td class="clickable">${o.user_created if o.user_created else ''}</td>
             % if o.status:
-            <td nowrap><strong><font color="${o.status.event.color}"><a href="javascript:customer_show_status(${o.status.status_id})">${o.status.event.display_name}</a></font></strong></td>
+            <td nowrap><strong><font color="${o.status.event.color}"><a href="javascript:customer_show_status('${o.status.status_id}')">${o.status.event.display_name}</a></font></strong></td>
             % else:
             <td>&nbsp;</td>
             % endif
@@ -82,7 +82,7 @@
                   <td valign="top">
                     <span>
                       % if oi.parent_id:
-                      <img src="/public/images/corner-dots.gif" border="0" onclick="customer_cancel_order(${o.order_id})">
+                      <img src="/public/images/corner-dots.gif" border="0" onclick="customer_cancel_order('${o.order_id}')">
                       % endif
                       ${oi.product.name}
                     </span>
