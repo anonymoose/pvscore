@@ -137,10 +137,11 @@ def analyze_table(cur, table):
     cur.execute('analyze %s' % table)
 
 
-def fix_user_table_pre(conn, cur):
+def fix_user_table_pre(conn, cur, tables):
     #cur.execute('alter table core_user add column username_x varchar(50)')
     #cur.execute('update core_user set username_x = username')
-    cur.execute('alter table core_user add column user_id integer default round(random() * 10000000)')
+    cur.execute('CREATE SEQUENCE user_id_temp_seq')
+    cur.execute("alter table core_user add column user_id integer default nextval('user_id_temp_seq')")
     cur.execute('alter table core_user add constraint user_id_unique unique (user_id)')
     cur.execute('alter table crm_appointment drop constraint appointment_user_completed_fkey')
     cur.execute('alter table crm_appointment drop constraint appointment_user_created_fkey')
@@ -158,6 +159,8 @@ def fix_user_table_pre(conn, cur):
     cur.execute('alter table crm_customer drop constraint customer_user_created_fkey')
     cur.execute('alter table crm_order_item drop constraint order_item_user_created_fkey')
     cur.execute('alter table core_status drop constraint status_username_fkey')
+    if 'wm_ireport' in tables:
+        cur.execute('alter table wm_ireport drop constraint wm_ireport_user_created_fkey')
     cur.execute('alter table core_user drop constraint users_pkey')
     cur.execute('alter table core_user add primary key (user_id)')
     cur.execute("select user_id, username from core_user")
@@ -181,7 +184,9 @@ def fix_user_table_pre(conn, cur):
         cur.execute("update crm_customer set user_created = '%s' where user_created = '%s'" % (userid, username))
         cur.execute("update crm_order_item set user_created = '%s' where user_created = '%s'" % (userid, username))
         cur.execute("update core_status set username = '%s' where username = '%s'" % (userid, username))
-            
+        if 'wm_ireport' in tables:
+            cur.execute("update wm_ireport set user_created = '%s' where user_created = '%s'" % (userid, username))
+
     conn.commit()
     cur.execute('alter table crm_appointment alter column user_completed set data type integer using cast (user_completed as integer)')
     cur.execute('alter table crm_appointment alter column user_created set data type integer using cast (user_created as integer)')
@@ -199,6 +204,8 @@ def fix_user_table_pre(conn, cur):
     cur.execute('alter table crm_customer alter column user_created set data type integer using cast (user_created as integer)')
     cur.execute('alter table crm_order_item alter column user_created set data type integer using cast (user_created as integer)')
     cur.execute('alter table core_status alter column username set data type integer using cast (username as integer)')
+    if 'wm_ireport' in tables:
+        cur.execute('alter table wm_ireport alter column user_created set data type integer using cast (user_created as integer)')
     conn.commit()
 
     cur.execute('alter table crm_appointment add foreign key (user_completed) REFERENCES core_user')
@@ -217,6 +224,8 @@ def fix_user_table_pre(conn, cur):
     cur.execute('alter table crm_customer add foreign key (user_created) REFERENCES core_user')
     cur.execute('alter table crm_order_item add foreign key (user_created) REFERENCES core_user')
     cur.execute('alter table core_status add foreign key (username) REFERENCES core_user')
+    if 'wm_ireport' in tables:
+        cur.execute('alter table wm_ireport add foreign key (user_created) REFERENCES core_user')
     conn.commit()
     
 def fix_fk_type_table(conn, cur, table):
@@ -364,12 +373,12 @@ if __name__ == '__main__':
     cur = conn.cursor()
     storage_root = sys.argv[3]
 
-    fix_user_table_pre(conn, cur)
+    tables = list_tables(cur)
+
+    fix_user_table_pre(conn, cur, tables)
     fix_date(conn, cur)
 
     conn.commit()
-
-    tables = list_tables(cur)
 
     # go get the primary keys, foreign keys, and indexes so we can remember them
     # later after we drop them.  Make sure they are integer keys.

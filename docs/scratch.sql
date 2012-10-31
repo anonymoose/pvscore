@@ -3923,3 +3923,15 @@ select table_name, column_name, data_type from information_schema.columns where 
 alter table core_asset add column extension varchar(10);
 alter table core_asset add column enterprise_id uuid;
 alter table core_asset add foreign key (enterprise_id) references crm_enterprise;
+
+
+select count(0) from wm_eod_quote;
+
+delete from wm_eod_quote where quote_dt < '2012-06-01';
+
+
+
+select count(0) from crm_customer;
+
+\d core_user;
+
