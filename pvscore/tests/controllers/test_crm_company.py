@@ -2,7 +2,6 @@ from pvscore.tests import TestController, secure
 from pvscore.model.crm.company import Company, Enterprise
 from pvscore.model.crm.campaign import Campaign
 from pvscore.model.core.users import Users
-import os, shutil
 
 # T pvscore.tests.controllers.test_crm_company:TestCrmCompany.test_quickstart
 

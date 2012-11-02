@@ -1518,7 +1518,9 @@ pvs.ui = function(){
 
         init_datepickers : function() {
             /* KB: [2010-09-17]: http://jqueryui.com/demos/datepicker/ */
-            $(".datepicker").datepicker({format: 'yyyy-mm-dd'});
+            if ($(".datepicker").datepicker) {
+                $(".datepicker").datepicker({format: 'yyyy-mm-dd'});
+            }
         }
     };
 

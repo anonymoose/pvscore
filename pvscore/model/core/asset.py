@@ -63,6 +63,11 @@ class Asset(ORMBase, BaseModel):
 
     
     @property
+    def absolute_path(self):
+        return "/%s" % self.path
+
+    
+    @property
     def relative_dir(self):
         this_id = str(self.id)
         return "enterprises/{enterprise_id}/assets/{_0}/{_1}/{_2}".format(enterprise_id=self.enterprise_id,

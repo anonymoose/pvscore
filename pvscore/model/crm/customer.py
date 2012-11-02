@@ -13,6 +13,7 @@ import pvscore.lib.util as util
 import uuid
 from pvscore.lib.sqla import GUID
 from pvscore.model.core.status import Status
+from pyramid.httpexceptions import HTTPForbidden
 
 class Customer(ORMBase, BaseModel):
 
@@ -288,6 +289,22 @@ class PeriodCustomerCountSummary(BaseAnalytic):
                     group by cust.create_dt
                     order by cust.create_dt asc""".format(d=self.days, entid=self.request.ctx.enterprise.enterprise_id)
 
+
+def load_customer(request):
+    """ KB: [2012-09-12]: Get the customer_id from the various places it
+    may be stashed.  session first."""
+    customer_id = None
+    if 'customer_id' in request.session:
+        customer_id = request.session['customer_id']
+    elif 'customer_id' in request.POST:
+        customer_id = request.POST.get('customer_id')
+    elif 'customer_id' in request.GET:
+        customer_id = request.GET.get('customer_id')
+    customer = Customer.load(customer_id)
+    if customer_id:
+        if not customer or customer.campaign.company.enterprise_id != request.ctx.enterprise.enterprise_id:
+            raise HTTPForbidden()
+    return customer
 
 
     # @staticmethod

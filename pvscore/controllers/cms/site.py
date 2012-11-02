@@ -1,7 +1,7 @@
 import logging
 from pyramid.response import Response
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPForbidden
+from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from pyramid.renderers import render
 from mako.exceptions import TopLevelLookupException
 from pvscore.controllers.base import BaseController
@@ -10,10 +10,11 @@ from pvscore.lib.decorators.authorize import authorize
 from pvscore.lib.auth_conditions import IsLoggedIn
 from pvscore.model.crm.company import Company
 from pvscore.model.crm.campaign import Campaign
-from pvscore.model.crm.customer import Customer
+from pvscore.model.crm.customer import load_customer
 import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
+
 
 class SiteController(BaseController):
 
@@ -31,6 +32,7 @@ class SiteController(BaseController):
 
     def _edit_impl(self):
         site_id = self.request.matchdict.get('site_id')
+        self.session['last_site_id'] = site_id
         if site_id:
             site = Site.load(site_id)
             self.forbid_if(not site or str(site.company.enterprise_id) != str(self.enterprise_id))
@@ -71,23 +73,6 @@ class SiteController(BaseController):
         return HTTPFound('/cms/site/edit/%s' % site.site_id)
 
 
-def _load_customer(request):
-    """ KB: [2012-09-12]: Get the customer_id from the various places it
-    may be stashed.  session first."""
-    customer_id = None
-    if 'customer_id' in request.session:
-        customer_id = request.session['customer_id']
-    elif 'customer_id' in request.POST:
-        customer_id = request.POST.get('customer_id')
-    elif 'customer_id' in request.GET:
-        customer_id = request.GET.get('customer_id')
-    customer = Customer.load(customer_id)
-    if customer_id:
-        if not customer or customer.campaign.company.enterprise_id != request.ctx.enterprise.enterprise_id:
-            raise HTTPForbidden()
-    return customer
-    
-
 def dynamic_url_lookup(request):
     """ KB: [2012-09-12]: This will render dynamic content.
     http://stackoverflow.com/questions/6321625/pyramid-is-it-possible-to-render-my-mako-template-as-a-string-within-my-view-c
@@ -121,7 +106,7 @@ def dynamic_url_lookup(request):
                                {'site' : request.ctx.site,
                                 'user' : request.ctx.user,
                                 'campaign' : request.ctx.campaign,
-                                'customer' : _load_customer(request),
+                                'customer' : load_customer(request),
                                 'matchdict' : matchdict},                                
                                request))
     except TopLevelLookupException as exc:

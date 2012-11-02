@@ -1,92 +1,4 @@
 import datetime
-from pvscore.model.crm.product import Product, ProductCategory
-import pvscore.lib.util as util
-
-class ProductProxy(object):
-    def __init__(self, product, campaign):
-        if not product:
-            raise Exception("Product required")
-        self.product = product
-        if not campaign:
-            self.campaign = product.company.default_campaign()
-        else:
-            self.campaign = campaign
-        self.enterprise_id = self.campaign.company.enterprise_id
-
-
-    @property
-    def unit_price(self):
-        self.product.get_price(self.campaign)
-
-
-    @property
-    def unit_cost(self):
-        return self.product.unit_cost
-
-
-    @property
-    def retail_price(self):
-        return self.product.get_retail_price(self.campaign)
-
-
-    @property
-    def discount_price(self):
-        return self.product.get_discount_price(self.campaign)
-
-
-    @property
-    def images(self):
-        return self.product.images
-
-
-    def __getattr__(self, name):
-        return getattr(self.product, name)
-
-
-
-class Catalog(object):
-    def __init__(self, site, campaign):
-        self.site = site
-        self.campaign = campaign
-        self.enterprise_id = campaign.company.enterprise_id
-
-
-    def get_product_by_sku(self, sku):
-        prod = Product.find_by_sku(self.enterprise_id, self.campaign, sku)
-        if prod:
-            return ProductProxy(prod, self.campaign)
-
-
-    def get_product(self, product_id):
-        prod = Product.load(product_id)
-        if prod:
-            return ProductProxy(prod, self.campaign)
-
-
-    def get_products(self, offset=None, limit=None):
-        return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_by_campaign(self.campaign, True)], offset, limit)
-
-
-    def get_new_products(self, offset=None, limit=None):
-        return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.find_by_campaign(self.campaign, True)], offset, limit)
-
-    def get_category(self, category_id):
-        return ProductCategory.load(category_id)
-
-
-    def get_category_products(self, category_id, offset=None, limit=None):
-        pcat = ProductCategory.load(category_id)
-        return util.page_list([ProductProxy(prod, self.campaign) for prod in pcat.products], offset, limit)
-
-
-    def get_shipping_timeframe_options(self):
-        shipping = self.site.get_shipping()
-        return shipping.get_timeframe_options(self.site)
-
-
-    def get_shipping_default_timeframe(self):
-        shipping = self.site.get_shipping()
-        return shipping.get_default_timeframe(self.site)
 
 
 class Cart(object):
@@ -110,6 +22,11 @@ class Cart(object):
         self.shipping_total = 0.0
 
 
+    @property
+    def item_count(self):
+        return len(self.items)
+
+
     def add_item(self, product, campaign, quantity=1, price=None):
         if not price:
             price = product.get_price(campaign)
@@ -129,6 +46,21 @@ class Cart(object):
     def remove_all(self):
         self.items = []
         self.shipping_total = 0.0
+
+
+    @property
+    def total(self):
+        return self.product_total + self.handling_total + self.shipping_total
+
+
+    @property
+    def product_total(self):
+        return reduce(lambda x, y: x + y['price'], self.items, 0.0)
+
+
+    @property
+    def handling_total(self):
+        return reduce(lambda x, y: x + y['handling'], self.items, 0.0)
 
 
     def has_product_id(self, product_id):
@@ -186,10 +118,6 @@ class Cart(object):
     #     return util.page_list([ProductProxy(prod, self.campaign) for prod in Product.catalog_search(search, self.campaign.company_id)], offset, limit)
 
 
-    # def get_categories(self):
-    #     return ProductCategory.find_by_campaign(self.campaign)
-
-
     # def get_manufacturers(self):
     #     return Product.find_manufacturers_by_campaign(self.enterprise_id, self.campaign)
 
@@ -199,6 +127,11 @@ class Cart(object):
     #        cart.set_shipping_timeframe(self.get_shipping_default_timeframe())
     #        cart.get_shipping_total(None, True)
     #        session.save() 
+
+#    def get_categories(self):
+#        return ProductCategory.find_by_campaign(self.campaign)
+
+
 
 #    def discount(self):
 #        if self.discount_id:
@@ -247,3 +180,48 @@ class Cart(object):
 #            order.save()
 #            order.commit()
 #            return True
+
+
+
+# class Catalog(object):
+#     def __init__(self, site, campaign):
+#         self.site = site
+#         self.campaign = campaign
+#         self.enterprise_id = campaign.company.enterprise_id
+
+
+#     def get_product_by_sku(self, sku):
+#         return Product.find_by_sku(self.enterprise_id, self.campaign, sku)
+
+
+#     def get_product(self, product_id):
+#         return Product.load(product_id)
+
+
+#     def get_products(self, offset=None, limit=None):
+#         return util.page_list(Product.find_by_campaign(self.campaign, True), offset, limit)
+
+
+#     def get_new_products(self, offset=None, limit=None):
+#         return util.page_list(Product.find_by_campaign(self.campaign, True), offset, limit)
+
+
+#     def get_category(self, category_id):
+#         return ProductCategory.load(category_id)
+
+
+#     def get_category_products(self, category_id, offset=None, limit=None):
+#         pcat = ProductCategory.load(category_id)
+#         if pcat:
+#             return util.page_list(pcat.products, offset, limit)
+
+
+#     def get_shipping_timeframe_options(self):
+#         shipping = self.site.get_shipping()
+#         return shipping.get_timeframe_options(self.site)
+
+
+#     def get_shipping_default_timeframe(self):
+#         shipping = self.site.get_shipping()
+#         return shipping.get_default_timeframe(self.site)
+    

@@ -167,6 +167,11 @@ def crm_routes(config):
     adrt('cms.site.save', '/cms/site/save') #, controller='cms/siteedit', action='save')
     adrt('cms.site.list', '/cms/site/list') #, controller='cms/siteedit', action='list')
 
+    adrt('cms.content.new', '/cms/content/new')
+    adrt('cms.content.edit', '/cms/content/edit/{content_id}')
+    adrt('cms.content.save', '/cms/content/save')
+    adrt('cms.content.list', '/cms/content/list/{site_id}')
+
     adrt('crm.listing.remove', '/crm/listing/remove/{listing_id}')
     adrt('crm.listing.json.get', '/crm/listing/json_get')
     adrt('crm.listing.json', '/crm/listing/json/{listing_id}')
@@ -174,6 +179,24 @@ def crm_routes(config):
     adrt('crm.listing.save', '/crm/listing/save')
     adrt('crm.listing.upload', '/crm/listing/upload/{listing_id}/{hash}')
 
+
+    # ecom routes
+    adrt('ecom.site.cart.default', '/cart')
+    adrt('ecom.site.cart', '/cart/{page}')
+    adrt('ecom.site.cart.add', '/ecom/cart/add/{product_id}/{quantity}')
+    adrt('ecom.site.cart.clear', '/ecom/cart/clear')
+    adrt('ecom.site.cart.remove', '/ecom/cart/remove/{product_id}')
+
+    adrt('ecom.site.product.default', '/product/{product_id}')
+    adrt('ecom.site.product.named', '/product/{name}/{product_id}')
+    adrt('ecom.site.product', '/product/{name}/{product_id}/{page}')
+
+    adrt('ecom.site.products.default', '/products/{subset}')
+    adrt('ecom.site.products', '/products/{subset}/{page}')
+
+    adrt('ecom.site.category.default', '/category/{category_id}')
+    adrt('ecom.site.category.named', '/category/{name}/{category_id}')
+    adrt('ecom.site.category', '/category/{name}/{category_id}/{page}')
 
     adrt('crm.dashboard', '/crm/dashboard')
 

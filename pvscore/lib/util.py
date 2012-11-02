@@ -1,10 +1,10 @@
+from webhelpers.html import literal
 import smtplib
 from email.MIMEMultipart import MIMEMultipart   #pylint: disable-msg=F0401,E0611
 from email.MIMEText import MIMEText   #pylint: disable-msg=F0401,E0611
 import redis
 import socket
 import datetime, os, errno
-from webhelpers.html import literal
 import re
 #from operator import itemgetter
 import logging

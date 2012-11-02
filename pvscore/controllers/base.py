@@ -4,7 +4,6 @@ from pyramid.httpexceptions import HTTPForbidden, HTTPFound
 import logging
 from pvscore.lib.plugin import plugin_registry
 
-
 log = logging.getLogger(__name__)
 
 class BaseUI(object):

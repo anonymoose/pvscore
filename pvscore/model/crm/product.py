@@ -26,7 +26,6 @@ class Product(ORMBase, BaseModel):
     name = Column(String(200))
     detail_description = Column(Text)
     description = Column(Text)
-
     create_dt = Column(DateTime, server_default=text('now()'))
     delete_dt = Column(DateTime)
     mod_dt = Column(DateTime, server_default=text('now()'))
@@ -102,6 +101,20 @@ class Product(ORMBase, BaseModel):
 
 
     @staticmethod
+    def find_by_manufacturer(enterprise_id, mfr_name, for_web=True):
+        return Session.query(Product) \
+            .options(FromCache('Product.find_by_manufacturer', '%s/%s' % (mfr_name, enterprise_id))) \
+            .join((Company, Product.company_id == Company.company_id)) \
+            .filter(and_(Product.delete_dt == None,
+                         Product.enabled == True,
+                         Product.manufacturer.like('%'+mfr_name+'%'),
+                         Company.enterprise_id == enterprise_id,
+                         or_(Product.web_visible == True, Product.web_visible==for_web)
+                         )) \
+                         .order_by(Product.name).all()
+
+
+    @staticmethod
     def find_all_except(product):
         return Session.query(Product).join((Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
@@ -125,44 +138,69 @@ class Product(ORMBase, BaseModel):
 
 
     @staticmethod
+    def find_new_by_campaign(campaign, offset=0, limit=10):
+        return Session.query(Product) \
+            .options(FromCache("Product.Campaign_new", campaign.campaign_id)) \
+            .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
+            .filter(and_(Product.delete_dt == None,
+                          Product.enabled == True,
+                          Company.enterprise_id == campaign.company.enterprise_id,
+                          ProductPricing.delete_dt == None,
+                          ProductPricing.campaign == campaign,
+                          Product.web_visible == True,
+                          ProductPricing.retail_price != None,
+                          ProductPricing.retail_price > 0)).order_by(Product.create_dt.desc()).offset(offset).limit(limit).all()
+
+
+    @staticmethod
     def find_by_campaign(campaign, for_catalog=False):
         return Product._find_by_campaign_impl(campaign, for_catalog)
 
 
     @staticmethod
-    def _find_by_campaign_impl(campaign, for_catalog):#, specials=False, featured=False):
+    def find_specials_by_campaign(campaign, for_catalog=True):
+        return Product._find_by_campaign_impl(campaign, for_catalog, True, False)
+
+
+    @staticmethod
+    def find_featured_by_campaign(campaign, for_catalog=True):
+        return Product._find_by_campaign_impl(campaign, for_catalog, False, True)
+
+
+    @staticmethod
+    def _find_by_campaign_impl(campaign, for_catalog, specials=False, featured=False):
         enterprise_id = campaign.company.enterprise_id
         ckey = 'Product.Campaign'
         clause = and_(Product.delete_dt == None,
                       Product.enabled == True,
                       Company.enterprise_id == enterprise_id,
                       ProductPricing.delete_dt == None,
-                      ProductPricing.campaign == campaign,
-                      or_(Product.web_visible == True, Product.web_visible==for_catalog))
-        # if specials:
-        #     ckey = 'Product.Campaign_Specials'
-        #     clause = and_(Product.delete_dt == None,
-        #                   Product.enabled == True,
-        #                   Product.special == True,
-        #                   Company.enterprise_id == enterprise_id,
-        #                   ProductPricing.delete_dt == None,
-        #                   ProductPricing.campaign == campaign,
-        #                   or_(Product.web_visible == True, Product.web_visible==for_catalog))
-        # elif featured:
-        #     ckey = 'Product.Campaign_Featured'
-        #     clause = and_(Product.delete_dt == None,
-        #                   Product.enabled == True,
-        #                   Product.featured == True,
-        #                   Company.enterprise_id == enterprise_id,
-        #                   ProductPricing.delete_dt == None,
-        #                   ProductPricing.campaign == campaign,
-        #                   or_(Product.web_visible == True, Product.web_visible==for_catalog))
-        # if for_catalog:
-        #     ckey += '_for_catalog'
-        #     clause = and_(clause,
-        #                   #or_(Product.inventory == None, Product.inventory > 0, Product.show_negative_inventory == True),
-        #                   ProductPricing.retail_price != None,
-        #                   ProductPricing.retail_price > 0)
+                      ProductPricing.campaign == campaign)
+        if specials:
+            ckey = 'Product.Campaign_Specials'
+            clause = and_(Product.delete_dt == None,
+                          Product.enabled == True,
+                          Product.special == True,
+                          Company.enterprise_id == enterprise_id,
+                          ProductPricing.delete_dt == None,
+                          ProductPricing.campaign == campaign,
+                          and_(ProductPricing.discount_price != None, ProductPricing.discount_price > 0),
+                          Product.web_visible == True)
+        elif featured:
+            ckey = 'Product.Campaign_Featured'
+            clause = and_(Product.delete_dt == None,
+                          Product.enabled == True,
+                          Product.featured == True,
+                          Company.enterprise_id == enterprise_id,
+                          ProductPricing.delete_dt == None,
+                          ProductPricing.campaign == campaign,
+                          Product.web_visible == True)
+        if for_catalog:
+            ckey += '_for_catalog'
+            clause = and_(clause,
+                          #or_(Product.inventory == None, Product.inventory > 0, Product.show_negative_inventory == True),
+                          ProductPricing.retail_price != None,
+                          ProductPricing.retail_price > 0)
         return Session.query(Product) \
             .options(FromCache(ckey, campaign.campaign_id)) \
             .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
@@ -182,6 +220,7 @@ class Product(ORMBase, BaseModel):
         for pri in self.prices:
             pri.invalidate_caches()
             campaign_id = pri.campaign_id
+            invalidate(self, 'Product.Campaign_new', campaign_id)
             invalidate(self, 'Product.Campaign_Featured', campaign_id)
             invalidate(self, 'Product.Campaign_Specials', campaign_id)
             invalidate(self, 'Product.Campaign', campaign_id)
@@ -229,8 +268,6 @@ class Product(ORMBase, BaseModel):
         imgs = self.images
         if imgs and len(imgs) > 0:
             return imgs[0]
-        return ''
-
 
 
     def get_sales_report(self):
@@ -465,6 +502,16 @@ class ProductCategory(ORMBase, BaseModel):
             .join((Company, ProductCategory.company_id == Company.company_id)) \
             .filter(and_(ProductCategory.delete_dt == None,
                          Company.enterprise_id == enterprise_id)) \
+                         .order_by(ProductCategory.name) \
+                         .all()
+
+
+    @staticmethod
+    def find_by_campaign(campaign):
+        return Session.query(ProductCategory) \
+            .join((Company, ProductCategory.company_id == Company.company_id)) \
+            .filter(and_(ProductCategory.delete_dt == None,
+                         Company.company_id == campaign.company_id)) \
                          .order_by(ProductCategory.name) \
                          .all()
 
@@ -808,29 +855,6 @@ class InventoryJournal(ORMBase, BaseModel):
 
 
     # @staticmethod
-    # def find_by_manufacturer(enterprise_id, mfr_name, for_web=True):
-    #     return Session.query(Product) \
-    #         .options(FromCache('Product.find_by_manufacturer', '%s/%s' % (mfr_name, enterprise_id))) \
-    #         .join((Company, Product.company_id == Company.company_id)) \
-    #         .filter(and_(Product.delete_dt == None,
-    #                      Product.enabled == True,
-    #                      Product.manufacturer.like('%'+mfr_name+'%'),
-    #                      Company.enterprise_id == enterprise_id,
-    #                      or_(Product.web_visible == True, Product.web_visible==for_web)
-    #                      )) \
-    #                      .order_by(Product.name).all()
-
-    # @staticmethod
-    # def find_specials_by_campaign(campaign, for_catalog=False):
-    #     return Product._find_by_campaign_impl(campaign, for_catalog, True, False)
-
-
-    # @staticmethod
-    # def find_featured_by_campaign(campaign, for_catalog=False):
-    #     return Product._find_by_campaign_impl(campaign, for_catalog, False, True)
-
-
-    # @staticmethod
     # def find_best_sellers_by_campaign(campaign, for_web=True):
     #     enterprise_id = campaign.company.enterprise_id
     #     return Session.query(Product) \
@@ -900,16 +924,6 @@ class InventoryJournal(ORMBase, BaseModel):
     # @staticmethod
     # def clear_by_product(product):
     #     ProductCategoryJoin.clear_by_product(product)
-
-
-    # @staticmethod
-    # def find_by_campaign(campaign):
-    #     return Session.query(ProductCategory) \
-    #         .join((Company, ProductCategory.company_id == Company.company_id)) \
-    #         .filter(and_(ProductCategory.delete_dt == None,
-    #                      Company.company_id == campaign.company_id)) \
-    #                      .order_by(ProductCategory.name) \
-    #                      .all()
 
 
     # @staticmethod
