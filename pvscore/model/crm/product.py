@@ -9,7 +9,7 @@ from pvscore.model.crm.pricing import ProductPricing
 from pvscore.model.crm.company import Company
 from pvscore.model.core.asset import Asset
 import pvscore.lib.db as db
-from pvs.thirdparty.dbcache import FromCache, invalidate
+from pvscore.thirdparty.dbcache import FromCache, invalidate
 from sqlalchemy.orm.collections import attribute_mapped_collection
 import pvscore.lib.util as util
 import uuid

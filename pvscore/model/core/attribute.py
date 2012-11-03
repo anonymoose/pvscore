@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String
 from sqlalchemy.orm import relation, joinedload
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from pvs.thirdparty.dbcache import FromCache
+from pvscore.thirdparty.dbcache import FromCache
 import uuid
 from pvscore.lib.sqla import GUID
 

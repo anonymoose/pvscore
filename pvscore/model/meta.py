@@ -4,8 +4,8 @@ import inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import pvscore.lib.util as util
-import pvscore.lib.dbcache as dbcache
-from pvscore.lib.dbcache import FromCache
+import pvscore.thirdparty.dbcache as dbcache
+from pvscore.thirdparty.dbcache import FromCache
 from zope.sqlalchemy import ZopeTransactionExtension  #pylint: disable-msg=E0611,F0401
 
 log = logging.getLogger(__name__)

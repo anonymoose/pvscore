@@ -91,7 +91,6 @@ class TestCrmListing(TestController):
 
 
 #    def test_selenium(self):
-#        import pdb; pdb.set_trace()
 #        browser = webdriver.Firefox() # Get local session of firefox
 #        browser.get("http://www.yahoo.com") # Load page
 #        assert "Yahoo!" in browser.title

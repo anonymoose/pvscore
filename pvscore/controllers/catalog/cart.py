@@ -12,7 +12,6 @@ class CartController(CatalogBaseController):
     @view_config(route_name='ecom.site.cart')
     @view_config(route_name='ecom.site.cart.default')
     def cart(self):
-        # /cart/{page}
         page = self.request.matchdict.get('page', 'cart')
         params = self.params()
         return self.render(page, params)
@@ -20,7 +19,6 @@ class CartController(CatalogBaseController):
 
     @view_config(route_name='ecom.site.cart.add', renderer="string")
     def add(self):
-        # /cart/{page}
         product_id = self.request.matchdict.get('product_id')
         quantity = self.request.matchdict.get('quantity')
         redir = self.request.GET.get('redir')
@@ -41,7 +39,7 @@ class CartController(CatalogBaseController):
         return 'True' if not redir else HTTPFound(redir)
 
 
-    @view_config(route_name='ecom.site.cart.clear', renderer="string")
+    @view_config(route_name='ecom.site.cart.remove', renderer="string")
     def remove(self):
         if not 'cart' in self.session:
             return 'False'

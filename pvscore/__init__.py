@@ -7,10 +7,9 @@ from pyramid.events import BeforeRender
 from pvscore.lib import helpers
 from pvscore.config.routes import crm_routes
 import pvscore.config as config
-import pvscore.lib.dbcache as dbcache
-from pvscore.model.cms.content import make_content_function
 from pvscore.controllers.cms.site import dynamic_url_lookup
 from pvscore.lib.plugin import plugin_registry
+from pvscore.model.cms.content import make_content_function
 
 
 def add_renderer_globals(event):
@@ -20,10 +19,12 @@ def add_renderer_globals(event):
     event['tmpl_context'] = request.tmpl_context
     event['plugin_registry'] = plugin_registry
     if hasattr(request, 'ctx'):
-        event['content'] = make_content_function(request.ctx.site, request)
+        pass
+    event['content'] = make_content_function(request.ctx.site, request)
 
 
 def _config_impl(cfg, settings):
+    import pvscore.thirdparty.dbcache as dbcache
     engine = create_engine(settings['sqlalchemy.url'], poolclass=pool.SingletonThreadPool)
     init_model(engine, settings)
     cfg.include("pyramid_beaker")

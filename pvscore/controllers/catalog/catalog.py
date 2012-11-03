@@ -35,6 +35,7 @@ class CatalogBaseController(BaseController):
                 }
 
     
+    
     def render(self, mako_file, params=None):
         site = self.request.ctx.site
         path = "/%s/%s.mako" % (site.namespace, mako_file)
@@ -62,12 +63,15 @@ class CatalogBaseController(BaseController):
 
 
     def specials_product_list(self, offset=None, limit=None):
-        return util.page_list(Product.find_specials_by_campaign(self.request.ctx.campaign), offset, limit)
+        products = Product.find_specials_by_campaign(self.request.ctx.campaign)
+        return util.page_list(products if len(products) > 0 else Product.find_new_by_campaign(self.request.ctx.campaign, 0, 10),
+                              offset, limit)
 
 
     def featured_product_list(self, offset=None, limit=None):
-        return util.page_list(Product.find_featured_by_campaign(self.request.ctx.campaign, True), offset, limit)
-
+        products = Product.find_featured_by_campaign(self.request.ctx.campaign)
+        return util.page_list(products if len(products) > 0 else Product.find_new_by_campaign(self.request.ctx.campaign, 0, 10),
+                              offset, limit)
 
 
 class CatalogController(CatalogBaseController):

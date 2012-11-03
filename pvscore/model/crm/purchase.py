@@ -5,7 +5,7 @@ from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.crm.company import Company
-from pvs.thirdparty.dbcache import FromCache, invalidate
+from pvscore.thirdparty.dbcache import FromCache, invalidate
 import logging
 import uuid
 from pvscore.lib.sqla import GUID

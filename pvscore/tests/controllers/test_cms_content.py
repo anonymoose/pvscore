@@ -1,10 +1,7 @@
 from pvscore.tests import TestController, secure
 from pvscore.model.cms.content import Content
-from pyramid.httpexceptions import HTTPForbidden
-from pvscore.model.crm.campaign import Campaign
-from pvscore.model.crm.company import Enterprise
 import logging
-import uuid
+
 
 log = logging.getLogger(__name__)
 
@@ -80,7 +77,7 @@ class TestCmsContent(TestController):
         content_id = f['content_id'].value
         self.assertNotEqual(f['content_id'].value, '')
         content = Content.load(content_id)
-        return content_id
+        return content.content_id
 
 
     def _delete_new(self, content_id):
@@ -98,6 +95,7 @@ class TestCmsContent(TestController):
         R.mustcontain('nosetest.content.0')
         R.mustcontain(str(self.site.site_id))
         self._delete_new(content_id)
+
 
     def test_content_non_existant(self):
         R = self.get('/content?content_name=bogus.bogus')
