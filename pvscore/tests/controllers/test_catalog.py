@@ -1,4 +1,4 @@
-from pvscore.tests import TestController, secure
+from pvscore.tests import TestController
 from pvscore.model.crm.product import Product
 from pvscore.model.crm.company import Enterprise
 import logging
@@ -29,8 +29,8 @@ class TestCatalog(TestController):
 
 
     def test_products_new(self):
-        prod0 = self._get_prod(0)
-        prod1 = self._get_prod(1)
+        #prod0 = self._get_prod(0)
+        #prod1 = self._get_prod(1)
         R = self.get('/products/new/catalog_products')
         assert R.status_int == 200
         #R.mustcontain('product_id=%s' % prod0.product_id)
