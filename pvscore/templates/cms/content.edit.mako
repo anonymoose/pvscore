@@ -8,7 +8,7 @@
   <h2>New Content Block</h2>
   % endif
   <div class="container">
-    <form id="frm_site" method="POST" action="/cms/content/save">
+    <form id="frm_content" method="POST" action="/cms/content/save">
       ${h.hidden('site_id', value=site.site_id)}
       ${h.hidden('content_id', value=content.content_id)}
       <div class="row">

@@ -19,7 +19,8 @@ def add_renderer_globals(event):
     event['c'] = request.tmpl_context
     event['tmpl_context'] = request.tmpl_context
     event['plugin_registry'] = plugin_registry
-    event['content'] = make_content_function(request.ctx.site, request)
+    if hasattr(request, 'ctx'):
+        event['content'] = make_content_function(request.ctx.site, request)
 
 
 def _config_impl(cfg, settings):

@@ -55,20 +55,16 @@ class Content(ORMBase, BaseModel):
 
 
     def render(self, **kwargs):
+        ret = ''
         if self.data:
             globs = kwargs or {}
             #globs['c'].catalog = Catalog(self.content.page.site, self.get_campaign(self.content.page.site))
-            return util.literal(Template(self.data).render(**globs))
-        else:
-            return ''
-
-
-    def data_to_json(self):
-        return json.loads(self.data) if self.data else ''
+            ret = util.literal(Template(self.data).render(**globs))
+        return ret
 
 
 def make_content_function(site, request):
     def content(name):
         content = Content.find_by_name(site, name)
-        return content.render(request=request)
+        return content.render(request=request) if content else ''
     return content
