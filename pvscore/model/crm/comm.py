@@ -19,7 +19,7 @@ class Communication(ORMBase, BaseModel):
     __tablename__ = 'crm_communication'
     __pk__ = 'comm_id'
 
-    comm_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    comm_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
     user_created = Column(GUID, ForeignKey('core_user.user_id'))
     name = Column(String(50))

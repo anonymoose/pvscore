@@ -11,7 +11,7 @@ class Discount(ORMBase, BaseModel):
     __tablename__ = 'crm_discount'
     __pk__ = 'discount_id'
 
-    discount_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    discount_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
     vendor_id = Column(GUID, ForeignKey('crm_vendor.vendor_id'))
     product_id = Column(GUID, ForeignKey('crm_product.product_id'))

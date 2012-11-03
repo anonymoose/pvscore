@@ -1,5 +1,5 @@
 #pylint: disable-msg=E1101
-import logging
+import logging, uuid
 from pvscore.lib.sqla import GUID
 from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import String, DateTime, Text
@@ -9,6 +9,8 @@ from pvscore.model.meta import ORMBase, BaseModel, Session
 from mako.template import Template
 from pvscore.lib.dbcache import FromCache, invalidate
 import pvscore.lib.util as util
+from pvscore.model.core.users import Users
+from pvscore.model.cms.site import Site
 import simplejson as json
 
 log = logging.getLogger(__name__)
@@ -18,8 +20,8 @@ class Content(ORMBase, BaseModel):
     __tablename__ = 'cms_content'
     __pk__ = 'content_id'
 
-    content_id = Column(GUID, primary_key=True)
-    site_id = Column(GUID, ForeignKey('core_user.user_id'))
+    content_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    site_id = Column(GUID, ForeignKey('cms_site.site_id'))
     user_created = Column(GUID, ForeignKey('core_user.user_id'))
     type = Column(String(50))
     name = Column(String(50))
@@ -27,8 +29,8 @@ class Content(ORMBase, BaseModel):
     create_dt = Column(DateTime, server_default = text('now()'))
     delete_dt = Column(DateTime)
 
-    creator = relation('Users')
-    site = relation('Site')
+    creator = relation('Users', primaryjoin=Users.user_id == user_created)
+    site = relation('Site', primaryjoin=Site.site_id == site_id)
 
     @staticmethod
     def find_by_site(site):
@@ -38,15 +40,25 @@ class Content(ORMBase, BaseModel):
                          Content.delete_dt == None)).order_by(Content.name).all()
     
 
+    @staticmethod
+    def find_by_name(site, name):
+        return Session.query(Content)\
+            .options(FromCache('Content.find_by_name', "%s/%s" % (site.site_id, name)))\
+            .filter(and_(Content.site == site,
+                         Content.name == name,
+                         Content.delete_dt == None)).first()
+    
+
     def invalidate_caches(self, **kwargs):
-        invalidate(self, 'Content.find_by_name_and_type', self.site_id)
+        invalidate(self, 'Content.find_by_name', '%s/%s' % (self.site_id, self.name))
+        invalidate(self, 'Content.find_by_site', self.site_id)
 
 
     def render(self, **kwargs):
         if self.data:
             globs = kwargs or {}
             #globs['c'].catalog = Catalog(self.content.page.site, self.get_campaign(self.content.page.site))
-            return util.literal(Template(self.data).render(globs))
+            return util.literal(Template(self.data).render(**globs))
         else:
             return ''
 
@@ -55,3 +67,8 @@ class Content(ORMBase, BaseModel):
         return json.loads(self.data) if self.data else ''
 
 
+def make_content_function(site, request):
+    def content(name):
+        content = Content.find_by_name(site, name)
+        return content.render(request=request)
+    return content

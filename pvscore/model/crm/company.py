@@ -15,7 +15,7 @@ class Company(ORMBase, BaseModel):
     __tablename__ = 'crm_company'
     __pk__ = 'company_id'
 
-    company_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    company_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
     status_id = Column(GUID, ForeignKey('core_status.status_id'))
     default_campaign_id = Column(GUID, ForeignKey('crm_campaign.campaign_id'))
@@ -118,7 +118,7 @@ class Enterprise(ORMBase, BaseModel):
     __tablename__ = 'crm_enterprise'
     __pk__ = 'enterprise_id'
 
-    enterprise_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    enterprise_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     name = Column(String(50))
     crm_style = Column(Text)
     # KB: [2011-12-04]: If this enterprise is created because of a customer relationship in another enterprise, put that FK here.

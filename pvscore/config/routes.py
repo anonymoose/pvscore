@@ -167,8 +167,8 @@ def crm_routes(config):
     adrt('cms.site.save', '/cms/site/save') #, controller='cms/siteedit', action='save')
     adrt('cms.site.list', '/cms/site/list') #, controller='cms/siteedit', action='list')
 
-    adrt('cms.content.new', '/cms/content/new')
-    adrt('cms.content.edit', '/cms/content/edit/{content_id}')
+    adrt('cms.content.new', '/cms/content/new/{site_id}')
+    adrt('cms.content.edit', '/cms/content/edit/{site_id}/{content_id}')
     adrt('cms.content.save', '/cms/content/save')
     adrt('cms.content.list', '/cms/content/list/{site_id}')
 
@@ -178,7 +178,6 @@ def crm_routes(config):
     adrt('crm.listing.show_add_picture', '/crm/listing/show_add_picture')
     adrt('crm.listing.save', '/crm/listing/save')
     adrt('crm.listing.upload', '/crm/listing/upload/{listing_id}/{hash}')
-
 
     # ecom routes
     adrt('ecom.site.cart.default', '/cart')

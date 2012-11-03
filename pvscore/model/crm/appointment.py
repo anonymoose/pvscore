@@ -15,7 +15,7 @@ class Appointment(ORMBase, BaseModel):
     __tablename__ = 'crm_appointment'
     __pk__ = 'appointment_id'
 
-    appointment_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    appointment_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     customer_id = Column(GUID, ForeignKey('crm_customer.customer_id'))
     user_created = Column(GUID, ForeignKey('core_user.user_id'))
     user_assigned = Column(GUID, ForeignKey('core_user.user_id'))

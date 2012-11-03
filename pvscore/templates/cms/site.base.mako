@@ -12,14 +12,18 @@ if 'last_site_id' in request.session:
 %>
   <div class="well sidebar-nav">
     <ul class="nav nav-list">
-      % if last_site:
-      <li><b><a href="/cms/site/edit/${last_site.site_id}">Edit ${last_site.domain}</a></b></li>
-      <li><b><a href="http://${last_site.domain}" target="_blank">Visit ${last_site.domain}</a></b></li>
+    % if last_site:
+      <li class="nav-header">${last_site.domain}</li>
+      <li><a href="/cms/site/edit/${last_site.site_id}">Edit Site</a></li>
+      <li><a href="http://${last_site.domain}" target="_blank">Visit Site</a></li>
       <li><hr></li>
-      
-      % else:
-      Select a site
-      % endif
+      <li class="nav-header">Content</li>
+      <li><a href="/cms/content/list/${last_site.site_id}">List ${last_site.domain} Content</a></li>
+      <li><a href="/cms/content/new/${last_site.site_id}">Add Content for ${last_site.domain}</a></li>
+    % else:
+      <li class="nav-header">Select a site</li>
+      <li><a href="/cms/site/list">List Websites</a></li>
+    % endif
     </ul>
   </div>
 </%def>

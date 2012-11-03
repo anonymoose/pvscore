@@ -357,6 +357,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
     <script src="/static/crm/js/discount.js"></script>
     <script src="/static/crm/js/purchase.js"></script>
     <script src="/static/crm/js/comm.js"></script>
+    <script src="/static/crm/js/content.js"></script>
     <script src="/static/crm/js/customer.js"></script>
     <script src="/static/crm/js/appointment.js"></script>
 </%def>

@@ -19,7 +19,7 @@ class Product(ORMBase, BaseModel):
     __tablename__ = 'crm_product'
     __pk__ = 'product_id'
 
-    product_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    product_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     company_id = Column(GUID, ForeignKey('crm_company.company_id'))
     status_id = Column(GUID, ForeignKey('core_status.status_id'))
     vendor_id = Column(GUID, ForeignKey('crm_vendor.vendor_id'))
@@ -414,7 +414,7 @@ class ProductChild(ORMBase, BaseModel):
     __tablename__ = 'crm_product_child'
     __pk__ = 'product_child_id'
 
-    product_child_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    product_child_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     parent_id = Column(GUID, ForeignKey('crm_product.product_id'))
     child_id = Column(GUID, ForeignKey('crm_product.product_id'))
     child_quantity = Column(Integer, server_default=text('1'))
@@ -453,7 +453,7 @@ class ProductCategory(ORMBase, BaseModel):
     __tablename__ = 'crm_product_category'
     __pk__ = 'category_id'
 
-    category_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    category_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     company_id = Column(GUID, ForeignKey('crm_company.company_id'))
     name = Column(String(200))
     description = Column(Text)
@@ -532,7 +532,7 @@ class ProductCategoryJoin(ORMBase, BaseModel):
     __tablename__ = 'crm_product_category_join'
     __pk__ = 'pcj_id'
 
-    pcj_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    pcj_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     product_id = Column(GUID, ForeignKey('crm_product.product_id'))
     category_id = Column(GUID, ForeignKey('crm_product_category.category_id'))
 
@@ -558,7 +558,7 @@ class ProductReturn(ORMBase, BaseModel):
     __tablename__ = 'crm_product_return'
     __pk__ = 'return_id'
 
-    return_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    return_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     product_id = Column(GUID, ForeignKey('crm_product.product_id'))
     order_id = Column(GUID, ForeignKey('crm_customer_order.order_id'))
     journal_id = Column(GUID, ForeignKey('crm_journal.journal_id'))
@@ -599,7 +599,7 @@ class InventoryJournal(ORMBase, BaseModel):
     __tablename__ = 'crm_product_inventory_journal'
     __pk__ = 'inv_journal_id'
 
-    inv_journal_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    inv_journal_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     product_id = Column(GUID, ForeignKey('crm_product.product_id'))
     return_id = Column(GUID, ForeignKey('crm_product_return.return_id'))
     order_item_id = Column(GUID, ForeignKey('crm_order_item.order_item_id'))

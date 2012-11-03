@@ -3935,3 +3935,4 @@ select count(0) from crm_customer;
 
 \d core_user;
 
+\d cms_content;

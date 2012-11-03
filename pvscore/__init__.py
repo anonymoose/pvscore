@@ -8,15 +8,18 @@ from pvscore.lib import helpers
 from pvscore.config.routes import crm_routes
 import pvscore.config as config
 import pvscore.lib.dbcache as dbcache
+from pvscore.model.cms.content import make_content_function
 from pvscore.controllers.cms.site import dynamic_url_lookup
 from pvscore.lib.plugin import plugin_registry
 
 
 def add_renderer_globals(event):
+    request = event['request']
     event['h'] = helpers
-    event['c'] = event['request'].tmpl_context
-    event['tmpl_context'] = event['request'].tmpl_context
+    event['c'] = request.tmpl_context
+    event['tmpl_context'] = request.tmpl_context
     event['plugin_registry'] = plugin_registry
+    event['content'] = make_content_function(request.ctx.site, request)
 
 
 def _config_impl(cfg, settings):

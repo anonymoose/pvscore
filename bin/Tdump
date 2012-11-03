@@ -1,5 +1,5 @@
 #!/bin/bash
 
-echo "RECREATE DB..."
+echo "Dump current unittest db to ./unittest-db/unittest.sql..."
 pg_dump -U unittest -O -c unittest > ./unittest-db/unittest.sql
 

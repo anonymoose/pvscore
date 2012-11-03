@@ -17,7 +17,7 @@ class PurchaseOrder(ORMBase, BaseModel):
     __tablename__ = 'crm_purchase_order'
     __pk__ = 'purchase_order_id'
 
-    purchase_order_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    purchase_order_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     company_id = Column(GUID, ForeignKey('crm_company.company_id'))
     vendor_id = Column(GUID, ForeignKey('crm_vendor.vendor_id'))
     status_id = Column(GUID, ForeignKey('core_status.status_id'))
@@ -85,7 +85,7 @@ class PurchaseOrderItem(ORMBase, BaseModel):
     __tablename__ = 'crm_purchase_order_item'
     __pk__ = 'order_item_id'
 
-    order_item_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    order_item_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     purchase_order_id = Column(GUID, ForeignKey('crm_purchase_order.purchase_order_id'))
     product_id = Column(GUID, ForeignKey('crm_product.product_id'))
     quantity = Column(Float, default=1.0)
@@ -136,7 +136,7 @@ class Vendor(ORMBase, BaseModel):
     __tablename__ = 'crm_vendor'
     __pk__ = 'vendor_id'
 
-    vendor_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    vendor_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
     name = Column(String(100))
     addr1 = Column(String(50))

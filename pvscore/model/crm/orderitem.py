@@ -15,7 +15,7 @@ class OrderItem(ORMBase, BaseModel):
     __tablename__ = 'crm_order_item'
     __pk__ = 'order_item_id'
 
-    order_item_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    order_item_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     order_id = Column(GUID, ForeignKey('crm_customer_order.order_id'))
     status_id = Column(GUID, ForeignKey('core_status.status_id'))
     user_created = Column(GUID, ForeignKey('core_user.user_id'))
@@ -50,7 +50,7 @@ class OrderItemTermsAcceptance(ORMBase, BaseModel):
     __tablename__ = 'crm_oi_terms_acceptance'
     __pk__ = 'oi_terms_acceptance_id'
 
-    oi_terms_acceptance_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    oi_terms_acceptance_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     order_id = Column(GUID, ForeignKey('crm_customer_order.order_id'))
     order_item_id = Column(GUID, ForeignKey('crm_order_item.order_item_id'))
     create_dt = Column(DateTime, server_default = text('now()'))

@@ -28,14 +28,20 @@ class ContentController(BaseController):
 
 
     def _edit_impl(self):
+        site_id = self.request.matchdict.get('site_id')
+        site = Site.load(site_id)
+        self.forbid_if(not site or str(site.company.enterprise_id) != str(self.enterprise_id))
         content_id = self.request.matchdict.get('content_id')
-        self.session['last_content_id'] = content_id
         if content_id:
             content = Content.load(content_id)
-            self.forbid_if(not content or str(content.site.company.enterprise_id) != str(self.enterprise_id))
+            self.forbid_if(not content
+                           or str(content.site.company.enterprise_id) != str(self.enterprise_id)
+                           or str(content.site_id) != str(site_id))
         else:
             content = Content()
+            content.site_id = site_id
         return {
+            'site' : site,
             'content' : content,
             'companies' : util.select_list(Company.find_all(self.enterprise_id), 'company_id', 'name'),
             'campaigns' : util.select_list(Campaign.find_all(self.enterprise_id), 'campaign_id', 'name')
@@ -48,6 +54,7 @@ class ContentController(BaseController):
         site = Site.load(self.request.matchdict.get('site_id'))
         self.forbid_if(not site or str(site.company.enterprise_id) != str(self.enterprise_id))
         return {
+            'site' : site,
             'contents' : Content.find_by_site(site)
             }
 
@@ -64,7 +71,8 @@ class ContentController(BaseController):
         content.bind(self.request.POST, True)
         content.save()
         content.flush()
+        content.invalidate_caches()
         self.flash('Successfully saved %s.' % (content.content_id))
-        return HTTPFound('/cms/content/edit/%s' % content.content_id)
+        return HTTPFound('/cms/content/edit/%s/%s' % (content.site_id, content.content_id))
 
 

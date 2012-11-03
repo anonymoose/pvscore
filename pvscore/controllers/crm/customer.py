@@ -18,7 +18,7 @@ from pvscore.model.crm.billing import Billing
 from pvscore.lib.billing_api import BaseBillingApi
 import simplejson as json
 import pvscore.lib.util as util
-from pvscore.lib.catalog import Cart
+from pvscore.lib.cart import Cart
 from pvscore.lib.mail import UserMail
 
 log = logging.getLogger(__name__)

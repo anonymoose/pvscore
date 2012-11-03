@@ -15,7 +15,7 @@ class Report(ORMBase, BaseModel):
     __tablename__ = 'crm_report'
     __pk__ = 'report_id'
 
-    report_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    report_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     name = Column(String(100))
     description = Column(String(200))
     type = Column(String(50))
@@ -58,7 +58,7 @@ class ReportCompanyJoin(ORMBase, BaseModel):
     __tablename__ = 'crm_report_company_join'
     __pk__ = 'rcj_id'
 
-    rcj_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    rcj_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     report_id = Column(GUID, ForeignKey('crm_report.report_id'))
     company_id = Column(GUID, ForeignKey('crm_company.company_id'))
 

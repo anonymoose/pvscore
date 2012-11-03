@@ -20,7 +20,7 @@ class Customer(ORMBase, BaseModel):
     __tablename__ = 'crm_customer'
     __pk__ = 'customer_id'
 
-    customer_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    customer_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     campaign_id = Column(GUID, ForeignKey('crm_campaign.campaign_id'))
     billing_id = Column(GUID, ForeignKey('crm_billing.billing_id'))
     status_id = Column(GUID, ForeignKey('core_status.status_id'))

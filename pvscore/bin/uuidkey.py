@@ -263,10 +263,12 @@ def fix_fk_type_table(conn, cur, table):
     conn.commit()
 
 def fix_content(conn, cur):
+    cur.execute('truncate table cms_content')
     cur.execute('alter table cms_content drop column page_id')
     cur.execute('alter table cms_content drop column is_dynamic')
+    cur.execute('alter table cms_content add column site_id uuid')
+    cur.execute('alter table cms_content add foreign key (site_id) references cms_site')
     conn.commit()
-
 
 
 def fix_assets(conn, cur, dbname, storage_root):

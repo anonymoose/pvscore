@@ -12,7 +12,7 @@ class ProductPricing(ORMBase, BaseModel):
     __tablename__ = 'crm_product_pricing'
     __pk__ = 'product_pricing_id'
 
-    product_pricing_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    product_pricing_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
     campaign_id = Column(GUID, ForeignKey('crm_campaign.campaign_id'))
     product_id = Column(GUID, ForeignKey('crm_product.product_id'))
     wholesale_price = Column(Float)
