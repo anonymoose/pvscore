@@ -5,7 +5,7 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from webhelpers.html import literal
-from pvscore.lib.dbcache import invalidate
+from pvs.thirdparty.dbcache import invalidate
 from pvscore.lib.mail import UserMail
 from pvscore.model.core.status import Status
 import logging

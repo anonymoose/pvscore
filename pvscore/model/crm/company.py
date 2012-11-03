@@ -4,7 +4,7 @@ from sqlalchemy.types import Integer, String, DateTime, Text
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from pvscore.lib.dbcache import FromCache, invalidate
+from pvs.thirdparty.dbcache import FromCache, invalidate
 import pvscore.lib.db as db
 from pvscore.lib.mail import MailInfo
 import uuid

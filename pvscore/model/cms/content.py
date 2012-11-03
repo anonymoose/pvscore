@@ -7,7 +7,7 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from mako.template import Template
-from pvscore.lib.dbcache import FromCache, invalidate
+from pvs.thirdparty.dbcache import FromCache, invalidate
 import pvscore.lib.util as util
 from pvscore.model.core.users import Users
 from pvscore.model.cms.site import Site

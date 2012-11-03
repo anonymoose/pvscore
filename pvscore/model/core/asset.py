@@ -4,7 +4,7 @@ from sqlalchemy.types import Integer, String, DateTime
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from pvscore.lib.dbcache import invalidate , FromCache
+from pvs.thirdparty.dbcache import invalidate , FromCache
 import uuid
 from pvscore.lib.sqla import GUID
 import pvscore.lib.util as util

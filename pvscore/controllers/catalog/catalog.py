@@ -91,15 +91,16 @@ class CatalogController(CatalogBaseController):
         # **L-5-Hydroxytryptophan=50 mg,*
         # **L-5-Hydroxytryptophan=50 mg,20%
         attrs = prod.get_attrs()
-        special_attrs = []
-        for attr in attrs.keys():
-            if attr.startswith('**'):
-                amounts = attrs[attr].split(',')
-                sattr = (attr[2:], amounts[0], amounts[1] if len(amounts) == 2 else '')
-                special_attrs.append(sattr)
+        # special_attrs = []
+        # for attr in attrs.keys():
+        #     if attr.startswith('**'):
+        #         amounts = attrs[attr].split(',')
+        #         sattr = (attr[2:], amounts[0], amounts[1] if len(amounts) == 2 else '')
+        #         special_attrs.append(sattr)
+        # params['special_attrs'] = special_attrs
         params['product'] = prod
         params['attrs'] = attrs
-        params['special_attrs'] = special_attrs
+
         params['price'] = util.money(prod.get_price(params['campaign']))
         params['seo_title'] = prod.seo_title
         params['seo_keywords'] = prod.seo_keywords
