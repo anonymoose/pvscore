@@ -28,7 +28,7 @@ class TestCrmCompany(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/company/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Company')
         f = R.forms['frm_company']
         self.assertEqual(f['name'].value, '')
@@ -44,7 +44,7 @@ class TestCrmCompany(TestController):
     def test_list_with_new(self):
         company_id = self._create_new()
         R = self.get('/crm/company/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Company')
         self._delete_new(company_id)
 
@@ -62,7 +62,7 @@ class TestCrmCompany(TestController):
     def test_save_existing(self):
         company_id = self._create_new()
         R = self.get('/crm/company/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Company')
 
         R = self.get('/crm/company/edit/%s' % company_id)
@@ -78,7 +78,7 @@ class TestCrmCompany(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_company']
         R.mustcontain('Edit Company')
 
@@ -91,7 +91,7 @@ class TestCrmCompany(TestController):
 
     def _create_new(self):
         R = self.get('/crm/company/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Company')
         f = R.forms['frm_company']
         self.assertEqual(f['company_id'].value, '')
@@ -106,7 +106,7 @@ class TestCrmCompany(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_company']
         R.mustcontain('Edit Company')
         company_id = f['company_id'].value
@@ -124,7 +124,7 @@ class TestCrmCompany(TestController):
     @secure
     def test_show_new_enterprise(self):
         R = self.get('/crm/company/enterprise/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Enterprise')
         f = R.forms['frm_enterprise']
         self.assertEqual(f['name'].value, '')
@@ -137,7 +137,7 @@ class TestCrmCompany(TestController):
 
     def _create_new_enterprise(self):
         R = self.get('/crm/company/enterprise/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Enterprise')
         f = R.forms['frm_enterprise']
         self.assertEqual(f['enterprise_id'].value, '')
@@ -150,7 +150,7 @@ class TestCrmCompany(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_enterprise']
         R.mustcontain('Edit Enterprise')
         enterprise_id = f['enterprise_id'].value
@@ -169,7 +169,7 @@ class TestCrmCompany(TestController):
     def test_list_with_new_enterprise(self):
         enterprise_id = self._create_new_enterprise()
         R = self.get('/crm/company/enterprise/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Enterprise')
         self._delete_new_enterprise(enterprise_id)
 
@@ -178,7 +178,7 @@ class TestCrmCompany(TestController):
     def test_save_existing_enterprise(self):
         enterprise_id = self._create_new_enterprise()
         R = self.get('/crm/company/enterprise/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Enterprise')
 
         R = self.get('/crm/company/enterprise/edit/%s' % enterprise_id)
@@ -194,7 +194,7 @@ class TestCrmCompany(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_enterprise']
         R.mustcontain('Edit Enterprise')
 
@@ -220,7 +220,7 @@ class TestCrmCompany(TestController):
         f.set('u_email', 'utest@testing.com')
 
         R = f.submit('submit')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
 
         f = R.forms['frm_quick']
         enterprise_id = f['enterprise_id'].value

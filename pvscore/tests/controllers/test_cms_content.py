@@ -14,7 +14,7 @@ class TestCmsContent(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/cms/content/new/%s' % self.site.site_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('New Content Block')
         f = R.forms['frm_content']
         self.assertEqual(f['content_id'].value, '')
@@ -31,7 +31,7 @@ class TestCmsContent(TestController):
     def test_list_with_new(self):
         content_id = self._create_new()
         R = self.get('/cms/content/list/%s' % self.site.site_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('nosetest.content.0')
         self._delete_new(content_id)
 
@@ -40,7 +40,7 @@ class TestCmsContent(TestController):
     def test_save_existing(self):
         content_id = self._create_new()
         R = self.get('/cms/content/list/%s' % self.site.site_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('nosetest.content.0')
 
         R = self.get('/cms/content/edit/%s/%s' % (self.site.site_id, content_id))
@@ -54,7 +54,7 @@ class TestCmsContent(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_content']
         R.mustcontain('Edit Content Block')
 
@@ -64,7 +64,7 @@ class TestCmsContent(TestController):
 
     def _create_new(self):
         R = self.get('/cms/content/new/%s' % self.site.site_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('New Content Block')
         f = R.forms['frm_content']
         self.assertEqual(f['content_id'].value, '')
@@ -74,7 +74,7 @@ class TestCmsContent(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_content']
         R.mustcontain('Edit Content Block')
         content_id = f['content_id'].value

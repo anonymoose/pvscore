@@ -21,7 +21,7 @@ class TestCrmCustomer(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/customer/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('New Customer')
         f = R.forms['frm_customer']
         self.assertEqual(f['fname'].value, '')
@@ -30,7 +30,7 @@ class TestCrmCustomer(TestController):
     def _create_new(self):  #pylint: disable-msg=R0915
         # create the customer and ensure he's editable.
         R = self.get('/crm/customer/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('New Customer')
         f = R.forms['frm_customer']
         self.assertEqual(f['customer_id'].value, '')
@@ -45,7 +45,7 @@ class TestCrmCustomer(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_customer']
         R.mustcontain('Edit Customer')
         customer_id = f['customer_id'].value
@@ -58,13 +58,13 @@ class TestCrmCustomer(TestController):
 
         # order 3 things and make sure they are there.
         R = self.get('/crm/customer/add_order_dialog/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Add Order')
         R = self.post('/crm/customer/add_order/%s' % str(customer_id),
                       {'products[%s]' % prods[0].product_id : '1.0',
                        'products[%s]' % prods[1].product_id : '2.0',
                        'products[%s]' % prods[2].product_id : '1.0'})  # <-- this one has inventory = 0
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         order_id = R.body
         order = CustomerOrder.load(order_id)
         assert str(order.customer.customer_id) in str(order.customer)
@@ -74,14 +74,14 @@ class TestCrmCustomer(TestController):
             self.assertEqual(item.product_id in (prods[0].product_id, prods[1].product_id, prods[2].product_id), True)
             oids.append(item.order_item_id)
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Order (%s)' % order_id)
         total = order.total_price()
 
         # KB: [2012-09-08]: pay for it. we can't hit the button because
         # it does JS magic.  so, simulate the JS magic and add something.
         R = self.get('/crm/customer/edit_order_dialog/%s/%s' % (customer_id, order_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Finalize Order')
         for oid in oids:
             R.mustcontain('quantity%s' % oid)
@@ -103,13 +103,13 @@ class TestCrmCustomer(TestController):
         total = order.total_price()
 
         R = self.get('/crm/customer/apply_payment_dialog/%s/%s' % (customer_id, order_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Apply Payment to Order')
         f = R.forms['frm_apply_payment']
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('FullPayment applied: $%.2f' % total)
         return customer_id
 
@@ -129,9 +129,9 @@ class TestCrmCustomer(TestController):
     def test_show_history(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/edit/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R = self.get('/crm/customer/show_history/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Customer History')
         R.mustcontain('CustomerOrder Payment Applied')
         self._delete_new(customer_id)
@@ -141,9 +141,9 @@ class TestCrmCustomer(TestController):
     def test_show_billing(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/edit/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R = self.get('/crm/customer/show_billings/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Customer Billing Activity')
         R.mustcontain('FullPayment')
         #R.mustcontain('CreditDecrease')
@@ -154,9 +154,9 @@ class TestCrmCustomer(TestController):
     def test_show_attributes(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/edit/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R = self.get('/crm/customer/show_attributes/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Customer Attributes')
         self._delete_new(customer_id)
         
@@ -165,7 +165,7 @@ class TestCrmCustomer(TestController):
     def test_search(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/show_search')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Customer Search')
         f = R.forms['frm_customer_search']
         f.set('phone', '9041112222')
@@ -176,7 +176,7 @@ class TestCrmCustomer(TestController):
         R = f.submit()
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Customer')
         self._delete_new(customer_id)
 
@@ -201,7 +201,7 @@ class TestCrmCustomer(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_customer']
         R.mustcontain('Edit Customer')
 
@@ -241,7 +241,7 @@ class TestCrmCustomer(TestController):
     def test_add_order(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/add_order_dialog/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Add Order')
 
         cust = Customer.load(customer_id)
@@ -253,14 +253,14 @@ class TestCrmCustomer(TestController):
                       {'products[%s]' % prods[0].product_id : '1.0',
                        'products[%s]' % prods[1].product_id : '2.0',
                        'products[%s]' % prods[2].product_id : '1.0'})  # <-- this one has inventory = 0
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         order_id = R.body
         order = CustomerOrder.load(order_id)
         self.assertNotEqual(order, None)
         for item in order.items:
             self.assertEqual(item.product_id in (prods[0].product_id, prods[1].product_id, prods[2].product_id), True)
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Order (%s)' % order_id)
         self._delete_new(customer_id)
 
@@ -270,12 +270,12 @@ class TestCrmCustomer(TestController):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         R = self.get('/crm/customer/show_billings/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Customer Billing Activity')
         journal_entry = cust.get_active_orders()[0].journal_entries[0]
         assert str(journal_entry.journal_id) in str(journal_entry)
         R = self.get('/crm/customer/show_billing_dialog/%s/%s?dialog=1' % (customer_id, journal_entry.journal_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('%.2f' % journal_entry.amount)
 
         # some misc stuff here for coverage.
@@ -303,7 +303,7 @@ class TestCrmCustomer(TestController):
                        'confirmpassword' : 'password',
                        'redir' : '/'
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params 
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
@@ -318,11 +318,11 @@ class TestCrmCustomer(TestController):
                        'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
                        })
         assert api.get_last_status() == (None, None)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params
         self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Order List')
         cust.invalidate_caches()
         cust = Customer.load(customer_id)
@@ -330,14 +330,14 @@ class TestCrmCustomer(TestController):
         url = '/crm/customer/cancel_order_dialog/%s/%s' % (customer_id, ordr.order_id)
         R.mustcontain(url)
         R = self.get(url)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain("Cancel Order from")
         f = R.forms['frm_cancel']
         f.set('cancel_reason', 'This is a cancel reason')
         R = f.submit('btn_cancel')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert url not in R.body
         self._delete_new(customer_id)        
 
@@ -345,24 +345,24 @@ class TestCrmCustomer(TestController):
     def _test_return_impl(self, return_type, customer_id):
         cust = Customer.load(customer_id)
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Order List')
         ordr = cust.get_active_orders()[0]
         jslink = "customer_edit_order('%s')" % ordr.order_id
         R.mustcontain(jslink)
         R = self.get('/crm/customer/edit_order_dialog/%s/%s' % (customer_id, ordr.order_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain("Finalize Order for")
         oitem = ordr.active_items[0]
         R = self.get('/crm/customer/return_item_dialog/%s/%s/%s' % (customer_id, ordr.order_id, oitem.order_item_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Return <i><b>%s</b></i>' % oitem.product.name)
         f = R.forms['frm_return_item']
         f.set('rt_refund_type', return_type)
         R = f.submit('btn_return')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain("&#39;%s&#39; returned.  $%.2f refunded by %s" % (oitem.product.name, oitem.total(), return_type))
 
 
@@ -383,7 +383,7 @@ class TestCrmCustomer(TestController):
     @secure
     def test_return_single_item(self):  #pylint: disable-msg=R0915
         R = self.get('/crm/customer/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('New Customer')
         f = R.forms['frm_customer']
         self.assertEqual(f['customer_id'].value, '')
@@ -396,42 +396,42 @@ class TestCrmCustomer(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_customer']
         R.mustcontain('Edit Customer')
         customer_id = f['customer_id'].value
         self.assertNotEqual(f['customer_id'].value, '')
         R = self.get('/crm/customer/add_order_dialog/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Add Order')
         cust = Customer.load(customer_id)
         assert cust != None and str(cust.customer_id) == customer_id
         prods = Product.find_by_campaign(cust.campaign)
         assert prods and len(prods) > 3
         R = self.post('/crm/customer/add_order/%s' % str(customer_id), {'products[%s]' % prods[0].product_id : '1.0'})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         order_id = R.body
         order = CustomerOrder.load(order_id)
         self.assertNotEqual(order, None)
         item = order.items[0]
         self.assertEqual(item.product_id, prods[0].product_id)
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Order (%s)' % order_id)
         total = order.total_price()
         R = self.get('/crm/customer/edit_order_dialog/%s/%s' % (customer_id, order_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Finalize Order')
         R.mustcontain('quantity%s' % item.order_item_id)
         R.mustcontain('$%.2f' % total)
         R = self.get('/crm/customer/apply_payment_dialog/%s/%s' % (customer_id, order_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Apply Payment to Order')
         f = R.forms['frm_apply_payment']
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('FullPayment applied: $%.2f' % total)
         self._test_return_impl('Refund', customer_id)
         self._delete_new(customer_id)
@@ -442,10 +442,10 @@ class TestCrmCustomer(TestController):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         R = self.get('/crm/customer/check_duplicate_email/%s' % cust.email)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         self.assertEqual(R.body, 'True')
         R = self.get('/crm/customer/check_duplicate_email/thisemailisnothere@test.com')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         self.assertEqual(R.body, 'False')
         self._delete_new(customer_id)
         
@@ -455,7 +455,7 @@ class TestCrmCustomer(TestController):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         R = self.get('/crm/customer/status_dialog/%s?dialog=1' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Frobdicate')  # our pre-canned test status that changes customer status
         event = Status.find_event(cust.campaign.company.enterprise_id, cust, 'FROBDICATE')
         f = R.forms['frm_dialog']
@@ -463,7 +463,7 @@ class TestCrmCustomer(TestController):
         R = f.submit()
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Statused Customer to Frobdicate')
         self._delete_new(customer_id)
 
@@ -474,7 +474,7 @@ class TestCrmCustomer(TestController):
         cust = Customer.load(customer_id)
         order = cust.orders[0]
         R = self.get('/crm/customer/status_dialog/%s?order_id=%s&dialog=1' % (customer_id, order.order_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Foobaz')
         event = Status.find_event(cust.campaign.company.enterprise_id, order, 'FOOBAZ')
         f = R.forms['frm_dialog']
@@ -483,7 +483,7 @@ class TestCrmCustomer(TestController):
         R = f.submit()
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Statused Order to Foobaz')
         self._delete_new(customer_id)
 
@@ -495,7 +495,7 @@ class TestCrmCustomer(TestController):
         order = cust.orders[0]
         order_item = order.active_items[0]
         R = self.get('/crm/customer/status_dialog/%s?order_item_id=%s&dialog=1' % (customer_id, order_item.order_item_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Derf')
         event = Status.find_event(cust.campaign.company.enterprise_id, order_item, 'DERF')
         f = R.forms['frm_dialog']
@@ -504,7 +504,7 @@ class TestCrmCustomer(TestController):
         R = f.submit()
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Statused Item to Derf')
         self._delete_new(customer_id)
 
@@ -515,7 +515,7 @@ class TestCrmCustomer(TestController):
         cust = Customer.load(customer_id)
         hist = Status.find_by_customer(cust, 0)[0]
         R = self.get('/crm/customer/show_status_dialog/%s/%s' % (cust.customer_id, hist.status_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         self._delete_new(customer_id)
 
 
@@ -525,9 +525,9 @@ class TestCrmCustomer(TestController):
         cust = Customer.load(customer_id)
         self.assertEqual(cust.delete_dt, None)
         R = self.get('/crm/customer/edit/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R = self.get('/crm/customer/delete/%s' % customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('True')
         cust.invalidate_caches()
         cust = Customer.load(customer_id)
@@ -544,7 +544,7 @@ class TestCrmCustomer(TestController):
                        'confirmpassword' : 'password',
                        'redir' : '/'
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params 
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
@@ -565,7 +565,7 @@ class TestCrmCustomer(TestController):
                        'confirmpassword' : 'password',
                        'redir' : '/'
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Email ken@testxyz.com already in use')
         self._delete_new(customer_id)
 
@@ -607,7 +607,7 @@ class TestCrmCustomer(TestController):
                        'confirmpassword' : 'password',
                        'redir' : '/'
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params 
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
@@ -622,7 +622,7 @@ class TestCrmCustomer(TestController):
                        'product_sku' : products[0].sku,
                        'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params
         self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
         self._delete_new(customer_id)        
@@ -639,7 +639,7 @@ class TestCrmCustomer(TestController):
                        'confirmpassword' : 'password',
                        'redir' : '/'
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params 
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
@@ -654,7 +654,7 @@ class TestCrmCustomer(TestController):
                        'product_sku' : 'crapcrap',
                        'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain("No such product sku: crapcrap")
         self._delete_new(customer_id)        
 
@@ -670,7 +670,7 @@ class TestCrmCustomer(TestController):
                        'confirmpassword' : 'password',
                        'redir' : '/'
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params 
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
@@ -686,7 +686,7 @@ class TestCrmCustomer(TestController):
                        'product_sku' : products[0].sku,
                        'bill_cc_token' : api.create_token(ent, '4000000000000002', '12', '2019', '123')
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain("Unable to bill credit card:")
         self._delete_new(customer_id)        
 
@@ -702,7 +702,7 @@ class TestCrmCustomer(TestController):
                        'confirmpassword' : 'password',
                        'redir' : '/'
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params 
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
@@ -718,14 +718,14 @@ class TestCrmCustomer(TestController):
                        'product_sku' : products[0].sku,
                        'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params
         self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
         R = self.post('/crm/customer/self_save_billing',
                       {'fname' : 'Ken Test',
                        'bill_cc_token' : api.create_token(ent, '4012888888881881', '12', '2019', '123')
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain("Successfully saved billing information.")
         self._delete_new(customer_id)        
 
@@ -741,7 +741,7 @@ class TestCrmCustomer(TestController):
                        'confirmpassword' : 'password',
                        'redir' : '/'
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params 
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
@@ -757,7 +757,7 @@ class TestCrmCustomer(TestController):
                        'product_sku' : products[0].sku,
                        'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params
         self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
 
@@ -765,7 +765,7 @@ class TestCrmCustomer(TestController):
                       {'fname' : 'Ken Test',
                        'bill_cc_token' : api.create_token(ent, '4000000000000002', '12', '2019', '123')
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain("Unable to save credit card information")
         self._delete_new(customer_id) 
         
@@ -797,7 +797,7 @@ class TestCrmCustomer(TestController):
                       {'username': cust.email,
                        'password': 'bogus',
                        'order_id' : orders[0].order_id})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Username or password incorrect.  Unable to cancel.')
         cust.invalidate_caches()
         cust = Customer.load(customer_id)
@@ -816,7 +816,7 @@ class TestCrmCustomer(TestController):
                       {'username': cust.email,
                        'password': cust.password,
                        'order_id' : order.order_id})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Order cancelled.')
         cust.invalidate_caches()
         cust = Customer.load(customer_id)
@@ -833,7 +833,7 @@ class TestCrmCustomer(TestController):
         R = self.post('/crm/customer/self_cancel_order',
                       {'username': cust.email,
                        'password': cust.password})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Order cancelled.')
         cust.invalidate_caches()
         cust = Customer.load(customer_id)
@@ -854,7 +854,7 @@ class TestCrmCustomer(TestController):
                        'confirmpassword' : 'password',
                        'redir' : '/'
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params 
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
@@ -870,7 +870,7 @@ class TestCrmCustomer(TestController):
                        'product_sku' : products[0].sku,
                        'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')
                        })
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         assert 'customer_id' in R.request.params
         self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
 
@@ -879,7 +879,7 @@ class TestCrmCustomer(TestController):
         R = self.post('/crm/customer/self_cancel_order',
                       {'username': cust.email,
                        'password': cust.password})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Order cancelled.')
         cust.invalidate_caches()
         cust = Customer.load(customer_id)

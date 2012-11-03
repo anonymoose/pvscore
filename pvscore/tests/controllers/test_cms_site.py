@@ -14,7 +14,7 @@ class TestCmsSite(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/cms/site/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('New Site')
         f = R.forms['frm_site']
         self.assertEqual(f['domain'].value, '')
@@ -30,7 +30,7 @@ class TestCmsSite(TestController):
     def test_list_with_new(self):
         site_id = self._create_new()
         R = self.get('/cms/site/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('testsite.com')
         self._delete_new(site_id)
 
@@ -39,7 +39,7 @@ class TestCmsSite(TestController):
     def test_save_existing(self):
         site_id = self._create_new()
         R = self.get('/cms/site/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('testsite.com')
 
         R = self.get('/cms/site/edit/%s' % site_id)
@@ -53,7 +53,7 @@ class TestCmsSite(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_site']
         R.mustcontain('Edit Site')
 
@@ -63,7 +63,7 @@ class TestCmsSite(TestController):
 
     def _create_new(self):
         R = self.get('/cms/site/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('New Site')
         f = R.forms['frm_site']
         self.assertEqual(f['site_id'].value, '')
@@ -76,7 +76,7 @@ Disallow: /cms/cart/add/*""")
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_site']
         R.mustcontain('Edit Site')
         site_id = f['site_id'].value
@@ -98,7 +98,7 @@ Disallow: /cms/cart/add/*""")
         cmpns = Campaign.find_all(ent.enterprise_id)
         other_campaign = cmpns[1]
         R = self.get('/?__cid=%s' % other_campaign.campaign_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain("campaign_id = %s" % other_campaign.campaign_id)
 
     def test_site_not_hosted(self):

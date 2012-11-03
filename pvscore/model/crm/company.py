@@ -235,9 +235,7 @@ class Enterprise(ORMBase, BaseModel):
             company_id = cid[0]
             Session.execute("delete from crm_product_category where company_id = '%s'" % company_id)
             Session.execute("delete from crm_report where company_id = '%s'" % company_id)
-            Session.execute("""delete from cms_content
-                                where page_id in (select page_id from cms_page where site_id in
-                                                      (select site_id from cms_site where company_id = '%s'))""" % company_id)
+            Session.execute("""delete from cms_content where site_id in (select site_id from cms_site where company_id = '%s')""" % company_id)
             Session.execute("delete from cms_page where site_id in (select site_id from cms_site where company_id = '%s')" % company_id)
             Session.execute("delete from cms_site where company_id = '%s'" % company_id)
             Session.execute("update crm_company set default_campaign_id = null where company_id = '%s'" % company_id)

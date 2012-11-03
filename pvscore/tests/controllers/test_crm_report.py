@@ -12,7 +12,7 @@ class TestCrmReport(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/report/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Report')
         f = R.forms['frm_report']
         self.assertEqual(f['name'].value, '')
@@ -22,7 +22,7 @@ class TestCrmReport(TestController):
     def test_list_with_new(self):
         report_id = self._create_new()
         R = self.get('/crm/report/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Report')
         self._delete_new(report_id)
 
@@ -37,7 +37,7 @@ class TestCrmReport(TestController):
     def test_show(self):
         report_id = self._create_new()
         R = self.get('/crm/report/show/%s' % report_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Description')
         R.mustcontain('Product')  # because show_product_id == True
         R.mustcontain('rpt_product_id')
@@ -65,7 +65,7 @@ class TestCrmReport(TestController):
     def test_save_existing(self):
         report_id = self._create_new()
         R = self.get('/crm/report/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Report')
 
         R = self.get('/crm/report/edit/%s' % report_id)
@@ -86,7 +86,7 @@ class TestCrmReport(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_report']
         R.mustcontain('Edit Report')
 
@@ -103,7 +103,7 @@ class TestCrmReport(TestController):
 
     def _create_new(self):
         R = self.get('/crm/report/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Report')
         f = R.forms['frm_report']
         self.assertEqual(f['report_id'].value, '')
@@ -155,7 +155,7 @@ if (id)  {
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_report']
         R.mustcontain('Edit Report')
         report_id = f['report_id'].value

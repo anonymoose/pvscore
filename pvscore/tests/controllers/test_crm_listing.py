@@ -43,7 +43,7 @@ class TestCrmListing(TestController):
     def test_remove(self):
         listing_id = self._create_new()
         R = self.get('/crm/listing/remove/%s' % listing_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         lis = Listing.load(listing_id)
         self.assertNotEqual(lis.delete_dt, None)
         self._delete_new(listing_id)
@@ -66,7 +66,7 @@ class TestCrmListing(TestController):
     @customer_logged_in
     def test_show_add_picture(self):
         R = self.get('/crm/listing/show_add_picture')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Please choose an image')
 
 

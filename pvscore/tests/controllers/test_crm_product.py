@@ -22,7 +22,7 @@ class TestCrmProduct(TestController):
         ent = Enterprise.find_all()[0]
         comp = Company.find_all(ent.enterprise_id)[0]
         R = self.get('/crm/product/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Product')
         f = R.forms['frm_product']
         self.assertEqual(f['product_id'].value, '')
@@ -43,7 +43,7 @@ class TestCrmProduct(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_product']
         R.mustcontain('Edit Product')
         product_id = f['product_id'].value
@@ -66,13 +66,13 @@ class TestCrmProduct(TestController):
                      {'product_id': product_id,
                       'note' : 'Test Note %s' % product_id,
                       'event_id' : events[0].event_id})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Product Event History')
         R.mustcontain('Test Note %s' % product_id)
         # assert that the edit page has the name of the event in green
         # at the top.
         R = self.get('/crm/product/edit/%s' % product_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Product')
         R.mustcontain(events[0].short_name)
         self._delete_new(product_id)
@@ -82,7 +82,7 @@ class TestCrmProduct(TestController):
     def test_show_orders(self):
         product_id = self._create_new()
         R = self.get('/crm/product/show_orders/%s' % product_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         self._delete_new(product_id)
 
 
@@ -90,7 +90,7 @@ class TestCrmProduct(TestController):
     def test_show_sales(self):
         product_id = self._create_new()
         R = self.get('/crm/product/show_sales/%s' % product_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         self._delete_new(product_id)
 
 
@@ -98,7 +98,7 @@ class TestCrmProduct(TestController):
     def test_show_purchases(self):
         product_id = self._create_new()
         R = self.get('/crm/product/show_purchases/%s' % product_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         self._delete_new(product_id)
 
 
@@ -106,7 +106,7 @@ class TestCrmProduct(TestController):
     def test_show_history(self):
         product_id = self._create_new()
         R = self.get('/crm/product/show_history/%s' % product_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Product Event History')
         self._delete_new(product_id)
 
@@ -115,21 +115,21 @@ class TestCrmProduct(TestController):
     def test_show_returns(self):
         product_id = self._create_new()
         R = self.get('/crm/product/show_returns/%s' % product_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         self._delete_new(product_id)
 
 
     @secure
     def test_show_inventory(self):
         R = self.get('/crm/product/show_inventory')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Product Quick Editor')
 
 
     @secure
     def test_inventory_list(self):
         R = self.get('/crm/product/inventory_list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         prods = json.loads(R.body)
         self.assertGreater(prods['records'], 100)
         self.assertEqual(prods['records'], len(prods['rows']))
@@ -141,7 +141,7 @@ class TestCrmProduct(TestController):
         cmpns = Campaign.find_all(ent.enterprise_id)
 
         R = self.get('/crm/product/inventory_list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         prods = json.loads(R.body)
         self.assertGreater(prods['records'], 100)
         self.assertEqual(prods['records'], len(prods['rows']))
@@ -171,7 +171,7 @@ class TestCrmProduct(TestController):
         self.assertEqual(True, cmpns[1].campaign_id not in prod.campaign_prices.keys())
 
         R = self.get('/crm/product/edit/%s' % pid)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_product']
         R.mustcontain('Edit Product')
         self.assertEqual(f['product_id'].value, pid)
@@ -185,7 +185,7 @@ class TestCrmProduct(TestController):
 
         product_id = self._create_new()
         R = self.get('/crm/product/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Product')
         R.mustcontain('Product Search')   # make sure product search is in 2 places
 
@@ -214,7 +214,7 @@ class TestCrmProduct(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_product']
         R.mustcontain('Edit Product')
 
@@ -242,7 +242,7 @@ class TestCrmProduct(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_product']
         R.mustcontain('Edit Product')
         self.assertEqual(f['product_id'].value, product_id)
@@ -277,7 +277,7 @@ class TestCrmProduct(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/product/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Product')
         f = R.forms['frm_product']
         self.assertEqual(f['name'].value, '')
@@ -293,7 +293,7 @@ class TestCrmProduct(TestController):
     def test_list_with_new(self):
         product_id = self._create_new()
         R = self.get('/crm/product/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Product')
         self._delete_new(product_id)
 

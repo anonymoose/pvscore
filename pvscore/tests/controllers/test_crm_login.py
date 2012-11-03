@@ -9,21 +9,21 @@ class TestCrmLogin(TestController):
 
     def test_index(self):
         R = self.get('/crm')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('CRM Login')
         self.app.reset()
 
 
     def test_login_empty(self):
         R = self.post('/crm/login')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Invalid User or Password')
         self.app.reset()
 
 
     def test_valid(self):
         R = self.post('/crm/login', {'username': UID, 'password': PWD})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Dashboard')
         self.app.reset()
 
@@ -47,7 +47,7 @@ class TestCrmLogin(TestController):
     def test_goto_path(self):
         R = self.post('/crm/login', {'username': UID, 'password': PWD,
                                      'path': '/crm/dashboard', 'vars': ''})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Dashboard')
         self.app.reset()
 
@@ -55,14 +55,14 @@ class TestCrmLogin(TestController):
     def test_goto_path_vars(self):
         R = self.post('/crm/login', {'username': UID, 'password': PWD,
                                      'path': '/crm/dashboard', 'vars': 'a=b'})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Dashboard')
         self.app.reset()
 
 
     def test_customer_login(self):
         R = self.post('/crm/customer_login', {'username': 'amers_j@yahoo.com', 'password': 'geology'})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('this is the index')
         self.app.reset()
 
@@ -71,14 +71,14 @@ class TestCrmLogin(TestController):
                       {'username': 'amers_j@yahoo.com',
                        'password': 'geology',
                        'redir' : '/'})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('this is the index')
         self.app.reset()
 
 
     def test_customer_login_invalid(self):
         R = self.post('/crm/customer_login', {'username': 'amers_j@yahoo.com', 'password': 'bogus'})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('this is the index')
         self.assertEqual(R.request.path, '/')
         self.app.reset()

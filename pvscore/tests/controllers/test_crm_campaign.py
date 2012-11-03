@@ -7,7 +7,7 @@ class TestCrmCampaign(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/campaign/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Campaign')
         f = R.forms['frm_campaign']
         self.assertEqual(f['name'].value, '')
@@ -17,7 +17,7 @@ class TestCrmCampaign(TestController):
     def test_list_with_new(self):
         campaign_id = self._create_new()
         R = self.get('/crm/campaign/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Campaign')
         self._delete_new(campaign_id)
 
@@ -37,7 +37,7 @@ class TestCrmCampaign(TestController):
     def test_save_existing(self):
         campaign_id = self._create_new()
         R = self.get('/crm/campaign/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Campaign')
 
         R = self.get('/crm/campaign/edit/%s' % campaign_id)
@@ -55,7 +55,7 @@ class TestCrmCampaign(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_campaign']
         R.mustcontain('Edit Campaign')
 
@@ -69,7 +69,7 @@ class TestCrmCampaign(TestController):
 
     def _create_new(self):
         R = self.get('/crm/campaign/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Campaign')
         f = R.forms['frm_campaign']
         self.assertEqual(f['campaign_id'].value, '')
@@ -89,7 +89,7 @@ class TestCrmCampaign(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_campaign']
         R.mustcontain('Edit Campaign')
         campaign_id = f['campaign_id'].value

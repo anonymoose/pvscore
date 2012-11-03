@@ -12,7 +12,7 @@ class TestCrmPurchase(TestController):
     @secure
     def test_show_new_vendor(self):
         R = self.get('/crm/purchase/vendor/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Vendor')
         f = R.forms['frm_vendor']
         self.assertEqual(f['vendor_id'].value, '')
@@ -22,7 +22,7 @@ class TestCrmPurchase(TestController):
     def test_list_with_new_vendor(self):
         vendor_id = self._create_new_vendor()
         R = self.get('/crm/purchase/vendor/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Vendor')
         self._delete_new_vendor(vendor_id)
 
@@ -37,7 +37,7 @@ class TestCrmPurchase(TestController):
     def test_save_existing_vendor(self):
         vendor_id = self._create_new_vendor()
         R = self.get('/crm/purchase/vendor/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Vendor')
 
         R = self.get('/crm/purchase/vendor/edit/%s' % vendor_id)
@@ -52,7 +52,7 @@ class TestCrmPurchase(TestController):
         R = f.submit()
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_vendor']
         R.mustcontain('Edit Vendor')
 
@@ -63,7 +63,7 @@ class TestCrmPurchase(TestController):
 
     def _create_new_vendor(self):
         R = self.get('/crm/purchase/vendor/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Vendor')
         f = R.forms['frm_vendor']
         self.assertEqual(f['vendor_id'].value, '')
@@ -74,7 +74,7 @@ class TestCrmPurchase(TestController):
         R = f.submit()
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_vendor']
         R.mustcontain('Edit Vendor')
         vendor_id = f['vendor_id'].value
@@ -94,13 +94,13 @@ class TestCrmPurchase(TestController):
     def test_show_history(self):
         purchase_order_id = self._create_new()
         R = self.get('/crm/purchase/complete/%s' % purchase_order_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('True')
         R = self.get('/crm/purchase/edit/%s' % purchase_order_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Completed:')
         R = self.get('/crm/purchase/show_history/%s' % purchase_order_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('PurchaseOrder Completed')
         self._delete_new(purchase_order_id)
 
@@ -108,7 +108,7 @@ class TestCrmPurchase(TestController):
     @secure
     def test_search(self):
         R = self.get('/crm/purchase/show_search')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Purchase Order Search')
         
         f = R.forms['frm_purchase_search']
@@ -124,7 +124,7 @@ class TestCrmPurchase(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/purchase/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Supplier Order')
         f = R.forms['frm_purchase']
         self.assertEqual(f['purchase_order_id'].value, '')
@@ -134,7 +134,7 @@ class TestCrmPurchase(TestController):
     def test_list_with_new(self):
         purchase_order_id = self._create_new()
         R = self.get('/crm/purchase/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Purchase Order')
         self._delete_new(purchase_order_id)
 
@@ -158,12 +158,12 @@ class TestCrmPurchase(TestController):
                        'quantity' : 10,
                        'unit_cost' : 123})
         oitem = json.loads(R.body)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         order_item_id = oitem['id']
 
         # get the json from it
         R = self.get('/crm/purchase/order_item_json/%s/%s' % (purchase_order_id, order_item_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         oitem = json.loads(R.body)
         self.assertEqual(oitem['order_item_id'], order_item_id)
         self.assertEqual(oitem['note'], 'Note Note')
@@ -172,16 +172,16 @@ class TestCrmPurchase(TestController):
 
         # complete the item
         R = self.get('/crm/purchase/complete_item/%s/%s' % (purchase_order_id, order_item_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('True')
 
         #R = self.get('/crm/purchase/show_history/%s' % purchase_order_id)
-        #self.assertEqual(R.status_int, 200)
+        #assert R.status_int == 200
         #R.mustcontain('PurchaseOrder Completed')
 
         # delete the oi
         R = self.get('/crm/purchase/delete_purchase_order_item/%s/%s' % (purchase_order_id, order_item_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('True')
         
         self._delete_new(purchase_order_id)
@@ -201,13 +201,13 @@ class TestCrmPurchase(TestController):
                        'quantity' : 10,
                        'unit_cost' : 123})
         json.loads(R.body)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
 
         R = self.get('/crm/purchase/complete/%s' % purchase_order_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('True')
         R = self.get('/crm/purchase/edit/%s' % purchase_order_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Completed:')
         self._delete_new(purchase_order_id)
 
@@ -221,7 +221,7 @@ class TestCrmPurchase(TestController):
         R = self.post(str('/crm/purchase/save_status/%s' % purchase_order_id),
                       {'event_id' : evt.event_id,
                        'note' : 'Note Note'})
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         self._delete_new(purchase_order_id)
         
 
@@ -229,7 +229,7 @@ class TestCrmPurchase(TestController):
     def test_save_existing(self):
         purchase_order_id = self._create_new()
         R = self.get('/crm/purchase/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Purchase Order')
 
         R = self.get('/crm/purchase/edit/%s' % purchase_order_id)
@@ -244,7 +244,7 @@ class TestCrmPurchase(TestController):
         R = f.submit()
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_purchase']
         R.mustcontain('Edit Supplier Order')
 
@@ -261,7 +261,7 @@ class TestCrmPurchase(TestController):
         ven = vendors[0]
 
         R = self.get('/crm/purchase/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Supplier Order')
         f = R.forms['frm_purchase']
         self.assertEqual(f['purchase_order_id'].value, '')
@@ -272,7 +272,7 @@ class TestCrmPurchase(TestController):
         R = f.submit()
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_purchase']
         R.mustcontain('Edit Supplier Order')
         purchase_order_id = f['purchase_order_id'].value

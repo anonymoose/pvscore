@@ -8,7 +8,7 @@ class TestCrmCommunication(TestController):
     
     def _create_new(self):
         R = self.get('/crm/communication/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Email Template')
         f = R.forms['frm_comm']
         self.assertEqual(f['comm_id'].value, '')
@@ -18,7 +18,7 @@ class TestCrmCommunication(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_comm']
         R.mustcontain('Edit Email Template')
         comm_id = f['comm_id'].value
@@ -41,7 +41,7 @@ class TestCrmCommunication(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/communication/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Email Template')
         f = R.forms['frm_comm']
         self.assertEqual(f['comm_id'].value, '')
@@ -53,7 +53,7 @@ class TestCrmCommunication(TestController):
     def test_list_with_new(self):
         comm_id = self._create_new()
         R = self.get('/crm/communication/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Comm')
         self._delete_new(comm_id)
 
@@ -62,7 +62,7 @@ class TestCrmCommunication(TestController):
     def test_save_existing(self):
         comm_id = self._create_new()
         R = self.get('/crm/communication/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Comm')
 
         R = self.get('/crm/communication/edit/%s' % comm_id)
@@ -74,7 +74,7 @@ class TestCrmCommunication(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_comm']
         R.mustcontain('Edit Email Template')
 
@@ -92,7 +92,7 @@ class TestCrmCommunication(TestController):
         comm = Communication.find_all(ent.enterprise_id)[0]
         order = cust.get_active_orders()[0]
         R = self.get('/crm/communication/view_comm_dialog/%s/%s?order_id=%s&dialog=1' % (cust.customer_id, comm.comm_id, order.order_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('%s %s' % (cust.fname, cust.lname))
 
 
@@ -100,14 +100,14 @@ class TestCrmCommunication(TestController):
     def test_send_comm_dialog(self):
         cust = self.get_customer()
         R = self.get('/crm/communication/send_comm_dialog?customer_id=%s&dialog=1' % cust.customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Invoice')
 
 
     @secure
     def test_send_comm_dialog_all(self):
         R = self.get('/crm/communication/send_comm_dialog?dialog=1')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Invoice')
         
         

@@ -13,7 +13,7 @@ class TestCrmAppointment(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/appointment/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('New Appointment')
         f = R.forms['frm_appointment']
         self.assertEqual(f['title'].value, '')
@@ -22,7 +22,7 @@ class TestCrmAppointment(TestController):
     def _create_new(self):
         # create the appointment and ensure he's editable.
         R = self.get('/crm/appointment/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('New Appointment')
         f = R.forms['frm_appointment']
         self.assertEqual(f['appointment_id'].value, '')
@@ -35,7 +35,7 @@ class TestCrmAppointment(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_appointment']
         R.mustcontain('Edit Appointment')
         appointment_id = f['appointment_id'].value
@@ -47,7 +47,7 @@ class TestCrmAppointment(TestController):
         # create the appointment and ensure he's editable.
         cust = self.get_customer()
         R = self.get('/crm/appointment/new_for_customer/%s' % cust.customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('New Appointment')
         f = R.forms['frm_appointment']
 
@@ -64,7 +64,7 @@ class TestCrmAppointment(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
 
         f = R.forms['frm_appointment']
         R.mustcontain('Edit Customer Appointment')
@@ -88,7 +88,7 @@ class TestCrmAppointment(TestController):
     def test_list(self):
         appointment_id = self._create_new()
         R = self.get('/crm/appointment/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Appointment')
         self._delete_new(appointment_id)
 
@@ -97,7 +97,7 @@ class TestCrmAppointment(TestController):
     def test_edit_existing(self):
         appointment_id = self._create_new()
         R = self.get('/crm/appointment/edit/%s' % appointment_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_appointment']
         R.mustcontain('Edit Appointment')
         self.assertEqual(str(f['appointment_id'].value) , str(appointment_id))
@@ -111,7 +111,7 @@ class TestCrmAppointment(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_appointment']
         R.mustcontain('Edit Appointment')
 
@@ -132,7 +132,7 @@ class TestCrmAppointment(TestController):
         appt = Appointment.load(appointment_id)
         assert appt is not None
         R = self.get('/crm/appointment/edit_for_customer/%s/%s' % (appt.customer_id, appointment_id))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_appointment']
         R.mustcontain('Edit Customer Appointment')
         self.assertEqual(str(f['appointment_id'].value) , str(appointment_id))
@@ -147,7 +147,7 @@ class TestCrmAppointment(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_appointment']
         R.mustcontain('Edit Customer Appointment')
 
@@ -163,7 +163,7 @@ class TestCrmAppointment(TestController):
         appt = Appointment.load(appointment_id)
         assert appt is not None
         R = self.get('/crm/appointment/show_appointments/%s' % appt.customer_id)
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Customer Appointment')
         self._delete_new(appointment_id)
         
@@ -175,13 +175,13 @@ class TestCrmAppointment(TestController):
         appt1 = Appointment.load(appointment_id1)
         assert appt1 is not None
         R = self.get('/crm/appointment/show_search')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Appointment Search')
         f = R.forms["frm_appointment_search"]
         f.set('title', 'Test')
         f.set('description', 'Test Description')
         R = f.submit('submit')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Appointment Search')
         R.mustcontain('Test Appointment')
         R.mustcontain('Test Customer Appointment')
@@ -198,7 +198,7 @@ class TestCrmAppointment(TestController):
         appt1 = Appointment.load(appointment_id1)
         assert appt1 is not None
         R = self.get('/crm/appointment/day_view/%s/%s/%s' % (TOMORROW.year, TOMORROW.month, TOMORROW.day))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Appointment')
         R.mustcontain('Test Customer Appointment')
         R.mustcontain('/crm/appointment/edit_for_customer/%s/%s' % (appt1.customer_id, appointment_id1))
@@ -207,9 +207,9 @@ class TestCrmAppointment(TestController):
         self._delete_new(appointment_id2)
         self._delete_new(appointment_id2)
         R = self.get('/crm/appointment/tomorrow')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R = self.get('/crm/appointment/this_day')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
 
 
     @secure
@@ -219,13 +219,13 @@ class TestCrmAppointment(TestController):
         appt1 = Appointment.load(appointment_id1)
         assert appt1 is not None
         R = self.get('/crm/appointment/month_view/%s/%s' % (TOMORROW.year, TOMORROW.month))
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('/crm/appointment/edit_for_customer/%s/%s' % (appt1.customer_id, appointment_id1))
         R.mustcontain('/crm/appointment/edit/%s' % appointment_id2)
         self._delete_new(appointment_id2)
         self._delete_new(appointment_id2)
         R = self.get('/crm/appointment/this_month')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         
         
               

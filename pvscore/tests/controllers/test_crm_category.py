@@ -9,7 +9,7 @@ class TestCrmCategory(TestController):
     def _create_new(self):
         # probably a better way to get the preferred enterprise here.
         R = self.get('/crm/product/category/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Product Category')
         f = R.forms['frm_category']
         self.assertEqual(f['category_id'].value, '')
@@ -20,7 +20,7 @@ class TestCrmCategory(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_category']
         R.mustcontain('Edit Product Category')
         category_id = f['category_id'].value
@@ -38,7 +38,7 @@ class TestCrmCategory(TestController):
         ent = Enterprise.find_all()[0]
         category_id = self._create_new()
         R = self.get('/crm/product/category/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Category')
         R.mustcontain('Product Search')
         R = self.get('/crm/product/category/edit/%s' % category_id)
@@ -55,7 +55,7 @@ class TestCrmCategory(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_category']
         R.mustcontain('Edit Product Category')
         self.assertEqual(f['category_id'].value, category_id)
@@ -69,7 +69,7 @@ class TestCrmCategory(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/product/category/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Product Category')
         f = R.forms['frm_category']
         self.assertEqual(f['name'].value, '')
@@ -86,7 +86,7 @@ class TestCrmCategory(TestController):
     def test_list_with_new(self):
         category_id = self._create_new()
         R = self.get('/crm/product/category/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Category')
         self._delete_new(category_id)
 

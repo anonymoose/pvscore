@@ -7,7 +7,7 @@ class TestCrmEvent(TestController):
     
     def _create_new(self):
         R = self.get('/crm/event/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Event')
         f = R.forms['frm_event']
         self.assertEqual(f['event_id'].value, '')
@@ -17,7 +17,7 @@ class TestCrmEvent(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_event']
         R.mustcontain('Edit Event')
         event_id = f['event_id'].value
@@ -40,7 +40,7 @@ class TestCrmEvent(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/event/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit Event')
         f = R.forms['frm_event']
         self.assertEqual(f['event_id'].value, '')
@@ -51,7 +51,7 @@ class TestCrmEvent(TestController):
     def test_list_with_new(self):
         event_id = self._create_new()
         R = self.get('/crm/event/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Event')
         self._delete_new(event_id)
 
@@ -60,7 +60,7 @@ class TestCrmEvent(TestController):
     def test_save_existing(self):
         event_id = self._create_new()
         R = self.get('/crm/event/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Test Event')
 
         R = self.get('/crm/event/edit/%s' % event_id)
@@ -72,7 +72,7 @@ class TestCrmEvent(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_event']
         R.mustcontain('Edit Event')
 

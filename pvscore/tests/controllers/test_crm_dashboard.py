@@ -8,7 +8,7 @@ class TestCrmDashboard(TestController):
     def test_dashboard(self):
         self.login_crm()
         R = self.get('/crm/dashboard')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Dashboard')
 
 

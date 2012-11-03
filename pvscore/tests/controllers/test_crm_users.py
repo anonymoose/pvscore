@@ -7,7 +7,7 @@ class TestCrmUsers(TestController):
     
     def _create_new(self):
         R = self.get('/crm/users/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit User')
         f = R.forms['frm_users']
         self.assertEqual(f['user_id'].value, '')
@@ -20,7 +20,7 @@ class TestCrmUsers(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_users']
         R.mustcontain('Edit Users')
         user_id = f['user_id'].value
@@ -61,7 +61,7 @@ class TestCrmUsers(TestController):
     @secure
     def test_show_new(self):
         R = self.get('/crm/users/new')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('Edit User')
         f = R.forms['frm_users']
         self.assertEqual(f['user_id'].value, '')
@@ -72,7 +72,7 @@ class TestCrmUsers(TestController):
     def test_list_with_new(self):
         user_id = self._create_new()
         R = self.get('/crm/users/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('test@tester.com')
         self._delete_new(user_id)
 
@@ -80,7 +80,7 @@ class TestCrmUsers(TestController):
     @secure
     def test_edit_current(self):
         R = self.get('/crm/users/edit_current')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain(UID)
 
 
@@ -88,7 +88,7 @@ class TestCrmUsers(TestController):
     def test_save_existing(self):
         user_id = self._create_new()
         R = self.get('/crm/users/list')
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         R.mustcontain('test@tester.com')
 
         R = self.get('/crm/users/edit/%s' % user_id)
@@ -100,7 +100,7 @@ class TestCrmUsers(TestController):
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
-        self.assertEqual(R.status_int, 200)
+        assert R.status_int == 200
         f = R.forms['frm_users']
         R.mustcontain('Edit User')
 
