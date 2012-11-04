@@ -10,16 +10,16 @@ class Cart(object):
         self.site_id = site.site_id if site else None
 
         
-    def __repr__(self):
-        rep = 'shipping_total : %s \ntimeframe : %s\n' % (self.shipping_total, self.timeframe)
-        for i in range(0, len(self.items)):
-            rep = rep + '%s @ %s\n' % (self.items[i]['product'].name, self.items[i]['quantity'])
-        return rep
+    # def __repr__(self):
+    #     rep = 'shipping_total : %s \ntimeframe : %s\n' % (self.shipping_total, self.timeframe)
+    #     for i in range(0, len(self.items)):
+    #         rep = rep + '%s @ %s\n' % (self.items[i]['product'].name, self.items[i]['quantity'])
+    #     return rep
 
         
-    def set_shipping_timeframe(self, timeframe):
-        self.timeframe = timeframe
-        self.shipping_total = 0.0
+    # def set_shipping_timeframe(self, timeframe):
+    #     self.timeframe = timeframe
+    #     self.shipping_total = 0.0
 
 
     @property
@@ -44,6 +44,7 @@ class Cart(object):
 
 
     def remove_all(self):
+        del self.items
         self.items = []
         self.shipping_total = 0.0
 
@@ -64,10 +65,7 @@ class Cart(object):
 
 
     def has_product_id(self, product_id):
-        for i in range(0, len(self.items)):
-            if self.items[i]['product'].product_id == product_id:
-                return True
-        return False
+        return len([item for item in self.items if self['product'].product_id == product_id]) > 0
 
         
     def remove_item(self, product):

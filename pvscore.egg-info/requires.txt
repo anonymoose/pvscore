@@ -29,3 +29,4 @@ pyflakes
 feedparser
 selenium
 stripe
+PyRSS2Gen

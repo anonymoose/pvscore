@@ -612,16 +612,23 @@ def year_list():
 #
 def run_process_loop(exe):    
     proc = subprocess.Popen(exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    lines = []
     while (True):
         retcode = proc.poll() #returns None while subprocess is running
         line = proc.stdout.readline()
-        yield line
-        if (retcode is not None):
+        if line:
+            lines.append(line)
+        else:
             break
+        #yield line
+        #if (retcode is not None):
+        #    break
+    return lines
 
       
 def run_process(exe):
-    return [line for line in run_process_loop(exe)]
+    return run_process_loop(exe)
+#return [line for line in run_process_loop(exe)]
 
 
 # def contains(lst, val):

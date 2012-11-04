@@ -26,3 +26,6 @@ class TestUtil(TestController):
         assert '<option value="TN" selected>Tennessee</option>' in sl
         assert util.state_abbrev_to_state('TN') == 'Tennessee'
 
+    def test_run_process(self):
+        output = util.run_process(['/bin/cat', '/etc/passwd'])
+        assert len([out for out in output if 'root' in out]) > 0

@@ -34,8 +34,7 @@ class CartController(CatalogBaseController):
             return 'True'
         redir = self.request.GET.get('redir')
         cart = self.session['cart']
-        del cart.items
-        cart.items = []
+        cart.remove_all()
         return 'True' if not redir else HTTPFound(redir)
 
 

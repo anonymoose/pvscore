@@ -26,7 +26,7 @@ from sqlalchemy.orm.interfaces import MapperOption
 from sqlalchemy.orm.query import Query
 from sqlalchemy.sql import visitors
 import pvscore.config as config
-
+#105-106, 120, 128-129, 153-154, 210-212, 223-229, 243-244, 256-269, 293
 class CachingQuery(Query):
     """A Query subclass which optionally loads full results from a Beaker
     cache region.
@@ -100,10 +100,10 @@ class CachingQuery(Query):
             ret = self.merge_result(ret, load=False)
         return ret
 
-    def set_value(self, value):
-        """Set the value in the cache for this query."""
-        cache_, cache_key = _get_cache_parameters(self)
-        cache_.put(cache_key, value)
+    # def set_value(self, value):
+    #     """Set the value in the cache for this query."""
+    #     cache_, cache_key = _get_cache_parameters(self)
+    #     cache_.put(cache_key, value)
 
 def query_callable(manager):
     def query(*arg, **kw):
@@ -116,17 +116,18 @@ def _get_cache_parameters(query):
     on this query's current criterion and parameter values.
 
     """
-    if not hasattr(query, '_cache_parameters'):
-        raise ValueError("This Query does not have caching parameters configured.")
+    assert hasattr(query, '_cache_parameters')
+    #raise ValueError("This Query does not have caching parameters configured.")
 
     region, namespace, cache_key = query._cache_parameters
 
     namespace = _namespace_from_query(namespace, query)
 
-    if cache_key is None:
+    args = _params_from_query(query)
+    cache_key = cache_key if cache_key is not None else " ".join([str(x) for x in args])
         # cache key - the value arguments from this query's parameters.
-        args = _params_from_query(query)
-        cache_key = " ".join([str(x) for x in args])
+
+
 
     # get cache
     cache_ = query.cache_manager.get_cache_region(namespace, region)
@@ -149,12 +150,12 @@ def _namespace_from_query(namespace, query):
 
 def _set_cache_parameters(query, region, namespace, cache_key):
 
-    if hasattr(query, '_cache_parameters'):
-        region, namespace, cache_key = query._cache_parameters
-        raise ValueError("This query is already configured "
-                        "for region %r namespace %r" %
-                        (region, namespace)
-                    )
+    assert not hasattr(query, '_cache_parameters')
+    #region, namespace, cache_key = query._cache_parameters
+    #    raise ValueError("This query is already configured "
+    #                    "for region %r namespace %r" %
+    #                    (region, namespace)
+    #                )
     query._cache_parameters = region, namespace, cache_key
 
 class FromCache(MapperOption):
@@ -186,62 +187,62 @@ class FromCache(MapperOption):
         """Process a Query during normal loading operation."""
         _set_cache_parameters(query, self.region, self.namespace, self.cache_key)
 
-class RelationshipCache(MapperOption):
-    """Specifies that a Query as called within a "lazy load"
-       should load results from a cache."""
+# class RelationshipCache(MapperOption):
+#     """Specifies that a Query as called within a "lazy load"
+#        should load results from a cache."""
 
-    propagate_to_loaders = True
+#     propagate_to_loaders = True
 
-    def __init__(self, namespace, attribute, region='default'):
-        """Construct a new RelationshipCache.
+#     def __init__(self, namespace, attribute, region='default'):
+#         """Construct a new RelationshipCache.
 
-        :param region: the cache region.  Should be a
-        region configured in the Beaker CacheManager.
+#         :param region: the cache region.  Should be a
+#         region configured in the Beaker CacheManager.
 
-        :param namespace: the cache namespace.  Should
-        be a name uniquely describing the target Query's
-        lexical structure.
+#         :param namespace: the cache namespace.  Should
+#         be a name uniquely describing the target Query's
+#         lexical structure.
 
-        :param attribute: A Class.attribute which
-        indicates a particular class relationship() whose
-        lazy loader should be pulled from the cache.
+#         :param attribute: A Class.attribute which
+#         indicates a particular class relationship() whose
+#         lazy loader should be pulled from the cache.
 
-        """
-        self.region = region
-        self.namespace = namespace
-        self._relationship_options = {
-            ( attribute.property.parent.class_, attribute.property.key ) : self
-        }
+#         """
+#         self.region = region
+#         self.namespace = namespace
+#         self._relationship_options = {
+#             ( attribute.property.parent.class_, attribute.property.key ) : self
+#         }
 
-    def process_query_conditionally(self, query):
-        """Process a Query that is used within a lazy loader.
+#     def process_query_conditionally(self, query):
+#         """Process a Query that is used within a lazy loader.
 
-        (the process_query_conditionally() method is a SQLAlchemy
-        hook invoked only within lazyload.)
+#         (the process_query_conditionally() method is a SQLAlchemy
+#         hook invoked only within lazyload.)
 
-        """
-        if query._current_path:
-            mapper, key = query._current_path[-2:]
+#         """
+#         if query._current_path:
+#             mapper, key = query._current_path[-2:]
 
-            for cls in mapper.class_.__mro__:
-                if (cls, key) in self._relationship_options:
-                    relationship_option = self._relationship_options[(cls, key)]
-                    _set_cache_parameters(
-                            query,
-                            relationship_option.region,
-                            relationship_option.namespace,
-                            None)
+#             for cls in mapper.class_.__mro__:
+#                 if (cls, key) in self._relationship_options:
+#                     relationship_option = self._relationship_options[(cls, key)]
+#                     _set_cache_parameters(
+#                             query,
+#                             relationship_option.region,
+#                             relationship_option.namespace,
+#                             None)
 
-    def and_(self, option):
-        """Chain another RelationshipCache option to this one.
+#     def and_(self, option):
+#         """Chain another RelationshipCache option to this one.
 
-        While many RelationshipCache objects can be specified on a single
-        Query separately, chaining them together allows for a more efficient
-        lookup during load.
+#         While many RelationshipCache objects can be specified on a single
+#         Query separately, chaining them together allows for a more efficient
+#         lookup during load.
 
-        """
-        self._relationship_options.update(option._relationship_options)
-        return self
+#         """
+#         self._relationship_options.update(option._relationship_options)
+#         return self
 
 
 def _params_from_query(query):

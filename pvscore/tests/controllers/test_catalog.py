@@ -1,6 +1,7 @@
 from pvscore.tests import TestController
 from pvscore.model.crm.product import Product
 from pvscore.model.crm.company import Enterprise
+from pvscore.model.crm.product import ProductCategory
 import logging
 
 
@@ -55,6 +56,19 @@ class TestCatalog(TestController):
         R = self.get('/products/specials/catalog_products')
         assert R.status_int == 200
         # no specials in test db.  fix this.
+
+
+    def test_category(self):
+        ent = Enterprise.find_all()[0]
+        campaign = ent.companies[0].default_campaign
+        categories = ProductCategory.find_by_campaign(campaign)
+        assert len(categories) > 0
+        category = categories[0]
+        products = category.products
+        R = self.get('/category/%s/%s/catalog_category' % (category.name, category.category_id))
+        assert R.status_int == 200
+        for prod in products:
+            assert str(prod.product_id) in R.body
 
 
     def test_clear_cart(self):

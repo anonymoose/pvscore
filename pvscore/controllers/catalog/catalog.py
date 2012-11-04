@@ -44,18 +44,18 @@ class CatalogBaseController(BaseController):
                                self.request))
 
 
-    def personal_product_list(self, customer):
-        activeorders = customer.get_active_orders()
-        products = {}
-        for aorder in activeorders:
-            for oitem in aorder.items:
-                if not oitem.product.name in products:
-                    products[oitem.product.name] = Product.load(oitem.product.product_id)
-        return products.values()
+    # def personal_product_list(self, customer):
+    #     activeorders = customer.get_active_orders()
+    #     products = {}
+    #     for aorder in activeorders:
+    #         for oitem in aorder.items:
+    #             if not oitem.product.name in products:
+    #                 products[oitem.product.name] = Product.load(oitem.product.product_id)
+    #     return products.values()
 
 
-    def manufacturer_product_list(self, manufacturer_name, offset=None, limit=None):
-        return util.page_list(Product.find_by_manufacturer(self.enterprise_id, manufacturer_name), offset, limit)
+    # def manufacturer_product_list(self, manufacturer_name, offset=None, limit=None):
+    #     return util.page_list(Product.find_by_manufacturer(self.enterprise_id, manufacturer_name), offset, limit)
 
 
     def new_product_list(self, offset=None, limit=None):

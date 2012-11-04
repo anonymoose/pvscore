@@ -36,7 +36,8 @@ requires = [
     'pyflakes',
     'feedparser',
     'selenium',
-    'stripe'
+    'stripe',
+    'PyRSS2Gen'
     ]
 
 setup(name='pvscore',
