@@ -65,7 +65,7 @@ class Cart(object):
 
 
     def has_product_id(self, product_id):
-        return len([item for item in self.items if self['product'].product_id == product_id]) > 0
+        return len([item for item in self.items if item['product'].product_id == product_id]) > 0
 
         
     def remove_item(self, product):
