@@ -290,10 +290,12 @@ class PeriodCustomerCountSummary(BaseAnalytic):
                     order by cust.create_dt asc""".format(d=self.days, entid=self.request.ctx.enterprise.enterprise_id)
 
 
-def load_customer(request):
+def load_customer(request, default_to_new_customer=False):
     """ KB: [2012-09-12]: Get the customer_id from the various places it
     may be stashed.  session first."""
     customer_id = None
+    if request.ctx.customer:
+        return request.ctx.customer
     if 'customer_id' in request.session:
         customer_id = request.session['customer_id']
     elif 'customer_id' in request.POST:
@@ -301,10 +303,12 @@ def load_customer(request):
     elif 'customer_id' in request.GET:
         customer_id = request.GET.get('customer_id')
     customer = Customer.load(customer_id)
-    if customer_id:
-        if not customer or customer.campaign.company.enterprise_id != request.ctx.enterprise.enterprise_id:
-            raise HTTPForbidden()
-    return customer
+    if customer_id and (not customer or customer.campaign.company.enterprise_id != request.ctx.enterprise.enterprise_id):
+        raise HTTPForbidden()
+    if customer:
+        return customer
+    elif default_to_new_customer:
+        return Customer()
 
 
     # @staticmethod

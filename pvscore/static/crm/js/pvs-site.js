@@ -51,6 +51,25 @@ cms.catalog = function() {
                   });
         },
 
+        update_cart : function(elem, product_id, quantity, on_success, on_fail) {
+            $.get('/ecom/cart/update/' + product_id + '/' + quantity,
+                  function(response) {
+                      if (is_true(response)) {
+                          if (on_success) {
+                              on_success(elem, product_id);
+                          } else {
+                              alert('Your cart has been updated.');
+                          }
+                      } else {
+                          if (on_fail) {
+                              on_fail(elem, product_id, response);
+                          } else {
+                              alert('Unable to update cart:\n'+response);
+                          }
+                      }
+                  });
+        },
+
         remove_from_cart : function(elem, product_id, on_success, on_fail) {
             $.get('/ecom/cart/remove/' + product_id,
                   function(response) {
@@ -70,8 +89,23 @@ cms.catalog = function() {
                   });
         },
 
-        goto_checkout : function() {
-            pvs.browser.goto_url('/checkout');
+        set_shipping : function(elem, code, on_success, on_fail) {
+            $.get('/ecom/cart/set_shipping/' + code,
+                  function(response) {
+                      if (is_true(response)) {
+                          if (on_success) {
+                              on_success(elem, code);
+                          } else {
+                              alert('Shipping Updated');
+                          }
+                      } else {
+                          if (on_fail) {
+                              on_fail(elem, code, response);
+                          } else {
+                              alert('Unable to update shipping:\n'+response);
+                          }
+                      }
+                  });
         }
     };
     return pub;

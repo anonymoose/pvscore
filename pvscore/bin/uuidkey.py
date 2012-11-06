@@ -262,6 +262,7 @@ def fix_fk_type_table(conn, cur, table):
     cur.execute("alter table {table} rename column fk_id_uuid to fk_id".format(table=table))
     conn.commit()
 
+
 def fix_content(conn, cur):
     cur.execute('truncate table cms_content')
     cur.execute('alter table cms_content drop column page_id')

@@ -32,6 +32,7 @@ class Site(ORMBase, BaseModel):
     delete_dt = Column(DateTime)
     header_code = Column(String(1000))
     footer_code = Column(String(1000))
+    config_json = Column(Text)
     seo_title = Column(String(512))
     seo_keywords = Column(String(1000))
     seo_description = Column(String(1000))

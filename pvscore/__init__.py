@@ -14,13 +14,13 @@ from pvscore.model.cms.content import make_content_function
 
 def add_renderer_globals(event):
     request = event['request']
-    event['h'] = helpers
-    event['c'] = request.tmpl_context
-    event['tmpl_context'] = request.tmpl_context
-    event['plugin_registry'] = plugin_registry
-    if hasattr(request, 'ctx'):
-        pass
-    event['content'] = make_content_function(request.ctx.site, request)
+    if request:
+        event['h'] = helpers
+        event['c'] = request.tmpl_context
+        event['tmpl_context'] = request.tmpl_context
+        event['plugin_registry'] = plugin_registry
+        if hasattr(request, 'ctx'):
+            event['content'] = make_content_function(request.ctx.site, request)
 
 
 def _config_impl(cfg, settings):

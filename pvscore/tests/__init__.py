@@ -83,7 +83,6 @@ class TestController(TestCase):
         # this sets the site it.
         self.post('/crm/customer_login',
                   {'username' : username, 'password' : password})
-
         assert self.site
         os.environ['enterprise_id'] = str(self.site.company.enterprise_id)
 

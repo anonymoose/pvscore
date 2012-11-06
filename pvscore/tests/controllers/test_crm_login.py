@@ -1,4 +1,5 @@
 from pvscore.tests import TestController, UID, PWD
+from pvscore.model.crm.customer import Customer
 import logging
 
 log = logging.getLogger(__name__)
@@ -83,6 +84,26 @@ class TestCrmLogin(TestController):
         self.assertEqual(R.request.path, '/')
         self.app.reset()
 
+
+    def test_customer_forgot_password_invalid_username(self):  #pylint: disable-msg=C0103
+        R = self.post('/crm/customer_forgot_password',
+                      {'username': 'bogus@bogus.com'})
+        assert R.status_int == 200
+        assert "Your new password has been sent" not in R.body
+
+
+    def test_customer_forgot_password(self):
+        R = self.post('/crm/customer_forgot_password',
+                      {'username': 'amers_j@yahoo.com'})
+        assert R.status_int == 200
+        assert "Your new password has been sent" in R.body
+        custs = Customer.find_all_by_email('amers_j@yahoo.com')
+        assert len(custs) > 0
+        cust = custs[0]
+        assert cust.password != 'geology'
+        cust.password = 'geology'
+        cust.save()
+        self.commit()
 
     # @secure
     # def test_logout(self):

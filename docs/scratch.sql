@@ -3937,3 +3937,5 @@ select count(0) from crm_customer;
 
 \d cms_content;
 
+
+alter table cms_site add column config_json text;

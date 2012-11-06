@@ -625,6 +625,15 @@ class CustomerController(BaseController):
         return order.order_id
 
 
+    @view_config(route_name='crm.customer.purchase_cart')
+    def purchase_cart(self):
+        import pdb; pdb.set_trace()
+        self.forbid_if(not self.request.ctx.customer or 'cart' not in self.session or not self.session['cart'])
+        cust = self.request.ctx.customer
+        self._site_purchase(cust, self.session['cart'])
+        return self.find_redirect()
+        
+
     @view_config(route_name='crm.customer.signup')
     def signup(self):
         cust = self._signup()
@@ -673,7 +682,7 @@ class CustomerController(BaseController):
         return HTTPFound(util.nvl(self.request.POST.get('redir'), '/') + '?customer_id=' + str(cust.customer_id)) #pylint: disable-msg=E1103
     
 
-    def _site_purchase(self, cust):  #pylint: disable-msg=R0912,R0915
+    def _site_purchase(self, cust, cart=None):  #pylint: disable-msg=R0912,R0915
         bill = Billing.create(cust)
         bill.set_cc_info(self.request.POST.get('bill_cc_num'), self.request.POST.get('bill_cc_cvv'))
         bill.cc_exp = self.request.POST.get('bill_cc_exp')
@@ -686,15 +695,16 @@ class CustomerController(BaseController):
         bill.save()
         campaign = Campaign.load(cust.campaign_id)
 
-        cart = Cart()
-        product_skus = self.request.POST.getall('product_sku')
-        for sku in product_skus:
-            prod = Product.find_by_sku(self.enterprise_id, campaign, sku)
-            if prod:
-                cart.add_item(prod, cust.campaign)
-            else:
-                self.flash("No such product sku: %s" % sku)
-                self.raise_redirect()
+        if not cart:
+            cart = Cart()
+            product_skus = self.request.POST.getall('product_sku')
+            for sku in product_skus:
+                prod = Product.find_by_sku(self.enterprise_id, campaign, sku)
+                if prod:
+                    cart.add_item(prod, cust.campaign)
+                else:
+                    self.flash("No such product sku: %s" % sku)
+                    self.raise_redirect()
 
         order = cust.add_order(cart, None, self.request.ctx.site, campaign)
         api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
@@ -816,11 +826,6 @@ class CustomerController(BaseController):
 
     @view_config(route_name='crm.customer.contact')
     def contact(self):
-        """ KB: [2011-04-26]: Page posts to /cms/account/contact
-        Sends out email and redirects to redir URL.
-        If POST["save"] is not null we save the customer and a status about
-        the interaction
-        """
         camp = self.request.ctx.campaign
         message = self.request.POST.get('message')
         email = self.request.POST.get('email')

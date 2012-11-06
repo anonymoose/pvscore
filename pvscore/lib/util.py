@@ -618,18 +618,13 @@ def run_process_loop(exe):
         line = proc.stdout.readline()
         if line:
             lines.append(line)
-        else:
+        elif retcode is not None:
             break
-        #yield line
-        #if (retcode is not None):
-        #    break
     return lines
 
       
 def run_process(exe):
     return run_process_loop(exe)
-#return [line for line in run_process_loop(exe)]
-
 
 # def contains(lst, val):
 #     try:

@@ -53,7 +53,7 @@
               </div>
               <div class="span2">
                 <label for="">Namespace</label>
-                ${h.text('namespace', class_="input-small", value=site.namespace)}
+                ${h.text('namespace', value=site.namespace)}
               </div>
             </div>
             <div class="row">
@@ -72,22 +72,8 @@
             </div>
             <div class="row">
               <div class="span5">
-                <label for="notes">Header Code</label>
-                ${h.textarea('header_code', rows=5, style="width: 450px;", content=h.literal(site.header_code if site.header_code else ''))}
-              </div>
-              <div class="span3">
-                  <label for="">Google Analytics Id</label>
-                  ${h.text('google_analytics_id', value=site.google_analytics_id)}
-              </div>
-            </div>
-            <div class="row">
-              <div class="span5">
-                <label for="notes">Footer Code</label>
-                ${h.textarea('footer_code', rows=5, style="width: 450px;", content=h.literal(site.footer_code if site.footer_code else ''))}
-              </div>
-              <div class="span3">
-                  <label for="">Shipping Method</label>
-                  ${h.select('shipping_method', site.shipping_method, shipping_methods)}
+                <label for="notes">Site Config JSON</label>
+                ${h.textarea('config_json', rows=5, style="width: 450px;", content=h.literal(site.config_json if site.config_json else ''))}
               </div>
             </div>
             <div class="row">
@@ -95,7 +81,17 @@
                 <label for="notes">robots.txt</label>
                 ${h.textarea('robots_txt', rows=5, style="width: 450px;", content=h.literal(site.robots_txt if site.robots_txt else ''))}
               </div>
+            </div>
+            <div class="row">
               <div class="span3">
+                  <label for="">Google Analytics Id</label>
+                  ${h.text('google_analytics_id', value=site.google_analytics_id)}
+              </div>
+              <div class="span3">
+                  <label for="">Shipping Method</label>
+                  ${h.select('shipping_method', site.shipping_method, shipping_methods)}
+              </div>
+              <div class="span2">
                   <label for="">Tax Method</label>
                   ${h.select('tax_method', site.tax_method, tax_methods)}
               </div>

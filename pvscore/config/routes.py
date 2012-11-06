@@ -6,6 +6,7 @@ def crm_routes(config):
     adrt('crm.login.post', '/crm/login')
     adrt('crm.login.logout', '/crm/logout')
     adrt('crm.login.customer', '/crm/customer_login')
+    adrt('crm.login.customer_forgot_password', '/crm/customer_forgot_password')
 
     adrt('crm.campaign.list', '/crm/campaign/list')
     adrt('crm.campaign.new', '/crm/campaign/new')
@@ -115,6 +116,7 @@ def crm_routes(config):
     adrt('crm.purchase.complete', '/crm/purchase/complete/{purchase_order_id}')  #, controller='crm/purchase', action='complete')
     adrt('crm.purchase.complete_item', '/crm/purchase/complete_item/{purchase_order_id}/{order_item_id}')  #, controller='crm/purchase', action='complete_item')
 
+    adrt('crm.customer.purchase_cart', '/crm/customer/purchase_cart')
     adrt('crm.customer.new', '/crm/customer/new') # controller='crm/customer', action='new')
     adrt('crm.customer.edit', '/crm/customer/edit/{customer_id}') # controller='crm/customer', action='edit')
     adrt('crm.customer.editbye', '/crm/customer/edit_by_email/{customer_id}/{enterprise_id}') # controller='crm/customer', action='edit_by_email')
@@ -183,8 +185,12 @@ def crm_routes(config):
     adrt('ecom.site.cart.default', '/cart')
     adrt('ecom.site.cart', '/cart/{page}')
     adrt('ecom.site.cart.add', '/ecom/cart/add/{product_id}/{quantity}')
+    adrt('ecom.site.cart.update', '/ecom/cart/update/{product_id}/{quantity}')
     adrt('ecom.site.cart.clear', '/ecom/cart/clear')
     adrt('ecom.site.cart.remove', '/ecom/cart/remove/{product_id}')
+    adrt('ecom.site.cart.checkout', '/checkout/{page}')
+    adrt('ecom.site.cart.set_shipping', '/ecom/cart/set_shipping/{shipping_code}')
+
 
     adrt('ecom.site.product.default', '/product/{product_id}')
     adrt('ecom.site.product.named', '/product/{name}/{product_id}')
@@ -193,9 +199,17 @@ def crm_routes(config):
     adrt('ecom.site.products.default', '/products/{subset}')
     adrt('ecom.site.products', '/products/{subset}/{page}')
 
+    adrt('ecom.site.search.default', '/ecom/search')
+    adrt('ecom.site.search', '/ecom/search/{page}')
+
     adrt('ecom.site.category.default', '/category/{category_id}')
     adrt('ecom.site.category.named', '/category/{name}/{category_id}')
     adrt('ecom.site.category', '/category/{name}/{category_id}/{page}')
+
+    adrt('ecom.site.page', '/ecom/page/{page}')
+    adrt('ecom.site.content.default', '/ecom/content/{content_name}/{page}')
+    adrt('ecom.site.content', '/ecom/content/{content_name}')
+
 
     adrt('crm.dashboard', '/crm/dashboard')
 

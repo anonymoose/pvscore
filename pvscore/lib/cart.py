@@ -1,25 +1,17 @@
 import datetime
-
+import pvscore.lib.util as util
 
 class Cart(object):
+    #                    option['code'] = code.text
+    #                    option['name'] = shipping_config['timeframe_choices'][code.text]
+    #                    option['charges'] = charges
+    #                    option['delivery_days'] = util.nvl(delivery_days)
     def __init__(self, site=None):
         self.items = []
         self.discount_id = None
-        self.timeframe = None
-        self.shipping_total = 0.0
         self.site_id = site.site_id if site else None
-
-        
-    # def __repr__(self):
-    #     rep = 'shipping_total : %s \ntimeframe : %s\n' % (self.shipping_total, self.timeframe)
-    #     for i in range(0, len(self.items)):
-    #         rep = rep + '%s @ %s\n' % (self.items[i]['product'].name, self.items[i]['quantity'])
-    #     return rep
-
-        
-    # def set_shipping_timeframe(self, timeframe):
-    #     self.timeframe = timeframe
-    #     self.shipping_total = 0.0
+        self.shipping_options = None
+        self.shipping_selection = None
 
 
     @property
@@ -32,7 +24,8 @@ class Cart(object):
             price = product.get_price(campaign)
         price = float(price)
         quantity = float(quantity)
-        self.shipping_total = 0.0
+        self.shipping_options = None
+        self.shipping_selection = None
         self.items.append({'product': product,
                            'quantity': quantity,
                            'campaign_id': campaign.campaign_id,
@@ -46,8 +39,25 @@ class Cart(object):
     def remove_all(self):
         del self.items
         self.items = []
-        self.shipping_total = 0.0
+        self.shipping_options = None
+        self.shipping_selection = None
 
+
+    @property
+    def shipping_selection_name(self):
+        if self.shipping_options and self.shipping_selection:
+            for opt in self.shipping_options:
+                if opt['code'] == self.shipping_selection:
+                    return opt['name']
+
+
+    @property
+    def shipping_total(self):
+        if self.shipping_options and self.shipping_selection:
+            for opt in self.shipping_options:
+                if opt['code'] == self.shipping_selection:
+                    return float(opt['charges'])
+        return 0.0
 
     @property
     def total(self):
@@ -56,12 +66,12 @@ class Cart(object):
 
     @property
     def product_total(self):
-        return reduce(lambda x, y: x + y['price'], self.items, 0.0)
+        return util.nvl(reduce(lambda x, y: x + y['price'], self.items, 0.0), 0.0)
 
 
     @property
     def handling_total(self):
-        return reduce(lambda x, y: x + y['handling'], self.items, 0.0)
+        return util.nvl(reduce(lambda x, y: x + y['handling'], self.items, 0.0), 0.0)
 
 
     def has_product_id(self, product_id):
@@ -73,7 +83,8 @@ class Cart(object):
         for i in range(len(self.items)-1, -1, -1):
             if str(self.items[i]['product'].product_id) == str(product.product_id):
                 del(self.items[i])
-                self.shipping_total = 0.0
+                self.shipping_options = None
+                self.shipping_selection = None
                 found = True
         return found
 

@@ -16,6 +16,14 @@ log = logging.getLogger(__name__)
 
 
 class Content(ORMBase, BaseModel):
+    """
+    truncate table cms_content;
+    alter table cms_content drop column page_id;
+    alter table cms_content drop column is_dynamic;
+    alter table cms_content add column site_id uuid;
+    alter table cms_content add foreign key (site_id) references cms_site;
+    """
+
     __tablename__ = 'cms_content'
     __pk__ = 'content_id'
 

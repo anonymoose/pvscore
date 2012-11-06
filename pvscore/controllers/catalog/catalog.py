@@ -8,6 +8,7 @@ from pyramid.renderers import render
 from pvscore.lib.cart import Cart
 from pvscore.model.crm.product import Product, ProductCategory
 import pvscore.lib.util as util
+import simplejson as json
 
 log = logging.getLogger(__name__)
 
@@ -22,18 +23,17 @@ class CatalogBaseController(BaseController):
         return {'site' : site,
                 'base' : '/%s/' % site.namespace,
                 'user' : self.request.ctx.user,
-                'campaign' : campaign,
-                'categories' : ProductCategory.find_by_campaign(campaign),
-                'customer' : load_customer(self.request),
-                'matchdict' : self.request.matchdict,
                 'cart' : cart,
-                'back_link' : self.session.get('back_link'),
-                'specials' : self.specials_product_list(0, 4),
                 'seo_title' : '',
                 'seo_keywords' : '',
-                'seo_description' : ''
+                'seo_description' : '',
+                'campaign' : campaign,
+                'categories' : ProductCategory.find_by_campaign(campaign),
+                'customer' : load_customer(self.request, True),  # this way customer is always there, just may be empty
+                'matchdict' : self.request.matchdict,
+                'back_link' : self.session.get('back_link'),
+                'specials' : self.specials_product_list(0, 4)
                 }
-
     
     
     def render(self, mako_file, params=None):
@@ -143,7 +143,30 @@ class CatalogController(CatalogBaseController):
         return self.render(page, params)
 
 
+    @view_config(route_name='ecom.site.search.default')
+    @view_config(route_name='ecom.site.search')
+    def search(self):
+        page = self.request.matchdict.get('page', 'search_results')
+        params = self.params()
+        params['subset'] = 'search'
+        params['products'] = util.page_list(Product.catalog_search(self.enterprise_id,
+                                                                   self.request.GET.get('search')),
+                                            self.request.GET.get('offset'),
+                                            self.request.GET.get('limit'))
+        return self.render(page, params)
+        
+
+    @view_config(route_name='ecom.site.page')
+    def page(self):
+        return self.render(self.request.matchdict.get('page'))
 
 
-
+    @view_config(route_name='ecom.site.content.default')
+    @view_config(route_name='ecom.site.content')
+    def content(self):
+        page = self.request.matchdict.get('page', 'content')
+        params = self.params()
+        params['content_name'] = self.request.matchdict.get('content_name')
+        return self.render(page, params)
+    
 

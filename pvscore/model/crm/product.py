@@ -208,6 +208,23 @@ class Product(ORMBase, BaseModel):
             .all()
 
 
+    @staticmethod
+    def catalog_search(enterprise_id, search):
+        # SWAP THIS OUT FOR SPHINX.
+        srch = '%'+search.lower().replace("\'", '').replace("\\", '')+'%'
+        res = Session.query(Product)\
+            .join((Company, Product.company_id == Company.company_id))\
+            .filter(and_(Product.web_visible == True,
+                         Company.enterprise_id == enterprise_id,
+                         or_(Product.description.ilike(srch),
+                             Product.seo_title.ilike(srch),
+                             Product.seo_keywords.ilike(srch),
+                             Product.seo_description.ilike(srch),
+                             Product.name.ilike(srch),
+                             Product.sku.ilike(srch))))\
+                         .all()
+        return res
+
 
     def invalidate_caches(self, **kwargs):
         invalidate(self, 'Product.find_all', self.company.enterprise_id)
@@ -740,18 +757,6 @@ class InventoryJournal(ORMBase, BaseModel):
     #     return Session.query(Product).from_statement(sql).all()
 
 
-    # @staticmethod
-    # def catalog_search(enterprise_id, search):
-    #     srch = '%'+search.lower().replace("\'", '').replace("\\", '')+'%'
-    #     res = Session.query(Product)\
-    #         .join((Company, Product.company_id == Company.company_id))\
-    #         .filter(and_(Product.web_visible == True,
-    #                      Company.enterprise_id == enterprise_id,
-    #                      or_(Product.description.ilike(srch),
-    #                          Product.name.ilike(srch),
-    #                          Product.sku.ilike(srch))))\
-    #                      .all()
-    #     return res
 
 
     # def get_customers(self):
