@@ -132,19 +132,6 @@ class ListingController(BaseController):
         self.forbid_if(not lis or lis.hash != listing_hash)
         ass = Asset.create_new(lis, self.enterprise_id, self.request)
         Status.add(lis.customer, lis, Status.find_event(self.enterprise_id, lis, 'ASSET_UPLOAD'), ass.name)
-        #filename = md5('%s%s' % (asset_data.filename, listing_id)).hexdigest()
-        #extension = os.path.splitext(asset_data.filename)[1]
-        #folder = 'images/%s/%s/%s' % (filename[0], filename[1], filename[2])
-        #fs_path = os.path.join(folder, filename+extension)
-        #fs_path_real = os.path.join('%s/%s' % (site.site_full_directory, folder), filename+extension)
-        #permanent_file = open(fs_path_real, 'wb')
-        #shutil.copyfileobj(asset_data.file, permanent_file)
-        #asset_data.file.close()
-        #permanent_file.close()
-
-        # at this point everything is saved to disk. Create an asset object in
-        # the DB to remember it.
-        #if os.path.exists(fs_path_real):
         return str(ass.id)
         
 

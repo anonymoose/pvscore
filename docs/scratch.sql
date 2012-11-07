@@ -3939,3 +3939,7 @@ select count(0) from crm_customer;
 
 
 alter table cms_site add column config_json text;
+
+
+update crm_company set default_campaign_id = null where company_id = '9';
+delete from crm_campaign where company_id = '9';

@@ -68,7 +68,6 @@
                 ${h.text('zip', size=50, value=customer.zip)}
               </div>
               
-              
               <div class="span3">
                 <label for="phone">Phone</label>
                 ${h.text('phone', size=20, value=customer.phone)}

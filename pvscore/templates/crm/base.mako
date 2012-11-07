@@ -22,7 +22,6 @@ ${self.pre_process()}
   ${h.stylesheet_link('/static/bootstrap/css/bootstrap-responsive.css')}
   
   ${h.stylesheet_link('/static/js/jquery/jqgrid/css/ui.jqgrid.css')}
-  ${h.stylesheet_link('/static/js/jquery/jquery-ui/css/ui-lightness/jquery-ui-1.8.23.custom.css')}
   ${h.stylesheet_link('/static/bootstrap-extensions/datepicker/css/datepicker.css')}
   ${h.stylesheet_link('/static/css/pvs.css')}
   ${h.stylesheet_link('/static/css/appointment.css')}
@@ -64,7 +63,7 @@ ${self.pre_process()}
 <hr/>
 
 <footer>
-&nbsp;  &copy; ${h.literal(request.ctx.enterprise.copyright if request.ctx.enterprise.copyright else '<a target="_blank" href="http://www.palmvalleysoftware.com">Palm Valley Software</a>')}
+&nbsp;  &copy; ${h.literal(request.ctx.enterprise.copyright if request.ctx.enterprise.copyright else '<a target="_blank" href="https://www.eyefound.it">EyeFound.IT</a>')}
 </footer>
 
 

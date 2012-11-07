@@ -12,6 +12,7 @@ from pvscore.model.crm.product import Product, ProductReturn, InventoryJournal, 
 from pvscore.model.core.statusevent import StatusEvent
 from pvscore.model.core.status import Status
 from pvscore.model.crm.purchase import Vendor
+from pvscore.model.core.asset import Asset
 import pvscore.lib.util as util
 import simplejson as json
 
@@ -305,6 +306,29 @@ class ProductController(BaseController):
         return HTTPFound('/crm/product/show_history/%s' % product_id)
 
 
+    @view_config(route_name='crm.product.delete_picture', renderer="string")
+    @authorize(IsLoggedIn())
+    def delete_picture(self):
+        product_id = self.request.matchdict.get('product_id')
+        product = Product.load(product_id)
+        self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
+        asset_id = self.request.matchdict.get('asset_id')
+        asset = Asset.load(asset_id)
+        self.forbid_if(asset.fk_type != 'Product' or str(asset.fk_id) != str(product.product_id))
+        asset.delete()
+        return 'True'
+    
+
+    @view_config(route_name='crm.product.upload_picture', renderer="string")
+    def upload_picture(self):
+        product_id = self.request.matchdict.get('product_id')
+        product = Product.load(product_id)
+        self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
+        ass = Asset.create_new(product, self.enterprise_id, self.request)
+        self.flash('Uploaded new image to product')
+        product.invalidate_caches()
+        return str(ass.id)
+    
 
     # @view_config(route_name='crm.product.json', renderer='/crm/product.json.mako')
     # @authorize(IsLoggedIn())

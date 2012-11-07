@@ -45,12 +45,14 @@ ${next.body()}
   
   % if product.product_id:
   <div class="well sidebar-nav">
-    <span><h3>Product Images</h3>&nbsp;&nbsp;<a href="javascript:product_picture_edit_image()">Add Image</a></span>
+    <span><h3>Product Images</h3>&nbsp;&nbsp;<a href="#dlg_product_picture" role="button" data-toggle="modal">Add Image</a></span>
     <div id="product_images">
       % for img in product.images:
       <img id="pi_${img.id}" width="100"
-           src="/cms/asset/show/${img.id}"
-           onclick="product_picture_delete_image('${img.id}', true)"/>
+           src="${img.absolute_path}"
+           onclick="product_picture_delete_image('${img.id}', true)"
+           style="cursor:pointer;"
+           />
       % endfor
     </div>
   </div>
@@ -84,6 +86,47 @@ ${next.body()}
   <div class="modal-footer">
     <button class="btn btn-primary" onclick="$('#frm_status').submit()">Save changes</button>
     <button class="btn btn-link" data-dismiss="modal" aria-hidden="true">Cancel</button>
+  </div>
+</div>
+
+
+<div class="modal hide fade" id="dlg_product_picture">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Add Product Image</h3>
+  </div>
+  <div class="modal-body">
+    <form id="frm_picture" action="" method="POST"> 
+      <table>
+        <tr>
+          <td colspan="2">
+            <p>
+              Please choose an image from your computer.
+            </p>
+            <p>
+              Images must be JPG, GIF, or PNG and less than 10 MB.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td width="70%" valign="top" style="overflow: scroll;"> <!-- left column -->
+            <table>
+              <tr>
+                <td>
+                  <input id="file_upload" name="file_upload" type="file" />
+                </td>
+              </tr>
+              <tr>
+                <td><div id="uploaded_image"></div></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-link" data-dismiss="modal" aria-hidden="true">Close</button>
   </div>
 </div>
 

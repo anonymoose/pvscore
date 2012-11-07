@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, and_
 from sqlalchemy.types import Integer, String
 from sqlalchemy.orm import relation, joinedload
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from pvscore.thirdparty.dbcache import FromCache
+from pvscore.thirdparty.dbcache import FromCache, invalidate
 import uuid
 from pvscore.lib.sqla import GUID
 
@@ -102,13 +102,23 @@ class AttributeValue(ORMBase, BaseModel):
     @staticmethod
     def find_all(obj):
         #pylint: disable-msg=E1101
+        fk_type = type(obj).__name__ 
+        fk_id = getattr(obj, obj.__pk__)
+
         return Session.query(AttributeValue).join((Attribute, AttributeValue.attr_id == Attribute.attr_id)) \
             .options(joinedload('attribute')) \
-            .filter(and_(AttributeValue.fk_type == type(obj).__name__,
-                         AttributeValue.fk_id == getattr(obj, obj.__pk__))) \
+            .options(FromCache('AttributeValue.%s.%s' % (fk_type, fk_id))) \
+            .filter(and_(AttributeValue.fk_type == fk_type,
+                         AttributeValue.fk_id == fk_id)) \
                          .order_by(AttributeValue.attr_value_id).all()
 
 
+    @staticmethod
+    def invalidate_attributes(obj):
+        fk_type = type(obj).__name__ 
+        fk_id = getattr(obj, obj.__pk__)
+        invalidate(obj, 'AttributeValue.%s.%s' % (fk_type, fk_id))
+        
     # @staticmethod
     # def find_fk_id_by_value(fk_type, attr_name, attr_value):
     #     #pylint: disable-msg=E1101

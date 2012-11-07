@@ -267,7 +267,7 @@ def fix_content(conn, cur):
     cur.execute('truncate table cms_content')
     cur.execute('alter table cms_content drop column page_id')
     cur.execute('alter table cms_content drop column is_dynamic')
-    cur.execute('alter table cms_content add column site_id uuid')
+    cur.execute('alter table cms_content add column site_id integer')
     cur.execute('alter table cms_content add foreign key (site_id) references cms_site')
     conn.commit()
 
@@ -300,8 +300,7 @@ def fix_assets(conn, cur, dbname, storage_root):
         enterprise_id = ext = basename = None
         if 'Listing' == fk_type:
             if not fk_id:
-                print "** no fk_id for %s (%s)" % (ass[1][:-1], web_path)
-                continue
+                print "** Listing no fk_id for %s (%s)" % (ass[1][:-1], web_path)
             cur.execute("""select l.listing_id, l.company_id, c.enterprise_id
                             from pvs_listing l, crm_company c
                             where l.company_id = c.company_id and l.listing_id = '%s'""" % fk_id)
@@ -310,8 +309,7 @@ def fix_assets(conn, cur, dbname, storage_root):
             ext = os.path.splitext(web_path)[1]
         elif 'Product' == fk_type:
             if not fk_id:
-                print "** no fk_id for %s (%s)" % (ass[1][:-1], web_path)
-                continue
+                print "** Product no fk_id for %s (%s)" % (ass[1][:-1], web_path)
             cur.execute("""select p.product_id, p.company_id, c.enterprise_id
                             from crm_product p, crm_company c
                             where p.company_id = c.company_id and p.product_id = '%s'""" % fk_id)

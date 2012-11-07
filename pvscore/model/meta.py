@@ -110,9 +110,11 @@ class BaseModel(object):
 
 
     def invalidate_self(self):
+        from pvscore.model.core.attribute import AttributeValue
         if self.__pk__:
             Session.query(self.__class__).options(FromCache('%s.load' % self.__class__.__name__,      #pylint: disable-msg=E1101
                                                             getattr(self, self.__pk__))).invalidate()
+            AttributeValue.invalidate_attributes(self)
 
 
     def save(self):

@@ -18,57 +18,13 @@ product_setup_textarea = function(id) {
     pvs.form.init_editors();
 };
 
-var _asset_id = null;
-
-product_picture_edit_image = function() {
-    url = '/cms/asset/add_picture';
-    pvs.dialog.display({url:pvs.ajax.api({root: url}),
-                        title: 'Add Image',
-                        width:830,
-                        height:520,
-                        after_display_impl:
-                        function() {
-                            var url = pvs.ajax.api({root: '/cms/asset/upload_to_company/'+$_('#company_id')+'/Product/'+$_('#product_id')});
-                            $('#file_upload').uploadify({
-                                'uploader'     : '/public/js/jquery-1.4.2/jquery.uploadify-v2.1.4/uploadify.swf',
-                                'script'       : url,
-                                'cancelImg'    : '/public/js/jquery-1.4.2/jquery.uploadify-v2.1.4/cancel.png',
-                                'folder'       : '/images',
-                                'fileExt'      : '*.jpg;*.gif;*.png',
-                                'scriptAccess' : 'sameDomain',
-                                'wmode'        : 'transparent',
-                                'auto'         : true,
-                                'onComplete'   : function(event, ID, fileObj, response, data) {
-                                    _asset_id = response;
-                                    $('#uploaded_image').append('<img id="up_pi_'+_asset_id+'" src="/cms/asset/show/'+_asset_id+'" border="0"/>');
-                                },
-                                'onError'      : function (event,ID,fileObj,errorObj) {
-                                    pvs.alert(errorObj.type + ' Error: ' + errorObj.info);
-                                }
-                            });
-                        },
-                        on_before_close:
-                        function() {
-                            _asset_id = null;
-                            return true;
-                        },
-                        on_ok:
-                        function() {
-                            $('#product_images').append('<img id="pi_'+_asset_id+'" src="/cms/asset/show/'+_asset_id+'" border="0" onclick="product_picture_delete_image('+_asset_id+', true)"/>');
-                        },
-                        on_cancel:
-                        function() {
-                            product_picture_delete_image(_asset_id);
-                        }
-                });
-};
 
 product_picture_delete_image = function(asset_id, do_confirm) {
     if (do_confirm && !confirm('Delete Image?')) {
         return false;
     }
     if (asset_id) {
-        pvs.ajax.call(pvs.ajax.api({root: '/cms/asset/delete/'+asset_id}),
+        pvs.ajax.call(pvs.ajax.api({root: '/crm/product/delete_picture/'+$_('#product_id')+'/'+asset_id}),
                       function(response) {
                           if (pvs.is_true(response)) {
                               $('#pi_'+asset_id).remove()
@@ -79,67 +35,28 @@ product_picture_delete_image = function(asset_id, do_confirm) {
     }
 };
 
-/*
-product_show_list_impl = function(name, offset) {
-    if ($_('#product_id')) {
-        product_show_detail()
-        pvs.ui.menu_highlight('link_'+name);
-        $('#div_product_detail').load(pvs.ajax.dialog({root: '/crm/product/show_'+name+'/'+$_('#product_id'),
-                                                      offset: offset}));
-    }
-};
-
-product_show_history = function() {
-    product_show_list_impl('history');
-};
-product_show_sales = function() {
-    product_show_list_impl('sales');
-};
-product_show_returns = function() {
-    product_show_list_impl('returns');
-};
-product_show_purchases = function() {
-    product_show_list_impl('purchases');
-};
-
-
-product_gen_barcode = function(product_id) {
-    if ($_('#product_id') && $('#barcode').length) {
-        var btype = "ean8"; //        "ean13""std25""int25""code11""code39""code93""code128""codabar""msi""datamatrix"
-        $("#barcode").html('').show().barcode(pvs.string.pad_left($_('#product_id'), 7, '0'), btype, {
-            output:'canvas',
-            bgColor: '#FFFFFF',
-            color: '#000000',
-            barWidth: 1,
-            barHeight: 50,
-            moduleSize: 5,
-            addQuietZone: 0
+var _asset_id = null;
+pvs.onload.push(function() {
+    if ($('#file_upload').length) {
+        var url = pvs.ajax.api({root: '/crm/product/upload_picture/'+$_('#product_id')});
+        $('#file_upload').uploadify({
+            'uploader'     : '/static/js/jquery/uploadify/uploadify.swf',
+            'script'       : url,
+            'cancelImg'    : '/static/js/jquery/uploadify/cancel.png',
+            'folder'       : '/images',
+            'fileExt'      : '*.jpg;*.gif;*.png',
+            'scriptAccess' : 'sameDomain',
+            'wmode'        : 'transparent',
+            'auto'         : true,
+            'onComplete'   : function(event, ID, fileObj, response, data) {
+                pvs.browser.window_refresh();
+            },
+            'onError'      : function (event,ID,fileObj,errorObj) {
+                pvs.alert(errorObj.type + ' Error: ' + errorObj.info);
+            }
         });
     }
-};
-pvs.onload.push(product_gen_barcode);
-
-product_gen_barcode_impl = function(product_id, canvas_id) {
-    var btype = "ean8"; //        "ean13""std25""int25""code11""code39""code93""code128""codabar""msi""datamatrix"
-    $(canvas_id).html('').show().barcode(pvs.string.pad_left(product_id, 7, '0'), btype, {
-        output:'canvas',
-        bgColor: '#FFFFFF',
-        color: '#000000',
-        barWidth: 2,
-        barHeight: 75,
-        moduleSize: 5,
-        addQuietZone: 0
-    });
-};
-
-product_show_barcode = function(product_id) {
-    if ($_('#product_id')) {
-        pvs.browser.open_window('barcode',
-                                pvs.ajax.dialog({root: '/crm/product/show_barcode/'+$_('#product_id')}),
-                                100, 100);
-    }
-};
-*/
+});
 
 pvs.onload.push(function() {
     $('#product_search').typeahead({
@@ -266,3 +183,66 @@ pvs.onload.push(function() {
 product_inventory_save = function(product_id) {
     jQuery('#inventory').saveRow(product_id);
 };
+
+
+/*
+product_show_list_impl = function(name, offset) {
+    if ($_('#product_id')) {
+        product_show_detail()
+        pvs.ui.menu_highlight('link_'+name);
+        $('#div_product_detail').load(pvs.ajax.dialog({root: '/crm/product/show_'+name+'/'+$_('#product_id'),
+                                                      offset: offset}));
+    }
+};
+
+product_show_history = function() {
+    product_show_list_impl('history');
+};
+product_show_sales = function() {
+    product_show_list_impl('sales');
+};
+product_show_returns = function() {
+    product_show_list_impl('returns');
+};
+product_show_purchases = function() {
+    product_show_list_impl('purchases');
+};
+
+
+product_gen_barcode = function(product_id) {
+    if ($_('#product_id') && $('#barcode').length) {
+        var btype = "ean8"; //        "ean13""std25""int25""code11""code39""code93""code128""codabar""msi""datamatrix"
+        $("#barcode").html('').show().barcode(pvs.string.pad_left($_('#product_id'), 7, '0'), btype, {
+            output:'canvas',
+            bgColor: '#FFFFFF',
+            color: '#000000',
+            barWidth: 1,
+            barHeight: 50,
+            moduleSize: 5,
+            addQuietZone: 0
+        });
+    }
+};
+pvs.onload.push(product_gen_barcode);
+
+product_gen_barcode_impl = function(product_id, canvas_id) {
+    var btype = "ean8"; //        "ean13""std25""int25""code11""code39""code93""code128""codabar""msi""datamatrix"
+    $(canvas_id).html('').show().barcode(pvs.string.pad_left(product_id, 7, '0'), btype, {
+        output:'canvas',
+        bgColor: '#FFFFFF',
+        color: '#000000',
+        barWidth: 2,
+        barHeight: 75,
+        moduleSize: 5,
+        addQuietZone: 0
+    });
+};
+
+product_show_barcode = function(product_id) {
+    if ($_('#product_id')) {
+        pvs.browser.open_window('barcode',
+                                pvs.ajax.dialog({root: '/crm/product/show_barcode/'+$_('#product_id')}),
+                                100, 100);
+    }
+};
+*/

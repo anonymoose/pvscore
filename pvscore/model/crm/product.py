@@ -232,6 +232,9 @@ class Product(ORMBase, BaseModel):
         invalidate(self, 'ProductChild.find_children', self.product_id)
         invalidate(self, 'Product.find_by_manufacturer', '%s/%s' % (self.manufacturer, self.company.enterprise_id))
         invalidate(self, 'Product.find_by_sku', '%s/%s' % (self.manufacturer, self.company.enterprise_id))
+        if len(self.images) > 0:
+            for img in self.images:
+                img.invalidate_caches()
         if kwargs and 'vendor_id' in kwargs:
             invalidate(self, 'Product.find_by_vendor', '%s/%s' % (self.company.enterprise_id, kwargs['vendor_id']))
         for pri in self.prices:
@@ -493,6 +496,7 @@ class ProductCategory(ORMBase, BaseModel):
         if not self.category_id:
             return []
         return Session.query(Product)\
+            .options(FromCache("ProductCategory.Products.%s" % self.category_id))\
             .join((ProductCategoryJoin, Product.product_id == ProductCategoryJoin.product_id),
                   (ProductCategory, ProductCategoryJoin.category_id == ProductCategory.category_id),
                   (Company, ProductCategory.company_id == Company.company_id))\
@@ -526,6 +530,7 @@ class ProductCategory(ORMBase, BaseModel):
     @staticmethod
     def find_by_campaign(campaign):
         return Session.query(ProductCategory) \
+            .options(FromCache('Product.find_all', campaign.company.enterprise_id)) \
             .join((Company, ProductCategory.company_id == Company.company_id)) \
             .filter(and_(ProductCategory.delete_dt == None,
                          Company.company_id == campaign.company_id)) \

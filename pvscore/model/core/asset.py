@@ -87,7 +87,7 @@ class Asset(ORMBase, BaseModel):
         ass.save()
         ass.flush()        
         storage_root = Asset.get_storage_root()
-        fs_real_dir = "{root}/enterprises/{reldir}".format(root=storage_root, reldir=ass.relative_dir)
+        fs_real_dir = "{root}/{reldir}".format(root=storage_root, reldir=ass.relative_dir)
         util.mkdir_p(fs_real_dir)
         fs_real_path = "{fs_real_dir}/{assid}{ext}".format(fs_real_dir=fs_real_dir,
                                                            assid=ass.id,
@@ -106,11 +106,13 @@ class Asset(ORMBase, BaseModel):
     def filesystem_path(self):
         return '%s/%s' % (Asset.get_storage_root(), self.path)
 
-    # def delete(self):
-    #     if os.path.exists(self.fs_path):
-    #         os.remove(self.fs_path)
-    #     self.invalidate_caches()
-    #     Session.delete(self)   #pylint: disable-msg=E1101
+
+    def delete(self):
+        fs_path = self.filesystem_path
+        if os.path.exists(fs_path):
+            os.remove(fs_path)
+        self.invalidate_caches()
+        Session.delete(self)   #pylint: disable-msg=E1101
 
 
     # @staticmethod
