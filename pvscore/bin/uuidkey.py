@@ -301,6 +301,7 @@ def fix_assets(conn, cur, dbname, storage_root):
         if 'Listing' == fk_type:
             if not fk_id:
                 print "** Listing no fk_id for %s (%s)" % (ass[1][:-1], web_path)
+                continue
             cur.execute("""select l.listing_id, l.company_id, c.enterprise_id
                             from pvs_listing l, crm_company c
                             where l.company_id = c.company_id and l.listing_id = '%s'""" % fk_id)
@@ -310,6 +311,7 @@ def fix_assets(conn, cur, dbname, storage_root):
         elif 'Product' == fk_type:
             if not fk_id:
                 print "** Product no fk_id for %s (%s)" % (ass[1][:-1], web_path)
+                continue
             cur.execute("""select p.product_id, p.company_id, c.enterprise_id
                             from crm_product p, crm_company c
                             where p.company_id = c.company_id and p.product_id = '%s'""" % fk_id)
