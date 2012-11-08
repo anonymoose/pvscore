@@ -18,6 +18,7 @@ def init_pyramid(config_file_path):
     # else:
     config_file_path = os.getcwd() + '/' + config_file_path
     settings = paste.deploy.appconfig('config:%s' % config_file_path, relative_to='.')
+    logging.config.fileConfig(config_file_path)
     return command_line_main(settings)
 
 
