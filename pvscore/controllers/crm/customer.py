@@ -627,7 +627,6 @@ class CustomerController(BaseController):
 
     @view_config(route_name='crm.customer.purchase_cart')
     def purchase_cart(self):
-        import pdb; pdb.set_trace()
         self.forbid_if(not self.request.ctx.customer or 'cart' not in self.session or not self.session['cart'])
         cust = self.request.ctx.customer
         self._site_purchase(cust, self.session['cart'])

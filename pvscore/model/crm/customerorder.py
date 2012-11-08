@@ -54,6 +54,7 @@ class CustomerOrder(ORMBase, BaseModel):
         cord.customer = customer
         cord.campaign = campaign
         cord.save()
+        cord.flush()
         for cart_item in cart.items:
             prd = Product.load(cart_item['product'].product_id)
             item = OrderItem()

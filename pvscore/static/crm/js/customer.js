@@ -244,7 +244,7 @@ customer_add_order_submit = function() {
     });
     pvs.ajax.post_array(pvs.ajax.api({root: '/crm/customer/add_order/'+$_('#customer_id')}),
                         function(response) {
-                            var order_id = parseInt(response);
+                            var order_id = response;
                             if (order_id && order_id != NaN) {
                                 $('#flashes').append('Saved order.');
                                 pvs.browser.goto_url('/crm/customer/edit_order_dialog/'+$_('#customer_id')+'/'+order_id);
@@ -256,36 +256,6 @@ customer_add_order_submit = function() {
                        );
 };
 
-customer_add_order_orig = function() {
-    if ($_('#customer_id')) {
-        pvs.dialog.display({url:pvs.ajax.dialog({root: '/crm/customer/add_order_dialog/' + $_('#customer_id')}),
-                           title:'Add Order',
-                           width: $(window).width()*.60,
-                           height:$(document).height()*.75,
-                           on_ok:
-                           function() {
-                               var obj = {};
-                               $('.product_chk:checked').each(function(i) {
-                                   obj[this.value] = $('#quant_'+this.value).val();
-                               });
-                               pvs.ajax.post_array(pvs.ajax.api({root: '/crm/customer/add_order/'+$_('#customer_id')}),
-                                                  function(response) {
-                                                      var order_id = parseInt(response);
-                                                      if (order_id && order_id != NaN) {
-                                                          $('#flashes').append('Saved order.');
-                                                          customer_show_orders();
-                                                      } else {
-                                                          pvs.alert('Unable to save products:\n'+response);
-                                                      }
-                                                  },
-                                                  {products: obj}
-                                                 );
-                           }
-                          });
-    } else {
-        pvs.alert('Create customer first.');
-    }
-};
 
 customer_check_return_quantity = function() {
     if ($('#quantity_returned')) {

@@ -272,7 +272,7 @@ def fix_content(conn, cur):
     conn.commit()
 
 
-def fix_assets(conn, cur, dbname, storage_root):
+def fix_assets(conn, cur, dbname, storage_root, default_enterprise_id):
     cur.execute("alter table core_asset add column extension varchar(10)")
     cur.execute("alter table core_asset add column enterprise_id uuid")
     cur.execute("alter table core_asset add foreign key (enterprise_id) references crm_enterprise")
@@ -316,6 +316,7 @@ def fix_assets(conn, cur, dbname, storage_root):
                             from crm_product p, crm_company c
                             where p.company_id = c.company_id and p.product_id = '%s'""" % fk_id)
             product_id, company_id, enterprise_id = cur.fetchone()
+        enterprise_id = util.nvl(enterprise_id, default_enterprise_id)
         basename = os.path.basename(web_path)
         ext = os.path.splitext(web_path)[1]
         cmd = "mkdir -p {storage_root}/enterprises/{enterprise_id}/assets/{_0}/{_1}/{_2}".format(storage_root=storage_root,
@@ -333,10 +334,9 @@ def fix_assets(conn, cur, dbname, storage_root):
                                                                                                                                  assid=assid,
                                                                                                                                  ext=ext)
         util.run_process(cmd.split(' '))
-        if enterprise_id:
-            cur.execute("update core_asset set enterprise_id = '{ent_id}', extension = '{ext}' where id = '{id}'".format(ent_id=enterprise_id,
-                                                                                                                         ext=ext,
-                                                                                                                         id=assid))
+        cur.execute("update core_asset set enterprise_id = '{ent_id}', extension = '{ext}' where id = '{id}'".format(ent_id=enterprise_id,
+                                                                                                                     ext=ext,
+                                                                                                                     id=assid))
 
         #    cur.execute("select 
         #    print 'cp %s 
@@ -381,6 +381,7 @@ if __name__ == '__main__':
     conn = psycopg2.connect("dbname=%s user=%s password=%s host=localhost" % (sys.argv[1], sys.argv[1], sys.argv[2]))
     cur = conn.cursor()
     storage_root = sys.argv[3]
+    default_enterprise_id = sys.argv[4]
 
     tables = list_tables(cur)
 
@@ -535,7 +536,7 @@ if __name__ == '__main__':
         print "\n\n\nvacuuming for %s" % table
         analyze_table(cur, table)
 
-    fix_assets(conn, cur, dbname, storage_root)
+    fix_assets(conn, cur, dbname, storage_root, default_enterprise_id)
     conn.commit()
 
     cur.close()

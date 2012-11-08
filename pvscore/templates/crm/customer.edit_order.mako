@@ -182,7 +182,7 @@
 <script>
   var oi_ids = [
   % for oi in order.active_items:
-  ${oi.order_item_id},
+  '${oi.order_item_id}',
   % endfor
   -1
   ];
