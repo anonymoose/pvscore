@@ -58,7 +58,8 @@ usermod -a -G web nginx
 cp /apps/pvs/pvscore/config/prod.web/etc/nginx/nginx.conf /etc/nginx/nginx.conf
 mkdir /etc/nginx/sites
 cp /apps/pvs/pvscore/config/prod.web/etc/nginx/sites/pvs.conf /etc/nginx/sites/pvs.conf
-systemctl start nginx.service
+# don't start until web src is installed
+#systemctl start nginx.service
 
 ################################################################
 ## fail2ban

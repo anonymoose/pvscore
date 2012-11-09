@@ -21,3 +21,5 @@ cd pvscore
 python setup.py develop
 cd ../pvs
 python setup.py develop
+
+systemctl start nginx.service

@@ -11,21 +11,18 @@ yum -y install git
 mkdir -p /apps/pvs
 cd /apps/pvs
 git clone git@github.com:anonymoose/pvscore.git
-cd pvscore/config/prod.web
-./config-1-root.sh <username> <rootpw> <webpw>
+cd ~ 
+/apps/pvs/pvscore/config/prod.web/config-1-root.sh <username> <rootpw> <webpw>
 
 su - postgres
 /apps/pvs/pvscore/config/prod.web/config-2-postgres.sh
 exit
 
-# login as kbedwell in separate window
 # as kbedwell
 cp /apps/pvs/pvscore/config/prod.web/home/.bashrc .
 mkdir .ssh
 ssh-keygen -t rsa -C "kenneth.bedwell@gmail.com"
 cat ~/.ssh/id_rsa.pub
 >>>> put this into github's key manager as $svr.kbedwell
-## wait until config-1-root.sh is done
-
 /apps/pvs/pvscore/config/prod.web/config-3-user.sh
 
