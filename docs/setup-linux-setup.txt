@@ -62,8 +62,6 @@ curl 'http://wwww.palmvalleysoftware.com/download/bashrc.txt' >> ~/.bashrc
 
 ############################################################################
 # update YUM
-vi /etc/yum.repos.d/fedora.repo 
->>> add "exclude=postgresql*" to [fedora] section
 curl -O http://yum.postgresql.org/9.1/fedora/fedora-17-x86_64/pgdg-fedora91-9.1-4.noarch.rpm
 rpm -ivh pgdg-fedora91-9.1-4.noarch.rpm
 
@@ -145,10 +143,6 @@ mkdir -p /apps/pvs/storage
 chmod -R g+w /apps
 chown -R web:web /apps
 # exit back to kbedwell
-cd ~/.ssh
-ssh-keygen -t rsa -C "kenneth.bedwell@gmail.com"
-cat ~/.ssh/id_rsa.pub
->>>> put this into github's key manager
 cd /apps/pvs
 git clone git@github.com:anonymoose/pvscore.git
 git clone git@github.com:anonymoose/pvs.git

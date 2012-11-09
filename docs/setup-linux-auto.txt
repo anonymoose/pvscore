@@ -1,8 +1,23 @@
 # as root
-cd ~/.ssh
+mkdir .ssh
 ssh-keygen -t rsa -C "kenneth.bedwell@gmail.com"
 cat ~/.ssh/id_rsa.pub
 >>>> put this into github's key manager as $svr.root
 
+vi /etc/yum.repos.d/fedora.repo 
+>>> add "exclude=postgresql*" to [fedora] section
 
+mkdir -p /apps/pvs
+cd /apps/pvs
+git clone git@github.com:anonymoose/pvscore.git
+cd pvscore/config/prod.web
+chmod +x config.sh
+./config-1.sh <rootpw> <webpw>
 
+# try to login as kbedwell in separate window
+
+# as kbedwell
+mkdir .ssh
+ssh-keygen -t rsa -C "kenneth.bedwell@gmail.com"
+cat ~/.ssh/id_rsa.pub
+>>>> put this into github's key manager as $svr.kbedwell
