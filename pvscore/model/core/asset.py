@@ -97,6 +97,12 @@ class Asset(ORMBase, BaseModel):
             asset_data.file.close()
         return ass
 
+
+    @property
+    def web_path(self):
+        return '/%s' % self.path
+
+
     @staticmethod
     def get_storage_root():
         return util.cache_get('pvs.enterprise.root.dir')

@@ -43,10 +43,11 @@ curl 'http://wwww.palmvalleysoftware.com/download/iptables.up.rules' > /etc/ipta
 
 # save everything
 /sbin/iptables-restore < /etc/iptables.up.rules
-/sbin/service iptables save
+/sbin/iptables-save > /etc/sysconfig/iptables
+systemctl restart iptables.service
 
 # Reload SSH and make sure everything works
-/etc/init.d/sshd reload
+systemctl restart sshd.service
 
 # log back in as kbedwell to make sure all is well
 local>  ssh kbedwell@<this slice>
@@ -89,8 +90,7 @@ sudo yum -y install python-devel python-setuptools dos2unix readline-devel zlib-
 ################################################################
 ## nginx  (http://articles.slicehost.com/2008/12/17/centos-installing-nginx-via-yum)
 sudo yum -y install nginx
-sudo /sbin/chkconfig nginx on
-sudo /sbin/chkconfig --list nginx
+sudo systemctl enable nginx.service
 sudo usermod -a -G web nginx
 su
 curl 'http://wwww.palmvalleysoftware.com/download/nginx.conf' > /etc/nginx/nginx.conf
@@ -103,6 +103,7 @@ sudo /etc/init.d/nginx start
 ################################################################
 ## fail2ban
 sudo yum -y install fail2ban
+sudo systemctl enable fail2ban.service
 sudo /sbin/chkconfig fail2ban on
 -- Modify /etc/fail2ban/fail2ban.conf
 --    change:  logtarget = /var/log/fail2ban.log
@@ -110,15 +111,13 @@ sudo /etc/init.d/fail2ban start
 
 ################################################################
 ## memcached - only do this if you are NOT using REDIS as backend.
-sudo /sbin/chkconfig memcached on
-sudo /sbin/chkconfig --list memcached
-sudo /etc/init.d/memcached start
+sudo systemctl enable memcached
+sudo systemctl start memcached
 
 ################################################################
 ## atd
-sudo /sbin/chkconfig atd on
-sudo /sbin/chkconfig --list atd
-sudo /etc/init.d/atd start
+sudo systemctl enable atd.service
+sudo systemctl start atd.service
 
 ################################################################
 ## other tools
@@ -139,27 +138,28 @@ tar zxvf emacs-unix.tar.gz
 
 ################################################################
 ## Redis - 2.2.11
-cd ~/src
-wget http://redis.googlecode.com/files/redis-2.2.11.tar.gz
-tar xzf redis-2.2.11.tar.gz
-cd redis-2.2.11
-make
-sudo make install
-su -
-adduser redis
-passwd redis
-curl 'http://wwww.palmvalleysoftware.com/download/redis.conf' > /etc/redis.conf
-curl 'http://wwww.palmvalleysoftware.com/download/redis.init.d' > /etc/init.d/redis
-chmod +x /etc/init.d/redis
+yum install redis
+systemctl enable redis.service
 touch /var/log/redis.log
 chown redis:redis /var/log/redis.log
 mkdir /var/redis
 chown redis:redis /var/redis
-chkconfig --add redis
-chkconfig redis on
+sudo vi /usr/lib/systemd/system/redis.service
+>>>>> change path to /sbin/redis-server
+systemctl --system daemon-reload
+systemctl start redis.service
 
 ################################################################
 ## postgresql 8.4.4
+## http://wiki.postgresql.org/wiki/YUM_Installation
+cd ~/src
+vi /etc/yum.repos.d/fedora.repo 
+>>> add "exclude=postgresql*" to [fedora] section
+curl -O http://yum.postgresql.org/9.1/fedora/fedora-17-x86_64/pgdg-fedora91-9.1-4.noarch.rpm
+rpm -ivh pgdg-fedora91-9.1-4.noarch.rpm
+yum -y install postgresql91-server postgresql91-contrib postgresql91-devel
+
+
 cd ~/src
 wget http://wwww.palmvalleysoftware.com/download/postgresql-9.1.1.tar.gz
 tar zxvf postgresql-9.1.1.tar.gz
