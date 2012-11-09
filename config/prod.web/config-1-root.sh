@@ -93,6 +93,3 @@ systemctl start postgresql-9.1.service
 /usr/pgsql-9.1/bin/psql -U postgres -c "alter database retail owner to retail;"
 
 
-################################################################
-# get ready for step2
-rm -rf /apps/pvs

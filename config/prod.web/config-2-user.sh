@@ -1,4 +1,5 @@
 #!/bin/bash
+sudo rm -rf /apps/pvs
 
 mkdir -p /apps/pvs
 mkdir -p /apps/pvs/db
@@ -6,7 +7,7 @@ mkdir -p /apps/pvs/log
 mkdir -p /apps/pvs/storage
 chmod -R g+w /apps
 chown -R web:web /apps
-# exit back to kbedwell
+
 cd /apps/pvs
 rm -rf pvscore pvs
 git clone git@github.com:anonymoose/pvscore.git
