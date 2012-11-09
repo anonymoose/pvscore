@@ -12,8 +12,11 @@ mkdir -p /apps/pvs
 cd /apps/pvs
 git clone git@github.com:anonymoose/pvscore.git
 cd pvscore/config/prod.web
-chmod +x config-1-root.sh
 ./config-1-root.sh <username> <rootpw> <webpw>
+
+su - postgres
+/apps/pvs/pvscore/config/prod.web/config-2-postgres.sh
+exit
 
 # login as kbedwell in separate window
 # as kbedwell
@@ -24,6 +27,5 @@ cat ~/.ssh/id_rsa.pub
 >>>> put this into github's key manager as $svr.kbedwell
 ## wait until config-1-root.sh is done
 
-chmod +x /apps/pvs/pvscore/config/prod.web/config-2-user.sh
-/apps/pvs/pvscore/config/prod.web/config-2-user.sh
+/apps/pvs/pvscore/config/prod.web/config-3-user.sh
 
