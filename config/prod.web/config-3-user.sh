@@ -1,15 +1,14 @@
 #!/bin/bash
 sudo rm -rf /apps/pvs
 
-mkdir -p /apps/pvs
-mkdir -p /apps/pvs/db
-mkdir -p /apps/pvs/log
-mkdir -p /apps/pvs/storage
-chmod -R g+w /apps
-chown -R web:web /apps
+sudo mkdir -p /apps/pvs
+sudo mkdir -p /apps/pvs/db
+sudo mkdir -p /apps/pvs/log
+sudo mkdir -p /apps/pvs/storage
+sudo chmod -R g+w /apps
+sudo chown -R web:web /apps
 
 cd /apps/pvs
-rm -rf pvscore pvs
 git clone git@github.com:anonymoose/pvscore.git
 git clone git@github.com:anonymoose/pvs.git
 export PYTHON_EGG_CACHE=/apps/pvs/.python-eggs
@@ -22,4 +21,4 @@ python setup.py develop
 cd ../pvs
 python setup.py develop
 
-systemctl start nginx.service
+sudo systemctl start nginx.service

@@ -82,5 +82,9 @@ systemctl start redis.service
 #systemctl enable logrotate.service
 #systemctl start logrotate.service
 
+################################################################
+# prep for postgres
+echo postgres | passwd --stdin postgres
+usermod -a -G wheel postgres
 
 
