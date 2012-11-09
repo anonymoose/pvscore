@@ -11,10 +11,10 @@ echo $2 | passwd --stdin
 ########################################################################
 # add an admin user.  kbedwell to start.  Add him to the wheel group
 adduser web
-echo $3 | passwd web
+echo $3 | passwd --stdin web
 usermod -a -G wheel web
 adduser $1
-echo $3 | passwd --stdin $1
+echo $2 | passwd --stdin $1
 usermod -a -G wheel $1
 usermod -a -G web $1
 

@@ -7,12 +7,13 @@ cat ~/.ssh/id_rsa.pub
 vi /etc/yum.repos.d/fedora.repo 
 >>> add "exclude=postgresql*" to [fedora] section
 
+yum -y install git
 mkdir -p /apps/pvs
 cd /apps/pvs
 git clone git@github.com:anonymoose/pvscore.git
 cd pvscore/config/prod.web
-chmod +x config.sh
-./config-1.sh <rootpw> <webpw>
+chmod +x config-1-root.sh
+./config-1-root.sh <username> <rootpw> <webpw>
 
 # try to login as kbedwell in separate window
 
