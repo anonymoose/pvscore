@@ -22,4 +22,8 @@ mkdir .ssh
 ssh-keygen -t rsa -C "kenneth.bedwell@gmail.com"
 cat ~/.ssh/id_rsa.pub
 >>>> put this into github's key manager as $svr.kbedwell
+## wait until config-1-root.sh is done
+
+chmod +x /apps/pvs/pvscore/config/prod.web/config-2-user.sh
+/apps/pvs/pvscore/config/prod.web/config-2-user.sh
 

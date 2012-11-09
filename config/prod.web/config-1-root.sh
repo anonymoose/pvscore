@@ -38,7 +38,6 @@ systemctl restart sshd.service
 chmod 777 /dev/shm
 echo none                /dev/shm        tmpfs   rw,nosuid,nodev,noexec 0 0 >> /etc/fstab
 
-
 # fix the linker for postgres and R libraries
 #curl 'http://wwww.palmvalleysoftware.com/download/ld.so.conf' >> /etc/ld.so.conf
 #/sbin/ldconfig
@@ -82,14 +81,5 @@ systemctl start redis.service
 #systemctl enable logrotate.service
 #systemctl start logrotate.service
 
-################################################################
-# postgresql 8.4.4
-# http://wiki.postgresql.org/wiki/YUM_Installation
-/usr/pgsql-9.1/bin/initdb -U postgres -D /var/lib/pgsql/9.1/data
-systemctl enable postgresql-9.1.service
-systemctl start postgresql-9.1.service
-/usr/pgsql-9.1/bin/createdb -U postgres retail
-/usr/pgsql-9.1/bin/psql -U postgres -c "create user retail with password 'retail';"
-/usr/pgsql-9.1/bin/psql -U postgres -c "alter database retail owner to retail;"
 
 
