@@ -14,8 +14,6 @@ data
 .DS_Store
 *\#*\#
 *\#*
-sites
-companies
 dump.rdb
 redis.conf
 .coverage
