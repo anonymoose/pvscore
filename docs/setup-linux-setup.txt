@@ -12,12 +12,6 @@
 passwd
 
 ########################################################################
-# allow everybody in "wheel" group to run sudo commands
-visudo
-# uncomment the following line and save the file.
-%wheel  ALL=(ALL)       ALL
-
-########################################################################
 # add an admin user.  kbedwell to start.  Add him to the wheel group
 adduser web
 passwd web
@@ -31,7 +25,6 @@ usermod -a -G web kbedwell
 # prevent root from SSH'ing to the box
 vi /etc/ssh/sshd_config
 # ensure the following settings are in the file and save it
-Protocol 2
 PermitRootLogin no
 AllowUsers kbedwell
 
@@ -54,23 +47,14 @@ local>  ssh kbedwell@<this slice>
 
 # ensure that /dev/shm is set up for parallel processing in python
 # http://stackoverflow.com/questions/2009278/python-multiprocessing-permission-denied
-sudo chmod 777 /dev/shm
-sudo vi /etc/fstab
-> none /dev/shm tmpfs rw,nosuid,nodev,noexec 0 0
+chmod 777 /dev/shm
+vi /etc/fstab
+>>>> none                /dev/shm        tmpfs   rw,nosuid,nodev,noexec 0 0
 
 # fix the linker for postgres and R libraries
-sudo curl 'http://wwww.palmvalleysoftware.com/download/ld.so.conf' >> /etc/ld.so.conf
-sudo /sbin/ldconfig
+#curl 'http://wwww.palmvalleysoftware.com/download/ld.so.conf' >> /etc/ld.so.conf
+#/sbin/ldconfig
 
-# setup the init.d script for the python app
-curl 'http://wwww.palmvalleysoftware.com/download/apps.pvs' > /etc/init.d/apps.$APP
-/sbin/chkconfig apps.$APP on
-/sbin/chkconfig --list apps.$APP
-
-## CLOSE OUT ROOT SESSION AND LOG BACK IN AS KBEDWELL
-
-# seed DB.  If you are creating new DB, do this now as it will take a few minutes.
-local> scp backup.sql.tgz kbedwell@wm01:/home/kbedwell
 
 ###########################################################################
 ## .bashrc
@@ -78,149 +62,106 @@ curl 'http://wwww.palmvalleysoftware.com/download/bashrc.txt' >> ~/.bashrc
 
 ############################################################################
 # update YUM
-sudo yum -y groupremove 'GNOME Desktop Environment'  # only if necessary.
-sudo yum -y update
-sudo yum -y groupinstall 'Development Tools'
-sudo yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack.x86_64 lapack-devel.x86_64 atlas.x86_64 atlas.x86_64 blas.x86_64 blas-devel.x86_64 freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam
-sudo updatedb
+vi /etc/yum.repos.d/fedora.repo 
+>>> add "exclude=postgresql*" to [fedora] section
+curl -O http://yum.postgresql.org/9.1/fedora/fedora-17-x86_64/pgdg-fedora91-9.1-4.noarch.rpm
+rpm -ivh pgdg-fedora91-9.1-4.noarch.rpm
 
-# for 32 bit.
-sudo yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack lapack-devel atlas atlas blas blas-devel freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam
+yum -y update
+yum -y groupinstall 'Development Tools'
+yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack.x86_64 lapack-devel.x86_64 atlas.x86_64 atlas.x86_64 blas.x86_64 blas-devel.x86_64 freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel nginx fail2ban redis postgresql91-server postgresql91-contrib postgresql91-devel python-psycopg2
+updatedb
 
 ################################################################
 ## nginx  (http://articles.slicehost.com/2008/12/17/centos-installing-nginx-via-yum)
-sudo yum -y install nginx
-sudo systemctl enable nginx.service
-sudo usermod -a -G web nginx
+systemctl enable nginx.service
+usermod -a -G web nginx
 su
 curl 'http://wwww.palmvalleysoftware.com/download/nginx.conf' > /etc/nginx/nginx.conf
 mkdir /etc/nginx/sites
-curl 'http://wwww.palmvalleysoftware.com/download/nginx-pvs.conf' > /etc/nginx/sites/$APP.conf
-## fix location in /etc/nginx/sites/$APP.conf to reflect /apps/$APP/app/app/public/
+curl 'http://wwww.palmvalleysoftware.com/download/nginx-pvs.conf' > /etc/nginx/sites/pvs.conf
 exit       # back to kbedwell
-sudo /etc/init.d/nginx start
+systemctl start nginx
 
 ################################################################
 ## fail2ban
-sudo yum -y install fail2ban
-sudo systemctl enable fail2ban.service
-sudo /sbin/chkconfig fail2ban on
--- Modify /etc/fail2ban/fail2ban.conf
---    change:  logtarget = /var/log/fail2ban.log
-sudo /etc/init.d/fail2ban start
-
-################################################################
-## memcached - only do this if you are NOT using REDIS as backend.
-sudo systemctl enable memcached
-sudo systemctl start memcached
+systemctl enable fail2ban.service
+systemctl start fail2ban.service
 
 ################################################################
 ## atd
-sudo systemctl enable atd.service
-sudo systemctl start atd.service
+systemctl enable atd.service
+systemctl start atd.service
 
 ################################################################
-## other tools
-cd ~
-
-mkdir src ; cd src
-# mercurial
-sudo easy_install docutils    # this is needed by mercurial
-wget 'http://mercurial.selenic.com/release/mercurial-1.6.3.tar.gz'
-tar zxvf mercurial-1.6.3.tar.gz
-cd mercurial-1.6.3
-sudo make PREFIX=/usr install
-
-# emacs
-cd ~
-wget 'http://wwww.palmvalleysoftware.com/download/emacs-unix.tar.gz'
-tar zxvf emacs-unix.tar.gz
-
-################################################################
-## Redis - 2.2.11
-yum install redis
+## Redis
 systemctl enable redis.service
-touch /var/log/redis.log
-chown redis:redis /var/log/redis.log
-mkdir /var/redis
-chown redis:redis /var/redis
-sudo vi /usr/lib/systemd/system/redis.service
->>>>> change path to /sbin/redis-server
-systemctl --system daemon-reload
 systemctl start redis.service
 
 ################################################################
 ## postgresql 8.4.4
 ## http://wiki.postgresql.org/wiki/YUM_Installation
-cd ~/src
-vi /etc/yum.repos.d/fedora.repo 
->>> add "exclude=postgresql*" to [fedora] section
-curl -O http://yum.postgresql.org/9.1/fedora/fedora-17-x86_64/pgdg-fedora91-9.1-4.noarch.rpm
-rpm -ivh pgdg-fedora91-9.1-4.noarch.rpm
-yum -y install postgresql91-server postgresql91-contrib postgresql91-devel
-
-
-cd ~/src
-wget http://wwww.palmvalleysoftware.com/download/postgresql-9.1.1.tar.gz
-tar zxvf postgresql-9.1.1.tar.gz
-cd postgresql-9.1.1
-./configure --prefix=/usr/local/pgsql/v9.1.1 --with-python --with-pgport=5433
-make
-su
-make install
-adduser postgres
-passwd postgres
-mkdir -p /usr/local/pgsql/v9.1.1/data
-chown postgres /usr/local/pgsql/v9.1.1/data
 su - postgres
-/usr/local/pgsql/v9.1.1/bin/initdb -D /usr/local/pgsql/v9.1.1/data
-/usr/local/pgsql/v9.1.1/bin/pg_ctl -D /usr/local/pgsql/v9.1.1/data start
-/usr/local/pgsql/v9.1.1/bin/createdb pvs
-/usr/local/pgsql/v9.1.1/bin/psql pvs
->> create user pvs with password 'pvs';
->> \q
+/usr/pgsql-9.1/bin/initdb -D /var/lib/pgsql/9.1/data
+exit # back to root
+systemctl enable postgresql-9.1.service
+systemctl start postgresql-9.1.service
+/usr/pgsql-9.1/bin/createdb retail
 exit  #  back to root
-/usr/local/pgsql/v9.1.1/bin/psql -U postgres
->> alter database pvs owner to pvs;
->> \q
-cp contrib/start-scripts/linux /etc/init.d/postgresql
-chmod +x /etc/init.d/postgresql
-/sbin/chkconfig postgresql on
-/sbin/chkconfig --list postgresql
-exit
-
-# restore DB.  You should have already uploaded the file.
-cd ~
-tar zxvf backup.sql.tgz ; rm backup.sql.tgz
-psql -U wm -d wm -f backup.sql
+/usr/pgsql-9.1/bin/psql -U postgres -c "create user retail with password 'retail';"
+/usr/pgsql-9.1/bin/psql -U postgres -c "alter database retail owner to retail;"
 
 ###############################################################
 ## R
 cd ~/src
-wget 'http://mirrors.ibiblio.org/pub/mirrors/CRAN/src/base/R-2/R-2.11.1.tar.gz'
+wget 'http://mirrors.ibiblio.org/pub/mirrors/CRAN/src/base/     R-2/R-2.11.1.tar.gz'
 tar zxvf R-2.11.1.tar.gz
 cd R-2.11.1
 ./configure --with-x=no --enable-R-shlib=yes
 make
-sudo make install
+make install
 su
 /usr/local/bin/R
 R
 >> install.packages(c("TTR"))
 -- >> << specify a CRAN mirror in the US.  USA (AZ) works well >>
 -- exit  #back to kbedwell
-
 # ensure the following library is set prior to launching python that needs R (paste)
 export LD_LIBRARY_PATH=/usr/local/pgsql/v9.1.1/lib:/usr/local/lib64/R/lib:$LD_LIBRARY_PATH
 python -m 'rpy2.tests'
 
+
 ################################################################
 ## setup runtime environment directories
-sudo mkdir -p /apps/$APP
-sudo mkdir -p /apps/$APP/extensions
-sudo mkdir -p /apps/$APP/db
-sudo chmod -R g+w /apps
-sudo chown -R root:web /apps
+# setup the init.d script for the python app
+curl 'http://wwww.palmvalleysoftware.com/download/apps.pvs' > /etc/init.d/apps.$APP
+/sbin/chkconfig apps.$APP on
+/sbin/chkconfig --list apps.$APP
+
+mkdir -p /apps/pvs
+mkdir -p /apps/pvs/db
+mkdir -p /apps/pvs/log
+mkdir -p /apps/pvs/storage
+chmod -R g+w /apps
+chown -R web:web /apps
+# exit back to kbedwell
+cd ~/.ssh
+ssh-keygen -t rsa -C "kenneth.bedwell@gmail.com"
+cat ~/.ssh/id_rsa.pub
+>>>> put this into github's key manager
+cd /apps/pvs
+git clone git@github.com:anonymoose/pvscore.git
+git clone git@github.com:anonymoose/pvs.git
+export PYTHON_EGG_CACHE=/apps/pvs/.python-eggs
+wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
+python virtualenv.py --no-site-packages .
+source bin/activate
+easy_install pyramid
+cd pvscore
+python setup.py develop
+cd ../pvs
+python setup.py develop
+
 
 ###############################################################
 ## setup pylons (http://pylonshq.com/docs/en/1.0/gettingstarted )
@@ -261,13 +202,13 @@ wget 'http://wwww.palmvalleysoftware.com/download/numpy.tar.gz'
 tar zxvf numpy.tar.gz
 cd numpy
 python setup.py build
-sudo python setup.py install
+python setup.py install
 cd ~/src
 wget 'http://wwww.palmvalleysoftware.com/download/scipy.tar.gz'
 tar zxvf scipy.tar.gz
 cd scipy
 python setup.py build
-sudo python setup.py install
+python setup.py install
 cd ~/src
 wget 'http://wwww.palmvalleysoftware.com/download/python-dateutil-1.5.tar.gz'
 python setup.py install
@@ -290,14 +231,14 @@ pip install --index-url https://code.stripe.com --upgrade stripe
 #cd GeoIP-Python-1.2.4
 
 # setup logrotate
-sudo curl 'http://wwww.palmvalleysoftware.com/download/apps.logrotate' > /etc/logrotate.d/apps
-sudo vi /etc/logrotate.d/apps
+curl 'http://wwww.palmvalleysoftware.com/download/apps.logrotate' > /etc/logrotate.d/apps
+vi /etc/logrotate.d/apps
 ## change "pvs" path as appropriate
 
 cd ..
 ** unzip the app **
-sudo chown -R kbedwell:web app
-sudo chmod -R g+wx app
+chown -R kbedwell:web app
+chmod -R g+wx app
 cd app
 rm -rf data/sessions/container_file/*
 rm -rf data/sessions/container_file_lock/*
@@ -305,7 +246,7 @@ rm -rf data/templates/*
 find . -name ".hg" -type d -exec rm -rf {} \;
 find . -name "*DS_Store" -exec rm {} \;
 
-sudo /etc/init.d/apps.$APP start
+/etc/init.d/apps.$APP start
 
 #
 # SSL setup (works with godaddy)

@@ -1,0 +1,9 @@
+/apps/pvs/app/*.log {
+    daily
+    rotate 10
+    missingok
+    notifempty
+    compress
+    sharedscripts
+    endscript
+}
