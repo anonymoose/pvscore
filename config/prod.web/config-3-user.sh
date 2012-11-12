@@ -9,7 +9,9 @@ sudo chown -R web:web /apps
 
 cd /apps/pvs
 git clone git@github.com:anonymoose/pvscore.git
+sudo chown -R kbedwell.web pvscore
 git clone git@github.com:anonymoose/pvs.git
+sudo chown -R kbedwell.web pvs
 export PYTHON_EGG_CACHE=/apps/pvs/.python-eggs
 wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
 python virtualenv.py --no-site-packages .
@@ -23,3 +25,4 @@ python setup.py develop
 
 
 sudo systemctl start nginx.service
+sudo systemctl start pvs.service
