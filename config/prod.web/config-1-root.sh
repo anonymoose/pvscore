@@ -58,6 +58,7 @@ usermod -a -G web nginx
 cp /apps/pvs/pvscore/config/prod.web/etc/nginx/nginx.conf /etc/nginx/nginx.conf
 mkdir /etc/nginx/sites
 cp /apps/pvs/pvscore/config/prod.web/etc/nginx/sites/pvs.conf /etc/nginx/sites/pvs.conf
+mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.orig
 # don't start until web src is installed
 #systemctl start nginx.service
 

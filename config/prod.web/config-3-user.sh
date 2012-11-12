@@ -1,10 +1,9 @@
 #!/bin/bash
 sudo rm -rf /apps/pvs
 
-sudo mkdir -p /apps/pvs
 sudo mkdir -p /apps/pvs/db
 sudo mkdir -p /apps/pvs/log
-sudo mkdir -p /apps/pvs/storage
+sudo mkdir -p /apps/pvs/storage/enterprises
 sudo chmod -R g+w /apps
 sudo chown -R web:web /apps
 
@@ -21,5 +20,6 @@ cd pvscore
 python setup.py develop
 cd ../pvs
 python setup.py develop
+
 
 sudo systemctl start nginx.service
