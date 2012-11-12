@@ -16,6 +16,7 @@ wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
 python virtualenv.py --no-site-packages .
 source bin/activate
 easy_install pyramid
+
 cd pvscore
 python setup.py develop
 cd ../pvs

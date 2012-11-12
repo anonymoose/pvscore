@@ -18,8 +18,7 @@ fi
 export HISTFILESIZE=1000000000
 export HISTSIZE=1000000
 export HISTCONTROL=ignoredups 
-PATH=$PATH:.:/usr/pgsql-9.1/bin
-export PATH
+export PATH=$PATH:.:/usr/pgsql-9.1/bin
 alias ll="ls -aGFlh"
 alias ...="cd ../.."
 alias la='ls -Al'               # show hidden files

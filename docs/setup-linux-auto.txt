@@ -12,7 +12,7 @@ mkdir -p /apps/pvs
 cd /apps/pvs
 git clone git@github.com:anonymoose/pvscore.git
 cd ~ 
-/apps/pvs/pvscore/config/prod.web/config-1-root.sh <username> <rootpw> <webpw>
+/apps/pvs/pvscore/config/prod.web/config-1-root.sh <username> <rootpw> <webpw>        <<<<---- here on pvs04
 
 su - postgres
 /apps/pvs/pvscore/config/prod.web/config-2-postgres.sh
