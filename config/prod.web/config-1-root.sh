@@ -62,6 +62,11 @@ mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.orig
 # don't start until web src is installed
 #systemctl start nginx.service
 
+
+################################################################
+## hosts
+cp /apps/pvs/pvscore/config/prod.web/etc/hosts /etc/hosts
+
 ################################################################
 ## fail2ban
 systemctl enable fail2ban.service
