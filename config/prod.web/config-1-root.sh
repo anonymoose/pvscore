@@ -6,7 +6,7 @@ set -x
 
 ########################################################################
 # reset root password
-echo $2 | passwd --stdin
+echo $2 | passwd --stdin root
 
 ########################################################################
 # add an admin user.  kbedwell to start.  Add him to the wheel group
