@@ -23,13 +23,5 @@ LOG_FILE=$ROOT_DIR/log/$DESC.log
 PID_FILE_5000=$ROOT_DIR/$DESC.5000.pid
 PID_FILE_5001=$ROOT_DIR/$DESC.5001.pid
 
-OPTIONS=" $CONFIG \
---daemon \
---user=$USER \
---group=$GROUP \
---log-file=$LOG_FILE"
-
-echo -n $"Starting $DESC: "
-cd $APP_PATH
-$PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_5000 http_port=5000 &
-$PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_5001 http_port=5001 &
+cat $PID_FILE_5000 | xargs kill
+cat $PID_FILE_5001 | xargs kill

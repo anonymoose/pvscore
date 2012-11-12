@@ -89,3 +89,8 @@ echo postgres | passwd --stdin postgres
 usermod -a -G wheel postgres
 
 
+################################################################
+# setup the pvs service.
+cp /apps/pvs/pvscore/config/prod.web/usr/lib/systemd/system/pvs.service /usr/lib/systemd/system
+ln -s /usr/lib/systemd/system/pvs.service /etc/systemd/system/multi-user.target.wants/pvs.service
+systemctl daemon-reload
