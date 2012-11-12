@@ -23,6 +23,6 @@ python setup.py develop
 cd ../pvs
 python setup.py develop
 
-
 sudo systemctl start nginx.service
+sudo systemctl enable pvs.service
 sudo systemctl start pvs.service
