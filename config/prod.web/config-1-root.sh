@@ -38,9 +38,6 @@ systemctl restart sshd.service
 chmod 777 /dev/shm
 echo none                /dev/shm        tmpfs   rw,nosuid,nodev,noexec 0 0 >> /etc/fstab
 
-# fix the linker for postgres and R libraries
-#curl 'http://wwww.palmvalleysoftware.com/download/ld.so.conf' >> /etc/ld.so.conf
-#/sbin/ldconfig
 
 ########################################################################
 # set up for postgresql-happy yumming.

@@ -358,6 +358,7 @@ def fix_assets_b(conn, cur, dbname, storage_root):
         
 def fix_date(conn, cur):
     for table_name, column_name, data_type in get_columns_of_type(cur, 'date'):
+        print "    fix_date-> %s %s" % (table_name, column_name)
         change_type(cur, table_name, column_name, 'timestamp')
         
 
@@ -398,8 +399,11 @@ if __name__ == '__main__':
 
     tables = list_tables(cur)
 
+    print "\n\n\nfix_user_table_pre"
     fix_user_table_pre(conn, cur, tables)
+    print "\n\n\nfix_date"
     fix_date(conn, cur)
+    print "\n\n\nfix_content"
     fix_content(conn, cur)
 
     conn.commit()
