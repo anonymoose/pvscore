@@ -22,9 +22,9 @@ class Asset(ORMBase, BaseModel):
     fk_type = Column(String(50))
     fk_id = Column(Integer)
     create_dt = Column(DateTime, server_default = text('now()'))
-    mimetype = Column(String(30)) #
-    fs_path = Column(String(512)) #
-    web_path = Column(String(512)) #
+    #mimetype = Column(String(30)) #
+    #fs_path = Column(String(512)) #
+    #web_path = Column(String(512)) #
 
 
     status = relation('Status')

@@ -1,6 +1,7 @@
 import random
 from webhelpers.html import literal
 from webhelpers.html.tags import * #pylint: disable-msg=W0614,W0401,W0602,W0622
+import pvscore.lib.util as util
 
 
 def nvl(val, default=''):
@@ -50,6 +51,10 @@ def google_analytics(site, script_tags=True):
                st_end = '</script>' if script_tags else '',
                googid=site.google_analytics_id))
     return ''
+
+
+def this_year():
+    return util.this_year()
 
 
 def date_time(d8e, fmt="%Y-%m-%d %H:%M:%S"):

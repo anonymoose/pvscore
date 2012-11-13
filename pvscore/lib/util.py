@@ -6,7 +6,7 @@ import redis
 import socket
 import datetime, os, errno
 from datetime import date
-import re
+import re, calendar
 #from operator import itemgetter
 import logging
 import subprocess
@@ -61,6 +61,10 @@ def today_date():
 
 def hostname():
     return socket.gethostname()
+
+
+def this_year():
+    return datetime.date.today().year
 
 
 def is_empty(val):

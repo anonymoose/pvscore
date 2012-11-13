@@ -2,11 +2,11 @@ import logging
 import pvscore.lib.util as util
 import simplejson as json
 from pyramid.renderers import render
-import urllib2, math
+import urllib2
 try:
-    from xml.etree.ElementTree import fromstring, tostring
+    from xml.etree.ElementTree import fromstring#, tostring
 except ImportError:
-    from elementtree.ElementTree import fromstring, tostring
+    from elementtree.ElementTree import fromstring #pylint: disable-msg=F0401
 
 log = logging.getLogger(__name__)
 

@@ -8,7 +8,6 @@ from pyramid.renderers import render
 from pvscore.lib.cart import Cart
 from pvscore.model.crm.product import Product, ProductCategory
 import pvscore.lib.util as util
-import simplejson as json
 
 log = logging.getLogger(__name__)
 
