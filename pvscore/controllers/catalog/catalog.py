@@ -20,7 +20,7 @@ class CatalogBaseController(BaseController):
             self.session['cart'] = Cart(site)
         cart = self.session['cart']
         return {'site' : site,
-                'base' : '/%s/' % site.namespace,
+                'base' : '%s/%s/' % (self.request.host_url, site.namespace),
                 'user' : self.request.ctx.user,
                 'cart' : cart,
                 'seo_title' : '',
