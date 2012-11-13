@@ -64,7 +64,7 @@ class Product(ORMBase, BaseModel):
         sql = """select p.product_id, p.name,
                 p.unit_cost, pp.retail_price, pp.wholesale_price, pp.discount_price
                 from
-                crm_product p, crm_company com, crm_enterprise ent, crm_campaign cmp, crm_product_pricing pp
+                crm_product p, crm_company com, crm_campaign cmp, crm_product_pricing pp
                 where lower(p.name) like '%%{n}%%'
                 and p.delete_dt is null
                 and p.company_id = com.company_id
