@@ -65,7 +65,10 @@ class BaseController(BaseUI):
         return HTTPFound('%s%s' % (self.request.referrer, params)) if self.request.referrer else HTTPFound('/%s' % params)
 
 
-    def raise_redirect(self, params=""):
-        if self.request.POST.get('redir'):
-            raise HTTPFound('%s%s' % (self.request.POST.get('redir'), params))
-        raise HTTPFound('%s%s' % (self.request.referrer, params)) if self.request.referrer else HTTPFound('/%s' % params)
+    def raise_redirect(self, goto=None, params=""):
+        if goto:
+            raise HTTPFound(goto)
+        else:
+            if self.request.POST.get('redir'):
+                raise HTTPFound('%s%s' % (self.request.POST.get('redir'), params))
+            raise HTTPFound('%s%s' % (self.request.referrer, params)) if self.request.referrer else HTTPFound('/%s' % params)

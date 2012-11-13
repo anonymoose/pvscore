@@ -301,6 +301,9 @@ class CustomerController(BaseController):
             'order' : order,
             'comm_packing_slip_id' : order.campaign.comm_packing_slip_id,
             'total_price' : order.total_price(),
+            'total_item_price' : order.total_item_price(),
+            'total_handling_price' : order.total_handling_price(),
+            'total_shipping_price' : order.total_shipping_price(),
             'total_payments_applied' : order.total_payments_applied(),
             'total_discounts_applied' : order.total_discounts_applied(),
             'total_due' : order.total_payments_due()
@@ -629,7 +632,9 @@ class CustomerController(BaseController):
     def purchase_cart(self):
         self.forbid_if(not self.request.ctx.customer or 'cart' not in self.session or not self.session['cart'])
         cust = self.request.ctx.customer
+        cart = self.session['cart']
         self._site_purchase(cust, self.session['cart'])
+        cart.remove_all()
         return self.find_redirect()
         
 
@@ -660,7 +665,7 @@ class CustomerController(BaseController):
         cust = Customer.find(self.request.POST.get('email'), campaign)
         if cust:
             self.flash('Email %s already in use' % cust.email)
-            self.raise_redirect()
+            self.raise_redirect(self.request.referrer)
         cust = Customer()
         cust.campaign = campaign
         cust.bind(self.request.POST)
@@ -703,16 +708,13 @@ class CustomerController(BaseController):
                     cart.add_item(prod, cust.campaign)
                 else:
                     self.flash("No such product sku: %s" % sku)
-                    self.raise_redirect()
+                    self.raise_redirect(self.request.referrer)
 
         order = cust.add_order(cart, None, self.request.ctx.site, campaign)
         api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
         api.set_coupon(self.request.POST.get('coupon_code'))
         if api.purchase(order, bill, util.request_ip(self.request)):
-            Status.add(cust, order, Status.find_event(self.enterprise_id, order, 'BILLING_SUCCESS'),
-                       'Billing Succeeded')
-            Journal.create_new(order.total_payments_due(), order.customer, order, None,
-                               'FullPayment', api.payment_method, None)
+            import pdb; pdb.set_trace()
             # accept terms if they sent accept_terms as positive across (checkbox)
             if ('accept_terms' in self.request.POST and self.request.POST['accept_terms'] == '1'):
                 accept = OrderItemTermsAcceptance()
@@ -731,7 +733,7 @@ class CustomerController(BaseController):
             (_, last_note) = api.get_last_status()
             self.flash('Unable to bill credit card: %s' % last_note)
             log.error('CC DECLINED %s %s %s' % (cust.customer_id, cust.email, last_note))
-            self.raise_redirect()
+            self.raise_redirect(self.request.referrer)
 
 
     @view_config(route_name='crm.customer.self_save')
@@ -774,7 +776,7 @@ class CustomerController(BaseController):
             (_, last_note) = api.get_last_status()
             self.flash('Unable to save credit card information: %s' % last_note)
             log.error('CC CHANGE DECLINED %s %s %s' % (cust.customer_id, cust.email, last_note))
-            self.raise_redirect()
+            self.raise_redirect(self.request.referrer)
 
  
 

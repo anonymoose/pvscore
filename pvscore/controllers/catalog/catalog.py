@@ -170,3 +170,11 @@ class CatalogController(CatalogBaseController):
         return self.render(page, params)
     
 
+    @view_config(route_name='ecom.site.login.default')
+    @view_config(route_name='ecom.site.login')
+    def login(self):
+        page = self.request.matchdict.get('page', 'login')
+        params = self.params()
+        if params['customer'].customer_id and 'nextlink' in self.request.GET:
+            return HTTPFound(self.request.GET['nextlink'])
+        return self.render(page, params)

@@ -53,6 +53,9 @@ class CustomerOrder(ORMBase, BaseModel):
         cord.creator = user_created
         cord.customer = customer
         cord.campaign = campaign
+        cord.shipping_total = util.nvl(cart.shipping_total, 0.0)
+        cord.shipping_note = cart.shipping_selection_name
+        cord.handling_total = util.nvl(cart.handling_total, 0.0)
         cord.save()
         cord.flush()
         for cart_item in cart.items:

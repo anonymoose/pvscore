@@ -2,7 +2,7 @@ import logging
 import pvscore.lib.util as util
 import simplejson as json
 from pyramid.renderers import render
-import urllib2
+import urllib2, math
 try:
     from xml.etree.ElementTree import fromstring, tostring
 except ImportError:
@@ -42,7 +42,7 @@ class UPSShipping(object):
                                    'password' : shipping_config['password'],
                                    'container' : shipping_config['container_choices_default'],
                                    'pickup' : shipping_config['pickup_type_choices_default'],
-                                   'total_weight' : sum([util.nvl(item['product'].weight, '1') for item in cart.items]),
+                                   'total_weight' : max(sum([util.nvl(item['product'].weight, 1.0) for item in cart.items]), 1.0),
                                    'cart' : cart,
                                    'site' : site
                                    }))

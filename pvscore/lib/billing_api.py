@@ -80,7 +80,7 @@ class StripeBillingApi(BaseBillingApi):
         self.coupon = coupon
 
 
-    def purchase(self, order, billing, remote_ip=None):
+    def purchase(self, order, billing, cart, remote_ip=None):
         """ KB: [2012-09-10]: 
         If it's subscription, then subscribe this customer to the plan.
         Otherwise just hit them up non-recurring.
@@ -104,6 +104,8 @@ class StripeBillingApi(BaseBillingApi):
                 cust.third_party_id = stripe_cust.id
                 cust.save()
 
+            charge_items_amount = 0.0
+            subscription_amount = 0.0
             for oitem in order.active_items:
                 prod = oitem.product
                 if prod.subscription:
@@ -117,12 +119,16 @@ class StripeBillingApi(BaseBillingApi):
                     # else:
                     self.coupon = None
                     stripe_cust.update_subscription(plan=prod.sku, coupon=self.coupon)
+                    subscription_amount += int(prod.get_price(campaign)*100)
                 else:
-                    stripe.InvoiceItem.create(
-                        customer=stripe_cust.id,
-                        amount=int(prod.get_price(campaign)*100),  # must be amount in cents.  whatever.
-                        currency="usd",
-                        description=prod.name)
+                    charge_items_amount += int(prod.get_price(campaign)*100)  # must be amount in cents.  whatever.
+
+            if charge_items_amount > 0:
+                stripe.Charge.create(
+                    customer=stripe_cust.id,
+                    amount=int((order.total_price()-subscription_amount)*100),
+                    currency="usd",
+                    description='%s Purchase' % campaign.company.name)
             return True
         except stripe.CardError as exc:
             self.last_status = exc.code

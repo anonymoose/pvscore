@@ -565,11 +565,15 @@ customer_order_recalc = function() {
         }
 
         var total_price = total;
-        pvs.ui.set('#oi_total_price', '$' + total_price.toFixed(2));
+        pvs.ui.set('#oi_product_total', '$' + total_price.toFixed(2));
 
         if ($_('#shipping_total')) {
-            total += parseFloat($_('#shipping_total'));
+            var ship_total = parseFloat($_('#shipping_total'));
+            total += ship_total;
+            pvs.ui.set('#oi_shipping_total', '$' + ship_total.toFixed(2));
         }
+
+        pvs.ui.set('#oi_grand_total', '$' + total.toFixed(2));
 
         var payments_applied = parseFloat($_('#oi_payments_applied').substring(1));
         var discounts_applied = parseFloat($_('#oi_discounts_applied').substring(1));

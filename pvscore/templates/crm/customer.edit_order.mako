@@ -150,9 +150,13 @@
       <div class="offset5 span4">
         <dl class="dl-horizontal" style="text-overflow:clip;">
           <dt>Product Total</dt>
-          <dd id="oi_total_price">$${h.money(total_price)}</dd>
+          <dd id="oi_product_total">$${h.money(total_item_price)}</dd>
           <dt>Shipping Total</dt>
           <dd id="oi_shipping_total">$${h.nvl(h.money(order.shipping_total),'0.00')}</dd>
+          <dt>Handling Total</dt>
+          <dd id="oi_hpandling_total">$${h.nvl(h.money(order.handling_total),'0.00')}</dd>
+          <dt>Grand Total</dt>
+          <dd id="oi_grand_total">$${h.nvl(h.money(order.total_price()),'0.00')}</dd>
           <dt>Payments Applied</dt>
           <dd id="oi_payments_applied">$${h.nvl(h.money(total_payments_applied), '0.00')}</dd>
           <dt>Discounts Applied</dt>

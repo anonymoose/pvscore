@@ -208,6 +208,9 @@ def crm_routes(config):
     adrt('ecom.site.category.named', '/category/{name}/{category_id}')
     adrt('ecom.site.category', '/category/{name}/{category_id}/{page}')
 
+    adrt('ecom.site.login.default', '/ecom/login')
+    adrt('ecom.site.login', '/ecom/login/{page}')
+
     adrt('ecom.site.page', '/ecom/page/{page}')
     adrt('ecom.site.content.default', '/ecom/content/{content_name}/{page}')
     adrt('ecom.site.content', '/ecom/content/{content_name}')
