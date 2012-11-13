@@ -3943,3 +3943,29 @@ alter table cms_site add column config_json text;
 
 update crm_company set default_campaign_id = null where company_id = '9';
 delete from crm_campaign where company_id = '9';
+
+
+
+
+select cust.customer_id,
+                                            cust.lname || ', ' || cust.fname as "name"
+                                                 from crm_customer cust, crm_campaign cam, crm_company com, crm_enterprise ent
+                                                 where (lower(cust.lname) like '%%{l}%%' or cust.email = '{l}')
+                                                 and cust.delete_dt is null
+                                                 and cust.campaign_id = cam.campaign_id
+                                                 and cam.company_id = com.company_id
+
+                                                 and com.enterprise_id = '{ent_id}'
+                                                 order by cust.lname, cust.fname limit {lim}
+
+
+
+select cust.customer_id,
+                                            cust.lname || ', ' || cust.fname as "name", cam.campaign_id
+                                                 from crm_customer cust, crm_campaign cam, crm_company com, crm_enterprise ent
+                                                 where (lower(cust.lname) like '%%cob%%' or cust.email = 'cob')
+                                                 and cust.delete_dt is null
+                                                 and cust.campaign_id = cam.campaign_id
+                                                 and cam.company_id = com.company_id
+                                                 and com.enterprise_id = '8b012e41-ee87-4109-b0d5-d392be9f515a'
+                                                 order by cust.lname, cust.fname limit 10;

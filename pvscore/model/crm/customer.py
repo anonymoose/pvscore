@@ -108,10 +108,9 @@ class Customer(ORMBase, BaseModel):
 
     @staticmethod
     def find_last_names_autocomplete(enterprise_id, user_input, limit):
-        return db.get_result_dict(['customer_id', 'name'],
-                                  """select cust.customer_id,
+        return db.get_result_dict(['customer_id', 'name'], """select cust.customer_id,
                                             cust.lname || ', ' || cust.fname as "name"
-                                                 from crm_customer cust, crm_campaign cam, crm_company com, crm_enterprise ent
+                                                 from crm_customer cust, crm_campaign cam, crm_company com
                                                  where (lower(cust.lname) like '%%{l}%%' or cust.email = '{l}')
                                                  and cust.delete_dt is null
                                                  and cust.campaign_id = cam.campaign_id
