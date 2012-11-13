@@ -10,6 +10,7 @@ set -x
 # psql -U retail -d retail -f ../backup/pvs03-retail.sql 
 # psql -U retail2 -d retail2 -f ../backup/pvs02-retail.sql 
 
+
 pg_dump -U retail -O -c retail > /tmp/production-retail-`date +"%Y-%m-%d-%I-%M-%S"`.sql
 dropdb -U postgres retail2
 createdb -U postgres retail2
@@ -19,7 +20,8 @@ scp kbedwell@pvs02:/home/kbedwell/production-retail.sql .
 psql -U retail2 -d retail2 -f production-retail.sql
 rm production-retail.sql
 python ../pvscore/pvscore/bin/delete_enterprise.py retail2 3
-python ../pvscore/pvscore/bin/uuidkey.py retail2 retail2 /Users/kbedwell/dev/pydev/pvs/storage
+#python ../pvscore/pvscore/bin/uuidkey.py retail2 retail2 /Users/kbedwell/dev/pydev/pvs/storage
+python ../pvscore/pvscore/bin/uuidkey.py retail2 retail2 /apps/pvs/storage
 
 pg_dump -U retail2 -O --data-only retail2 > retail2.sql
 pg_dump -U retail -O -c retail > retail.sql

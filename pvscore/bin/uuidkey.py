@@ -4,6 +4,7 @@ import uuid
 from pprint import pprint
 from hashlib import md5
 import pvscore.lib.util as util
+import shutil
 
 def list_tables(cur):
     cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
@@ -272,15 +273,19 @@ def fix_content(conn, cur):
     conn.commit()
 
 
-def fix_assets(conn, cur, dbname, storage_root, default_enterprise_id):
+def fix_assets_a(conn, cur, dbname, storage_root):
     cur.execute("alter table core_asset add column extension varchar(10)")
     cur.execute("alter table core_asset add column enterprise_id uuid")
     cur.execute("alter table core_asset add foreign key (enterprise_id) references crm_enterprise")
-
     conn.commit()
+
+def fix_assets_b(conn, cur, dbname, storage_root):
+    # there's only one enterprise at a time, so this works.
+    cur.execute("select enterprise_id from crm_enterprise limit 1")
+    default_enterprise_id = cur.fetchone()[0]
+
     enterprises = []
     assets = []
-
     with open('%s-keys.log' % dbname, 'r') as keylog:
         for lin in keylog.readlines():
             parts = lin.split(':')
@@ -289,11 +294,6 @@ def fix_assets(conn, cur, dbname, storage_root, default_enterprise_id):
             elif parts[0] == 'core_asset':
                 assets.append(parts[1:])
         
-    for ent in enterprises:
-        dirname = "%s/enterprises/%s" % (storage_root, ent[1])
-        util.mkdir_p(dirname)
-        util.mkdir_p("%s/assets" % dirname)
-
     for ass in assets:
         cur.execute("select id, fk_type, fk_id, name, web_path from core_asset where id = '%s'" % ass[1][:-1]) #chop line feed
         assid, fk_type, fk_id, name, web_path = cur.fetchone()
@@ -325,18 +325,32 @@ def fix_assets(conn, cur, dbname, storage_root, default_enterprise_id):
                                                                                                  _1=assid[1],
                                                                                                  _2=assid[2])
         util.run_process(cmd.split(' '))
-        cmd = "mv {storage_root}{web_path} {storage_root}/enterprises/{enterprise_id}/assets/{_0}/{_1}/{_2}/{assid}{ext}".format(storage_root=storage_root,
-                                                                                                                                 web_path=web_path,
-                                                                                                                                 enterprise_id=enterprise_id,
-                                                                                                                                 _0=assid[0],
-                                                                                                                                 _1=assid[1],
-                                                                                                                                 _2=assid[2],
-                                                                                                                                 assid=assid,
-                                                                                                                                 ext=ext)
-        util.run_process(cmd.split(' '))
-        cur.execute("update core_asset set enterprise_id = '{ent_id}', extension = '{ext}' where id = '{id}'".format(ent_id=enterprise_id,
-                                                                                                                     ext=ext,
-                                                                                                                     id=assid))
+        if os.path.exists("{storage_root}{web_path}".format(storage_root=storage_root, web_path=web_path)):
+            src = "{storage_root}{web_path}".format(storage_root=storage_root,
+                                                    web_path=web_path)
+            dst = "{storage_root}/enterprises/{enterprise_id}/assets/{_0}/{_1}/{_2}/{assid}{ext}".format(storage_root=storage_root,
+                                                                                                          enterprise_id=enterprise_id,
+                                                                                                          _0=assid[0],
+                                                                                                          _1=assid[1],
+                                                                                                          _2=assid[2],
+                                                                                                          assid=assid,
+                                                                                                          ext=ext)
+            shutil.copyfile(src, dst)
+            if os.path.exists("{storage_root}/enterprises/{enterprise_id}/assets/{_0}/{_1}/{_2}/{assid}{ext}".format(storage_root=storage_root,
+                                                                                                                         enterprise_id=enterprise_id,
+                                                                                                                         _0=assid[0],
+                                                                                                                         _1=assid[1],
+                                                                                                                         _2=assid[2],
+                                                                                                                         assid=assid,
+                                                                                                                         ext=ext)):
+
+                cur.execute("update core_asset set enterprise_id = '{ent_id}', extension = '{ext}' where id = '{id}'".format(ent_id=enterprise_id,
+                                                                                                                             ext=ext,
+                                                                                                                             id=assid))
+            else:
+                print "Bogus enterprise asset %s %s" % (assid, web_path)
+        else:
+            print "Bogus company asset %s" % web_path
 
         #    cur.execute("select 
         #    print 'cp %s 
@@ -381,7 +395,6 @@ if __name__ == '__main__':
     conn = psycopg2.connect("dbname=%s user=%s password=%s host=localhost" % (sys.argv[1], sys.argv[1], sys.argv[2]))
     cur = conn.cursor()
     storage_root = sys.argv[3]
-    default_enterprise_id = sys.argv[4]
 
     tables = list_tables(cur)
 
@@ -536,9 +549,11 @@ if __name__ == '__main__':
         print "\n\n\nvacuuming for %s" % table
         analyze_table(cur, table)
 
-    fix_assets(conn, cur, dbname, storage_root, default_enterprise_id)
     conn.commit()
+    fix_assets_a(conn, cur, dbname, storage_root)
+    fix_assets_b(conn, cur, dbname, storage_root)
 
+    conn.commit()
     cur.close()
     conn.close()
 
