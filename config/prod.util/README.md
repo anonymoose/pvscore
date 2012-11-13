@@ -9,7 +9,7 @@ mkdir -p /apps/pvs
 cd /apps/pvs
 git clone git@github.com:anonymoose/pvscore.git
 cd ~ 
-/apps/pvs/pvscore/config/prod.web/config-1-root.sh <username> <rootpw> <webpw>        <<<<---- fill in your values
+/apps/pvs/pvscore/config/prod.util/config-1-root.sh <username> <rootpw> <webpw>        <<<<---- fill in your values
 
 
 su - kbedwell
