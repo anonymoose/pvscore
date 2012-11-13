@@ -206,10 +206,15 @@ class ReportController(BaseController):
 
         self.request.response.content_type = 'application/vnd.ms-excel'
         self.request.response.headers['Content-Disposition'] = 'attachment; filename="report.xls"'
+        columns = []
+        if rep.column_names:
+            jstr = '[{"columns" : %s}]' % rep.column_names.replace("'", '"')
+            columns = json.loads(jstr)
+            columns = columns[0]['columns']
 
         return {
             'rows' : results,
-            'columns' : json.loads(rep.column_names)
+            'columns' : columns
             }
 
 

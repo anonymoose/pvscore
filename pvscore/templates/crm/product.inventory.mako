@@ -17,7 +17,7 @@ var column_names = ["", "ID", "Name", "SKU", "Manufacturer", "Inventory", "Inv P
 ];
 
 var column_model = [{name:"act",index:"act", width:18,sortable:false},
-                    {name:"product_id",index:"product_id", width:25}, 
+                    {name:"product_id",index:"product_id", width:2}, 
                     {name:"name",index:"name", width:180, editable:true}, 
                     {name:"sku",index:"sku", width:60, editable:true}, 
                     {name:"manufacturer",index:"manufacturer", width:120, editable: true},

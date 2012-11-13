@@ -5,6 +5,7 @@ from email.MIMEText import MIMEText   #pylint: disable-msg=F0401,E0611
 import redis
 import socket
 import datetime, os, errno
+from datetime import date
 import re
 #from operator import itemgetter
 import logging
@@ -626,6 +627,19 @@ def run_process_loop(exe):
 def run_process(exe):
     return run_process_loop(exe)
 
+def get_first_day(dt, d_years=0, d_months=0):
+    # d_years, d_months are "deltas" to apply to dt
+    year, mon = dt.year + d_years, dt.month + d_months
+    aaa, mon = divmod(mon - 1, 12)
+    return date(year + aaa, mon + 1, 1)
+
+
+def get_last_day(dt, d_years=0, d_months=0):
+    # d_years, d_months are "deltas" to apply to dt
+    year, mon = dt.year + d_years, dt.month + d_months
+    aaa, mon = divmod(mon - 1, 12)
+    return date(year + aaa, mon + 1, calendar.monthrange(year + aaa, mon + 1)[1])
+
 # def contains(lst, val):
 #     try:
 #         lst.index(val)
@@ -662,20 +676,6 @@ def run_process(exe):
 #        if asbool(config['app_conf']['is_development']):
 #            return False
 #    return True
-
-
-# def get_first_day(dt, d_years=0, d_months=0):
-#     # d_years, d_months are "deltas" to apply to dt
-#     year, mon = dt.year + d_years, dt.month + d_months
-#     aaa, mon = divmod(mon - 1, 12)
-#     return date(year + aaa, mon + 1, 1)
-
-
-# def get_last_day(dt, d_years=0, d_months=0):
-#     # d_years, d_months are "deltas" to apply to dt
-#     year, mon = dt.year + d_years, dt.month + d_months
-#     aaa, mon = divmod(mon - 1, 12)
-#     return date(year + aaa, mon + 1, calendar.monthrange(year + aaa, mon + 1)[1])
 
 
 # def parse_date_as_date(strdt, fmt='%Y-%m-%d'):

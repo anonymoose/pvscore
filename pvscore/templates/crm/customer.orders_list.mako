@@ -57,7 +57,7 @@
         ${h.money(due)}
         % endif
       </td>
-      <td class="clickable" nowrap>${o.create_dt}</td>
+      <td class="clickable" nowrap>${h.date_time(o.create_dt)}</td>
       <td class="clickable">${o.creator.email if o.creator else ''}</td>
       % if o.status:
       <td nowrap><strong><font color="${o.status.event.color}"><a href="javascript:customer_show_status('${o.status.status_id}')">${o.status.event.display_name}</a></font></strong></td>
@@ -72,8 +72,6 @@
         <table>
           <tr>
             <td><i>Product</i></td>
-            <td><i>Ord</i></td>
-            <td><i>Itm</i></td>
             <td><i>Price</i></td>
             <td><i>Quantity</i></td>
             <td nowrap><i>Sub Total</i></td>
@@ -85,10 +83,9 @@
                 % if oi.parent_id:
                 <img src="/static/corner-dots.gif" border="0" onclick="customer_cancel_order('${o.order_id}')">
                 % endif
-                ${oi.product.name}
+                <a href="/crm/product/edit/${oi.product_id}">${oi.product.name}</a>
               </span>
             </td>
-            <td>${oi.order_id}</td><td>${oi.order_item_id}</td>
             <td class="money"  valign="top">
               % if oi.parent_id:
               &nbsp;
@@ -106,7 +103,7 @@
     % endif
     % if o.shipping_total:
     <tr class="detail_${o.order_id}" style="display:none;">
-      <td colspan="6">&nbsp;</td>
+      <td colspan="4">&nbsp;</td>
       <td nowrap>
         Shipping Total
       </td>

@@ -1,8 +1,8 @@
 <%!
 from datetime import date, timedelta
-import app.lib.util as util
-import app.lib.db as db
-from app.model.cms.site import Site
+import pvscore.lib.util as util
+import pvscore.lib.db as db
+from pvscore.model.cms.site import Site
 
 def f(val):
    return float(val if type(val) == str or type(val) == float or type(val) == int else 0)
@@ -31,7 +31,7 @@ def rptquery(st, end, site):
                     o.campaign_id = cmp.campaign_id and
                     oi.product_id = p.product_id and
                     cmp.company_id = co.company_id and
-                    co.enterprise_id = {entid} and
+                    co.enterprise_id = '{entid}' and
                     o.delete_dt is null and
                     oi.delete_dt is null and
                     o.status_id = cs.status_id and
@@ -55,16 +55,12 @@ else:
    rpt_year_to_day = rptquery(util.format_date(first_day_of_year), util.format_date(today), site)
 %>
 
-<form method="GET" action="/crm/report/mobile/${c.report.report_id}">
+<form method="GET" action="/crm/report/mobile/${report.report_id}">
   <table>
     <tr>
       <td>Start Date</td><td>${h.text('rpt_start_dt', size=10, value=request.GET.get('rpt_start_dt'))}</td>
       <td>End Date</td><td>${h.text('rpt_end_dt', size=10, value=request.GET.get('rpt_end_dt'))}</td>
-      % if h.is_mobile():
-      <td>${h.submit('refresh', 'Refresh')}</td>
-      % else:
-      <td>${h.button('refresh', 'Refresh', onclick='report_refresh();')}</td>
-      % endif
+      <td><a href="javascript:report_refresh();">Refresh</a></td>
     <tr>
   </table>
 </form>

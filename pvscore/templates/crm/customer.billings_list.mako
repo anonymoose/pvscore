@@ -33,9 +33,9 @@
             </td>
             <td nowrap>${b.type}</td>
             <td nowrap>${b.create_dt}</td>
-            <td>${b.user_created}</td>
+            <td>${b.creator.email if b.creator else 'Customer'}</td>
             <td align="left">${h.money(b.amount)}</td>
-            <td>${b.order_id}</td>
+            <td><a href="/crm/customer/edit_order_dialog/${b.customer_id}/${b.order_id}">order</a></td>
             <td>${b.note[0:60]+'...' if b.note else ''}</td>
           </tr>
           % endfor

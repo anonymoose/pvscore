@@ -87,9 +87,9 @@ report_show = function(height, width) {
    	    rowNum:100,
    	    rowList:[100,200,300],
    	    pager: '#pager',
-            sortname: 'fname',
+            //sortname: 'fname',
             viewrecords: true,
-            sortorder: 'asc',
+            //sortorder: 'asc',
             caption: $_('#description'),
             ondblClickRow: function_dbc
         }).navGrid("#pager",{edit:false,add:false,del:false});

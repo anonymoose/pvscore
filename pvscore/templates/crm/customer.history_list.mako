@@ -26,7 +26,7 @@
               </a>
             </td>
             <td nowrap>${s.fk_type} ${s.event.display_name}</td>
-            <td nowrap>${h.date_(s.create_dt)}</td>
+            <td nowrap>${h.date_time(s.create_dt)}</td>
             <td>${s.username[:11]+'...' if s.username and len(s.username)>11 else s.username}</td>
             <td>${s.note[0:60]+'...' if s.note else ''}</td>
           </tr>

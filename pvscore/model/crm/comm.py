@@ -68,6 +68,7 @@ class Communication(ORMBase, BaseModel):
             if 'html' == self.type:
                 dat = self.data
                 dat = dat.replace('{message}', util.nvl(extra_message, ''))
+                dat = dat.replace('{current_date}', util.words_date(util.now()))
                 dat = self.tokenize(dat, customer, order)
                 for otok in self._other_tokens.keys():
                     dat = dat.replace(otok, self._other_tokens[otok])

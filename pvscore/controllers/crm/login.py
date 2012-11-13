@@ -81,7 +81,7 @@ class LoginController(BaseController):
             return self.find_redirect()
         else:
             self.flash('Invalid User or Password')
-            return self.raise_redirect()
+            return self.raise_redirect(self.request.referrer)
 
 
     @view_config(route_name='crm.login.customer_forgot_password')

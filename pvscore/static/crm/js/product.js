@@ -169,7 +169,7 @@ pvs.onload.push(function() {
 		var ids = jQuery("#inventory").jqGrid('getDataIDs');
 		for(var i=0;i < ids.length;i++){
 		    var cl = ids[i];
-		    se = "<img src='/public/images/icons/silk/disk.png' alt='Save Changes' title='Save Changes' onclick=\"product_inventory_save('"+cl+"');\"  />";
+		    se = "<img src='/static/icons/silk/disk.png' alt='Save Changes' title='Save Changes' onclick=\"product_inventory_save('"+cl+"');\"  />";
 		    jQuery("#inventory").jqGrid('setRowData',ids[i],{act:se});
 		}
 	    },

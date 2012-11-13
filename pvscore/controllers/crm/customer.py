@@ -440,6 +440,7 @@ class CustomerController(BaseController):
             Status.add(customer, order, Status.find_event(self.enterprise_id, order, 'PAYMENT_APPLIED'), status_note)
             self.flash(status_note)
         customer.invalidate_caches()
+        customer.flush()
         return 'True'
 
     
@@ -714,7 +715,6 @@ class CustomerController(BaseController):
         api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
         api.set_coupon(self.request.POST.get('coupon_code'))
         if api.purchase(order, bill, util.request_ip(self.request)):
-            import pdb; pdb.set_trace()
             # accept terms if they sent accept_terms as positive across (checkbox)
             if ('accept_terms' in self.request.POST and self.request.POST['accept_terms'] == '1'):
                 accept = OrderItemTermsAcceptance()
