@@ -187,6 +187,10 @@ def hours_list():
             ['23:30', '11:30 pm']]
 
 
+def is_production():
+    return cache_get('pvs.is_production') is not None
+
+
 def cache_get(key):
     red = redis.StrictRedis(host='localhost', port=6379, db=0)
     ret = red.get(key)
@@ -673,13 +677,6 @@ def get_last_day(dt, d_years=0, d_months=0):
 
 # def index_of_min(lst):
 #     return min(enumerate(lst), key=itemgetter(1))[0]
-
-
-#def is_production():
-#    if 'is_development' in config['app_conf']:
-#        if asbool(config['app_conf']['is_development']):
-#            return False
-#    return True
 
 
 # def parse_date_as_date(strdt, fmt='%Y-%m-%d'):

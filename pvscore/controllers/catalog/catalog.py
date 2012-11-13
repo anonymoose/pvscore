@@ -19,8 +19,9 @@ class CatalogBaseController(BaseController):
         if not 'cart' in self.session:
             self.session['cart'] = Cart(site)
         cart = self.session['cart']
+        is_production = util.is_production()
         return {'site' : site,
-                'base' : '%s/%s/' % (self.request.host_url, site.namespace),
+                'base' : '%s/%s/' % (self.request.host_url.replace('http', 'https') if util.is_production() else self.request.host_url , site.namespace),
                 'user' : self.request.ctx.user,
                 'cart' : cart,
                 'seo_title' : '',
