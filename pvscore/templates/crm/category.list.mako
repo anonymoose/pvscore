@@ -8,7 +8,6 @@
   <table class="results sortable table table-striped" width="100%">
     <thead>
       <tr>
-        <td>ID</td>
         <td width="50%">Name</td>
         <td>Create Date</td>
       </tr>
@@ -16,7 +15,6 @@
     <tbody>
       % for pc in categories:
       <tr>
-        <td>${pc.category_id}</td>
         <td width="50%" nowrap>${h.link_to(pc.name, '/crm/product/category/edit/%s' % pc.category_id)}</td>
         <td nowrap>${pc.create_dt}</td>
       </tr>

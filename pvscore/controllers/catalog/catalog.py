@@ -106,9 +106,9 @@ class CatalogController(CatalogBaseController):
         params['attrs'] = attrs
 
         params['price'] = util.money(prod.get_price(params['campaign']))
-        params['seo_title'] = prod.seo_title
-        params['seo_keywords'] = prod.seo_keywords
-        params['seo_description'] = prod.seo_description
+        params['seo_title'] = util.nvl(prod.seo_title, self.request.ctx.site.seo_title)
+        params['seo_keywords'] = util.nvl(prod.seo_keywords, self.request.ctx.site.seo_title)
+        params['seo_description'] = util.nvl(prod.seo_description, self.request.ctx.site.seo_title)
         return self.render(page, params)
 
 
@@ -140,6 +140,10 @@ class CatalogController(CatalogBaseController):
         category = ProductCategory.load(category_id)
         params['products'] = util.page_list(category.products, self.request.GET.get('offset'), self.request.GET.get('limit'))
         params['category'] = category
+        params['seo_title'] = util.nvl(category.seo_title, self.request.ctx.site.seo_title)
+        params['seo_keywords'] = util.nvl(category.seo_keywords, self.request.ctx.site.seo_keywords)
+        params['seo_description'] = util.nvl(category.seo_description, self.request.ctx.site.seo_description)
+
         return self.render(page, params)
 
 

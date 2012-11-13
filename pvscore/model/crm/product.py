@@ -495,8 +495,8 @@ class ProductCategory(ORMBase, BaseModel):
     def products(self):
         if not self.category_id:
             return []
+        # TODO: Fix Category Caching .options(FromCache("ProductCategory.products", self.category_id))\
         return Session.query(Product)\
-            .options(FromCache("ProductCategory.Products.%s" % self.category_id))\
             .join((ProductCategoryJoin, Product.product_id == ProductCategoryJoin.product_id),
                   (ProductCategory, ProductCategoryJoin.category_id == ProductCategory.category_id),
                   (Company, ProductCategory.company_id == Company.company_id))\
@@ -530,7 +530,7 @@ class ProductCategory(ORMBase, BaseModel):
     @staticmethod
     def find_by_campaign(campaign):
         return Session.query(ProductCategory) \
-            .options(FromCache('Product.find_all', campaign.company.enterprise_id)) \
+            .options(FromCache('ProductCategory.find_by_campaign', campaign.campaign_id)) \
             .join((Company, ProductCategory.company_id == Company.company_id)) \
             .filter(and_(ProductCategory.delete_dt == None,
                          Company.company_id == campaign.company_id)) \
@@ -539,8 +539,11 @@ class ProductCategory(ORMBase, BaseModel):
 
 
     def invalidate_caches(self, **kwargs):
-        invalidate(self, 'ProductCategory.find_all', self.company.enterprise_id)
-        invalidate(self, 'ProductCategory.find_by_campaign', '%s' % (self.company.default_campaign_id))
+        self.invalidate_self()
+        if self.company:
+            invalidate(self, 'ProductCategory.find_all', self.company.enterprise_id)
+            invalidate(self, 'ProductCategory.find_by_campaign', '%s' % (self.company.default_campaign_id))
+        invalidate(self, 'ProductCategory.products', '%s' % self.category_id)
 
 
     @staticmethod

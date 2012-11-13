@@ -123,11 +123,9 @@ def _get_cache_parameters(query):
 
     namespace = _namespace_from_query(namespace, query)
 
-    args = _params_from_query(query)
-    cache_key = cache_key if cache_key is not None else " ".join([str(x) for x in args])
-        # cache key - the value arguments from this query's parameters.
-
-
+    if cache_key is None:
+        args = _params_from_query(query)
+        cache_key = " ".join([str(x) for x in args])
 
     # get cache
     cache_ = query.cache_manager.get_cache_region(namespace, region)

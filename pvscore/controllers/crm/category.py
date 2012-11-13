@@ -30,8 +30,8 @@ class CategoryController(BaseController):
             self.forbid_if(not category or category.company.enterprise_id != self.enterprise_id)
         else:
             category = ProductCategory()
+
         all_products = Product.find_all(self.enterprise_id)
-        
         return {'companies' : companies,
                 'category' : category,
                 'all_products' : all_products}
@@ -61,6 +61,8 @@ class CategoryController(BaseController):
                 child_product_id = self.request.POST.get(k)
                 pcat.add_product(child_product_id)
 
+        pcat.flush()
+        pcat.invalidate_caches()
         self.request.session.flash('Successfully saved %s.' % pcat.name)
         return HTTPFound('/crm/product/category/edit/%s' % pcat.category_id)
 

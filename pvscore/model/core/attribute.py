@@ -25,8 +25,8 @@ class Attribute(ORMBase, BaseModel):
     @staticmethod
     def find(fk_type, attr_name):
         #pylint: disable-msg=E1101
+        # TODO: Fix Attribute caching:  .options(FromCache('Attribute.find.%s.%s' % (fk_type, attr_name)))\
         return Session.query(Attribute)\
-            .options(FromCache('Attribute.find.%s.%s' % (fk_type, attr_name)))\
             .filter(and_(Attribute.fk_type == fk_type,
                          Attribute.attr_name == attr_name)).first()
 
@@ -92,8 +92,8 @@ class AttributeValue(ORMBase, BaseModel):
     @staticmethod
     def find(attr, fk_id):
         #pylint: disable-msg=E1101
+        #TODO: Fix attribute value caching:  .options(FromCache('AttributeValue.find.%s.%s' % (attr.attr_id, fk_id)))\
         return Session.query(AttributeValue)\
-            .options(FromCache('AttributeValue.find.%s.%s' % (attr.attr_id, fk_id)))\
             .filter(and_(AttributeValue.fk_type == attr.fk_type,
                          AttributeValue.fk_id == fk_id,
                          AttributeValue.attr_id == attr.attr_id)).first()
@@ -105,9 +105,9 @@ class AttributeValue(ORMBase, BaseModel):
         fk_type = type(obj).__name__ 
         fk_id = getattr(obj, obj.__pk__)
 
+        # TODO: Fix attribute value caching:    .options(FromCache('AttributeValue.%s.%s' % (fk_type, fk_id))) \
         return Session.query(AttributeValue).join((Attribute, AttributeValue.attr_id == Attribute.attr_id)) \
             .options(joinedload('attribute')) \
-            .options(FromCache('AttributeValue.%s.%s' % (fk_type, fk_id))) \
             .filter(and_(AttributeValue.fk_type == fk_type,
                          AttributeValue.fk_id == fk_id)) \
                          .order_by(AttributeValue.attr_value_id).all()
