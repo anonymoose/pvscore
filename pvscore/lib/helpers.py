@@ -53,6 +53,10 @@ def google_analytics(site, script_tags=True):
     return ''
 
 
+def is_production():
+    return util.is_production()
+
+
 def this_year():
     return util.this_year()
 
