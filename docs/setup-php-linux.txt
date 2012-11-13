@@ -15,9 +15,6 @@ mysqladmin -u root password Zachary234
 # if you want mysql...
 yum install lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP
 
-# if you don't.
-yum install lighttpd-fastcgi php-cli php-gd php-imap php-ldap php-odbc php-pgsql php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP
-
 pear install Mail
 
 vi /etc/php.ini

@@ -36,7 +36,8 @@ systemctl restart sshd.service
 # yum it up.
 yum -y update
 yum -y groupinstall 'Development Tools'
-yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate freetype freetype-devel libpng libpng-devel at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel nginx fail2ban 
+yum -y install dos2unix readline-devel zlib-devel emacs-nox mlocate freetype freetype-devel libpng libpng-devel at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel nginx fail2ban 
+yum -y install mysql mysql-server lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP
 updatedb
 
 ########################################################################
@@ -52,10 +53,6 @@ mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.orig
 
 
 ################################################################
-## hosts
-cp /apps/pvs/pvscore/config/prod.util/etc/hosts /etc/hosts
-
-################################################################
 ## fail2ban
 systemctl enable fail2ban.service
 systemctl start fail2ban.service
@@ -64,11 +61,5 @@ systemctl start fail2ban.service
 ## atd
 systemctl enable atd.service
 systemctl start atd.service
-
-################################################################
-## Logrotate
-#cp /apps/pvs/pvscore/config/prod.util/etc/logrotate.d/apps /etc/logrotate.d/apps
-#systemctl enable logrotate.service
-#systemctl start logrotate.service
 
 
