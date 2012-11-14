@@ -421,9 +421,9 @@ class CustomerController(BaseController):
         method = util.nvl(pmt_method, self.request.POST.get('pmt_method'))
         note = util.nvl(pmt_note, self.request.POST.get('pmt_note'))
 
-        self.forbid_if((amt + balance_amount_to_apply) > prior_total_due,
+        self.forbid_if(round(amt + balance_amount_to_apply, 2) > round(prior_total_due, 2),
                        "amt + balance_amount_to_apply > prior_total_due")
-        self.forbid_if(current_customer_balance > 0 and balance_amount_to_apply > current_customer_balance, 
+        self.forbid_if(current_customer_balance > 0 and round(balance_amount_to_apply, 2) > round(current_customer_balance, 2), 
                        "balance_amount_to_apply > current_customer_balance")
 
         pmt_type = 'PartialPayment'
