@@ -7,7 +7,7 @@ import pvscore.lib.util as util
 import shutil
 
 def list_tables(cur):
-    cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+    cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' and table_name not like 'wm_%'")
     return [tname[0] for tname in cur.fetchall()]
 
 
@@ -162,7 +162,7 @@ def fix_user_table_pre(conn, cur, tables):
     cur.execute('alter table core_status drop constraint status_username_fkey')
     if 'wm_ireport' in tables:
         cur.execute('alter table wm_ireport drop constraint wm_ireport_user_created_fkey')
-    cur.execute('alter table core_user drop constraint users_pkey')
+    cur.execute('alter table core_user drop constraint users_pkey cascade')
     cur.execute('alter table core_user add primary key (user_id)')
     cur.execute("select user_id, username from core_user")
     users = cur.fetchall()

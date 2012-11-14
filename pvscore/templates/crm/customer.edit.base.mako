@@ -72,7 +72,9 @@ ${next.body()}
       % if customer.customer_id:
         <li><hr></li>
         % for link_name in plugin_registry.category('customer_sidebar_link'):
-          <li><a href="${plugin_registry.getattr('customer_sidebar_link', link_name, 'href')}/${customer.customer_id}">${link_name}</a></li>
+          % if plugin_registry.is_applicable('customer_sidebar_link', link_name, request):
+            <li><a href="${plugin_registry.getattr('customer_sidebar_link', link_name, 'href')}/${customer.customer_id}">${link_name}</a></li>
+          % endif
         % endfor
         <li><hr></li>
         <li><a href="/crm/customer/new">New Customer</a></li>
