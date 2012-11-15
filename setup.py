@@ -12,6 +12,7 @@ requires = [
     'pyramid_tm',
     'pyramid_debugtoolbar',
     'pyramid_mailer',
+    'pyramid_exclog',
     'zope.sqlalchemy',
     'waitress',
     'psycopg2',

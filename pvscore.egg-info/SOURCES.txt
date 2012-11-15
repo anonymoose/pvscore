@@ -14,6 +14,7 @@ pvscore.egg-info/not-zip-safe
 pvscore.egg-info/requires.txt
 pvscore.egg-info/top_level.txt
 pvscore/bin/__init__.py
+pvscore/bin/delete_customers.py
 pvscore/bin/delete_enterprise.py
 pvscore/bin/load_products.py
 pvscore/bin/uuidkey.py

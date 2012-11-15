@@ -83,10 +83,10 @@ export IP=`ifconfig eth1 | grep inet | grep -v inet6 | awk '{print $2}'`
 echo server_address=$IP >> /etc/nagios/nrpe.cfg
 
 
-rm -rf /apps/pvs/pvscore/config/prod.util/etc/nagios/nagios.cfg
-rm -rf /apps/pvs/pvscore/config/prod.util/etc/nagios/nrpe.cfg
-rm -rf /apps/pvs/pvscore/config/prod.util/etc/nagios/objects/*.cfg
-rm -rf /apps/pvs/pvscore/config/prod.util/usr/lib64/nagios/plugins/*
+rm -rf /etc/nagios/nagios.cfg
+rm -rf /etc/nagios/nrpe.cfg
+rm -rf /etc/nagios/objects/*.cfg
+rm -rf /usr/lib64/nagios/plugins/*
 
 cp /apps/pvs/pvscore/config/prod.util/etc/nagios/nagios.cfg /etc/nagios
 cp /apps/pvs/pvscore/config/prod.util/etc/nagios/nrpe.cfg /etc/nagios

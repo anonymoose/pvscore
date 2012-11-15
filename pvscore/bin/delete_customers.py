@@ -18,6 +18,7 @@ def full_delete(conn, cur, customer_id):
     doit(conn, cur, "delete from crm_journal where customer_id = '%s'" % customer_id)
     doit(conn, cur, "delete from crm_product_inventory_journal where order_item_id in (select order_item_id from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id = '%s'))" % customer_id)
     doit(conn, cur, "delete from crm_oi_terms_acceptance where order_id in (select order_id from crm_customer_order where customer_id = '%s')" % customer_id)
+    doit(conn, cur, "delete from wm_ireport_order where order_id in (select order_id from crm_customer_order where customer_id = '%s')" % customer_id)
     doit(conn, cur, "delete from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id = '%s')" % customer_id)
     doit(conn, cur, "delete from crm_customer_order where customer_id = '%s'" % customer_id)
     #doit(conn, cur, "delete from pvs_listing where customer_id = #'%s'" % customer_id)
