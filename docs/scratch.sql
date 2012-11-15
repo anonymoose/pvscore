@@ -3969,3 +3969,16 @@ select cust.customer_id,
                                                  and cam.company_id = com.company_id
                                                  and com.enterprise_id = '8b012e41-ee87-4109-b0d5-d392be9f515a'
                                                  order by cust.lname, cust.fname limit 10;
+
+
+
+
+--
+-- create a smaller version of wm
+--
+delete from wm_eod_quote where quote_dt < '2012-06-01';
+delete from crm_customer where customer_id > 10000;
+create index idx_customer_status on core_status (customer_id);
+-- python pvscore/bin/delete_customers.py wm wm "where customer_id > 5000"
+
+

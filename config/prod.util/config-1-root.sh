@@ -76,11 +76,25 @@ echo nagios | passwd --stdin nagios
 groupadd nagcmd
 usermod -a -G nagcmd nagios
 usermod -a -G nagcmd nginx
-systemctl enable nagios.service
-systemctl enable nrpe.service
+htpasswd -b /etc/nagios/passwd nagiosadmin $2
 
 echo nrpe      5666/tcp    >> /etc/services
-
 export IP=`ifconfig eth1 | grep inet | grep -v inet6 | awk '{print $2}'`
-
 echo server_address=$IP >> /etc/nagios/nrpe.cfg
+
+
+rm -rf /apps/pvs/pvscore/config/prod.util/etc/nagios/nagios.cfg
+rm -rf /apps/pvs/pvscore/config/prod.util/etc/nagios/nrpe.cfg
+rm -rf /apps/pvs/pvscore/config/prod.util/etc/nagios/objects/*.cfg
+rm -rf /apps/pvs/pvscore/config/prod.util/usr/lib64/nagios/plugins/*
+
+cp /apps/pvs/pvscore/config/prod.util/etc/nagios/nagios.cfg /etc/nagios
+cp /apps/pvs/pvscore/config/prod.util/etc/nagios/nrpe.cfg /etc/nagios
+cp /apps/pvs/pvscore/config/prod.util/etc/nagios/objects/*.cfg /etc/nagios/objects
+cp -R /apps/pvs/pvscore/config/prod.util/usr/lib64/nagios/plugins/* /usr/lib64/nagios/plugins
+
+systemctl enable nagios.service
+systemctl enable nrpe.service
+systemctl start nagios.service
+systemctl start nrpe.service
+
