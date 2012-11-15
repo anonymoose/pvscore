@@ -36,8 +36,13 @@ systemctl restart sshd.service
 # yum it up.
 yum -y update
 yum -y groupinstall 'Development Tools'
-yum -y install nagios nagios-common nagios-devel nagios-plugins-all nrpe openssl-devel xinetd httpd php mysql gcc glibc glibc-common gd gd-devel mysql-server lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP dos2unix readline-devel zlib-devel emacs-nox mlocate freetype freetype-devel libpng libpng-devel at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel fail2ban 
+yum -y install nagios nagios-common nagios-devel nagios-plugins-nrpe nagios-plugins-all nrpe openssl-devel xinetd httpd php mysql gcc glibc glibc-common gd gd-devel mysql-server lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP dos2unix readline-devel zlib-devel emacs-nox mlocate freetype freetype-devel libpng libpng-devel at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel fail2ban 
 updatedb
+
+########################################################################
+# time sync
+echo 0 4 * * * root /sbin/ntpdate pool.ntp.org >> /etc/crontab
+systemctl restart crond.service
 
 ########################################################################
 # configure nginx
