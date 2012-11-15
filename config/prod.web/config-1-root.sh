@@ -45,7 +45,7 @@ curl -O http://yum.postgresql.org/9.1/fedora/fedora-17-x86_64/pgdg-fedora91-9.1-
 rpm -ivh pgdg-fedora91-9.1-4.noarch.rpm
 yum -y update
 yum -y groupinstall 'Development Tools'
-yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack.x86_64 lapack-devel.x86_64 atlas.x86_64 atlas.x86_64 blas.x86_64 blas-devel.x86_64 freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel nginx fail2ban redis postgresql91-server postgresql91-contrib postgresql91-devel python-psycopg2
+yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack.x86_64 lapack-devel.x86_64 atlas.x86_64 atlas.x86_64 blas.x86_64 blas-devel.x86_64 freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel nginx fail2ban redis postgresql91-server postgresql91-contrib postgresql91-devel python-psycopg2 nrpe nagios-plugins-all openssl-devel xinetd
 updatedb
 
 ########################################################################
@@ -59,10 +59,6 @@ mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.orig
 # don't start until web src is installed
 #systemctl start nginx.service
 
-
-################################################################
-## hosts
-cp /apps/pvs/pvscore/config/prod.web/etc/hosts /etc/hosts
 
 ################################################################
 ## fail2ban

@@ -48,7 +48,7 @@
             </div>
             <div class="span2">
               <label for="">Created by</label>
-              ${order.user_created if order.user_created else 'Customer'}
+              ${order.creator.email if order.user_created else 'Customer'}
             </div>
           </div>
         </div> <!-- well -->

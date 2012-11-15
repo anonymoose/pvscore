@@ -38,6 +38,7 @@ yum -y update
 yum -y groupinstall 'Development Tools'
 yum -y install dos2unix readline-devel zlib-devel emacs-nox mlocate freetype freetype-devel libpng libpng-devel at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel nginx fail2ban 
 yum -y install mysql mysql-server lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP
+yum -y install nagios nagios-common nagios-devel nagios-plugins-all nrpe openssl-devel xinetd
 updatedb
 
 ########################################################################
@@ -53,6 +54,12 @@ mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.orig
 
 
 ################################################################
+## mysql
+systemctl enable mysqld.service
+systemctl start mysqld.service
+mysqladmin -u root password $2
+
+################################################################
 ## fail2ban
 systemctl enable fail2ban.service
 systemctl start fail2ban.service
@@ -63,3 +70,24 @@ systemctl enable atd.service
 systemctl start atd.service
 
 
+########################################################################
+# app dirs
+sudo mkdir -p /apps
+sudo chmod -R g+w /apps
+sudo chown -R web:web /apps
+
+########################################################################
+# nagios
+useradd nagios
+echo nagios | passwd --stdin nagios
+groupadd nagcmd
+usermod -a -G nagcmd nagios
+usermod -a -G nagcmd nginx
+systemctl enable nagios.service
+systemctl enable nrpe.service
+
+echo nrpe      5666/tcp    >> /etc/services
+
+export IP=`ifconfig eth1 | grep inet | grep -v inet6 | awk '{print $2}'`
+
+echo server_address=$IP >> /etc/nagios/nrpe.cfg
