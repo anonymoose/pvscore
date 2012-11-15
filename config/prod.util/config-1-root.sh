@@ -79,22 +79,27 @@ usermod -a -G nagcmd nginx
 htpasswd -b /etc/nagios/passwd nagiosadmin $2
 
 echo nrpe      5666/tcp    >> /etc/services
-export IP=`ifconfig eth1 | grep inet | grep -v inet6 | awk '{print $2}'`
-echo server_address=$IP >> /etc/nagios/nrpe.cfg
 
 
 rm -rf /etc/nagios/nagios.cfg
 rm -rf /etc/nagios/nrpe.cfg
 rm -rf /etc/nagios/objects/*.cfg
-rm -rf /usr/lib64/nagios/plugins/*
 
 cp /apps/pvs/pvscore/config/prod.util/etc/nagios/nagios.cfg /etc/nagios
 cp /apps/pvs/pvscore/config/prod.util/etc/nagios/nrpe.cfg /etc/nagios
 cp /apps/pvs/pvscore/config/prod.util/etc/nagios/objects/*.cfg /etc/nagios/objects
 cp -R /apps/pvs/pvscore/config/prod.util/usr/lib64/nagios/plugins/* /usr/lib64/nagios/plugins
 
+export IP=`ifconfig eth1 | grep inet | grep -v inet6 | awk '{print $2}'`
+echo server_address=$IP >> /etc/nagios/nrpe.cfg
+
 systemctl enable nagios.service
 systemctl enable nrpe.service
+systemctl stop nagios.service
 systemctl start nagios.service
+systemctl stop nrpe.service
 systemctl start nrpe.service
+
+cp /apps/pvs/pvscore/config/prod.util/etc/httpd/conf.d/nagios-vhost.conf /etc/httpd/conf.d
+systemctl start httpd.service
 
