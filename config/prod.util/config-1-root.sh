@@ -86,9 +86,9 @@ rm -rf /etc/nagios/nrpe.cfg
 rm -rf /etc/nagios/objects/*.cfg
 
 cp /apps/pvs/pvscore/config/prod.util/etc/nagios/nagios.cfg /etc/nagios
-cp /apps/pvs/pvscore/config/prod.util/etc/nagios/nrpe.cfg /etc/nagios
+cp /apps/pvs/pvscore/config/prod.common/etc/nagios/nrpe.cfg /etc/nagios
 cp /apps/pvs/pvscore/config/prod.util/etc/nagios/objects/*.cfg /etc/nagios/objects
-cp -R /apps/pvs/pvscore/config/prod.util/usr/lib64/nagios/plugins/* /usr/lib64/nagios/plugins
+cp -R /apps/pvs/pvscore/config/prod.common/usr/lib64/nagios/plugins/* /usr/lib64/nagios/plugins
 
 export IP=`ifconfig eth1 | grep inet | grep -v inet6 | awk '{print $2}'`
 echo server_address=$IP >> /etc/nagios/nrpe.cfg

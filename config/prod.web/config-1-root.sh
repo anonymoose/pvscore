@@ -46,6 +46,7 @@ rpm -ivh pgdg-fedora91-9.1-4.noarch.rpm
 yum -y update
 yum -y groupinstall 'Development Tools'
 yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack.x86_64 lapack-devel.x86_64 atlas.x86_64 atlas.x86_64 blas.x86_64 blas-devel.x86_64 freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel nginx fail2ban redis postgresql91-server postgresql91-contrib postgresql91-devel python-psycopg2 nrpe nagios-plugins-all openssl-devel xinetd
+yum -y install nagios nagios-common nagios-devel nagios-plugins-all nrpe
 updatedb
 
 ########################################################################
@@ -92,3 +93,32 @@ usermod -a -G wheel postgres
 cp /apps/pvs/pvscore/config/prod.web/usr/lib/systemd/system/pvs.service /usr/lib/systemd/system
 ln -s /usr/lib/systemd/system/pvs.service /etc/systemd/system/multi-user.target.wants/pvs.service
 systemctl daemon-reload
+
+
+########################################################################
+# nagios
+useradd nagios
+echo nagios | passwd --stdin nagios
+groupadd nagcmd
+usermod -a -G nagcmd nagios
+usermod -a -G nagcmd nginx
+htpasswd -b /etc/nagios/passwd nagiosadmin $2
+
+echo nrpe      5666/tcp    >> /etc/services
+
+rm -rf /etc/nagios/nagios.cfg
+rm -rf /etc/nagios/nrpe.cfg
+rm -rf /etc/nagios/objects
+
+
+cp /apps/pvs/pvscore/config/prod.common/etc/nagios/nrpe.cfg /etc/nagios
+cp -R /apps/pvs/pvscore/config/prod.common/usr/lib64/nagios/plugins/* /usr/lib64/nagios/plugins
+
+export IP=`ifconfig eth1 | grep inet | grep -v inet6 | awk '{print $2}'`
+echo server_address=$IP >> /etc/nagios/nrpe.cfg
+
+systemctl enable nrpe.service
+systemctl stop nrpe.service
+systemctl start nrpe.service
+
+
