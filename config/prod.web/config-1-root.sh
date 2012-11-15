@@ -46,7 +46,7 @@ rpm -ivh pgdg-fedora91-9.1-4.noarch.rpm
 yum -y update
 yum -y groupinstall 'Development Tools'
 yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack.x86_64 lapack-devel.x86_64 atlas.x86_64 atlas.x86_64 blas.x86_64 blas-devel.x86_64 freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel nginx fail2ban redis postgresql91-server postgresql91-contrib postgresql91-devel python-psycopg2 nrpe nagios-plugins-all openssl-devel xinetd ntpdate
-yum -y install nagios nagios-common nagios-devel nagios-plugins-all nrpe
+yum -y install nagios nagios-common nagios-devel nagios-plugins-all nrpe nagios-plugins-nrpe
 updatedb
 
 ########################################################################
@@ -107,8 +107,6 @@ useradd nagios
 echo nagios | passwd --stdin nagios
 groupadd nagcmd
 usermod -a -G nagcmd nagios
-usermod -a -G nagcmd nginx
-htpasswd -b /etc/nagios/passwd nagiosadmin $2
 
 echo nrpe      5666/tcp    >> /etc/services
 
