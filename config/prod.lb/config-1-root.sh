@@ -69,6 +69,8 @@ useradd nagios
 echo nagios | passwd --stdin nagios
 groupadd nagcmd
 usermod -a -G nagcmd nagios
+usermod -a -G root nagios
+chmod g+r /var/log/messages
 
 echo nrpe      5666/tcp    >> /etc/services
 

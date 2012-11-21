@@ -81,6 +81,8 @@ echo nagios | passwd --stdin nagios
 groupadd nagcmd
 usermod -a -G nagcmd nagios
 usermod -a -G nagcmd nginx
+usermod -a -G root nagios
+chmod g+r /var/log/messages
 htpasswd -b /etc/nagios/passwd nagiosadmin $2
 
 echo nrpe      5666/tcp    >> /etc/services
