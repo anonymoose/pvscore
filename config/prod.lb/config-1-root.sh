@@ -57,6 +57,7 @@ systemctl start atd.service
 ########################################################################
 # pound
 systemctl enable pound.service
+rm -f /etc/pound.cfg
 cp /apps/pvs/pvscore/config/prod.lb/etc/pound.cfg /etc
 cp /apps/pvs/pvscore/config/prod.lb/etc/pki/tls/certs/*.pem /etc/pki/tls/certs
 systemctl start pound.service
