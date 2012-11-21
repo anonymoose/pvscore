@@ -3985,3 +3985,50 @@ create index idx_holding_customer on wm_customer_holding (customer_id);
 explain delete from core_status where customer_id = '40';
 select count(0) from core_status;
 
+
+
+delete from core_asset where status_id in (select status_id from core_status where customer_id > 1000) ;
+delete from crm_billing_history where customer_id > 1000;
+delete from crm_product_inventory_journal where return_id in (select return_id from crm_product_return where journal_id in (select journal_id from crm_journal where customer_id > 1000)) ;
+delete from crm_product_return where journal_id in (select journal_id from crm_journal where customer_id > 1000) ;
+delete from crm_journal where customer_id > 1000 ;
+delete from crm_product_inventory_journal where order_item_id in (select order_item_id from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id > 1000 ));
+delete from crm_oi_terms_acceptance where order_id in (select order_id from crm_customer_order where customer_id > 1000);
+delete from wm_ireport_order where order_id in (select order_id from crm_customer_order where customer_id > 1000) ;
+--delete from pvs_listing where customer_id > 1000 ;
+update crm_customer set status_id = null where customer_id > 1000 ;
+delete from crm_billing_history where customer_id > 1000 ;
+delete from wm_portfolio where customer_id > 1000 ;
+delete from wm_ireport_view_log where customer_id > 1000 ;
+delete from wm_customer_holding where customer_id > 1000 ;
+
+
+
+delete from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id > 1000) ;
+delete from crm_customer_order where customer_id > 1000 ;
+delete from core_status where customer_id > 1000 ;
+delete from crm_billing where billing_id in (select billing_id from crm_customer where customer_id > 1000);
+
+
+
+
+#    billing_ids = get_ids(cur, "select billing_id from crm_customer where customer_id = '%s'" % customer_id)
+#    doit(conn, cur, "delete from crm_customer where customer_id = '%s'" % customer_id)
+#    for bill_id in billing_ids:
+#        if bill_id:
+#            doit(conn, cur, "delete from crm_billing where billing_id = '%s'" % bill_id)
+
+
+delete from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id > 1000) ;
+
+\d crm_customer_order;
+
+
+select product_id, name, delete_dt from crm_product order by product_id desc;
+
+select count(0) from crm_order_item where product_id = 1668;
+
+
+
+delete from crm_order_item where product_id = 1668;
+

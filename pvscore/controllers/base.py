@@ -50,6 +50,13 @@ class BaseController(BaseUI):
             raise HTTPForbidden()
 
 
+    def redir_if(self, result, goto='/', msg=None):
+        if result:
+            if msg:
+                log.info(msg)
+            raise HTTPFound(goto)
+
+
     def cancel_session(self):
         self.session.invalidate()
 
