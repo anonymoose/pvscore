@@ -8,8 +8,10 @@ from email.MIMEText import MIMEText   #pylint: disable-msg=F0401,E0611
 #import email
 from email.MIMEBase import MIMEBase   #pylint: disable-msg=F0401,E0611
 from email.Encoders import encode_base64  #pylint: disable-msg=F0401,E0611
-import logging
 import os
+import logging
+import logging.handlers
+import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
 
@@ -82,3 +84,44 @@ class UserMail(object):
             #    attachment = MIMEAudio(attachment_file.read(), _subType=sub_type)
             #else:
 
+
+ 
+
+class GmailLogHandler(logging.handlers.SMTPHandler):
+    """ KB : [2012-11-21]:
+    Send exceptions to gmail, per standard python logging
+
+    [handler_exc_handler]
+    class = pvscore.lib.mail.GmailLogHandler
+    args = (("smtp.gmail.com", 587), 'info@eyefound.it', ['kenneth.bedwell@gmail.com'], 'EXCEPTION', ('info@eyefound.it', 'g00df00d'))
+    level = ERROR
+    formatter = exc_formatter
+    """
+    def emit(self, record):
+        """
+        Emit a record.
+         Format the record and send it to the specified addressees.
+        """
+        try:
+            port = self.mailport
+            if not port:
+                port = smtplib.SMTP_PORT
+            smtp = smtplib.SMTP(self.mailhost, port)
+            msg = self.format(record)
+            msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
+                            self.fromaddr,
+                            ",".join(self.toaddrs),
+                            self.getSubject(record),
+                            util.now(), msg)
+            if self.username:
+                smtp.ehlo() # for tls add this line
+                smtp.starttls() # for tls add this line
+                smtp.ehlo() # for tls add this line
+                smtp.login(self.username, self.password)
+            smtp.sendmail(self.fromaddr, self.toaddrs, msg)
+            smtp.quit()
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
+ 
