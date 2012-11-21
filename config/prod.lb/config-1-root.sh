@@ -36,7 +36,7 @@ systemctl restart sshd.service
 # yum it up.
 yum -y update
 yum -y groupinstall 'Development Tools'
-yum -y install nagios nagios-common nagios-devel nagios-plugins-nrpe nagios-plugins-all nrpe openssl-devel xinetd httpd php mysql gcc glibc glibc-common dos2unix readline-devel zlib-devel emacs-nox mlocate at openssl xslt libxml libxml-devel libxslt libxslt-devel fail2ban 
+yum -y install Pound nagios nagios-common nagios-devel nagios-plugins-nrpe nagios-plugins-all nrpe openssl-devel xinetd httpd php mysql gcc glibc glibc-common dos2unix readline-devel zlib-devel emacs-nox mlocate at openssl xslt libxml libxml-devel libxslt libxslt-devel fail2ban 
 updatedb
 
 ########################################################################
@@ -55,10 +55,12 @@ systemctl enable atd.service
 systemctl start atd.service
 
 ########################################################################
-# app dirs
-sudo mkdir -p /apps
-sudo chmod -R g+w /apps
-sudo chown -R web:web /apps
+# pound
+systemctl enable pound.service
+cp /apps/pvs/pvscore/config/prod.lb/etc/pound.cfg /etc
+cp /apps/pvs/pvscore/config/prod.lb/etc/pki/tls/certs/*.pem /etc/pki/tls/certs
+systemctl start pound.service
+
 
 ########################################################################
 # nagios
