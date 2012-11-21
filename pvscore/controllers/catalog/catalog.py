@@ -83,12 +83,11 @@ class CatalogController(CatalogBaseController):
         # /product/{product_id}/{page}
         page = self.request.matchdict.get('page', 'product')
         product_id = self.request.matchdict.get('product_id')
+        prod = Product.load(product_id)
+        self.redir_if(not prod or not prod.enabled or not prod.web_visible)
         self.session['last_product_id'] = product_id
         self.session['back_link'] = '/product/%s' % product_id
         params = self.params()
-        prod = Product.load(product_id)
-        if not prod or not prod.enabled or not prod.web_visible:
-            raise HTTPFound('/')
 
         # KB: [2011-06-09]:  If there are 2 stars at the beginning of the attribute name
         # then it is a special attribute that can be handled however you like in the templates.
@@ -104,7 +103,6 @@ class CatalogController(CatalogBaseController):
         # params['special_attrs'] = special_attrs
         params['product'] = prod
         params['attrs'] = attrs
-
         params['price'] = util.money(prod.get_price(params['campaign']))
         params['seo_title'] = util.nvl(prod.seo_title, self.request.ctx.site.seo_title)
         params['seo_keywords'] = util.nvl(prod.seo_keywords, self.request.ctx.site.seo_title)
@@ -134,16 +132,16 @@ class CatalogController(CatalogBaseController):
     def category(self):
         # /category/{category_id}/{page}
         page = self.request.matchdict.get('page', 'category')
-        category_id = self.request.matchdict.get('category_id')
+        category_id = util.to_uuid(self.request.matchdict.get('category_id'))
+        category = ProductCategory.load(category_id)
+        self.redir_if(not category)
         self.session['back_link'] = '/category/%s' % category_id
         params = self.params()
-        category = ProductCategory.load(category_id)
         params['products'] = util.page_list(category.products, self.request.GET.get('offset'), self.request.GET.get('limit'))
         params['category'] = category
         params['seo_title'] = util.nvl(category.seo_title, self.request.ctx.site.seo_title)
         params['seo_keywords'] = util.nvl(category.seo_keywords, self.request.ctx.site.seo_keywords)
         params['seo_description'] = util.nvl(category.seo_description, self.request.ctx.site.seo_description)
-
         return self.render(page, params)
 
 

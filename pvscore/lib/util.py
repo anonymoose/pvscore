@@ -10,6 +10,7 @@ import re, calendar
 #from operator import itemgetter
 import logging
 import subprocess
+import uuid
 
 log = logging.getLogger(__name__)
 
@@ -647,6 +648,14 @@ def get_last_day(dt, d_years=0, d_months=0):
     year, mon = dt.year + d_years, dt.month + d_months
     aaa, mon = divmod(mon - 1, 12)
     return date(year + aaa, mon + 1, calendar.monthrange(year + aaa, mon + 1)[1])
+
+
+def to_uuid(val):
+    try:
+        uuid.UUID(val)
+    except Exception as exc:
+        log.warn(exc)
+        return None
 
 # def contains(lst, val):
 #     try:
