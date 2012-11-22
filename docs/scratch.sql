@@ -4001,11 +4001,10 @@ delete from crm_billing_history where customer_id > 1000 ;
 delete from wm_portfolio where customer_id > 1000 ;
 delete from wm_ireport_view_log where customer_id > 1000 ;
 delete from wm_customer_holding where customer_id > 1000 ;
-
-
-
 delete from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id > 1000) ;
 delete from crm_customer_order where customer_id > 1000 ;
+
+
 delete from core_status where customer_id > 1000 ;
 delete from crm_billing where billing_id in (select billing_id from crm_customer where customer_id > 1000);
 

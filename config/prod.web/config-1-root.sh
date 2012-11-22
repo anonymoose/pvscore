@@ -26,7 +26,7 @@ echo AllowUsers $1 >> /etc/ssh/sshd_config
 ########################################################################
 # setup the firewall
 /sbin/iptables -F
-cp /apps/pvs/pvscore/config/prod.common/etc/iptables.up.rules /etc/iptables.up.rules
+cp /apps/pvs/pvscore/config/prod.web/etc/iptables.up.rules /etc/iptables.up.rules
 /sbin/iptables-restore < /etc/iptables.up.rules
 /sbin/iptables-save > /etc/sysconfig/iptables
 systemctl restart iptables.service
