@@ -86,7 +86,7 @@ class StripeBillingApi(BaseBillingApi):
         Otherwise just hit them up non-recurring.
         """
         if not billing.cc_token:
-            raise Exception("No stripe cc_token present")
+            raise Exception("No stripe cc_token present")  #pragma: no cover
         campaign = order.campaign
         cust = order.customer
         stripe.api_key = cust.campaign.company.enterprise.get_attr('stripe_private_key')
@@ -133,7 +133,7 @@ class StripeBillingApi(BaseBillingApi):
         except stripe.CardError as exc:
             self.last_status = exc.code
             self.last_note = exc.message
-        except Exception as exc2:
+        except Exception as exc2: #pragma: no cover
             self.last_status = -1
             self.last_note = exc2.message
         return False
@@ -150,7 +150,7 @@ class StripeBillingApi(BaseBillingApi):
         except stripe.CardError as exc:
             self.last_status = exc.code
             self.last_note = exc.message
-        except Exception as exc2:
+        except Exception as exc2: #pragma: no cover
             self.last_status = -1
             self.last_note = exc2.message
 
@@ -167,7 +167,7 @@ class StripeBillingApi(BaseBillingApi):
                 if prod.subscription:
                     stripe_cust.cancel_subscription()
                     return True
-        except Exception as exc2:
+        except Exception as exc2: #pragma: no cover
             self.last_note = exc2.message
         return False
 

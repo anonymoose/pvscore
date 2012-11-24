@@ -1,9 +1,11 @@
 from pvscore.tests import TestController, secure
+from pvscore.model.core.asset import Asset
 from pvscore.model.crm.company import Enterprise, Company
 from pvscore.model.crm.campaign import Campaign
 from pvscore.model.crm.product import Product, InventoryJournal
 from pvscore.model.core.statusevent import StatusEvent
 import simplejson as json
+import os
 
 # T pvscore.tests.controllers.test_crm_product
 
@@ -296,4 +298,40 @@ class TestCrmProduct(TestController):
         assert R.status_int == 200
         R.mustcontain('Test Product')
         self._delete_new(product_id)
+
+
+    @secure
+    def test_upload_picture(self):
+        product_id = self._create_new()
+        # http://stackoverflow.com/questions/2488978/nose-tests-file-uploads
+        files = [("Filedata", "testimage.jpg", "not really a jpg")]
+        R = self.app.post('/crm/product/upload_picture/%s' % str(product_id),
+                          upload_files=files)
+        assert R.status_int == 200
+        asset_id = R.body
+        ass = Asset.load(asset_id)
+        assert ass is not None
+        assert os.path.exists(ass.filesystem_path)
+        ass.delete()
+        assert not os.path.exists(ass.filesystem_path)
+        self._delete_new(product_id)
+
+
+    @secure
+    def test_delete_picture(self):
+        product_id = self._create_new()
+        # http://stackoverflow.com/questions/2488978/nose-tests-file-uploads
+        files = [("Filedata", "testimage.jpg", "not really a jpg")]
+        R = self.app.post('/crm/product/upload_picture/%s' % str(product_id),
+                          upload_files=files)
+        assert R.status_int == 200
+        asset_id = R.body
+        ass = Asset.load(asset_id)
+        assert ass is not None
+        assert os.path.exists(ass.filesystem_path)
+        R = self.app.get('/crm/product/delete_picture/%s/%s' % (str(product_id), str(ass.id)))
+        R.mustcontain('True')
+        assert not os.path.exists(ass.filesystem_path)
+        self._delete_new(product_id)
+
 

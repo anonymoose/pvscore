@@ -229,7 +229,7 @@ class CustomerOrder(ORMBase, BaseModel):
                           </tr>
                        """.format(name=i.product.name.encode('ascii', 'ignore'), price=util.money(i.unit_price),
                                   quant=int(i.quantity), tot=util.money(i.total()))
-            except Exception as exc:
+            except Exception as exc: #pragma: no cover
                 log.debug(exc)
 
         ret += '<tr><td colspan="4"><hr></td></tr>'
@@ -257,7 +257,7 @@ class CustomerOrder(ORMBase, BaseModel):
             ret += '<tr><td><i>Total Payments Applied</i></td><td colspan="2">&nbsp;</td><td align="right">%s</td></tr>' % util.money(self.total_payments_applied(), True)
             ret += '</table>'
             return ret
-        except Exception as exc:
+        except Exception as exc: #pragma: no cover
             log.debug(exc)
 
 

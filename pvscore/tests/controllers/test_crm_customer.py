@@ -921,3 +921,4 @@ class TestCrmCustomer(TestController):
         assert len(custs) == 1
         Customer.full_delete(custs[0].customer_id)
 
+

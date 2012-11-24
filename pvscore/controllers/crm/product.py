@@ -306,6 +306,17 @@ class ProductController(BaseController):
         return HTTPFound('/crm/product/show_history/%s' % product_id)
 
 
+    @view_config(route_name='crm.product.upload_picture', renderer="string")
+    def upload_picture(self):
+        product_id = self.request.matchdict.get('product_id')
+        product = Product.load(product_id)
+        self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
+        ass = Asset.create_new(product, self.enterprise_id, self.request)
+        self.flash('Uploaded new image to product')
+        product.invalidate_caches()
+        return str(ass.id)
+
+
     @view_config(route_name='crm.product.delete_picture', renderer="string")
     @authorize(IsLoggedIn())
     def delete_picture(self):
@@ -317,18 +328,7 @@ class ProductController(BaseController):
         self.forbid_if(asset.fk_type != 'Product' or str(asset.fk_id) != str(product.product_id))
         asset.delete()
         return 'True'
-    
-
-    @view_config(route_name='crm.product.upload_picture', renderer="string")
-    def upload_picture(self):
-        product_id = self.request.matchdict.get('product_id')
-        product = Product.load(product_id)
-        self.forbid_if(not product or product.company.enterprise_id != self.enterprise_id)
-        ass = Asset.create_new(product, self.enterprise_id, self.request)
-        self.flash('Uploaded new image to product')
-        product.invalidate_caches()
-        return str(ass.id)
-    
+        
 
     # @view_config(route_name='crm.product.json', renderer='/crm/product.json.mako')
     # @authorize(IsLoggedIn())

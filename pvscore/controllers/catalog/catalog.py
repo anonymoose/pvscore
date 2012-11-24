@@ -8,6 +8,7 @@ from pyramid.renderers import render
 from pvscore.lib.cart import Cart
 from pvscore.model.crm.product import Product, ProductCategory
 import pvscore.lib.util as util
+from pvscore.lib.smart.scatalog import SmartCatalog, SmartPricing, SmartSeo
 
 log = logging.getLogger(__name__)
 
@@ -19,7 +20,6 @@ class CatalogBaseController(BaseController):
         if not 'cart' in self.session:
             self.session['cart'] = Cart(site)
         cart = self.session['cart']
-        is_production = util.is_production()
         return {'site' : site,
                 'base' : '%s/%s/' % (self.request.host_url.replace('http', 'https') if util.is_production() else self.request.host_url , site.namespace),
                 'user' : self.request.ctx.user,
@@ -28,7 +28,7 @@ class CatalogBaseController(BaseController):
                 'seo_keywords' : '',
                 'seo_description' : '',
                 'campaign' : campaign,
-                'categories' : ProductCategory.find_by_campaign(campaign),
+                'categories' : SmartCatalog.category_list(campaign),
                 'customer' : load_customer(self.request, True),  # this way customer is always there, just may be empty
                 'matchdict' : self.request.matchdict,
                 'back_link' : self.session.get('back_link'),
@@ -59,19 +59,16 @@ class CatalogBaseController(BaseController):
 
 
     def new_product_list(self, offset=None, limit=None):
-        return Product.find_new_by_campaign(self.request.ctx.campaign, offset, limit)
+        return SmartCatalog.new_product_list(self.request.ctx.campaign, offset, limit)
 
 
     def specials_product_list(self, offset=None, limit=None):
-        products = Product.find_specials_by_campaign(self.request.ctx.campaign)
-        return util.page_list(products if len(products) > 0 else Product.find_new_by_campaign(self.request.ctx.campaign, 0, 10),
-                              offset, limit)
+        return SmartCatalog.specials_product_list(self.request.ctx.campaign, offset, limit)
 
 
     def featured_product_list(self, offset=None, limit=None):
-        products = Product.find_featured_by_campaign(self.request.ctx.campaign)
-        return util.page_list(products if len(products) > 0 else Product.find_new_by_campaign(self.request.ctx.campaign, 0, 10),
-                              offset, limit)
+        return SmartCatalog.featured_product_list(self.request.ctx.campaign, offset, limit)
+
 
 
 class CatalogController(CatalogBaseController):
@@ -103,10 +100,8 @@ class CatalogController(CatalogBaseController):
         # params['special_attrs'] = special_attrs
         params['product'] = prod
         params['attrs'] = attrs
-        params['price'] = util.money(prod.get_price(params['campaign']))
-        params['seo_title'] = util.nvl(prod.seo_title, self.request.ctx.site.seo_title)
-        params['seo_keywords'] = util.nvl(prod.seo_keywords, self.request.ctx.site.seo_title)
-        params['seo_description'] = util.nvl(prod.seo_description, self.request.ctx.site.seo_title)
+        params['price'] = SmartPricing.product_price(prod, params['campaign'])
+        (params['seo_title'], params['seo_keywords'], params['seo_description']) = SmartSeo.product_seo(prod, self.request.ctx.site)
         return self.render(page, params)
 
 
@@ -139,9 +134,7 @@ class CatalogController(CatalogBaseController):
         params = self.params()
         params['products'] = util.page_list(category.products, self.request.GET.get('offset'), self.request.GET.get('limit'))
         params['category'] = category
-        params['seo_title'] = util.nvl(category.seo_title, self.request.ctx.site.seo_title)
-        params['seo_keywords'] = util.nvl(category.seo_keywords, self.request.ctx.site.seo_keywords)
-        params['seo_description'] = util.nvl(category.seo_description, self.request.ctx.site.seo_description)
+        (params['seo_title'], params['seo_keywords'], params['seo_description']) = SmartSeo.category_seo(category, self.request.ctx.site)
         return self.render(page, params)
 
 

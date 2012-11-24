@@ -1,3 +1,4 @@
+#pragma: no cover
 import psycopg2, sys
 
 def get_ids(cur, sql):

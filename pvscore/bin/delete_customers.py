@@ -1,3 +1,4 @@
+#pragma: no cover
 # python ../pvscore/pvscore/bin/delete_customers.py wm wm "where customer_id > 5000"
 import psycopg2, sys
 

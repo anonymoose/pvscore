@@ -1,3 +1,4 @@
+#pragma: no cover
 import psycopg2
 import sys, os
 import uuid
@@ -358,8 +359,9 @@ def fix_assets_b(conn, cur, dbname, storage_root):
         
 def fix_date(conn, cur):
     for table_name, column_name, data_type in get_columns_of_type(cur, 'date'):
-        print "    fix_date-> %s %s" % (table_name, column_name)
-        change_type(cur, table_name, column_name, 'timestamp')
+        if table_name != 'wm_eod_quote':
+            print "    fix_date-> %s %s" % (table_name, column_name)
+            change_type(cur, table_name, column_name, 'timestamp')
         
 
 # def dump_asset_keys(cur, dbname):

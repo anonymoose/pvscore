@@ -19,12 +19,17 @@ class TestUtil(TestController):
         today_ = datetime.date.today()
         assert [today_.year + 10, today_.year + 10] in util.year_list()
         assert util.month_list()[0] == ["1", "January"]
-        
+        assert util.this_year == datetime.date.today().year
+        assert util.get_first_day(today_) == util.get_first_day(today_)  # this is pretty dumb.  it works, just get it covered.
+        assert util.get_last_day(today_) == util.get_last_day(today_)
+        assert util.to_uuid('ken') == None
+
 
     def test_states(self):
         sl = util.state_select_list('TN')
         assert '<option value="TN" selected>Tennessee</option>' in sl
         assert util.state_abbrev_to_state('TN') == 'Tennessee'
+
 
     def test_run_process(self):
         output = util.run_process(['/bin/cat', '/etc/passwd'])

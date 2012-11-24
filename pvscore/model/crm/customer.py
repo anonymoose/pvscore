@@ -213,7 +213,7 @@ class Customer(ORMBase, BaseModel):
         Session.execute("delete from crm_oi_terms_acceptance where order_id in (select order_id from crm_customer_order where customer_id = '%s')" % customer_id)
         Session.execute("delete from crm_order_item where order_id in (select order_id from crm_customer_order where customer_id = '%s')" % customer_id)
         Session.execute("delete from crm_customer_order where customer_id = '%s'" % customer_id)
-        Session.execute("delete from pvs_listing where customer_id = #'%s'" % customer_id)
+        Session.execute("delete from pvs_listing where customer_id = '%s'" % customer_id)
         Session.execute("update crm_customer set status_id = null where customer_id = '%s'" % customer_id)
         Session.execute("delete from core_status where customer_id = '%s'" % customer_id)
         Session.execute("delete from crm_billing_history where customer_id = '%s'" % customer_id)

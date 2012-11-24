@@ -1,9 +1,11 @@
-from pvscore.tests import TestController
+import logging
+from pvscore.tests import TestController, secure, customer_logged_in
 from pvscore.model.crm.product import Product
 from pvscore.model.crm.company import Enterprise
 from pvscore.model.crm.product import ProductCategory
-import logging
-
+from pvscore.tests.controllers.test_cms_content import content_create_new, content_delete_new
+from pvscore.model.cms.content import Content
+from pvscore.lib.billing_api import StripeBillingApi
 
 log = logging.getLogger(__name__)
 
@@ -19,6 +21,77 @@ class TestCatalog(TestController):
 
     def _get_prod(self, idx=0):
         return self._get_prods()[idx]
+
+
+    def test_search(self):
+        prod = self._get_prod()
+        R = self.get('/ecom/search/catalog_search_results?search=%s' % prod.name)
+        assert R.status_int == 200
+        R.mustcontain(prod.name)
+        R = self.get('/ecom/search/catalog_search_results?search=BOGUSSSSS')
+        assert R.status_int == 200
+        
+
+    @secure
+    def test_page(self): 
+        content_id = content_create_new(self)
+        cnt = Content.load(content_id)
+        R = self.get('/ecom/page/content?content_name=%s' % cnt.name)
+        assert R.status_int == 200
+        R.mustcontain(cnt.name)
+        R.mustcontain(self.site.site_id)
+        content_delete_new(content_id)
+
+
+    @secure
+    def test_content(self):
+        content_id = content_create_new(self)
+        cnt = Content.load(content_id)
+        R = self.get('/ecom/content/%s/catalog_content?content_name=%s' % (cnt.name, cnt.name))
+        assert R.status_int == 200
+        R.mustcontain(cnt.name)
+        R.mustcontain(self.site.site_id)
+        content_delete_new(content_id)
+
+
+    def test_login(self):
+        R = self.get('/ecom/login/catalog_login?nextlink=/ecom/page/catalog_login_follow')
+        R.mustcontain('this is the login page')
+        
+
+    @customer_logged_in
+    def test_already_logged_in(self):
+        R = self.get('/ecom/login/catalog_login?nextlink=/ecom/page/catalog_login_follow')
+        R.mustcontain('this is the second page')
+
+
+    @customer_logged_in
+    def test_purchase_cart(self):
+        ent = Enterprise.find_all()[0]
+        api = StripeBillingApi()
+        R = self.get('/ecom/cart/clear')
+        assert R.status_int == 200
+        assert 'product_id' not in R.body
+        R = self.get('/cart/catalog_cart')
+        assert R.status_int == 200
+        assert 'product_id' not in R.body
+        prod = self._get_prod()
+        R = self.get('/ecom/cart/add/%s/2' % prod.product_id)
+        assert R.status_int == 200
+        assert R.body == 'True'
+        R = self.get('/cart/catalog_cart')
+        assert R.status_int == 200
+        assert 'product_id=%s' % prod.product_id in R.body
+        R = self.post("/crm/customer/purchase_cart",
+                      {'redir' : '/ecom/page/catalog_thanks',
+                      'accept_terms' : '1',
+                      'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')})
+
+        assert R.status_int == 200
+        R.mustcontain('Thanks for your purchase')
+
+
+    def test_cart_internal(self):        pass
 
 
     def test_product_page(self):
@@ -120,3 +193,4 @@ class TestCatalog(TestController):
         assert R.status_int == 200
         assert 'product_id=%s' % prod.product_id not in R.body
         
+

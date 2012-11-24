@@ -115,8 +115,9 @@ class AttributeValue(ORMBase, BaseModel):
 
     @staticmethod
     def invalidate_attributes(obj):
-        fk_type = type(obj).__name__ 
-        fk_id = getattr(obj, obj.__pk__)
+        pass
+        #fk_type = type(obj).__name__ 
+        #fk_id = getattr(obj, obj.__pk__)
         #invalidate(obj, 'AttributeValue.%s.%s' % (fk_type, fk_id))
         
     # @staticmethod

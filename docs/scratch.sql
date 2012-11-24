@@ -4056,8 +4056,7 @@ where
 c.customer_id = co.customer_id
 and co.order_id = oi.order_id
 and oi.product_id = p.product_id
-and p.product_id in (1670)
-;
+and p.product_id in (1670);
 
 drop table if exists tmp_status_keepers;
 create table tmp_status_keepers
@@ -4106,6 +4105,7 @@ insert into tmp_status_keepers select x.status_id
 from wm_ireport  x
 where x.status_id is not null;
 
+update crm_customer set billing_id = null;
 
 copy (select c.* from crm_customer c
 where c.customer_id in (select distinct customer_id from tmp_keepers)) to '/tmp/crm_customer.copy';
@@ -4117,7 +4117,7 @@ copy (select oi.* from crm_order_item oi
 where oi.order_item_id in (select distinct order_item_id from tmp_keepers)) to '/tmp/crm_order_item.copy';
 
 copy (select j.* from crm_journal j
-where j.customer_id in (select distinct customer_id from tmp_keepers)) to '/tmp/crm_journal.copy';
+where j.order_id in (select distinct order_id from tmp_keepers)) to '/tmp/crm_journal.copy';
 
 copy (select av.* from core_attribute_value av
 where av.fk_type != 'Customer' or (av.fk_type = 'Customer' and av.fk_id in (select customer_id from tmp_keepers))) to '/tmp/core_attribute_value.copy';
@@ -4128,6 +4128,7 @@ where s.status_id in (select distinct status_id from tmp_status_keepers)) to '/t
 copy (select p.* from wm_portfolio p
 where p.customer_id in (select distinct customer_id from tmp_keepers)) to '/tmp/wm_portfolio.copy';
 
+
 copy crm_company to '/tmp/crm_company.copy';
 copy crm_campaign to '/tmp/crm_campaign.copy';
 copy crm_communication to '/tmp/crm_communication.copy';
@@ -4135,7 +4136,6 @@ copy crm_product to '/tmp/crm_product.copy';
 copy crm_product_category to '/tmp/crm_product_category.copy';
 copy crm_product_category_join to '/tmp/crm_product_category_join.copy';
 copy crm_product_child to '/tmp/crm_product_child.copy';
-copy crm_product_inventory_journal to '/tmp/crm_product_inventory_journal.copy';
 copy crm_product_pricing to '/tmp/crm_product_pricing.copy';
 copy crm_report to '/tmp/crm_report.copy';
 
@@ -4156,5 +4156,32 @@ truncate table crm_oi_terms_acceptance;
 delete from core_user_priv where priv_id not in (select distinct priv_id from core_user where priv_id is not null);
 
 
-
+alter table crm_company drop constraint crm_company_default_campaign_id_fkey;
+copy crm_company from '/tmp/crm_company.copy';
+copy crm_communication from '/tmp/crm_communication.copy';
+copy crm_campaign from '/tmp/crm_campaign.copy';
 copy crm_customer from '/tmp/crm_customer.copy';
+alter table crm_company add constraint crm_company_default_campaign_id_fkey FOREIGN KEY (default_campaign_id) REFERENCES crm_campaign(campaign_id);
+copy crm_product from '/tmp/crm_product.copy';
+copy crm_product_category from '/tmp/crm_product_category.copy';
+copy crm_product_category_join from '/tmp/crm_product_category_join.copy';
+copy crm_product_child from '/tmp/crm_product_child.copy';
+copy crm_product_pricing from '/tmp/crm_product_pricing.copy';
+copy crm_report from '/tmp/crm_report.copy';
+copy core_status from '/tmp/core_status.copy';
+copy crm_customer_order from '/tmp/crm_customer_order.copy';
+copy crm_order_item from '/tmp/crm_order_item.copy';
+copy crm_journal from '/tmp/crm_journal.copy';
+copy core_attribute_value from '/tmp/core_attribute_value.copy';
+copy wm_portfolio from '/tmp/wm_portfolio.copy';
+
+-- select constraint_name, table_name from information_schema.table_constraints where constraint_name like '%fkey1';
+alter table crm_customer drop constraint crm_customer_status_id_fkey1;
+alter table crm_journal drop constraint crm_journal_order_id_fkey1;
+
+drop table tmp_keepers;
+drop table tmp_status_keepers;
+
+
+
+

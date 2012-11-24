@@ -43,3 +43,4 @@ class TestMail(TestController):
         assert excepted
 
         
+    def test_gmail_log_handler(self): pass

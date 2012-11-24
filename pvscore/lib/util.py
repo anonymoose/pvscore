@@ -125,7 +125,7 @@ def sendmail(from_addr, to_addr, subject, text, username, password, server, port
     conn.ehlo()
     try:
         conn.starttls()
-    except Exception as exc:
+    except Exception as exc: #pragma: no cover
         log.debug(exc)
     conn.ehlo()
     conn.login(username, password)
@@ -212,7 +212,7 @@ def mkdir_p(path):
     """
     try:
         os.makedirs(path)
-    except OSError as exc: # Python >2.5
+    except OSError as exc: # pragma: no cover
         if exc.errno != errno.EEXIST:
             raise
 
@@ -652,7 +652,7 @@ def get_last_day(dt, d_years=0, d_months=0):
 
 def to_uuid(val):
     try:
-        uuid.UUID(val)
+        return uuid.UUID(val)
     except Exception as exc:
         log.warn(exc)
         return None
