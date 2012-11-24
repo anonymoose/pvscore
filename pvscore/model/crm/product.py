@@ -338,6 +338,12 @@ class Product(ORMBase, BaseModel):
 
 
     @property
+    def link(self):
+        """ KB: [2012-11-24]: This puts a dependency on the ecom URL layout, which may be too inflexible.  ok for now. """
+        return "/product/%s/%s" % (util.html_literal(self.name.replace('#', '')), str(self.product_id))
+
+
+    @property
     def images(self):
         if not self._images:
             self._images = Asset.find_for_object(self)

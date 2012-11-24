@@ -264,6 +264,10 @@ def page_list(arr, offset, limit):
     return arr
 
 
+def html_literal(strng):
+    return literal(strng)
+
+
 def country_select_list():
     return literal(""" <option value="US">UNITED STATES</option>
         <option value="AF">AFGHANISTAN</option>
