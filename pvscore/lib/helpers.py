@@ -33,6 +33,10 @@ def money(dbl):
     else: return ''
 
 
+def state_select_list(selected_st=None):
+    return util.state_select_list(selected_st)
+
+
 def google_analytics(site, script_tags=True):
     if site and site.google_analytics_id:
         return literal("""

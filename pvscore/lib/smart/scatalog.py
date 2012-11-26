@@ -5,7 +5,10 @@ class SmartCatalog(object):
 
     @staticmethod
     def category_list(campaign):
-        return ProductCategory.find_by_campaign(campaign)
+        return ProductCategory.find_ordered_list(campaign, 'revenue')
+        #return ProductCategory.find_ordered_list(campaign, 'quantity')
+        #return ProductCategory.find_ordered_list(campaign, 'profit')
+        #return ProductCategory.find_by_campaign(campaign)
 
 
     @staticmethod
@@ -15,14 +18,14 @@ class SmartCatalog(object):
 
     @staticmethod
     def specials_product_list(campaign, offset=None, limit=None):
-        products = Product.find_specials_by_campaign(campaign)
-        return util.page_list(products if len(products) > 0 else Product.find_new_by_campaign(campaign, 0, 10), offset, limit)
+        products = Product.find_ordered_list(campaign, 'specials', 'revenue')
+        return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new', 'revenue'), offset, limit)
 
 
     @staticmethod
     def featured_product_list(campaign, offset=None, limit=None):
-        products = Product.find_featured_by_campaign(campaign)
-        return util.page_list(products if len(products) > 0 else Product.find_new_by_campaign(campaign, 0, 10), offset, limit)
+        products = Product.find_ordered_list(campaign, 'featured', 'revenue')
+        return util.page_list(products if len(products) > 0 else Product.find_new_by_campaign(campaign, 'new', 'revenue'), offset, limit)
 
 
 

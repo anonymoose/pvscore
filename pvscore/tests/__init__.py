@@ -11,7 +11,7 @@ from cStringIO import StringIO
 import sys
 from pvscore.model.crm.comm import Communication
 from pvscore.model.crm.customer import Customer
-from pvscore.model.crm.company import Company
+from pvscore.model.crm.company import Company, Enterprise
 from pvscore.model.crm.product import Product, InventoryJournal
 from pvscore.model.crm.journal import Journal
 from pvscore.model.cms.site import Site
@@ -137,6 +137,18 @@ class TestController(TestCase):
 
     def commit(self):
         transaction.commit()
+
+    def get_prods(self):
+        ent = Enterprise.find_all()[0]
+        prods = Product.find_all(ent.enterprise_id)
+        assert len(prods) > 0
+        return prods
+
+
+    def get_prod(self, idx=0):
+        return self.get_prods()[idx]
+
+
 
 def customer_logged_in(func, username="amers_j@yahoo.com", password="geology"):
     def wrap(self):

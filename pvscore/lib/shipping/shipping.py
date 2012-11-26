@@ -28,12 +28,14 @@ class UPSShipping(object):
 
     def get_options(self, customer, site, cart):
         site_config = json.loads(site.config_json) if site.config_json else None
-        if not site_config:
+        if not site_config: #pragma: no cover
             raise Exception("No site config for UPS Shipping.")
         
         shipping_config = site_config[0]['shipping']
         xml = util.literal(render('/catalog/shipping.ups_pricing_call.mako',
-                                  {'cust' : customer,
+                                  {'cart' : cart,
+                                   'site' : site,
+                                   'cust' : customer,
                                    'campaign' : customer.campaign,
                                    'company' : customer.campaign.company,
                                    'api_key' : shipping_config['api_key'],
@@ -42,9 +44,7 @@ class UPSShipping(object):
                                    'password' : shipping_config['password'],
                                    'container' : shipping_config['container_choices_default'],
                                    'pickup' : shipping_config['pickup_type_choices_default'],
-                                   'total_weight' : max(sum([util.nvl(item['product'].weight, 1.0) for item in cart.items]), 1.0),
-                                   'cart' : cart,
-                                   'site' : site
+                                   'total_weight' : max(sum([util.nvl(item['product'].weight, 1.0) for item in cart.items]), 1.0)
                                    }))
 
         tree = self._process_request(shipping_config['ups_url'], xml)

@@ -4183,5 +4183,409 @@ drop table tmp_keepers;
 drop table tmp_status_keepers;
 
 
+-------------------------------------------------------------------
+
+
+
+-- highest revenue categories
+explain select x.* from 
+(select pc.name, pc.category_id
+,sum(oi.quantity) as quantity
+,sum(oi.unit_price*oi.quantity) as revenue
+,sum(oi.unit_cost*oi.quantity) as cost
+,sum((oi.unit_price*oi.quantity)-(oi.unit_cost*oi.quantity)) as profit
+from
+crm_customer_order o, crm_customer cust, crm_order_item oi, crm_campaign cmp, crm_product p,
+crm_product_category pc, crm_product_category_join pcj
+where
+o.customer_id = cust.customer_id and
+o.order_id = oi.order_id and
+o.campaign_id = cmp.campaign_id and
+cmp.campaign_id = '1fe1dc5d-1f9e-4f90-b711-db59c09009b1' and
+oi.product_id = p.product_id and
+p.product_id = pcj.product_id and
+pcj.category_id = pc.category_id and
+o.delete_dt is null and
+oi.delete_dt is null
+group by pc.name, pc.category_id
+order by sum(oi.unit_price*oi.quantity) desc
+) x order by revenue;
+
+
+-- specials
+
+select campaign_id, customer_id, email from crm_customer where email = 'kenneth.bedwell@gmail.com' and password = 'pass2';
+select * from crm_campaign where campaign_id = 'c7b7ec79-3974-4927-bceb-83443f0add68';
+select * from crm_company where company_id = '42d5ce7b-f5be-43fe-80b9-56a013b9314a';
+
+
+
+
+
+SELECT anon_1.crm_customer_customer_id AS anon_1_crm_customer_customer_id
+, anon_1.crm_customer_campaign_id AS anon_1_crm_customer_campaign_id
+, anon_1.crm_customer_billing_id AS anon_1_crm_customer_billing_id
+, anon_1.crm_customer_status_id AS anon_1_crm_customer_status_id
+, anon_1.crm_customer_user_created AS anon_1_crm_customer_user_created
+, anon_1.crm_customer_user_assigned AS anon_1_crm_customer_user_assigned
+, anon_1.crm_customer_fname AS anon_1_crm_customer_fname
+, anon_1.crm_customer_lname AS anon_1_crm_customer_lname
+, anon_1.crm_customer_title AS anon_1_crm_customer_title
+, anon_1.crm_customer_company_name AS anon_1_crm_customer_company_name
+, anon_1.crm_customer_password AS anon_1_crm_customer_password
+, anon_1.crm_customer_orig_campaign_id AS anon_1_crm_customer_orig_campaign_id
+, anon_1.crm_customer_email AS anon_1_crm_customer_email
+, anon_1.crm_customer_delete_dt AS anon_1_crm_customer_delete_dt
+, anon_1.crm_customer_email_optout_dt AS anon_1_crm_customer_email_optout_dt
+, anon_1.crm_customer_create_dt AS anon_1_crm_customer_create_dt
+, anon_1.crm_customer_mod_dt AS anon_1_crm_customer_mod_dt
+, anon_1.crm_customer_addr1 AS anon_1_crm_customer_addr1
+, anon_1.crm_customer_addr2 AS anon_1_crm_customer_addr2
+, anon_1.crm_customer_city AS anon_1_crm_customer_city
+, anon_1.crm_customer_state AS anon_1_crm_customer_state
+, anon_1.crm_customer_zip AS anon_1_crm_customer_zip
+, anon_1.crm_customer_country AS anon_1_crm_customer_country
+, anon_1.crm_customer_phone AS anon_1_crm_customer_phone
+, anon_1.crm_customer_alt_phone AS anon_1_crm_customer_alt_phone
+, anon_1.crm_customer_fax AS anon_1_crm_customer_fax
+, anon_1.crm_customer_notes AS anon_1_crm_customer_notes
+, anon_1.crm_customer_third_party_agent AS anon_1_crm_customer_third_party_agent
+, anon_1.crm_customer_third_party_id AS anon_1_crm_customer_third_party_id
+, anon_1.crm_customer_default_latitude AS anon_1_crm_customer_default_latitude
+, anon_1.crm_customer_default_longitude AS anon_1_crm_customer_default_longitude
+, anon_1.crm_customer_cid_0 AS anon_1_crm_customer_cid_0
+, anon_1.crm_customer_cid_1 AS anon_1_crm_customer_cid_1
+, anon_1.crm_customer_cid_2 AS anon_1_crm_customer_cid_2
+, anon_1.crm_customer_cid_3 AS anon_1_crm_customer_cid_3
+, anon_1.crm_customer_cid_4 AS anon_1_crm_customer_cid_4
+, anon_1.crm_customer_cid_5 AS anon_1_crm_customer_cid_5
+, anon_1.crm_customer_cid_6 AS anon_1_crm_customer_cid_6
+, anon_1.crm_customer_cid_7 AS anon_1_crm_customer_cid_7
+, anon_1.crm_customer_cid_8 AS anon_1_crm_customer_cid_8
+, anon_1.crm_customer_cid_9 AS anon_1_crm_customer_cid_9
+, anon_1.crm_customer_ref_0 AS anon_1_crm_customer_ref_0
+, anon_1.crm_customer_ref_1 AS anon_1_crm_customer_ref_1
+, anon_1.crm_customer_ref_2 AS anon_1_crm_customer_ref_2
+, core_status_event_1.event_id AS core_status_event_1_event_id
+, core_status_event_1.enterprise_id AS core_status_event_1_enterprise_id
+, core_status_event_1.event_type AS core_status_event_1_event_type
+, core_status_event_1.short_name AS core_status_event_1_short_name
+, core_status_event_1.display_name AS core_status_event_1_display_name
+, core_status_event_1.phase AS core_status_event_1_phase
+, core_status_event_1.create_dt AS core_status_event_1_create_dt
+, core_status_event_1.end_dt AS core_status_event_1_end_dt
+, core_status_event_1.claim AS core_status_event_1_claim
+, core_status_event_1.finalize AS core_status_event_1_finalize
+, core_status_event_1.is_system AS core_status_event_1_is_system
+, core_status_event_1.milestone_complete AS core_status_event_1_milestone_complete
+, core_status_event_1.note_req AS core_status_event_1_note_req
+, core_status_event_1.dashboard AS core_status_event_1_dashboard
+, core_status_event_1.reason_req AS core_status_event_1_reason_req
+, core_status_event_1.change_status AS core_status_event_1_change_status
+, core_status_event_1.touch AS core_status_event_1_touch
+, core_status_event_1.position AS core_status_event_1_position
+, core_status_event_1.color AS core_status_event_1_color
+, core_status_1.status_id AS core_status_1_status_id
+, core_status_1.event_id AS core_status_1_event_id
+, core_status_1.username AS core_status_1_username
+, core_status_1.customer_id AS core_status_1_customer_id
+, core_status_1.fk_type AS core_status_1_fk_type
+, core_status_1.fk_id AS core_status_1_fk_id
+, core_status_1.note AS core_status_1_note
+, core_status_1.create_dt AS core_status_1_create_dt
+, crm_enterprise_1.enterprise_id AS crm_enterprise_1_enterprise_id
+, crm_enterprise_1.name AS crm_enterprise_1_name
+, crm_enterprise_1.crm_style AS crm_enterprise_1_crm_style
+, crm_enterprise_1.customer_id AS crm_enterprise_1_customer_id
+, crm_enterprise_1.order_item_id AS crm_enterprise_1_order_item_id
+, crm_enterprise_1.terms_link AS crm_enterprise_1_terms_link
+, crm_enterprise_1.copyright AS crm_enterprise_1_copyright
+, crm_enterprise_1.logo_path AS crm_enterprise_1_logo_path
+, crm_enterprise_1.logo_path_pdf AS crm_enterprise_1_logo_path_pdf
+, crm_enterprise_1.support_email AS crm_enterprise_1_support_email
+, crm_enterprise_1.support_phone AS crm_enterprise_1_support_phone
+, crm_enterprise_1.create_dt AS crm_enterprise_1_create_dt
+, crm_enterprise_1.delete_dt AS crm_enterprise_1_delete_dt
+, crm_enterprise_1.billing_method AS crm_enterprise_1_billing_method
+, crm_enterprise_1.email AS crm_enterprise_1_email
+, crm_enterprise_1.smtp_server AS crm_enterprise_1_smtp_server
+, crm_enterprise_1.smtp_username AS crm_enterprise_1_smtp_username
+, crm_enterprise_1.smtp_password AS crm_enterprise_1_smtp_password
+, crm_enterprise_1.imap_server AS crm_enterprise_1_imap_server
+, crm_enterprise_1.imap_username AS crm_enterprise_1_imap_username
+, crm_enterprise_1.imap_password AS crm_enterprise_1_imap_password
+, crm_company_1.company_id AS crm_company_1_company_id
+, crm_company_1.enterprise_id AS crm_company_1_enterprise_id
+, crm_company_1.status_id AS crm_company_1_status_id
+, crm_company_1.default_campaign_id AS crm_company_1_default_campaign_id
+, crm_company_1.name AS crm_company_1_name
+, crm_company_1.paypal_id AS crm_company_1_paypal_id
+, crm_company_1.create_dt AS crm_company_1_create_dt
+, crm_company_1.delete_dt AS crm_company_1_delete_dt
+, crm_company_1.anon_customer_email AS crm_company_1_anon_customer_email
+, crm_company_1.addr1 AS crm_company_1_addr1
+, crm_company_1.addr2 AS crm_company_1_addr2
+, crm_company_1.city AS crm_company_1_city
+, crm_company_1.state AS crm_company_1_state
+, crm_company_1.zip AS crm_company_1_zip
+, crm_company_1.country AS crm_company_1_country
+, crm_company_1.phone AS crm_company_1_phone
+, crm_company_1.alt_phone AS crm_company_1_alt_phone
+, crm_company_1.fax AS crm_company_1_fax
+, crm_company_1.email AS crm_company_1_email
+, crm_company_1.smtp_server AS crm_company_1_smtp_server
+, crm_company_1.smtp_username AS crm_company_1_smtp_username
+, crm_company_1.smtp_password AS crm_company_1_smtp_password
+, crm_company_1.imap_server AS crm_company_1_imap_server
+, crm_company_1.imap_username AS crm_company_1_imap_username
+, crm_company_1.imap_password AS crm_company_1_imap_password
+, crm_product_pricing_1.product_pricing_id AS crm_product_pricing_1_product_pricing_id
+, crm_product_pricing_1.campaign_id AS crm_product_pricing_1_campaign_id
+, crm_product_pricing_1.product_id AS crm_product_pricing_1_product_id
+, crm_product_pricing_1.wholesale_price AS crm_product_pricing_1_wholesale_price
+, crm_product_pricing_1.retail_price AS crm_product_pricing_1_retail_price
+, crm_product_pricing_1.discount_price AS crm_product_pricing_1_discount_price
+, crm_product_pricing_1.bill_method_type AS crm_product_pricing_1_bill_method_type
+, crm_product_pricing_1.bill_freq_type AS crm_product_pricing_1_bill_freq_type
+, crm_product_pricing_1.create_dt AS crm_product_pricing_1_create_dt
+, crm_product_pricing_1.delete_dt AS crm_product_pricing_1_delete_dt
+, crm_product_1.product_id AS crm_product_1_product_id
+, crm_product_1.company_id AS crm_product_1_company_id
+, crm_product_1.status_id AS crm_product_1_status_id
+, crm_product_1.vendor_id AS crm_product_1_vendor_id
+, crm_product_1.name AS crm_product_1_name
+, crm_product_1.detail_description AS crm_product_1_detail_description
+, crm_product_1.description AS crm_product_1_description
+, crm_product_1.create_dt AS crm_product_1_create_dt
+, crm_product_1.delete_dt AS crm_product_1_delete_dt
+, crm_product_1.mod_dt AS crm_product_1_mod_dt
+, crm_product_1.type AS crm_product_1_type
+, crm_product_1.manufacturer AS crm_product_1_manufacturer
+, crm_product_1.unit_cost AS crm_product_1_unit_cost
+, crm_product_1.sku AS crm_product_1_sku
+, crm_product_1.third_party_id AS crm_product_1_third_party_id
+, crm_product_1.handling_price AS crm_product_1_handling_price
+, crm_product_1.weight AS crm_product_1_weight
+, crm_product_1.enabled AS crm_product_1_enabled
+, crm_product_1.singleton AS crm_product_1_singleton
+, crm_product_1.featured AS crm_product_1_featured
+, crm_product_1.special AS crm_product_1_special
+, crm_product_1.web_visible AS crm_product_1_web_visible
+, crm_product_1.inventory_par AS crm_product_1_inventory_par
+, crm_product_1.show_negative_inventory AS crm_product_1_show_negative_inventory
+, crm_product_1.seo_title AS crm_product_1_seo_title
+, crm_product_1.seo_keywords AS crm_product_1_seo_keywords
+, crm_product_1.seo_description AS crm_product_1_seo_description
+, crm_product_1.subscription AS crm_product_1_subscription
+, crm_product_1.inventory AS crm_product_1_inventory
+, crm_order_item_1.order_item_id AS crm_order_item_1_order_item_id
+, crm_order_item_1.order_id AS crm_order_item_1_order_id
+, crm_order_item_1.status_id AS crm_order_item_1_status_id
+, crm_order_item_1.user_created AS crm_order_item_1_user_created
+, crm_order_item_1.product_id AS crm_order_item_1_product_id
+, crm_order_item_1.parent_id AS crm_order_item_1_parent_id
+, crm_order_item_1.name AS crm_order_item_1_name
+, crm_order_item_1.unit_cost AS crm_order_item_1_unit_cost
+, crm_order_item_1.unit_price AS crm_order_item_1_unit_price
+, crm_order_item_1.unit_discount_price AS crm_order_item_1_unit_discount_price
+, crm_order_item_1.unit_retail_price AS crm_order_item_1_unit_retail_price
+, crm_order_item_1.create_dt AS crm_order_item_1_create_dt
+, crm_order_item_1.delete_dt AS crm_order_item_1_delete_dt
+, crm_order_item_1.quantity AS crm_order_item_1_quantity
+, crm_order_item_1.tax AS crm_order_item_1_tax
+, crm_journal_1.journal_id AS crm_journal_1_journal_id
+, crm_journal_1.customer_id AS crm_journal_1_customer_id
+, crm_journal_1.order_id AS crm_journal_1_order_id
+, crm_journal_1.user_created AS crm_journal_1_user_created
+, crm_journal_1.create_dt AS crm_journal_1_create_dt
+, crm_journal_1.delete_dt AS crm_journal_1_delete_dt
+, crm_journal_1.type AS crm_journal_1_type
+, crm_journal_1.note AS crm_journal_1_note
+, crm_journal_1.method AS crm_journal_1_method
+, crm_journal_1.amount AS crm_journal_1_amount
+, crm_customer_order_1.order_id AS crm_customer_order_1_order_id
+, crm_customer_order_1.customer_id AS crm_customer_order_1_customer_id
+, crm_customer_order_1.campaign_id AS crm_customer_order_1_campaign_id
+, crm_customer_order_1.status_id AS crm_customer_order_1_status_id
+, crm_customer_order_1.user_created AS crm_customer_order_1_user_created
+, crm_customer_order_1.create_dt AS crm_customer_order_1_create_dt
+, crm_customer_order_1.delete_dt AS crm_customer_order_1_delete_dt
+, crm_customer_order_1.cancel_dt AS crm_customer_order_1_cancel_dt
+, crm_customer_order_1.note AS crm_customer_order_1_note
+, crm_customer_order_1.shipping_note AS crm_customer_order_1_shipping_note
+, crm_customer_order_1.shipping_total AS crm_customer_order_1_shipping_total
+, crm_customer_order_1.handling_note AS crm_customer_order_1_handling_note
+, crm_customer_order_1.handling_total AS crm_customer_order_1_handling_total
+, crm_customer_order_1.external_cart_id AS crm_customer_order_1_external_cart_id
+, crm_enterprise_2.enterprise_id AS crm_enterprise_2_enterprise_id
+, crm_enterprise_2.name AS crm_enterprise_2_name
+, crm_enterprise_2.crm_style AS crm_enterprise_2_crm_style
+, crm_enterprise_2.customer_id AS crm_enterprise_2_customer_id
+, crm_enterprise_2.order_item_id AS crm_enterprise_2_order_item_id
+, crm_enterprise_2.terms_link AS crm_enterprise_2_terms_link
+, crm_enterprise_2.copyright AS crm_enterprise_2_copyright
+, crm_enterprise_2.logo_path AS crm_enterprise_2_logo_path
+, crm_enterprise_2.logo_path_pdf AS crm_enterprise_2_logo_path_pdf
+, crm_enterprise_2.support_email AS crm_enterprise_2_support_email
+, crm_enterprise_2.support_phone AS crm_enterprise_2_support_phone
+, crm_enterprise_2.create_dt AS crm_enterprise_2_create_dt
+, crm_enterprise_2.delete_dt AS crm_enterprise_2_delete_dt
+, crm_enterprise_2.billing_method AS crm_enterprise_2_billing_method
+, crm_enterprise_2.email AS crm_enterprise_2_email
+, crm_enterprise_2.smtp_server AS crm_enterprise_2_smtp_server
+, crm_enterprise_2.smtp_username AS crm_enterprise_2_smtp_username
+, crm_enterprise_2.smtp_password AS crm_enterprise_2_smtp_password
+, crm_enterprise_2.imap_server AS crm_enterprise_2_imap_server
+, crm_enterprise_2.imap_username AS crm_enterprise_2_imap_username
+, crm_enterprise_2.imap_password AS crm_enterprise_2_imap_password
+, crm_company_2.company_id AS crm_company_2_company_id
+, crm_company_2.enterprise_id AS crm_company_2_enterprise_id
+, crm_company_2.status_id AS crm_company_2_status_id
+, crm_company_2.default_campaign_id AS crm_company_2_default_campaign_id
+, crm_company_2.name AS crm_company_2_name
+, crm_company_2.paypal_id AS crm_company_2_paypal_id
+, crm_company_2.create_dt AS crm_company_2_create_dt
+, crm_company_2.delete_dt AS crm_company_2_delete_dt
+, crm_company_2.anon_customer_email AS crm_company_2_anon_customer_email
+, crm_company_2.addr1 AS crm_company_2_addr1
+, crm_company_2.addr2 AS crm_company_2_addr2
+, crm_company_2.city AS crm_company_2_city
+, crm_company_2.state AS crm_company_2_state
+, crm_company_2.zip AS crm_company_2_zip
+, crm_company_2.country AS crm_company_2_country
+, crm_company_2.phone AS crm_company_2_phone
+, crm_company_2.alt_phone AS crm_company_2_alt_phone
+, crm_company_2.fax AS crm_company_2_fax
+, crm_company_2.email AS crm_company_2_email
+, crm_company_2.smtp_server AS crm_company_2_smtp_server
+, crm_company_2.smtp_username AS crm_company_2_smtp_username
+, crm_company_2.smtp_password AS crm_company_2_smtp_password
+, crm_company_2.imap_server AS crm_company_2_imap_server
+, crm_company_2.imap_username AS crm_company_2_imap_username
+, crm_company_2.imap_password AS crm_company_2_imap_password
+, crm_campaign_1.campaign_id AS crm_campaign_1_campaign_id
+, crm_campaign_1.company_id AS crm_campaign_1_company_id
+, crm_campaign_1.comm_post_purchase_id AS crm_campaign_1_comm_post_purchase_id
+, crm_campaign_1.comm_post_cancel_id AS crm_campaign_1_comm_post_cancel_id
+, crm_campaign_1.comm_packing_slip_id AS crm_campaign_1_comm_packing_slip_id
+, crm_campaign_1.comm_forgot_password_id AS crm_campaign_1_comm_forgot_password_id
+, crm_campaign_1.name AS crm_campaign_1_name
+, crm_campaign_1.create_dt AS crm_campaign_1_create_dt
+, crm_campaign_1.delete_dt AS crm_campaign_1_delete_dt
+, crm_campaign_1.type AS crm_campaign_1_type
+, crm_campaign_1.default_url AS crm_campaign_1_default_url
+, crm_campaign_1.tax_rate AS crm_campaign_1_tax_rate
+, crm_campaign_1.email AS crm_campaign_1_email
+, crm_campaign_1.smtp_server AS crm_campaign_1_smtp_server
+, crm_campaign_1.smtp_username AS crm_campaign_1_smtp_username
+, crm_campaign_1.smtp_password AS crm_campaign_1_smtp_password
+, crm_campaign_1.imap_server AS crm_campaign_1_imap_server
+, crm_campaign_1.imap_username AS crm_campaign_1_imap_username
+, crm_campaign_1.imap_password AS crm_campaign_1_imap_password
+, crm_billing_1.billing_id AS crm_billing_1_billing_id
+, crm_billing_1.status_id AS crm_billing_1_status_id
+, crm_billing_1.user_created AS crm_billing_1_user_created
+, crm_billing_1.note AS crm_billing_1_note
+, crm_billing_1.type AS crm_billing_1_type
+, crm_billing_1.account_holder AS crm_billing_1_account_holder
+, crm_billing_1.account_addr AS crm_billing_1_account_addr
+, crm_billing_1.account_city AS crm_billing_1_account_city
+, crm_billing_1.account_state AS crm_billing_1_account_state
+, crm_billing_1.account_country AS crm_billing_1_account_country
+, crm_billing_1.account_zip AS crm_billing_1_account_zip
+, crm_billing_1.third_party_id AS crm_billing_1_third_party_id
+, crm_billing_1.cc_token AS crm_billing_1_cc_token
+, crm_billing_1.cc_last_4 AS crm_billing_1_cc_last_4
+, crm_billing_1.cc_exp AS crm_billing_1_cc_exp
+, crm_billing_1.is_primary AS crm_billing_1_is_primary
+, crm_billing_1.create_dt AS crm_billing_1_create_dt
+, crm_billing_1.delete_dt AS crm_billing_1_delete_dt 
+FROM (SELECT crm_customer.customer_id AS crm_customer_customer_id
+, crm_customer.campaign_id AS crm_customer_campaign_id
+, crm_customer.billing_id AS crm_customer_billing_id
+, crm_customer.status_id AS crm_customer_status_id
+, crm_customer.user_created AS crm_customer_user_created
+, crm_customer.user_assigned AS crm_customer_user_assigned
+, crm_customer.fname AS crm_customer_fname
+, crm_customer.lname AS crm_customer_lname
+, crm_customer.title AS crm_customer_title
+, crm_customer.company_name AS crm_customer_company_name
+, crm_customer.password AS crm_customer_password
+, crm_customer.orig_campaign_id AS crm_customer_orig_campaign_id
+, crm_customer.email AS crm_customer_email
+, crm_customer.delete_dt AS crm_customer_delete_dt
+, crm_customer.email_optout_dt AS crm_customer_email_optout_dt
+, crm_customer.create_dt AS crm_customer_create_dt
+, crm_customer.mod_dt AS crm_customer_mod_dt
+, crm_customer.addr1 AS crm_customer_addr1
+, crm_customer.addr2 AS crm_customer_addr2
+, crm_customer.city AS crm_customer_city
+, crm_customer.state AS crm_customer_state
+, crm_customer.zip AS crm_customer_zip
+, crm_customer.country AS crm_customer_country
+, crm_customer.phone AS crm_customer_phone
+, crm_customer.alt_phone AS crm_customer_alt_phone
+, crm_customer.fax AS crm_customer_fax
+, crm_customer.notes AS crm_customer_notes
+, crm_customer.third_party_agent AS crm_customer_third_party_agent
+, crm_customer.third_party_id AS crm_customer_third_party_id
+, crm_customer.default_latitude AS crm_customer_default_latitude
+, crm_customer.default_longitude AS crm_customer_default_longitude
+, crm_customer.cid_0 AS crm_customer_cid_0
+, crm_customer.cid_1 AS crm_customer_cid_1
+, crm_customer.cid_2 AS crm_customer_cid_2
+, crm_customer.cid_3 AS crm_customer_cid_3
+, crm_customer.cid_4 AS crm_customer_cid_4
+, crm_customer.cid_5 AS crm_customer_cid_5
+, crm_customer.cid_6 AS crm_customer_cid_6
+, crm_customer.cid_7 AS crm_customer_cid_7
+, crm_customer.cid_8 AS crm_customer_cid_8
+, crm_customer.cid_9 AS crm_customer_cid_9
+, crm_customer.ref_0 AS crm_customer_ref_0
+, crm_customer.ref_1 AS crm_customer_ref_1
+, crm_customer.ref_2 AS crm_customer_ref_2 
+FROM crm_customer JOIN crm_campaign ON crm_campaign.campaign_id = crm_customer.campaign_id 
+WHERE crm_customer.delete_dt IS NULL AND crm_campaign.company_id = '42d5ce7b-f5be-43fe-80b9-56a013b9314a' AND crm_customer.email ILIKE 'kenneth.bedwell@gmail.com' AND crm_customer.password = 'pass2'
+ LIMIT 1 AS anon_1 LEFT OUTER JOIN crm_customer_order AS crm_customer_order_1 ON anon_1.crm_customer_customer_id = crm_customer_order_1.customer_id LEFT OUTER JOIN core_status AS core_status_1 ON core_status_1.status_id = crm_customer_order_1.status_id LEFT OUTER JOIN core_status_event AS core_status_event_1 ON core_status_event_1.event_id = core_status_1.event_id LEFT OUTER JOIN crm_order_item AS crm_order_item_1 ON crm_customer_order_1.order_id = crm_order_item_1.order_id LEFT OUTER JOIN crm_product AS crm_product_1 ON crm_product_1.product_id = crm_order_item_1.product_id LEFT OUTER JOIN crm_company AS crm_company_1 ON crm_company_1.company_id = crm_product_1.company_id LEFT OUTER JOIN crm_enterprise AS crm_enterprise_1 ON crm_enterprise_1.enterprise_id = crm_company_1.enterprise_id LEFT OUTER JOIN crm_product_pricing AS crm_product_pricing_1 ON crm_product_1.product_id = crm_product_pricing_1.product_id LEFT OUTER JOIN crm_journal AS crm_journal_1 ON crm_customer_order_1.order_id = crm_journal_1.order_id LEFT OUTER JOIN crm_campaign AS crm_campaign_1 ON crm_campaign_1.campaign_id = anon_1.crm_customer_campaign_id LEFT OUTER JOIN crm_company AS crm_company_2 ON crm_company_2.company_id = crm_campaign_1.company_id LEFT OUTER JOIN crm_enterprise AS crm_enterprise_2 ON crm_enterprise_2.enterprise_id = crm_company_2.enterprise_id LEFT OUTER JOIN crm_billing AS crm_billing_1 ON crm_billing_1.billing_id = anon_1.crm_customer_billing_id ORDER BY crm_customer_order_1.create_dt DESC
+, crm_order_item_1.create_dt ASC
+, crm_journal_1.journal_id ASC;
+
+
+2012-11-25 15:35:30,395 INFO  [sqlalchemy.engine.base.Engine][Dummy-4] {'password_1': u'pass2', 'email_1': u'kenneth.bedwell@gmail.com
+', 'company_id_1': , 'param_1': 1}
+
+
+
+
+select c.status_id, c.email, c.customer_id, c.user_created
+from crm_customer c, crm_campaign cmp, crm_company comp, crm_order_item oi, crm_customer_order co
+where c.email = 'kenneth.bedwell@gmail.com'
+and c.password = 'pass2'
+and c.campaign_id = cmp.campaign_id
+and cmp.company_id = comp.company_id
+and comp.company_id = '42d5ce7b-f5be-43fe-80b9-56a013b9314a'
+and co.customer_id = c.customer_id
+and oi.order_id = co.order_id;
+
+
+select count(0) cnt 
+                               from crm_customer c, crm_campaign cmp, crm_company comp
+                               where c.email = 'kenneth.bedwell@gmail.com'
+                               and c.password = 'pass2'
+                               and c.campaign_id = cmp.campaign_id
+                               and cmp.company_id = comp.company_id
+                               and comp.company_id = '42d5ce7b-f5be-43fe-80b9-56a013b9314a';
+
+
+select count(0) cnt 
+                               from crm_customer c
+                               where c.email = 'kenneth.bedwell@gmail.com'
+                               and c.password = 'pass2';
+
+
+select * from crm_company where company_id = '42d5ce7b-f5be-43fe-80b9-56a013b9314a';
+
+
+
 
 

@@ -164,17 +164,25 @@ class Customer(ORMBase, BaseModel):
 
     @staticmethod
     def authenticate(username, pwd, company):
-        """ KB: [2010-10-05]: See if there is a user that matches the UID and password supplied
-        Also determine if this guy is allowed into the crm/cms area of the pvscore.
-        """
-        from pvscore.model.crm.campaign import Campaign
-        return None != Session.query(Customer) \
-            .join((Campaign, Campaign.campaign_id == Customer.campaign_id)) \
-            .filter(and_(Customer.delete_dt == None,
-                         Campaign.company_id == company.company_id,
-                         Customer.email.ilike(username),
-                         Customer.password == pwd)).first()
-                         #                             Customer.password == Customer.encode_password(pwd))).first()
+        """ KB: [2010-10-05]: See if there is a user that matches the UID and password supplied """
+        val = Session.query('cnt')\
+            .from_statement("""select count(0) cnt
+                               from crm_customer c, crm_campaign cmp, crm_company comp
+                               where c.email = :email
+                               and c.password = :pwd
+                               and c.campaign_id = cmp.campaign_id
+                               and cmp.company_id = comp.company_id
+                               and comp.company_id = :company_id""")\
+                               .params(email=username, pwd=pwd, company_id=company.company_id).first()
+        return val and len(val) == 1 and val[0] == 1
+        # from pvscore.model.crm.campaign import Campaign
+        # return None != Session.query(Customer) \
+        #     .join((Campaign, Campaign.campaign_id == Customer.campaign_id)) \
+        #     .filter(and_(Customer.delete_dt == None,
+        #                  Campaign.company_id == company.company_id,
+        #                  Customer.email.ilike(username),
+        #                  Customer.password == pwd)).first()
+        #                  #                             Customer.password == Customer.encode_password(pwd))).first()
 
 
 

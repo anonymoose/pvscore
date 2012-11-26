@@ -1,6 +1,5 @@
 import logging
 from pvscore.tests import TestController, secure, customer_logged_in
-from pvscore.model.crm.product import Product
 from pvscore.model.crm.company import Enterprise
 from pvscore.model.crm.product import ProductCategory
 from pvscore.tests.controllers.test_cms_content import content_create_new, content_delete_new
@@ -12,19 +11,10 @@ log = logging.getLogger(__name__)
 # bin/Tfull pvscore.tests.controllers.test_catalog
 
 class TestCatalog(TestController):
-    def _get_prods(self):
-        ent = Enterprise.find_all()[0]
-        prods = Product.find_all(ent.enterprise_id)
-        assert len(prods) > 0
-        return prods
-
-
-    def _get_prod(self, idx=0):
-        return self._get_prods()[idx]
 
 
     def test_search(self):
-        prod = self._get_prod()
+        prod = self.get_prod()
         R = self.get('/ecom/search/catalog_search_results?search=%s' % prod.name)
         assert R.status_int == 200
         R.mustcontain(prod.name)
@@ -75,7 +65,7 @@ class TestCatalog(TestController):
         R = self.get('/cart/catalog_cart')
         assert R.status_int == 200
         assert 'product_id' not in R.body
-        prod = self._get_prod()
+        prod = self.get_prod()
         R = self.get('/ecom/cart/add/%s/2' % prod.product_id)
         assert R.status_int == 200
         assert R.body == 'True'
@@ -91,11 +81,8 @@ class TestCatalog(TestController):
         R.mustcontain('Thanks for your purchase')
 
 
-    def test_cart_internal(self):        pass
-
-
     def test_product_page(self):
-        prod = self._get_prod()
+        prod = self.get_prod()
         R = self.get('/product/%s/%s/catalog_product' % (prod.name, prod.product_id))
         assert R.status_int == 200
         R.mustcontain('product_id=%s' % prod.product_id)
@@ -103,8 +90,8 @@ class TestCatalog(TestController):
 
 
     def test_products_new(self):
-        #prod0 = self._get_prod(0)
-        #prod1 = self._get_prod(1)
+        #prod0 = self.get_prod(0)
+        #prod1 = self.get_prod(1)
         R = self.get('/products/new/catalog_products')
         assert R.status_int == 200
         #R.mustcontain('product_id=%s' % prod0.product_id)
@@ -116,7 +103,7 @@ class TestCatalog(TestController):
     def test_products_featured(self):
         R = self.get('/products/featured/catalog_products')
         assert R.status_int == 200
-        prods = self._get_prods()
+        prods = self.get_prods()
         prods = [prod for prod in prods if prod.featured]
         assert prods is not None
         assert len(prods) > 0
@@ -163,7 +150,7 @@ class TestCatalog(TestController):
         R = self.get('/cart/catalog_cart')
         assert R.status_int == 200
         assert 'product_id' not in R.body
-        prod = self._get_prod()
+        prod = self.get_prod()
         R = self.get('/ecom/cart/add/%s/2' % prod.product_id)
         assert R.status_int == 200
         assert R.body == 'True'
@@ -179,7 +166,7 @@ class TestCatalog(TestController):
         R = self.get('/cart/catalog_cart')
         assert R.status_int == 200
         assert 'product_id' not in R.body
-        prod = self._get_prod()
+        prod = self.get_prod()
         R = self.get('/ecom/cart/add/%s/2' % prod.product_id)
         assert R.status_int == 200
         assert R.body == 'True'
@@ -193,4 +180,25 @@ class TestCatalog(TestController):
         assert R.status_int == 200
         assert 'product_id=%s' % prod.product_id not in R.body
         
-
+    @customer_logged_in
+    def test_shipping(self):
+        R = self.get('/ecom/cart/clear')
+        assert R.status_int == 200
+        assert 'product_id' not in R.body
+        R = self.get('/cart/catalog_cart')
+        assert R.status_int == 200
+        assert 'product_id' not in R.body
+        prod = self.get_prod()
+        R = self.get('/ecom/cart/add/%s/2' % prod.product_id)
+        assert R.status_int == 200
+        assert R.body == 'True'
+        R = self.get('/cart/catalog_cart')
+        assert R.status_int == 200
+        assert 'product_id=%s' % prod.product_id in R.body
+        R = self.get('/checkout/catalog_checkout_shipping')
+        assert R.status_int == 200
+        R.mustcontain('Ground')
+        R.mustcontain('3 Day Select')
+        R.mustcontain('Second Day Air')
+        R.mustcontain('Next Day Air Saver')
+        

@@ -1,4 +1,4 @@
-#pylint: disable-msg=E1101,C0103,R0913
+#pylint: disable-msg=E1101,C0103,R0913,C0302
 import math
 from sqlalchemy import Column, ForeignKey, and_, or_
 from sqlalchemy.types import Integer, String, DateTime, Text, Float, Boolean, DateTime
@@ -135,6 +135,16 @@ class Product(ORMBase, BaseModel):
                              Product.enabled == True,
                              or_(Product.type == 'Top Level', Product.type == 'Parent or Child'))).order_by(Product.name).all()
         else: return []
+
+    
+    @staticmethod
+    def find_ordered_list(campaign, which, order_by='revenue'):
+        if 'new' == which:
+            return Product.find_new_by_campaign(campaign)
+        elif 'specials' == which:
+            return Product.find_specials_by_campaign(campaign)
+        elif 'featured' == which:
+            return Product.find_featured_by_campaign(campaign)
 
 
     @staticmethod
@@ -340,7 +350,9 @@ class Product(ORMBase, BaseModel):
     @property
     def link(self):
         """ KB: [2012-11-24]: This puts a dependency on the ecom URL layout, which may be too inflexible.  ok for now. """
-        return "/product/%s/%s" % (util.html_literal(self.name.replace('#', '')), str(self.product_id))
+        if self.name:
+            return "/product/%s/%s" % (util.html_literal(self.name.replace('#', '')), str(self.product_id))
+        return "/product/%s" % str(self.product_id)
 
 
     @property
@@ -542,6 +554,47 @@ class ProductCategory(ORMBase, BaseModel):
                          Company.company_id == campaign.company_id)) \
                          .order_by(ProductCategory.name) \
                          .all()
+
+
+    @staticmethod
+    def find_ordered_list(campaign, orderby="revenue"):
+        """ KB: [2012-11-24]: Find list of all the categories, put the highest by $orderby on top. everybody else on the bottom.
+        $orderby can be one of 'revenue', 'quantity', 'profit'
+        Used in scatalog
+        """
+        highest = db.get_result_set(('category_id', 'company_id', 'name', 'description', 'create_dt', 'delete_dt', 'mod_dt', 'seo_title', 'seo_keywords', 'seo_description'),
+                                    """select x.category_id,x.company_id,x.name,x.description,x.create_dt,x.delete_dt,x.mod_dt,x.seo_title,x.seo_keywords,x.seo_description
+                                       from (
+                                        select  pc.category_id,pc.company_id,pc.name,pc.description,pc.create_dt,pc.delete_dt,pc.mod_dt,pc.seo_title,pc.seo_keywords,pc.seo_description
+                                        ,sum(oi.quantity) as quantity
+                                        ,sum(oi.unit_price*oi.quantity) as revenue
+                                        ,sum(oi.unit_cost*oi.quantity) as cost
+                                        ,sum((oi.unit_price*oi.quantity)-(oi.unit_cost*oi.quantity)) as profit
+                                        from
+                                        crm_customer_order o, crm_customer cust, crm_order_item oi, crm_campaign cmp, crm_product p,
+                                        crm_product_category pc, crm_product_category_join pcj
+                                        where
+                                        o.customer_id = cust.customer_id and
+                                        o.order_id = oi.order_id and
+                                        o.campaign_id = cmp.campaign_id and
+                                        cmp.campaign_id = '%s' and
+                                        oi.product_id = p.product_id and
+                                        p.product_id = pcj.product_id and
+                                        pcj.category_id = pc.category_id and
+                                        o.delete_dt is null and
+                                        oi.delete_dt is null
+                                        group by pc.category_id,pc.company_id,pc.name,pc.description,pc.create_dt,pc.delete_dt,pc.mod_dt,pc.seo_title,pc.seo_keywords,pc.seo_description
+                                        ) x order by %s""" % (campaign.campaign_id,
+                                                              orderby if orderby in ('revenue', 'quantity', 'profit') else ''))
+        allcats = db.get_result_set(('category_id', 'company_id', 'name', 'description', 'create_dt', 'delete_dt', 'mod_dt', 'seo_title', 'seo_keywords', 'seo_description'),
+                                    """select pc.category_id,pc.company_id,pc.name,pc.description,pc.create_dt,pc.delete_dt,pc.mod_dt,pc.seo_title,pc.seo_keywords,pc.seo_description
+                                        from crm_product_category pc, crm_company comp, crm_campaign cmp
+                                        where
+                                        pc.company_id = comp.company_id and
+                                        cmp.campaign_id = '%s' and
+                                        cmp.company_id = comp.company_id""" % campaign.campaign_id)
+        highest_ids = [high.category_id for high in highest]
+        return highest + [cat for cat in allcats if cat.category_id not in highest_ids]
 
 
     def invalidate_caches(self, **kwargs):

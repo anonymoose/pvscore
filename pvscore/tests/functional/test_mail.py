@@ -1,8 +1,9 @@
 #pylint: disable-msg=W0612,C0103,R0903
 from pvscore.tests import TestController
-from pvscore.lib.mail import UserMail
+from pvscore.lib.mail import UserMail, GmailLogHandler
 from pvscore.model.crm.company import Company, Enterprise
 import random
+import logging
 
 # bin/T pvscore.tests.functional.test_mail
 
@@ -43,4 +44,13 @@ class TestMail(TestController):
         assert excepted
 
         
-    def test_gmail_log_handler(self): pass
+    def test_gmail_log_handler(self):
+        logger = logging.getLogger()
+        gm = GmailLogHandler(("smtp.gmail.com", 587), 'info@eyefound.it', ['kenneth.bedwell@gmail.com'], 'EXCEPTION', ('info@eyefound.it', 'g00df00d'))
+        gm.setLevel(logging.ERROR)
+        logger.addHandler(gm)
+        try:
+            1/0
+        except:
+            logger.exception('FFFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUU-')
+
