@@ -3,12 +3,15 @@ import pvscore.lib.helpers as h
 import pvscore.lib.util as util
 from pvscore.tests import TestController
 from pyramid import testing
+import datetime
 
 # bin/T pvscore.tests.functional.test_helpers
 
 class TestHelpers(TestController):
     def test_google_analytics(self):
         val = h.google_analytics(self.site)
+        self.assertEqual(val is not None, True)
+        val = h.piwik_analytics(self.site)
         self.assertEqual(val is not None, True)
 
 
@@ -27,6 +30,7 @@ class TestHelpers(TestController):
         assert h.slash_date(dtime) == dtime.strftime("%m/%d/%Y")
         assert h.words_date(None) == ''
         assert h.words_date(dtime) == dtime.strftime("%B %d, %Y")
+        assert h.this_year() == datetime.date.today().year
         self.assertEqual('checkbox' in h.chkbox('fud'), True)        
 
         dobj = TestObj()
@@ -50,6 +54,7 @@ class TestHelpers(TestController):
         assert h.onvl(dobj, 'a', '_default_') == 'aa'
         assert h.onvl(dobj, 'x', '_default_') == '_default_'
         assert h.onvl(None, 'x', '_default_') == '_default_'
+        assert h.is_production() == False
 
 
 class TestObj(object):

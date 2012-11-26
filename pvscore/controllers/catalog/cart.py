@@ -56,7 +56,7 @@ class CartController(CatalogBaseController):
     @view_config(route_name='ecom.site.cart.remove', renderer="string")
     def remove(self):
         if not 'cart' in self.session:
-            return 'False'
+            return 'False' #pragma: no cover
         redir = self.request.GET.get('redir')
         cart = self.session['cart']
         product_id = self.request.matchdict.get('product_id')
@@ -70,7 +70,7 @@ class CartController(CatalogBaseController):
     def checkout(self):
         page = self.request.matchdict.get('page')
         if 'cart' not in self.session:
-            return HTTPFound('/')
+            return HTTPFound('/')   #pragma: no cover
         params = self.params()
         cart = self.session['cart']
         if self.request.ctx.site.config_json and not cart.shipping_options:

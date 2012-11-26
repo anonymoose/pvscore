@@ -726,7 +726,7 @@ class CustomerController(BaseController):
             self._apply_payment(cust.customer_id, order.order_id, order.total_price(), api.payment_method)
             try:
                 campaign.send_post_purchase_comm(order)
-            except Exception as exc:
+            except Exception as exc:  #pragma: no cover
                 log.warning(exc)
             return cust
         else:

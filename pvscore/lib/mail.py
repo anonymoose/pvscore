@@ -36,7 +36,7 @@ class UserMail(object):
     def send(self, to_addr, subject, text, *attachment_file_paths):
         email_info = self.sender.get_email_info()
         if not email_info.check():
-            raise Exception('Invalid email info')
+            raise Exception('Invalid email info')   #pragma: no cover
         server, port = email_info.smtp_server.split(':')
         msg = MIMEMultipart()
         msg['From'] = email_info.email
@@ -52,7 +52,7 @@ class UserMail(object):
         mail_server.ehlo()
         try:
             mail_server.starttls()
-        except Exception as exc:
+        except Exception as exc:  #pragma: no cover
             log.info(exc)
         mail_server.ehlo()
         mail_server.login(email_info.smtp_username, email_info.smtp_password)
@@ -103,9 +103,7 @@ class GmailLogHandler(logging.handlers.SMTPHandler):
          Format the record and send it to the specified addressees.
         """
         try:
-            port = self.mailport
-            if not port:
-                port = smtplib.SMTP_PORT
+            port = self.mailport if self.mailport else smtplib.SMTP_PORT
             smtp = smtplib.SMTP(self.mailhost, port)
             msg = self.format(record)
             msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
@@ -120,8 +118,8 @@ class GmailLogHandler(logging.handlers.SMTPHandler):
                 smtp.login(self.username, self.password)
             smtp.sendmail(self.fromaddr, self.toaddrs, msg)
             smtp.quit()
-        except (KeyboardInterrupt, SystemExit):
+        except (KeyboardInterrupt, SystemExit):  #pragma: no cover
             raise
-        except:
+        except:  #pragma: no cover
             self.handleError(record)
  

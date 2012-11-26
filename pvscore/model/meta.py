@@ -174,12 +174,12 @@ class BaseAnalytic(object):
 
     @property
     def columns(self):
-        pass
+        pass  #pragma: no cover
 
 
     @property
     def query(self):
-        pass
+        pass  #pragma: no cover
 
 
     def run(self):

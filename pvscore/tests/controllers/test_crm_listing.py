@@ -82,6 +82,9 @@ class TestCrmListing(TestController):
         assert R.status_int == 200
         asset_id = R.body
         ass = Asset.load(asset_id)
+        assert ass.web_path is not None
+        assert str(ass.id) in ass.web_path
+        assert ass.exists
         assert ass is not None
         assert ass.get_listing().listing_id == listing.listing_id
         listings = Listing.find_all_pending_approval(self.site.company.enterprise_id)

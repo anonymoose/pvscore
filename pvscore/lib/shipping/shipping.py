@@ -5,7 +5,7 @@ from pyramid.renderers import render
 import urllib2
 try:
     from xml.etree.ElementTree import fromstring#, tostring
-except ImportError:
+except ImportError:  #pragma: no cover
     from elementtree.ElementTree import fromstring #pylint: disable-msg=F0401
 
 log = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class UPSShipping(object):
         try:
             status_code = tree.getiterator('ResponseStatusCode')
             status_val = status_code[0].text
-        except AttributeError:
+        except AttributeError:  #pragma: no cover
             status_val = "-1"
 
         options = []
@@ -70,7 +70,7 @@ class UPSShipping(object):
                     option['charges'] = charges
                     option['delivery_days'] = util.nvl(delivery_days)
                     options.append(option)
-        else:
+        else:  #pragma: no cover
             try:
                 errors = tree.find('.//Error')
                 log.error("UPS %s Error: Code %s - %s" % (errors[0].text, errors[1].text, errors[2].text))

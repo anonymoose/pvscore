@@ -107,7 +107,7 @@ def _remember_customer(request):
         request.ctx.customer = Customer.load(request.params.get('customer_id'))
     if request.ctx.customer:
         if request.ctx.customer.campaign.company.enterprise_id != request.ctx.enterprise.enterprise_id:
-            raise HTTPForbidden()
+            raise HTTPForbidden()    #pragma: no cover
 
 
 def _remember_user(request):

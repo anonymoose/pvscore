@@ -52,7 +52,7 @@ class BaseController(BaseUI):
 
     def redir_if(self, result, goto='/', msg=None):
         if result:
-            if msg:
+            if msg:  #pragma: no cover
                 log.info(msg)
             raise HTTPFound(goto)
 
@@ -74,7 +74,7 @@ class BaseController(BaseUI):
 
     def raise_redirect(self, goto=None, params=""):
         if goto:
-            raise HTTPFound(goto)
+            raise HTTPFound(goto)  #pragma: no cover
         else:
             if self.request.POST.get('redir'):
                 raise HTTPFound('%s%s' % (self.request.POST.get('redir'), params))

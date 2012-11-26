@@ -19,7 +19,7 @@ class TestUtil(TestController):
         today_ = datetime.date.today()
         assert [today_.year + 10, today_.year + 10] in util.year_list()
         assert util.month_list()[0] == ["1", "January"]
-        assert util.this_year == datetime.date.today().year
+        assert util.this_year() == datetime.date.today().year
         assert util.get_first_day(today_) == util.get_first_day(today_)  # this is pretty dumb.  it works, just get it covered.
         assert util.get_last_day(today_) == util.get_last_day(today_)
         assert util.to_uuid('ken') == None

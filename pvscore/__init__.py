@@ -50,7 +50,8 @@ def command_line_main(settings):
     return cfg.make_wsgi_app()
 
 
-def main(global_config, **settings):   #pylint: disable-msg=W0613
+#pylint: disable-msg=W0613
+def main(global_config, **settings):   #pragma: no cover
     cfg = Configurator(settings=settings)
     init_pvscore(cfg, settings)
     return cfg.make_wsgi_app()

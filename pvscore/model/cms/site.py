@@ -47,7 +47,7 @@ class Site(ORMBase, BaseModel):
     default_campaign = relation('Campaign', lazy='joined')
     creator = relation('Users', primaryjoin=Users.user_id == user_created)
 
-    def __repr__(self):
+    def __repr__(self):  #pragma: no cover
         return '%s : %s' % (self.domain, self.company.name)
 
 

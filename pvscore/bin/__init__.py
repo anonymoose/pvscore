@@ -61,7 +61,7 @@ class PVSOptionParser(OptionParser):
     and pass --foobaz and have it parsed elsewhere.
     """
     def error(self, msg):
-        pass
+        pass  #pragma: no cover
 
 # KB: [2011-11-08]: This is so OptionParser will work, provided -I /whatever is the first arg 
 ARGV = sys.argv[sys.argv.index('-I')+1:] if '-I' in sys.argv else sys.argv
