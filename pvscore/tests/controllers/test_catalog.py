@@ -57,7 +57,7 @@ class TestCatalog(TestController):
 
     @customer_logged_in
     def test_purchase_cart(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         api = StripeBillingApi()
         R = self.get('/ecom/cart/clear')
         assert R.status_int == 200
@@ -119,7 +119,7 @@ class TestCatalog(TestController):
 
 
     def test_category(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         campaign = ent.companies[0].default_campaign
         categories = ProductCategory.find_by_campaign(campaign)
         assert len(categories) > 0

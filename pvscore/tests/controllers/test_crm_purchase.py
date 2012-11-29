@@ -147,7 +147,7 @@ class TestCrmPurchase(TestController):
 
     @secure
     def test_order_item_add_delete(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         purchase_order_id = self._create_new()
         prods = Product.find_all(ent.enterprise_id)
         product_id = prods[0].product_id
@@ -191,7 +191,7 @@ class TestCrmPurchase(TestController):
     def test_complete_po(self):
         purchase_order_id = self._create_new()
 
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         prods = Product.find_all(ent.enterprise_id)
         product_id = prods[0].product_id
 
@@ -214,7 +214,7 @@ class TestCrmPurchase(TestController):
 
     @secure
     def test_save_status(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         evt = StatusEvent.find(ent.enterprise_id, 'PurchaseOrder', 'TESTEVENT_PO')
         purchase_order_id = self._create_new()
 
@@ -256,7 +256,7 @@ class TestCrmPurchase(TestController):
 
 
     def _create_new(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         vendors = Vendor.find_all(ent.enterprise_id)
         ven = vendors[0]
 

@@ -346,6 +346,51 @@ class Product(ORMBase, BaseModel):
                                                          product_id=self.product_id))
 
 
+    def get_customers(self):
+        from pvscore.model.crm.customer import Customer
+        sql = """SELECT cu.*
+                 FROM crm_product p, crm_company com, crm_campaign cam, crm_customer cu, crm_customer_order co, crm_order_item oi
+                 where p.company_id = com.company_id
+                 and cam.company_id = com.company_id
+                 and cam.campaign_id = cu.campaign_id
+                 and cu.customer_id = co.customer_id
+                 and co.order_id = oi.order_id
+                 and oi.product_id = p.product_id
+                 and cam.delete_dt is null
+                 and co.cancel_dt is null
+                 and cu.delete_dt is null
+                 and oi.delete_dt is null
+                 and p.product_id = '{prodid}'
+                 and com.enterprise_id = '{ent_id}'
+                 and p.company_id = '{cid}'""".format(prodid=self.product_id,
+                                                  cid=self.company_id,
+                                                  ent_id=self.company.enterprise_id)
+        return Session.query(Customer) \
+            .from_statement(sql).all()
+
+
+    def get_customers_created_today(self):
+        from pvscore.model.crm.customer import Customer
+        sql = """SELECT cu.*
+                 FROM crm_product p, crm_company com, crm_campaign cam, crm_customer cu, crm_customer_order co, crm_order_item oi
+                 where p.company_id = com.company_id
+                 and cam.company_id = com.company_id
+                 and cam.campaign_id = cu.campaign_id
+                 and cu.customer_id = co.customer_id
+                 and co.order_id = oi.order_id
+                 and oi.product_id = p.product_id
+                 and cam.delete_dt is null
+                 and cu.delete_dt is null
+                 and oi.delete_dt is null
+                 and p.product_id = '{prodid}'
+                 and com.enterprise_id = '{ent_id}'
+                 and p.company_id = '{cid}'
+                 and oi.create_dt > now()::date - 1""".format(prodid=self.product_id,
+                                                              cid=self.company_id,
+                                                              ent_id=self.company.enterprise_id)
+        return Session.query(Customer) \
+            .from_statement(sql).all()
+
 
     @property
     def link(self):
@@ -826,50 +871,8 @@ class InventoryJournal(ORMBase, BaseModel):
 
 
 
-    # def get_customers(self):
-    #     from pvscore.model.crm.customer import Customer
-    #     sql = """SELECT cu.*
-    #              FROM crm_product p, crm_company com, crm_campaign cam, crm_customer cu, crm_customer_order co, crm_order_item oi
-    #              where p.company_id = com.company_id
-    #              and cam.company_id = com.company_id
-    #              and cam.campaign_id = cu.campaign_id
-    #              and cu.customer_id = co.customer_id
-    #              and co.order_id = oi.order_id
-    #              and oi.product_id = p.product_id
-    #              and cam.delete_dt is null
-    #              and co.cancel_dt is null
-    #              and cu.delete_dt is null
-    #              and oi.delete_dt is null
-    #              and p.product_id = {prodid}
-    #              and com.enterprise_id = {ent_id}
-    #              and p.company_id={cid}""".format(prodid=self.product_id,
-    #                                               cid=self.company_id,
-    #                                               ent_id=self.company.enterprise_id)
-    #     return Session.query(Customer) \
-    #         .from_statement(sql).all()
 
 
-    # def get_customers_created_today(self):
-    #     from pvscore.model.crm.customer import Customer
-    #     sql = """SELECT cu.*
-    #              FROM crm_product p, crm_company com, crm_campaign cam, crm_customer cu, crm_customer_order co, crm_order_item oi
-    #              where p.company_id = com.company_id
-    #              and cam.company_id = com.company_id
-    #              and cam.campaign_id = cu.campaign_id
-    #              and cu.customer_id = co.customer_id
-    #              and co.order_id = oi.order_id
-    #              and oi.product_id = p.product_id
-    #              and cam.delete_dt is null
-    #              and cu.delete_dt is null
-    #              and oi.delete_dt is null
-    #              and p.product_id = {prodid}
-    #              and com.enterprise_id = {ent_id}
-    #              and p.company_id={cid}
-    #              and oi.create_dt > now()::date - 1""".format(prodid=self.product_id,
-    #                                               cid=self.company_id,
-    #                                               ent_id=self.company.enterprise_id)
-    #     return Session.query(Customer) \
-    #         .from_statement(sql).all()
 
     # @staticmethod
     # def find_all(enterprise_id):

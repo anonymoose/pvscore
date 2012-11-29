@@ -643,7 +643,7 @@ class CustomerController(BaseController):
     def signup(self):
         cust = self._signup()
         if cust:
-            return HTTPFound(self.request.POST.get('redir') + '?customer_id=' + str(cust.customer_id))
+            return self.find_redirect('?customer_id=' + str(cust.customer_id))
     
 
     @validate((('fname', 'string'), ('fname', 'required'),
@@ -777,7 +777,6 @@ class CustomerController(BaseController):
             self.flash('Unable to save credit card information: %s' % last_note)
             log.error('CC CHANGE DECLINED %s %s %s' % (cust.customer_id, cust.email, last_note))
             self.raise_redirect(self.request.referrer)
-
  
 
     @view_config(route_name='crm.customer.self_cancel_order')
@@ -852,24 +851,13 @@ class CustomerController(BaseController):
         return self.find_redirect()
 
 
-#    def signup_and_purchase(self):
-#        """ KB: [2011-04-26]:
-#        Sign up just like in self.signup.
-#        Add the product ID's to the cart.
-#        Create all the requisite billing information from the info in POST.
-#        Add a real order and save everything
-#        Hit the configured BillingApi and bill through it.
-#        - If everything comes back ok then send the customer a post_purchase comm and redirect to POST['redir']
-#        - If not, set a self.flash as to the reason why it failed.
-#        - Delete the billing we just created and the order we just created.
-#        - Redirect back from where we came.
-#        Send the customer the post_purchase comm as configured for the campaign.
-#        Redirect to POST['redir']
-#        """
-#        if not self._signup():
-#            return HTTPFound('{url}?msg=signup_failed'.format(url=self.request.POST.get('url_path'))))
-#        cust = self._site_purchase(False)
-#        return HTTPFound(self.request.POST.get('redir') + '?customer_id=' + str(cust.customer_id))
+    @view_config(route_name='crm.customer.signup_and_purchase')
+    def signup_and_purchase(self):
+        cust = self._signup()
+        if not cust:
+            return HTTPFound('{url}?msg=signup_failed' % self.request.referrer)
+        self._site_purchase(cust)
+        return self.find_redirect('?customer_id=' + str(cust.customer_id))
 
 
 #    def signup_free(self):

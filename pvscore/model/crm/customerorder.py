@@ -35,6 +35,7 @@ class CustomerOrder(ORMBase, BaseModel):
     handling_note = Column(String(50))
     handling_total = Column(Float)
     external_cart_id = Column(String(100))
+    third_party_id = Column(String(100))
 
     customer = relation('Customer')
     campaign = relation('Campaign')
@@ -170,7 +171,7 @@ class CustomerOrder(ORMBase, BaseModel):
     def total_price(self):
         tot = 0.0
         for oitem in self.active_items:
-            tot += (oitem.unit_price * (oitem.quantity if oitem.quantity else 1)) + oitem.tax
+            tot += oitem.total()
         return round(tot + (self.shipping_total if self.shipping_total else 0.0) + (self.handling_total if self.handling_total else 0.0), 2)
 
 

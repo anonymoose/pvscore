@@ -94,7 +94,7 @@ Disallow: /cms/cart/add/*""")
 
 
     def test_site_alternate_campaign(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         cmpns = Campaign.find_all(ent.enterprise_id)
         other_campaign = cmpns[1]
         R = self.get('/?__cid=%s' % other_campaign.campaign_id)

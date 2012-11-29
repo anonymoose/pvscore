@@ -117,5 +117,10 @@ def log(msg):
     sys.stdout.flush()
 
 
-
-
+def email(to, subj, msg):
+    pass
+#    from app.lib.base import BaseUI
+#    from app.model.crm.company import Company, Enterprise
+#    Enterprise.load(BaseUI.get_enterprise_id())
+#    mail = UserMail(Company.find_all()[0])
+#    mail.send(to, subj, msg)

@@ -68,7 +68,7 @@ class TestController(TestCase):
 
 
     def _get_headers(self, headers):
-        return headers if headers else {'Host': self.get_host(),
+        return headers if headers else {'Host': str(self.site.domain),
                                         'HTTP_X_REAL_IP': '98.231.77.218', # a real PV ip addr.
                                         'X-Real-Ip': '98.231.77.218'
                                         }
@@ -168,6 +168,30 @@ def secure(func, username='kenneth.bedwell@gmail.com', password='Zachary234'):
         return ret
     wrap.__name__ = func.__name__
     return wrap
+
+
+class alternate_site(object):
+    """ KB: [2012-11-29]: If in a test method you want to use a site that is configured other than "healthyustore.net"
+    @alternate_site('test2.com')
+    def test_whatever(self):
+        :::
+    """
+    def __init__(self, domain):
+        self.domain = domain
+
+    def __call__(self, original_func):
+        decorator_self = self
+        def wrap(func_self, *args, **kwargs):
+            orig_site = func_self.site
+            func_self.site = Site.find_by_host(self.domain)
+            try:
+                return original_func(func_self, *args, **kwargs)
+            finally:
+                func_self.site = orig_site
+
+        wrap.__name__ = original_func.__name__
+        return wrap
+
 
 
 # def quiet(func):

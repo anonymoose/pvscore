@@ -43,6 +43,11 @@ class Billing(ORMBase, BaseModel):
         self._cc_num = num
         self._cc_cvv = cvv
 
+    def get_cc_num(self):
+        return self._cc_num
+
+    def get_cc_cvv(self):
+        return self._cc_cvv
         
     @staticmethod
     def create(cust, save=True):

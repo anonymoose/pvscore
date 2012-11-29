@@ -137,7 +137,23 @@ copy wm_ireport_prediction_join from '/tmp/wm_ireport_prediction_join.copy';
 alter table crm_customer drop constraint crm_customer_status_id_fkey1;
 alter table crm_journal drop constraint crm_journal_order_id_fkey1;
 
+alter table wm_customer_holding drop column customer_id;
+alter table wm_customer_holding add column customer_id uuid;
+
 drop table tmp_keepers;
 drop table tmp_status_keepers;
 
 alter table core_status add foreign key (customer_id) references crm_customer;
+
+
+alter table wm_ireport drop column status_id;
+alter table wm_ireport add column status_id uuid;
+alter table wm_ireport add foreign key (status_id) references core_status;
+
+alter table wm_ireport drop column user_created;
+alter table wm_ireport add column user_created uuid;
+alter table wm_ireport add foreign key (user_created) references core_user;
+
+alter table wm_ireport drop column product_id;
+alter table wm_ireport add column product_id uuid;
+alter table wm_ireport add foreign key (product_id) references crm_product;

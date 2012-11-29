@@ -30,14 +30,18 @@ class OrderItem(ORMBase, BaseModel):
     delete_dt = Column(DateTime)
     quantity = Column(Float)
     tax = Column(Float, default=0.0)
+    third_party_id = Column(String(100))
 
     order = relation('CustomerOrder', lazy="joined")
     creator = relation('Users')
     product = relation('Product', lazy="joined")
     status = relation('Status')
 
+
     def total(self):
-        return util.nvl(self.unit_price, 0.0) * util.nvl(self.quantity, 0.0)
+        """ KB: [2012-11-28]: TODO: Change this to where handling_price is an attribute """
+        pretax = (util.nvl(self.product.handling_price, 0.0) + util.nvl(self.unit_price, 0.0)) * util.nvl(self.quantity, 1.0)
+        return pretax + (pretax * self.tax)
 
 
     @property

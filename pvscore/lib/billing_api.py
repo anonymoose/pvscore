@@ -1,6 +1,10 @@
 #pylint: disable-msg=W0221,W0613
+import urllib
+import urllib2
 import stripe
 import logging
+from pyramid.renderers import render
+import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
 
@@ -9,9 +13,12 @@ class BaseBillingApi(object):
     @staticmethod
     def create_api(enterprise):
         """ KB: [2010-10-20]: this is called to get the right api for the application """
-        ret = NullBillingApi()
-        if (enterprise is not None and 'Stripe' == enterprise.billing_method):
-            ret = StripeBillingApi()
+        ret = NullBillingApi(enterprise)
+        if enterprise is not None:
+            if 'Stripe' == enterprise.billing_method:
+                ret = StripeBillingApi(enterprise)
+            elif 'Authorize.Net' == enterprise.billing_method:
+                return AuthorizeNetBillingApi(enterprise)
         return ret
 
 
@@ -40,10 +47,11 @@ class BaseBillingApi(object):
 
 
 class NullBillingApi(BaseBillingApi):
-    def __init__(self):
+    def __init__(self, enterprise):
         super(NullBillingApi, self).__init__()
         self.payment_method = 'Credit Card'
         self.coupon = None
+        self.enterprise = enterprise
 
 
 class StripeBillingApi(BaseBillingApi):
@@ -55,16 +63,17 @@ class StripeBillingApi(BaseBillingApi):
     @stripe = product.sku @pvs
     """
 
-    def  __init__(self):
+    def  __init__(self, enterprise):
         super(StripeBillingApi, self).__init__()
         self.last_status = None
         self.last_note = None
         self.payment_method = 'Credit Card'
         self.coupon = None
+        self.enterprise = enterprise
 
 
-    def create_token(self, enterprise, ccnum, month, year, cvc):  #pylint: disable-msg=R0913
-        stripe.api_key = enterprise.get_attr('stripe_private_key')
+    def create_token(self, ccnum, month, year, cvc):  #pylint: disable-msg=R0913
+        stripe.api_key = self.enterprise.get_attr('stripe_private_key')
         token = stripe.Token.create(
             card={
                 "number": ccnum,
@@ -89,7 +98,7 @@ class StripeBillingApi(BaseBillingApi):
             raise Exception("No stripe cc_token present")  #pragma: no cover
         campaign = order.campaign
         cust = order.customer
-        stripe.api_key = cust.campaign.company.enterprise.get_attr('stripe_private_key')
+        stripe.api_key = self.enterprise.get_attr('stripe_private_key')
 
         try:
             # see if this customer exists at stripe.  If not create him.
@@ -140,7 +149,7 @@ class StripeBillingApi(BaseBillingApi):
 
 
     def update_billing(self, cust, bill):
-        stripe.api_key = cust.campaign.company.enterprise.get_attr('stripe_private_key')
+        stripe.api_key = self.enterprise.get_attr('stripe_private_key')
         try:
             if cust.third_party_id:
                 stripe_cust = stripe.Customer.retrieve(cust.third_party_id)
@@ -160,7 +169,7 @@ class StripeBillingApi(BaseBillingApi):
             cust = order.customer
             if not cust.third_party_id:
                 return False
-            stripe.api_key = cust.campaign.company.enterprise.get_attr('stripe_private_key')
+            stripe.api_key = self.enterprise.get_attr('stripe_private_key')
             stripe_cust = stripe.Customer.retrieve(cust.third_party_id)
             for oitem in order.active_items:
                 prod = oitem.product
@@ -178,6 +187,335 @@ class StripeBillingApi(BaseBillingApi):
 
     def get_last_status(self):
         return (self.last_status, self.last_note)
+
+
+
+API_VERSION = '3.1'
+DELIM_CHAR = ','
+ENCAP_CHAR = '$'
+APPROVED, DECLINED, ERROR, FRAUD_REVIEW = 1, 2, 3, 4
+RESPONSE_CODE, RESPONSE_REASON_CODE, RESPONSE_REASON_TEXT = 0, 2, 3
+
+#https://github.com/agiliq/merchant/blob/master/docs/gateways/authorize_net.rst
+class AuthorizeNetBillingApi(BaseBillingApi):
+    test_url = "https://test.authorize.net/gateway/transact.dll"
+    live_url = "https://secure.authorize.net/gateway/transact.dll"
+
+    arb_test_url = 'https://apitest.authorize.net/xml/v1/request.api'
+    arb_live_url = 'https://api.authorize.net/xml/v1/request.api'
+
+    def  __init__(self, enterprise):
+        super(AuthorizeNetBillingApi, self).__init__()
+        self.last_status = None
+        self.last_note = None
+        self.payment_method = 'Credit Card'
+        self.coupon = None
+        self.enterprise = enterprise
+        self.test_mode = ('T' == self.enterprise.get_attr('authnet_test_mode', 'F'))
+        self.authnet_login_id = self.enterprise.get_attr('authnet_login_id')
+        self.authnet_transaction_key = self.enterprise.get_attr('authnet_transaction_key')
+
+
+    def set_coupon(self, coupon):
+        pass
+
+
+    def purchase(self, order, billing, cart, remote_ip=None):
+        campaign = order.campaign
+        enterprise = campaign.company.enterprise
+
+        charge_items_amount = 0.0
+        subscription_amount = 0.0
+        for oitem in order.active_items:
+            prod = oitem.product
+            if prod.subscription:
+                resp = self._create_subscription(prod, oitem, order.customer, billing)
+                if not resp:
+                    return False
+                subscription_amount += int(oitem.total()*100)
+            else:
+                charge_items_amount += int(oitem.total()*100)  # must be amount in cents.  whatever.
+
+        if charge_items_amount > 0:
+            resp = self._charge_card((order.total_price()-subscription_amount), order, order.customer, billing)
+            if not resp:
+                return False
+        return True
+
+
+    def cancel_order(self, order, billing):
+        try:
+            cust = order.customer
+            for oitem in order.active_items:
+                prod = oitem.product
+                if prod.subscription:
+                    return self._cancel_subscription(cust, order, oitem)
+        except Exception as exc2: #pragma: no cover
+            self.last_note = exc2.message
+        return False
+
+
+    def update_billing(self, cust, billing):
+        try:
+            for order in cust.get_active_orders():
+                for oitem in order.active_items:
+                    prod = oitem.product
+                    if prod.subscription:
+                        if not self._update_subscription(cust, order, oitem, billing):
+                            return False
+            return True
+        except Exception as exc2: #pragma: no cover
+            self.last_note = exc2.message
+        return False
+
+
+    def _update_subscription(self, customer, order, order_item, billing):
+        try:
+            xml = render('/crm/billing/authnet_arb_update_subscription.xml.mako',
+                         {'auth_login' : self.authnet_login_id,
+                          'auth_key' : self.authnet_transaction_key,
+                          'subscription_id' : order_item.third_party_id,
+                          'card_number' : billing.get_cc_num(),
+                          'exp_date' : billing.cc_exp
+                          })
+    
+            headers = {'content-type': 'text/xml'}
+    
+            conn = urllib2.Request(url=self._arb_url, data=xml, headers=headers)
+            try:
+                open_conn = urllib2.urlopen(conn)
+                xml_response = open_conn.read()
+            except urllib2.URLError:
+                return (5, '1', 'Could not talk to payment gateway.')
+    
+            response = util.xml_str_to_dict(xml_response)['ARBUpdateSubscriptionResponse']
+    
+            status = "SUCCESS"
+            if response['messages']['resultCode'].lower() != 'ok':
+                status = "FAILURE"
+                message = response['messages']['message']
+                if type(message) == list:
+                    message = message[0]
+                self.last_status = message['code']
+                self.last_note = message['text']
+                return False
+            return True
+        except Exception as exc2: #pragma: no cover
+            self.last_status = -1
+            self.last_note = exc2.message
+        return False
+
+
+    def get_last_status(self):
+        return (self.last_status, self.last_note)
+
+
+    @property
+    def _service_url(self):
+        return self.test_url if self.test_mode else self.live_url
+
+
+    @property
+    def _arb_url(self):
+        return self.arb_test_url if self.test_mode else self.arb_live_url
+
+
+    def _create_subscription(self, prod, order_item, customer, billing):
+        try:
+            xml = render('/crm/billing/authnet_arb_create_subscription.xml.mako',
+                         {'auth_login' : self.authnet_login_id,
+                          'auth_key' : self.authnet_transaction_key,
+                          'amount' : order_item.total(),
+                          'card_number' : billing.get_cc_num(),
+                          'exp_date' : billing.cc_exp,
+                          'start_date' : util.str_today(),
+                          'total_occurrences' : 9999,
+                          'interval_length' : 1,
+                          'interval_unit' : 'months',
+                          'sub_name' : '',
+                          'first_name' : customer.fname,
+                          'last_name' : customer.lname
+                          })
+    
+            headers = {'content-type': 'text/xml'}
+    
+            conn = urllib2.Request(url=self._arb_url, data=xml, headers=headers)
+            try:
+                open_conn = urllib2.urlopen(conn)
+                xml_response = open_conn.read()
+            except urllib2.URLError:
+                return (5, '1', 'Could not talk to payment gateway.')
+    
+            response = util.xml_str_to_dict(xml_response)['ARBCreateSubscriptionResponse']
+
+            # successful response
+            # {u'ARBCreateSubscriptionResponse': {u'messages': {u'message': {u'code': u'I00001',
+            #                                                               u'text': u'Successful.'},
+            #                                                  u'resultCode': u'Ok'},
+            #                                    u'subscriptionId': u'933728'}}
+    
+            status = "SUCCESS"
+            if response['messages']['resultCode'].lower() != 'ok':
+                status = "FAILURE"
+                message = response['messages']['message']
+
+                if type(message) == list:
+                    message = message[0]
+                self.last_status = message['code']
+                self.last_note = message['text']
+                return False
+            order_item.third_party_id = response['subscriptionId']
+            order_item.save()
+            return True
+        except Exception as exc2: #pragma: no cover
+            self.last_status = -1
+            self.last_note = exc2.message
+        return False
+
+
+    def _cancel_subscription(self, customer, order, order_item):
+        try:
+            xml = render('/crm/billing/authnet_arb_cancel_subscription.xml.mako',
+                         {'auth_login' : self.authnet_login_id,
+                          'auth_key' : self.authnet_transaction_key,
+                          'subscription_id' : order_item.third_party_id
+                          })
+    
+            headers = {'content-type': 'text/xml'}
+    
+            conn = urllib2.Request(url=self._arb_url, data=xml, headers=headers)
+            try:
+                open_conn = urllib2.urlopen(conn)
+                xml_response = open_conn.read()
+            except urllib2.URLError:
+                return (5, '1', 'Could not talk to payment gateway.')
+    
+            response = util.xml_str_to_dict(xml_response)['ARBCancelSubscriptionResponse']
+    
+            status = "SUCCESS"
+            if response['messages']['resultCode'].lower() != 'ok':
+                status = "FAILURE"
+                message = response['messages']['message']
+
+                if type(message) == list:
+                    message = message[0]
+                self.last_status = message['code']
+                self.last_note = message['text']
+                return False
+            return True
+        except Exception as exc2: #pragma: no cover
+            self.last_status = -1
+            self.last_note = exc2.message
+        return False
+
+
+    def _charge_card(self, amount, order, customer, billing):
+        post = {}
+        post['invoice_num'] = str(order.order_id)
+        post['description'] = "%s Order" % order.campaign.company.name
+        post['card_num'] = billing.get_cc_num()
+        post['card_code'] = billing.get_cc_cvv()
+        post['exp_date'] = billing.cc_exp
+        post['first_name'] = customer.fname
+        post['last_name'] = customer.lname
+        post['address'] = customer.addr1 + ' ' + util.nvl(customer.addr2)
+        post['company'] = customer.company_name
+        post['phone'] = customer.phone
+        post['zip'] = customer.zip
+        post['city'] = customer.city
+        post['country'] = customer.country
+        post['state'] = customer.state
+        post['email'] = customer.email
+        post['cust_id'] = customer.customer_id
+        #post['customer_ip'] = options['ip']
+        return self._commit('AUTH_CAPTURE', amount, post)
+
+
+    def _commit(self, action, money, parameters):
+        if not action == 'VOID':
+            parameters['amount'] = money
+        parameters['test_request'] = self.test_mode
+        url = self._service_url
+        data = self._post_data(action, parameters)
+        response = self._request(url, data)
+        if response['response_code'] != 1:
+            self.last_status = response['response_code']
+            self.last_note = response['response_reason_text']
+            return False
+        return True
+
+
+    def _post_data(self, action, parameters=None):
+        """add API details, gateway response formating options
+        to the request parameters"""
+        if not parameters:
+            parameters = {}
+        post = {}
+        post['version'] = API_VERSION
+        post['login'] = self.authnet_login_id
+        post['tran_key'] = self.authnet_transaction_key
+        post['relay_response'] = "FALSE"
+        post['type'] = action
+        post['delim_data'] = "TRUE"
+        post['delim_char'] = DELIM_CHAR
+        post['encap_char'] = ENCAP_CHAR
+        post.update(parameters)
+        return urllib.urlencode(dict(('x_%s' % (k), v) for k, v in post.iteritems()))
+
+
+    def _request(self, url, data, headers=None):
+        """Make POST request to the payment gateway with the data and return
+        gateway RESPONSE_CODE, RESPONSE_REASON_CODE, RESPONSE_REASON_TEXT"""
+        if not headers:
+            headers = {}
+        conn = urllib2.Request(url=url, data=data, headers=headers)
+        try:
+            open_conn = urllib2.urlopen(conn)
+            response = open_conn.read()
+        except urllib2.URLError:
+            return (5, '1', 'Could not talk to payment gateway.')
+        fields = response[1:-1].split('%s%s%s' % (ENCAP_CHAR, DELIM_CHAR, ENCAP_CHAR))
+        return self._save_authorize_response(fields)
+
+
+    def _save_authorize_response(self, response):
+        data = {}
+        data['response_code'] = int(response[0])
+        data['response_reason_code'] = response[2]
+        data['response_reason_text'] = response[3]
+        data['authorization_code'] = response[4]
+        data['address_verification_response'] = response[5]
+        data['transaction_id'] = response[6]
+        data['invoice_number'] = response[7]
+        data['description'] = response[8]
+        data['amount'] = response[9]
+        data['method'] = response[10]
+        data['transaction_type'] = response[11]
+        data['customer_id'] = response[12]
+    
+        data['first_name'] = response[13]
+        data['last_name'] = response[14]
+        data['company'] = response[15]
+        data['address'] = response[16]
+        data['city'] = response[17]
+        data['state'] = response[18]
+        data['zip_code'] = response[19]
+        data['country'] = response[20]
+        data['phone'] = response[21]
+        data['fax'] = response[22]
+        data['email'] = response[23]
+    
+        data['shipping_first_name'] = response[24]
+        data['shipping_last_name'] = response[25]
+        data['shipping_company'] = response[26]
+        data['shipping_address'] = response[27]
+        data['shipping_city'] = response[28]
+        data['shipping_state'] = response[29]
+        data['shipping_zip_code'] = response[30]
+        data['shipping_country'] = response[31]
+        data['card_code_response'] = response[38]
+        return data
+    
 
 # """
 # Gateway run by Matt Piruvil (mpirvul@eaccounts.net)

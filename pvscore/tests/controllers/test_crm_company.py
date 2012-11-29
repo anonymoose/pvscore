@@ -8,7 +8,7 @@ from pvscore.model.core.users import Users
 class TestCrmCompany(TestController):
 
     def test_misc(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         comps = Company.find_all(ent.enterprise_id)
         assert len(comps) > 0
         comp = comps[0]
@@ -24,6 +24,7 @@ class TestCrmCompany(TestController):
         ids = sorted([camp.campaign_id for camp in camps])
         ids2 = sorted([camp.campaign_id for camp in Campaign.load_ids(ids)])
         assert ids == ids2
+
 
     @secure
     def test_show_new(self):

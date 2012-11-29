@@ -87,7 +87,7 @@ class TestCrmCommunication(TestController):
 
     @secure
     def test_view_comm_dialog(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         cust = self.get_customer()
         comm = Communication.find_all(ent.enterprise_id)[0]
         order = cust.get_active_orders()[0]

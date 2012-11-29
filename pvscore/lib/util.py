@@ -11,6 +11,8 @@ import re, calendar
 import logging
 import subprocess
 import uuid
+from xml.dom.minidom import parse, parseString
+
 
 log = logging.getLogger(__name__)
 
@@ -19,9 +21,18 @@ def parse_date(strdt, fmt='%Y-%m-%d'):
     return datetime.datetime.strptime(strdt, fmt)
 
 
+def parse_date_as_date(strdt, fmt='%Y-%m-%d'):
+    dt = parse_date(strdt, fmt)
+    return datetime.date(dt.year, dt.month, dt.day)
+
+
 def format_date(d, fmt="%Y-%m-%d"):
     return d.strftime(fmt)
 
+
+def is_today(dt):
+    today_ = datetime.datetime.today()
+    return (today_.year == dt.year and today_.month == dt.month and today_.day == dt.day)
 
 #<pubDate>Wed, 02 Oct 2002 08:00:00 EST</pubDate>
 def format_rss_date(d):
@@ -661,6 +672,104 @@ def to_uuid(val):
         log.warn(exc)
         return None
 
+def single_attr_array(obj_array, attr_name):
+    """ KB: [2010-08-27]: Given an array of homogenous objects,
+    create an array of those values specified by attr_name
+    """
+    arr = []
+    for obj in obj_array:
+        arr.append(getattr(obj, attr_name, None))
+    return arr
+
+
+def single_key_array(dict_array, attr_name):
+    """ KB: [2010-08-27]: Given an array of homogenous objects,
+    create an array of those values specified by attr_name
+    """
+    arr = []
+    for obj in dict_array:
+        if type(obj) == tuple and type(attr_name) == int:
+            arr.append(obj[attr_name])
+        else:
+            if obj.has_key(attr_name):
+                arr.append(obj[attr_name])
+            else:
+                arr.append(None)
+    return arr
+
+
+class NotTextNodeError:
+    pass
+
+
+def text_from_node(node):
+    """
+    scans through all children of node and gathers the
+    text. if node has non-text child-nodes, then
+    NotTextNodeError is raised.
+    """
+    t = ""
+    for n in node.childNodes:
+        if n.nodeType == n.TEXT_NODE:
+            t += n.nodeValue
+        else:
+            raise NotTextNodeError
+    return t
+
+
+def xml_str_to_dict(xmlstr):
+    return xml_to_dict(parseString(xmlstr))
+
+
+def xml_to_dict(node):
+    """
+    xml_to_dict() scans through the children of node and makes a
+    dictionary from the content.
+    three cases are differentiated:
+    - if the node contains no other nodes, it is a text-node
+    and {nodeName:text} is merged into the dictionary.
+    - if the node has the attribute "method" set to "true",
+    then it's children will be appended to a list and this
+    list is merged to the dictionary in the form: {nodeName:list}.
+    - else, xml_to_dict() will call itself recursively on
+    the nodes children (merging {nodeName:xml_to_dict()} to
+    the dictionary).
+    """
+    dic = {}
+    multlist = {}  # holds temporary lists where there are multiple children
+    multiple = False
+    for n in node.childNodes:
+        if n.nodeType != n.ELEMENT_NODE:
+            continue
+        # find out if there are multiple records
+        if len(node.getElementsByTagName(n.nodeName)) > 1:
+            multiple = True
+            # and set up the list to hold the values
+            if not n.nodeName in multlist:
+                multlist[n.nodeName] = []
+        else:
+            multiple = False
+        try:
+            # text node
+            text = text_from_node(n)
+        except NotTextNodeError:
+            if multiple:
+                # append to our list
+                multlist[n.nodeName].append(xml_to_dict(n))
+                dic.update({n.nodeName: multlist[n.nodeName]})
+                continue
+            else:
+                # 'normal' node
+                dic.update({n.nodeName: xml_to_dict(n)})
+                continue
+        # text node
+        if multiple:
+            multlist[n.nodeName].append(text)
+            dic.update({n.nodeName: multlist[n.nodeName]})
+        else:
+            dic.update({n.nodeName: text})
+    return dic
+
 # def contains(lst, val):
 #     try:
 #         lst.index(val)
@@ -692,9 +801,6 @@ def to_uuid(val):
 #     return min(enumerate(lst), key=itemgetter(1))[0]
 
 
-# def parse_date_as_date(strdt, fmt='%Y-%m-%d'):
-#     dt = parse_date(strdt, fmt)
-#     return datetime.date(dt.year, dt.month, dt.day)
 
 
 # def str_now():
@@ -721,35 +827,8 @@ def to_uuid(val):
 #     return ret
 
 
-# def is_today(dt):
-#     today_ = datetime.datetime.today()
-#     return (today_.year == dt.year and today_.month == dt.month and today_.day == dt.day)
 
 
-# def single_attr_array(obj_array, attr_name):
-#     """ KB: [2010-08-27]: Given an array of homogenous objects,
-#     create an array of those values specified by attr_name
-#     """
-#     arr = []
-#     for obj in obj_array:
-#         arr.append(getattr(obj, attr_name, None))
-#     return arr
-
-
-# def single_key_array(dict_array, attr_name):
-#     """ KB: [2010-08-27]: Given an array of homogenous objects,
-#     create an array of those values specified by attr_name
-#     """
-#     arr = []
-#     for obj in dict_array:
-#         if type(obj) == tuple and type(attr_name) == int:
-#             arr.append(obj[attr_name])
-#         else:
-#             if obj.has_key(attr_name):
-#                 arr.append(obj[attr_name])
-#             else:
-#                 arr.append(None)
-#     return arr
 
 
 # def nl2br(val):

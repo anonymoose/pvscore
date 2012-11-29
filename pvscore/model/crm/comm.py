@@ -52,6 +52,21 @@ class Communication(ORMBase, BaseModel):
                              Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).all()
 
 
+    @staticmethod
+    def find_by_company(name, company):
+        # if user_sendable_only:
+        #     return Session.query(Communication) \
+        #         .filter(and_(Communication.delete_dt == None,
+        #                      Communication.name == name,
+        #                      Communication.user_sendable == True,
+        #                      Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).first()
+        # else:
+        return Session.query(Communication) \
+            .filter(and_(Communication.delete_dt == None,
+                         Communication.name == name,
+                         Communication.enterprise_id == str(company.enterprise_id))).order_by(Communication.name).first()
+
+
     def invalidate_caches(self, **kwargs):
         invalidate(self, 'Communication.find_all', self.enterprise_id)
         invalidate(self, 'Communication.find_all_by_company', self.company_id)
@@ -171,19 +186,6 @@ class Communication(ORMBase, BaseModel):
     #     com.save()
     #     return com
 
-    # @staticmethod
-    # def find_by_company(name, company):
-    #     # if user_sendable_only:
-    #     #     return Session.query(Communication) \
-    #     #         .filter(and_(Communication.delete_dt == None,
-    #     #                      Communication.name == name,
-    #     #                      Communication.user_sendable == True,
-    #     #                      Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).first()
-    #     # else:
-    #     return Session.query(Communication) \
-    #             .filter(and_(Communication.delete_dt == None,
-    #                          Communication.name == name,
-    #                          Communication.enterprise_id == company.enterprise_id)).order_by(Communication.name).first()
 
     # @staticmethod
     # def search(enterprise_id, name):

@@ -1,0 +1,49 @@
+Go here https://developer.authorize.net/testaccount/
+
+kbedwell5150
+Zachary234
+
+api login id = 95mDDjQ2p
+transaction key = 9H9H73r53xdeUJH3
+
+
+Log in to interface here:  https://test.authorize.net/
+
+
+Subject: Your Authorize.Net Developer Test Account
+
+Your Payment Gateway ID is: 382776
+Dear Ken Bedwell:
+
+Thank you for signing up for an Authorize.Net developer test account. Please review this e-mail in its entirety as it contains important information.
+
+Your test account is active and ready for you to begin testing now. Simply visit https://developer.authorize.net/integration/fifteenminutes to download the appropriate SDK and test your connection in fifteen minutes or less.
+
+To access your test account using the Merchant Interface, go to https://sandbox.authorize.net and log in using the Login ID and Password you created when requesting your test account. If you forgot your Login ID or Password, you can use the links located on the login page to request that information.
+
+If you need your test account's API Login ID and Transaction Key, simply log in to the Merchant Interface and click "Account." Then click "API Login ID and Transaction Key." Your API Login ID will be displayed. For security reasons, you cannot view your Transaction Key. Instead, you must generate a new one. To do this you will need the Secret Answer to the system-generated Secret Question, which is "Simon".
+
+You can check out our Developer Center at http://developer.authorize.net for sample code, SDKs, integration guides, troubleshooting tools and more. You can also visit our Developer Community at http://community.developer.authorize.net to share tips and best practices with other developers like you.
+
+For your reference, you can use the following test credit card numbers when testing your connection. The expiration date must be set to the present date or later:
+- American Express Test Card: 370000000000002
+- Discover Test Card: 6011000000000012
+- Visa Test Card: 4007000000027
+- Second Visa Test Card: 4012888818888
+- JCB: 3088000000000017
+- Diners Club/ Carte Blanche: 38000000000006
+
+Additional Resources:
+- Error Generation Guide at http://www.authorize.net/files/ErrorGenerationGuide.pdf
+- Troubleshooting Tools at http://developer.authorize.net/tools/
+- Testing FAQs at http://developer.authorize.net/testingtfaqs/
+- Developer Security Best Practices at http://developer.authorize.net/resources/files/developerbestpractices.pdf
+
+Once you have successfully completed testing, you may qualify for our Affiliate Reseller Program or one of our Certified Partner Programs. More information on each can be found in the Developer Center at http://developer.authorize.net/affiliate/ and http://developer.authorize.net/partners/.
+
+Last, to ensure you continue to receive e-mails from Authorize.Net, please add the domain "@authorize.net" to your approved senders or contact list.
+
+Thank you for signing up for an Authorize.Net test account and good luck with business.
+
+Sincerely,
+Authorize.Net

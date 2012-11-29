@@ -50,6 +50,12 @@ class BaseModel(object):
         pass
 
 
+    @classmethod
+    def count(cls, where=''):
+        ret = Session.query("c").from_statement("SELECT count(0) c FROM %s %s" % (cls.__tablename__, where)).one()    #pylint: disable-msg=E1101
+        return ret[0]
+
+
     def delete(self):
         # invalidate the single load cache from load() and tell the object to
         # invalidate itself.
@@ -154,11 +160,12 @@ class BaseModel(object):
         attr.set(self, value)
 
 
-    def get_attr(self, name):
+    def get_attr(self, name, default=None):
         from pvscore.model.core.attribute import Attribute
         attr = Attribute.find(self.__class__.__name__, name)
         if attr:
             return attr.get(self)
+        return default
 
 
     def get_attrs(self):
@@ -221,7 +228,3 @@ class BaseAnalytic(object):
     #     Session.execute('delete from %s %s' % (cls.__tablename__, where))    #pylint: disable-msg=E1101
 
 
-    # @classmethod
-    # def count(cls, where=''):
-    #     ret = Session.query("c").from_statement("SELECT count(0) c FROM %s %s" % (cls.__tablename__, where)).one()    #pylint: disable-msg=E1101
-    #     return ret[0]

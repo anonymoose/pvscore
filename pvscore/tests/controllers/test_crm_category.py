@@ -35,7 +35,7 @@ class TestCrmCategory(TestController):
 
     @secure
     def test_save_existing(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         category_id = self._create_new()
         R = self.get('/crm/product/category/list')
         assert R.status_int == 200

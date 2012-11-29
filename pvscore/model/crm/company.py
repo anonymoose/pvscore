@@ -155,7 +155,7 @@ class Enterprise(ORMBase, BaseModel):
 
     @staticmethod
     def get_billing_methods():
-        return ['PayPal', 'CCEAccounts', 'Stripe', 'Invoice', 'Offline']
+        return ['PayPal', 'Authorize.Net', 'Stripe', 'Invoice', 'Offline']
 
 
     @property

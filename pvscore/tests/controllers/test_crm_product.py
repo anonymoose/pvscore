@@ -21,7 +21,7 @@ class TestCrmProduct(TestController):
     """
 
     def _create_new(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         comp = Company.find_all(ent.enterprise_id)[0]
         R = self.get('/crm/product/new')
         assert R.status_int == 200
@@ -60,7 +60,7 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_save_status(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         product_id = self._create_new()
         product = Product.load(product_id)
         events = StatusEvent.find_all_applicable(ent.enterprise_id, product)
@@ -139,7 +139,7 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_save_inventory(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         cmpns = Campaign.find_all(ent.enterprise_id)
 
         R = self.get('/crm/product/inventory_list')
@@ -182,7 +182,7 @@ class TestCrmProduct(TestController):
     
     @secure
     def test_save_existing(self):
-        ent = Enterprise.find_all()[0]
+        ent = Enterprise.find_by_name('Healthy U Store')
         cmpns = Campaign.find_all(ent.enterprise_id)
 
         product_id = self._create_new()

@@ -4589,3 +4589,5 @@ select * from crm_company where company_id = '42d5ce7b-f5be-43fe-80b9-56a013b931
 
 
 
+alter table crm_order_item add column third_party_id varchar(100);
+alter table crm_customer_order add column third_party_id varchar(100);
