@@ -78,17 +78,19 @@ class Customer(ORMBase, BaseModel):
 
 
     def account_key(self):
-        """ KB: [2011-06-28]: This is suitable for passing back into /portal/login/login_to_link
-        This is so lame I can't even contain my guilt.  There has to be a better way with
-        hashlib.md5(...).hexdigest()
-        """
-        return db.get_value("select md5('%s%s')" % (self.email, self.password))
+        """ KB: [2012-11-29]: This used to be a weird md5 of email and password.  now its just the customer id. """
+        return self.customer_id
 
 
     def api_key(self):
-        return db.get_value("select md5('%s%s')" % (self.email, self.customer_id))
+        return self.account_key()
 
 
+    @staticmethod
+    def find_by_key(key):
+        return Customer.load(key)
+
+    
     @staticmethod
     def find(email, campaign):
         """ KB: [2010-12-15]: Find another customer that is in the same company. """
@@ -345,13 +347,6 @@ def load_customer(request, default_to_new_customer=False):
     # def find_all_by_channel(cid_0, cid_1=None):
     #     return Session.query(Customer)\
     #         .filter(and_(Customer.cid_0==cid_0, cid_1==cid_1)).all()
-
-
-    # @staticmethod
-    # def find_by_key(key):
-    #     return Session.query(Customer)\
-    #         .from_statement("""select * from crm_customer where '%s' = md5(email||password)
-    #                         """ % key).first()
 
 
     # @staticmethod

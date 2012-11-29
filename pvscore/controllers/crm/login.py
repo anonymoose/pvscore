@@ -107,18 +107,23 @@ class LoginController(BaseController):
         return self.find_redirect()
 
 
-#    """ KB: [2011-06-28]:
-#    http://ww.wealthmakers.com/crm/customer_login_to_link/fdf774eb58feefd35fc2abab7db194e8/http%3A%7C%7Cww.wealthmakers.com%7Cireport.html%3Firid%3D13235
-#    """
-#    def customer_login_to_link(self, key, link):
-#        cust = Customer.find_by_key(key)
-#        if cust:
-#            session['customer_id'] = cust.customer_id
-#            session['customer_logged_in'] = True
-#            session['crm_logged_in'] = False
-#            session.save()
-#            redirect(link.replace('|', '/'))
-#        else:
-#            flash('Invalid User or Password')
-#            redirect('/')
+    
+    @view_config(route_name='crm.login.customer_login_to_link')
+    def customer_login_to_link(self, ):
+        """ KB: [2011-06-28]:
+        http://ww.wealthmakers.com/crm/customer_login_to_link/fdf774eb58feefd35fc2abab7db194e8/http%3A%7C%7Cww.wealthmakers.com%7Cireport.html%3Firid%3D13235
+        http://healthyustore.net/crm/customer_login_to_link/47d66cae-7e0f-4111-bd54-7296dc92cbde/http%3A%7C%7Chealthyustore.net
+        """
+        key = self.request.matchdict.get('key')
+        link = self.request.matchdict.get('link')
+        cust = Customer.find_by_key(key)
+        if cust:
+            self.session['username'] = cust.email
+            self.session['customer_id'] = cust.customer_id
+            url = link.replace('|', '/')
+            log.info('customer %s (%s) login to %s' % (cust.customer_id, cust.email, url))
+            return HTTPFound(url)
+        else:
+            self.flash('Invalid User or Password')
+            return self.find_redirect('/')
 

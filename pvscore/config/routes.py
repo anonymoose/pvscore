@@ -7,6 +7,7 @@ def crm_routes(config):
     adrt('crm.login.logout', '/crm/logout')
     adrt('crm.login.customer', '/crm/customer_login')
     adrt('crm.login.customer_forgot_password', '/crm/customer_forgot_password')
+    adrt('crm.login.customer_login_to_link', '/crm/customer_login_to_link/{key}/{link}')
 
     adrt('crm.campaign.list', '/crm/campaign/list')
     adrt('crm.campaign.new', '/crm/campaign/new')

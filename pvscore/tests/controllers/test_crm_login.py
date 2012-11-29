@@ -105,6 +105,7 @@ class TestCrmLogin(TestController):
         cust.save()
         self.commit()
 
+
     # @secure
     # def test_logout(self):
     #     try:

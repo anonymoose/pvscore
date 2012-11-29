@@ -58,7 +58,7 @@ class TestCatalog(TestController):
     @customer_logged_in
     def test_purchase_cart(self):
         ent = Enterprise.find_by_name('Healthy U Store')
-        api = StripeBillingApi()
+        api = StripeBillingApi(ent)
         R = self.get('/ecom/cart/clear')
         assert R.status_int == 200
         assert 'product_id' not in R.body
@@ -75,7 +75,7 @@ class TestCatalog(TestController):
         R = self.post("/crm/customer/purchase_cart",
                       {'redir' : '/ecom/page/catalog_thanks',
                       'accept_terms' : '1',
-                      'bill_cc_token' : api.create_token(ent, '4242424242424242', '12', '2019', '123')})
+                      'bill_cc_token' : api.create_token('4242424242424242', '12', '2019', '123')})
 
         assert R.status_int == 200
         R.mustcontain('Thanks for your purchase')

@@ -19,6 +19,15 @@ class TestCrmCustomer(TestController):
     def test_misc(self):
         assert 'FullPayment' in Journal.get_types()
 
+
+    def test_customer_login_to_link(self):
+        customer_id = self._create_new()
+        R = self.get('/crm/customer_login_to_link/%s/http%3A%7C%7Chealthyustore.net' % customer_id)
+        assert R.status_int == 200
+        R.mustcontain(customer_id)
+        self._delete_new(customer_id)
+
+
     @secure
     def test_show_new(self):
         R = self.get('/crm/customer/new')
