@@ -65,6 +65,14 @@ systemctl enable atd.service
 systemctl start atd.service
 
 ################################################################
+## Prep kernel for postgres memory usage.
+sysctl -w kernel.shmmax=2147483648
+sysctl -w kernel.shmall=4194304
+echo kernel.shmmax=2147483648 >> /etc/sysctl.conf
+echo kernel.shmall=4194304    >> /etc/sysctl.conf
+
+
+################################################################
 ## Redis
 systemctl enable redis.service
 systemctl start redis.service
