@@ -1,0 +1,19 @@
+[Unit]
+Description=WealthMakers application
+Requires=postgresql-9.1.service redis.service
+After=postgresql-9.1.service redis.service
+
+[Service]
+Type=forking
+
+User=web
+Group=web
+
+ExecStart=/apps/pvs/pvscore/bin/startup.sh wm
+ExecStop=/apps/pvs/pvscore/bin/shutdown.sh wm
+
+# Give a reasonable amount of time for the server to start up/shut down
+TimeoutSec=90
+
+[Install]
+WantedBy=multi-user.target
