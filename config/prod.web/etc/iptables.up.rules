@@ -20,7 +20,7 @@
 # Allow postgres only on internal IP
 -A INPUT -i eth1 -p tcp --dport 5432
 
-#  Allows SSH connections only on internal IP
+# Allows SSH connections only on internal IP
 -A INPUT -i eth1 -p tcp -m state --state NEW --dport 22 -j ACCEPT
 
 # Allow ping
