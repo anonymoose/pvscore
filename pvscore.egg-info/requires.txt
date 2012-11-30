@@ -20,7 +20,7 @@ simplejson
 webhelpers
 beaker
 pyramid_beaker
-beaker_extensions==0.1.2dev
+beaker_extensions
 decorator
 webtest
 nose
