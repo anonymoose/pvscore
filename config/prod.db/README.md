@@ -20,6 +20,7 @@ exit
 
 su - kbedwell
 cp /apps/pvs/pvscore/config/prod.common/home/.bashrc .
+source .bashrc
 mkdir .ssh
 ssh-keygen -t rsa -C "kenneth.bedwell@gmail.com"
 cat ~/.ssh/id_rsa.pub
