@@ -221,9 +221,6 @@ class AuthorizeNetBillingApi(BaseBillingApi):
 
 
     def purchase(self, order, billing, cart, remote_ip=None):
-        campaign = order.campaign
-        enterprise = campaign.company.enterprise
-
         charge_items_amount = 0.0
         subscription_amount = 0.0
         for oitem in order.active_items:
@@ -289,10 +286,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
                 return (5, '1', 'Could not talk to payment gateway.')
     
             response = util.xml_str_to_dict(xml_response)['ARBUpdateSubscriptionResponse']
-    
-            status = "SUCCESS"
             if response['messages']['resultCode'].lower() != 'ok':
-                status = "FAILURE"
                 message = response['messages']['message']
                 if type(message) == list:
                     message = message[0]
@@ -347,18 +341,8 @@ class AuthorizeNetBillingApi(BaseBillingApi):
                 return (5, '1', 'Could not talk to payment gateway.')
     
             response = util.xml_str_to_dict(xml_response)['ARBCreateSubscriptionResponse']
-
-            # successful response
-            # {u'ARBCreateSubscriptionResponse': {u'messages': {u'message': {u'code': u'I00001',
-            #                                                               u'text': u'Successful.'},
-            #                                                  u'resultCode': u'Ok'},
-            #                                    u'subscriptionId': u'933728'}}
-    
-            status = "SUCCESS"
             if response['messages']['resultCode'].lower() != 'ok':
-                status = "FAILURE"
                 message = response['messages']['message']
-
                 if type(message) == list:
                     message = message[0]
                 self.last_status = message['code']
@@ -392,11 +376,8 @@ class AuthorizeNetBillingApi(BaseBillingApi):
     
             response = util.xml_str_to_dict(xml_response)['ARBCancelSubscriptionResponse']
     
-            status = "SUCCESS"
             if response['messages']['resultCode'].lower() != 'ok':
-                status = "FAILURE"
                 message = response['messages']['message']
-
                 if type(message) == list:
                     message = message[0]
                 self.last_status = message['code']

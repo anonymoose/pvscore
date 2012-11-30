@@ -1,4 +1,4 @@
-#pylint: disable-msg=C0103
+#pylint: disable-msg=C0103,C0302
 from pvscore.tests import TestController, secure, alternate_site
 from pvscore.model.crm.customer import Customer
 from pvscore.model.crm.customerorder import CustomerOrder
@@ -22,7 +22,7 @@ class TestCrmCustomer(TestController):
 
     def test_customer_login_to_link(self):
         customer_id = self._create_new()
-        R = self.get('/crm/customer_login_to_link/%s/http%3A%7C%7Chealthyustore.net' % customer_id)
+        R = self.get('/crm/customer_login_to_link/%s/http%3A%7C%7Chealthyustore.net' % customer_id)  #pylint: disable-msg=E1300
         assert R.status_int == 200
         R.mustcontain(customer_id)
         self._delete_new(customer_id)
@@ -929,7 +929,6 @@ class TestCrmCustomer(TestController):
         
     @alternate_site('test2.com')
     def test_authnet_purchase_nrc(self):
-        ent = Enterprise.find_by_name('Test2')
         R = self.post('/crm/customer/signup',
                       {'fname' : 'Ken',
                        'lname' : 'Bedwell',
@@ -950,7 +949,6 @@ class TestCrmCustomer(TestController):
         self.assertEqual(cust.fname, 'Ken')
         self.assertEqual(cust.lname, 'Bedwell')
         self.assertEqual(cust.email, 'test@test.com')
-        products = Product.find_by_campaign(self.site.default_campaign)
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',
                        'accept_terms' : '1',
@@ -967,7 +965,6 @@ class TestCrmCustomer(TestController):
 
     @alternate_site('test2.com')
     def test_authnet_purchase_nrc_invalid(self):
-        ent = Enterprise.find_by_name('Test2')
         R = self.post('/crm/customer/signup',
                       {'fname' : 'Ken',
                        'lname' : 'Bedwell',
@@ -988,7 +985,6 @@ class TestCrmCustomer(TestController):
         self.assertEqual(cust.fname, 'Ken')
         self.assertEqual(cust.lname, 'Bedwell')
         self.assertEqual(cust.email, 'test@test.com')
-        products = Product.find_by_campaign(self.site.default_campaign)
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',
                        'accept_terms' : '1',
@@ -1007,7 +1003,6 @@ class TestCrmCustomer(TestController):
     # T2-002      | Test 2 Recurring
     @alternate_site('test2.com')
     def test_authnet_self_save_billing_invalid(self):
-        ent = Enterprise.find_by_name('Test2')
         R = self.post('/crm/customer/signup',
                       {'fname' : 'Ken',
                        'lname' : 'Bedwell',
@@ -1024,7 +1019,6 @@ class TestCrmCustomer(TestController):
         self.assertEqual(cust.fname, 'Ken')
         self.assertEqual(cust.lname, 'Bedwell')
         self.assertEqual(cust.email, 'test@test.com')
-        products = Product.find_by_campaign(self.site.default_campaign)
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',
                        'accept_terms' : '1',
@@ -1063,7 +1057,6 @@ class TestCrmCustomer(TestController):
 
     @alternate_site('test2.com')
     def test_authnet_self_save_billing(self):
-        ent = Enterprise.find_by_name('Test2')
         R = self.post('/crm/customer/signup',
                       {'fname' : 'Ken',
                        'lname' : 'Bedwell',
@@ -1080,7 +1073,6 @@ class TestCrmCustomer(TestController):
         self.assertEqual(cust.fname, 'Ken')
         self.assertEqual(cust.lname, 'Bedwell')
         self.assertEqual(cust.email, 'test@test.com')
-        products = Product.find_by_campaign(self.site.default_campaign)
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',
                        'accept_terms' : '1',
@@ -1119,7 +1111,6 @@ class TestCrmCustomer(TestController):
 
     @alternate_site('test2.com')
     def test_authnet_save_and_purchase_invalid_cc(self):
-        ent = Enterprise.find_by_name('Test2')
         R = self.post('/crm/customer/signup',
                       {'fname' : 'Ken',
                        'lname' : 'Bedwell',
@@ -1136,7 +1127,6 @@ class TestCrmCustomer(TestController):
         self.assertEqual(cust.fname, 'Ken')
         self.assertEqual(cust.lname, 'Bedwell')
         self.assertEqual(cust.email, 'test@test.com')
-        products = Product.find_by_campaign(self.site.default_campaign)
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',
                        'accept_terms' : '1',
@@ -1153,7 +1143,6 @@ class TestCrmCustomer(TestController):
 
     @alternate_site('test2.com')
     def test_authnet_self_cancel_at_gateway(self):
-        ent = Enterprise.find_by_name('Test2')
         R = self.post('/crm/customer/signup',
                       {'fname' : 'Ken',
                        'lname' : 'Bedwell',
@@ -1170,7 +1159,6 @@ class TestCrmCustomer(TestController):
         self.assertEqual(cust.fname, 'Ken')
         self.assertEqual(cust.lname, 'Bedwell')
         self.assertEqual(cust.email, 'test@test.com')
-        products = Product.find_by_campaign(self.site.default_campaign)
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',
                        'accept_terms' : '1',

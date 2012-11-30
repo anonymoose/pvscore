@@ -170,7 +170,7 @@ def secure(func, username='kenneth.bedwell@gmail.com', password='Zachary234'):
     return wrap
 
 
-class alternate_site(object):
+class alternate_site(object):    #pylint: disable-msg=R0903
     """ KB: [2012-11-29]: If in a test method you want to use a site that is configured other than "healthyustore.net"
     @alternate_site('test2.com')
     def test_whatever(self):
@@ -180,7 +180,6 @@ class alternate_site(object):
         self.domain = domain
 
     def __call__(self, original_func):
-        decorator_self = self
         def wrap(func_self, *args, **kwargs):
             orig_site = func_self.site
             func_self.site = Site.find_by_host(self.domain)

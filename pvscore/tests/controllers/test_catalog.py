@@ -202,3 +202,8 @@ class TestCatalog(TestController):
         R.mustcontain('Second Day Air')
         R.mustcontain('Next Day Air Saver')
         
+    def test_alternate_product_search_by_name(self):
+        #http://healthyustore.net/product/Saccharomyces%20Boulardii%20
+        R = self.get('/product/Saccharomyces%20Boulardii%20')
+        assert R.status_int == 200
+        R.mustcontain('Saccharomyces')

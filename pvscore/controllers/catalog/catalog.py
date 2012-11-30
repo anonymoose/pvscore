@@ -80,6 +80,9 @@ class CatalogController(CatalogBaseController):
         # /product/{product_id}/{page}
         page = self.request.matchdict.get('page', 'product')
         product_id = self.request.matchdict.get('product_id')
+        if not util.is_uuid(product_id):
+            # it's not really a product ID, but a search string from a bot.
+            raise HTTPFound('/ecom/search?search=%s' % product_id)
         prod = Product.load(product_id)
         self.redir_if(not prod or not prod.enabled or not prod.web_visible)
         self.session['last_product_id'] = product_id
@@ -145,7 +148,7 @@ class CatalogController(CatalogBaseController):
         params = self.params()
         params['subset'] = 'search'
         params['products'] = util.page_list(Product.catalog_search(self.enterprise_id,
-                                                                   self.request.GET.get('search')),
+                                                                   str(util.nvl(self.request.GET.get('search'))).strip()),
                                             self.request.GET.get('offset'),
                                             self.request.GET.get('limit'))
         return self.render(page, params)

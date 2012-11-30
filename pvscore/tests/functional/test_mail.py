@@ -51,6 +51,6 @@ class TestMail(TestController):
         logger.addHandler(gm)
         try:
             1/0
-        except:
-            logger.exception('FFFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUU-')
+        except Exception as exc:
+            logger.exception(exc)
 

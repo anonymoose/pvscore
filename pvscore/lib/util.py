@@ -11,7 +11,7 @@ import re, calendar
 import logging
 import subprocess
 import uuid
-from xml.dom.minidom import parse, parseString
+from xml.dom.minidom import parseString
 
 
 log = logging.getLogger(__name__)
@@ -668,9 +668,13 @@ def get_last_day(dt, d_years=0, d_months=0):
 def to_uuid(val):
     try:
         return uuid.UUID(val)
-    except Exception as exc:
-        log.warn(exc)
+    except Exception as exc:   #pragma: no cover
         return None
+
+def is_uuid(val):
+    return to_uuid(val) != None
+    
+
 
 def single_attr_array(obj_array, attr_name):
     """ KB: [2010-08-27]: Given an array of homogenous objects,
@@ -698,23 +702,19 @@ def single_key_array(dict_array, attr_name):
     return arr
 
 
-class NotTextNodeError:
-    pass
-
-
 def text_from_node(node):
     """
     scans through all children of node and gathers the
     text. if node has non-text child-nodes, then
     NotTextNodeError is raised.
     """
-    t = ""
-    for n in node.childNodes:
-        if n.nodeType == n.TEXT_NODE:
-            t += n.nodeValue
+    txt = ""
+    for kid in node.childNodes:
+        if kid.nodeType == kid.TEXT_NODE:
+            txt += kid.nodeValue
         else:
-            raise NotTextNodeError
-    return t
+            raise Exception("Not Text Node")
+    return txt
 
 
 def xml_str_to_dict(xmlstr):
@@ -738,36 +738,36 @@ def xml_to_dict(node):
     dic = {}
     multlist = {}  # holds temporary lists where there are multiple children
     multiple = False
-    for n in node.childNodes:
-        if n.nodeType != n.ELEMENT_NODE:
+    for kid in node.childNodes:
+        if kid.nodeType != kid.ELEMENT_NODE:
             continue
         # find out if there are multiple records
-        if len(node.getElementsByTagName(n.nodeName)) > 1:
+        if len(node.getElementsByTagName(kid.nodeName)) > 1:
             multiple = True
             # and set up the list to hold the values
-            if not n.nodeName in multlist:
-                multlist[n.nodeName] = []
+            if not kid.nodeName in multlist:
+                multlist[kid.nodeName] = []
         else:
             multiple = False
         try:
             # text node
-            text = text_from_node(n)
-        except NotTextNodeError:
+            text = text_from_node(kid)
+        except Exception as exc:     #pylint: disable-msg=W0612
             if multiple:
                 # append to our list
-                multlist[n.nodeName].append(xml_to_dict(n))
-                dic.update({n.nodeName: multlist[n.nodeName]})
+                multlist[kid.nodeName].append(xml_to_dict(kid))
+                dic.update({kid.nodeName: multlist[kid.nodeName]})
                 continue
             else:
                 # 'normal' node
-                dic.update({n.nodeName: xml_to_dict(n)})
+                dic.update({kid.nodeName: xml_to_dict(kid)})
                 continue
         # text node
         if multiple:
-            multlist[n.nodeName].append(text)
-            dic.update({n.nodeName: multlist[n.nodeName]})
+            multlist[kid.nodeName].append(text)
+            dic.update({kid.nodeName: multlist[kid.nodeName]})
         else:
-            dic.update({n.nodeName: text})
+            dic.update({kid.nodeName: text})
     return dic
 
 # def contains(lst, val):
