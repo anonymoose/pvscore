@@ -267,7 +267,7 @@ class CustomerController(BaseController):
                 match = re.search(r'^.*\[(.*)\]', key)
                 if match:
                     pid = match.group(1)
-                    quant = float(self.request.POST.get(key))
+                    quant = float(util.nvl(self.request.POST.get(key), '1.0'))
                     if pid not in product_ids:
                         product_ids[pid] = 0
                     product_ids[pid] += quant

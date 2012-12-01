@@ -88,6 +88,13 @@ systemctl start redis.service
 echo postgres | passwd --stdin postgres
 usermod -a -G wheel postgres
 
+########################################################################
+# NFS
+rm -f /etc/sysconfig/nfs /etc/exports
+cp /apps/pvs/pvscore/config/prod.db/etc/sysconfig/nfs /etc/sysconfig/nfs
+cp /apps/pvs/pvscore/config/prod.db/etc/exports /etc
+systemctl enable nfs-server
+systemctl start nfs-server
 
 ########################################################################
 # nagios
@@ -100,8 +107,8 @@ chmod g+r /var/log/messages
 
 echo nrpe      5666/tcp    >> /etc/services
 
-rm -rf /etc/nagios/nagios.cfg
-rm -rf /etc/nagios/nrpe.cfg
+rm -f  /etc/nagios/nagios.cfg
+rm -f  /etc/nagios/nrpe.cfg
 rm -rf /etc/nagios/objects
 
 

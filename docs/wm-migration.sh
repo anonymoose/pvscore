@@ -1,29 +1,37 @@
 #!/bin/bash
 set -x
-# on pvs03
-# from apps/pvs/pvs
+# on db01, as kbedwell
 
-# dropdb -U postgres retail2
-# createdb -U postgres retail2
-# dropdb -U postgres retail
-# createdb -U postgres retail
-# psql -U retail -d retail -f ../backup/pvs03-retail.sql 
-# psql -U retail2 -d retail2 -f ../backup/pvs02-retail.sql 
+cd /apps/pvs/wm
+source ../bin/activate
 
-sudo systemctl stop pvs.service
-pg_dump -U retail -O -c retail > /tmp/production-retail-`date +"%Y-%m-%d-%I-%M-%S"`.sql
+dropdb -U postgres retail
+createdb -U postgres retail
+psql -U postgres -c "create user retail with password 'retail';"
+psql -U postgres -c 'alter database retail owner to retail;'
+
 dropdb -U postgres wm
 createdb -U postgres wm
 psql -U postgres -c "create user wm with password 'wm';"
 psql -U postgres -c 'alter database wm owner to wm;'
-ssh pvs02 "pg_dump -U wm -O -c wm | gzip > production-wm.sql.gz"
-scp kbedwell@pvs01:/home/kbedwell/production-wm.sql.gz .
+
+ssh web01-bak.eyefound.it "pg_dump -U retail -O -c retail | gzip > production-retail.sql.gz"
+scp kbedwell@web01-bak.eyefound.it:/home/kbedwell/production-retail.sql.gz .
+gunzip production-retail.sql.gz
+psql -U retail -d retail -f production-retail.sql
+
+ssh oldwm "pg_dump -U wm -O -c wm | gzip > production-wm.sql.gz"
+scp kbedwell@oldwm:/home/kbedwell/production-wm.sql.gz .
 gunzip production-wm.sql.gz
 psql -U wm -d wm -f production-wm.sql
+
+
+
+
 psql -U postgres -d wm -f ../pvscore/docs/wm-reduce.sql
 #python ../pvscore/pvscore/bin/delete_enterprise.py retail2 3
-python ../pvscore/pvscore/bin/uuidkey.py wm wm /Users/kbedwell/dev/pydev/pvs/storage
-#python ../pvscore/pvscore/bin/uuidkey.py wm wm /apps/pvs/storage
+#python ../pvscore/pvscore/bin/uuidkey.py wm wm /Users/kbedwell/dev/pydev/pvs/storage
+python ../pvscore/pvscore/bin/uuidkey.py wm wm /apps/pvs/storage
 
 update wm_portfolio from wm-keys.log
     alter table wm_portfolio add column customer_id_uuid uuid;

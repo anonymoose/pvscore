@@ -54,7 +54,6 @@ updatedb
 echo 0 4 * * * root /sbin/ntpdate pool.ntp.org >> /etc/crontab
 systemctl restart crond.service
 
-
 ########################################################################
 # configure nginx
 systemctl enable nginx.service

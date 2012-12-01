@@ -3,7 +3,7 @@ sudo rm -rf /apps/pvs
 
 sudo mkdir -p /apps/pvs/db
 sudo mkdir -p /apps/pvs/log
-sudo mkdir -p /apps/pvs/storage/enterprises
+sudo mkdir -p /apps/pvs/storage
 sudo chmod -R g+w /apps
 sudo chown -R web:web /apps
 
@@ -26,6 +26,11 @@ cd ../pvs
 python setup.py develop
 cd ../wm
 python setup.py develop
+
+########################################################################
+# nfs
+su -c "echo db01-bak.eyefound.it:/apps/pvs/storage /apps/pvs/storage  nfs   rw,noatime    0   0 >> /etc/fstab"
+sudo mount db01-bak.eyefound.it:/apps/pvs/storage /apps/pvs/storage
 
 sudo systemctl start nginx.service
 sudo systemctl enable pvs.service
