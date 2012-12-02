@@ -51,7 +51,7 @@ updatedb
 
 ########################################################################
 # time sync
-echo 0 4 * * * root /sbin/ntpdate pool.ntp.org >> /etc/crontab
+echo '0 4 * * * root /sbin/ntpdate pool.ntp.org' >> /etc/crontab
 systemctl restart crond.service
 
 ################################################################
