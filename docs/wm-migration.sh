@@ -1,19 +1,8 @@
 #!/bin/bash
 exit
 #
-# on oldwm
-#
-sudo /etc/init.d/nginx stop
-
-#
-# on web01
-#
-sudo systemctl stop nginx
-
-#
 # on db01, as kbedwell
 #
-
 cd /apps/pvs
 rsync -avz web01-bak.eyefound.it:/apps/pvs/storage /apps/pvs
 chown -R web.web ./storage
@@ -36,6 +25,16 @@ scp kbedwell@web01-bak.eyefound.it:/home/kbedwell/production-retail.sql.gz .
 gunzip production-retail.sql.gz
 psql -U retail -d retail -f production-retail.sql
 
+#
+# on oldwm
+#
+sudo /etc/init.d/nginx stop
+
+
+
+#
+# on db01, as kbedwell
+#
 ssh oldwm "pg_dump -U wm -O -c wm | gzip > production-wm.sql.gz"
 scp kbedwell@oldwm:/home/kbedwell/production-wm.sql.gz .
 gunzip production-wm.sql.gz
@@ -57,6 +56,15 @@ update wm_portfolio from wm-keys.log
 pg_dump -U wm -O --data-only wm > wm-reduced.sql
 pg_dump -U retail -O -c retail > retail.sql
 
+#
+# on web01
+#
+sudo systemctl stop nginx
+
+
+#
+# on db01, as kbedwell
+#
 cat retail.sql | awk '/DROP CONSTRAINT/' > constraint-drops.sql
 cat retail.sql | awk '/CREATE INDEX/ || /ALTER TABLE ONLY/ || /ADD CONSTRAINT/' > constraint-adds.sql
 psql -U retail -d retail -f constraint-drops.sql
