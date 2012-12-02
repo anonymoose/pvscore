@@ -3,42 +3,42 @@ exit
 #
 # on db01, as kbedwell
 #
-cd /apps/pvs
-rsync -avz web01-bak.eyefound.it:/apps/pvs/storage /apps/pvs
-chown -R web.web ./storage
+# cd /apps/pvs
+# rsync -avz web01-bak.eyefound.it:/apps/pvs/storage /apps/pvs
+# chown -R web.web ./storage
 
-cd /apps/pvs/wm
-source ../bin/activate
+# cd /apps/pvs/wm
+# source ../bin/activate
 
-dropdb -U postgres retail
-createdb -U postgres retail
-psql -U postgres -c "create user retail with password 'retail';"
-psql -U postgres -c 'alter database retail owner to retail;'
+# dropdb -U postgres retail
+# createdb -U postgres retail
+# psql -U postgres -c "create user retail with password 'retail';"
+# psql -U postgres -c 'alter database retail owner to retail;'
 
-dropdb -U postgres wm
-createdb -U postgres wm
-psql -U postgres -c "create user wm with password 'wm';"
-psql -U postgres -c 'alter database wm owner to wm;'
+# dropdb -U postgres wm
+# createdb -U postgres wm
+# psql -U postgres -c "create user wm with password 'wm';"
+# psql -U postgres -c 'alter database wm owner to wm;'
 
-ssh web01-bak.eyefound.it "pg_dump -U retail -O -c retail | gzip > production-retail.sql.gz"
-scp kbedwell@web01-bak.eyefound.it:/home/kbedwell/production-retail.sql.gz .
-gunzip production-retail.sql.gz
-psql -U retail -d retail -f production-retail.sql
+# ssh web01-bak.eyefound.it "pg_dump -U retail -O -c retail | gzip > production-retail.sql.gz"
+# scp kbedwell@web01-bak.eyefound.it:/home/kbedwell/production-retail.sql.gz .
+# gunzip production-retail.sql.gz
+# psql -U retail -d retail -f production-retail.sql
 
 #
 # on oldwm
 #
-sudo /etc/init.d/nginx stop
+#sudo /etc/init.d/nginx stop
 
 
 
 #
 # on db01, as kbedwell
 #
-ssh oldwm "pg_dump -U wm -O -c wm | gzip > production-wm.sql.gz"
-scp kbedwell@oldwm:/home/kbedwell/production-wm.sql.gz .
-gunzip production-wm.sql.gz
-psql -U wm -d wm -f production-wm.sql
+# ssh oldwm "pg_dump -U wm -O -c wm | gzip > production-wm.sql.gz"
+# scp kbedwell@oldwm:/home/kbedwell/production-wm.sql.gz .
+# gunzip production-wm.sql.gz
+# psql -U wm -d wm -f production-wm.sql
 
 
 psql -U postgres -d wm -f ../pvscore/docs/wm-reduce.sql
@@ -71,16 +71,12 @@ psql -U retail -d retail -f constraint-drops.sql
 psql -U retail -d retail -f wm-reduced.sql
 psql -U retail -d retail -f constraint-adds.sql
 
-cd /apps/pvs
-rsync -avz web01-bak.eyefound.it:/apps/pvs/storage /apps/pvs
-chown -R web.web ./storage
-
 #
 # on lb01, as root
 #
-vi /etc/pound.cfg
--- repoint wealthmakers.com to web01-bak
-systemctl restart pound.service
+# vi /etc/pound.cfg
+# -- repoint wealthmakers.com to web01-bak
+# systemctl restart pound.service
 
 #
 # on web01, as kbedwell

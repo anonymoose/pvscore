@@ -395,7 +395,7 @@ def fix_date(conn, cur):
 
 if __name__ == '__main__':
     dbname = sys.argv[1]
-    conn = psycopg2.connect("dbname=%s user=%s password=%s host=localhost" % (sys.argv[1], sys.argv[1], sys.argv[2]))
+    conn = psycopg2.connect("dbname=%s user=%s password=%s host=127.0.0.1" % (sys.argv[1], sys.argv[1], sys.argv[2]))
     cur = conn.cursor()
     storage_root = sys.argv[3]
 
