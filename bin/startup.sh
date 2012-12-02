@@ -2,7 +2,7 @@
 set -x
 APP=$1
 PORT1=$2
-PORT1=$3
+PORT2=$3
 
 #nothing below this line should change.
 
