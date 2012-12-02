@@ -1,6 +1,8 @@
 #!/bin/bash
 
 APP=$1
+PORT1=$2
+PORT1=$3
 
 #nothing below this line should change.
 
@@ -19,9 +21,10 @@ PASTER=$ROOT_DIR/bin/pserve
 CONFIG=production.ini
 USER=web
 GROUP=web
-LOG_FILE=$ROOT_DIR/log/$DESC.log
-PID_FILE_5000=$ROOT_DIR/$DESC.5000.pid
-PID_FILE_5001=$ROOT_DIR/$DESC.5001.pid
+LOG_FILE_1=$ROOT_DIR/log/$DESC.$PORT1.log
+LOG_FILE_2=$ROOT_DIR/log/$DESC.$PORT2.log
+PID_FILE_1=$ROOT_DIR/$DESC.$PORT1.pid
+PID_FILE_2=$ROOT_DIR/$DESC.$PORT2.pid
 
-cat $PID_FILE_5000 | xargs kill
-#cat $PID_FILE_5001 | xargs kill
+cat $PID_FILE_1 | xargs kill
+cat $PID_FILE_2 | xargs kill

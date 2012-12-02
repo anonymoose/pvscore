@@ -9,8 +9,8 @@ Type=forking
 User=web
 Group=web
 
-ExecStart=/apps/pvs/pvscore/bin/startup.sh pvs
-ExecStop=/apps/pvs/pvscore/bin/shutdown.sh pvs
+ExecStart=/apps/pvs/pvscore/bin/startup.sh pvs 5000 5001
+ExecStop=/apps/pvs/pvscore/bin/shutdown.sh pvs 5000 5001
 
 # Give a reasonable amount of time for the server to start up/shut down
 TimeoutSec=90

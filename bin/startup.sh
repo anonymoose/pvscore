@@ -1,6 +1,8 @@
 #!/bin/bash
 set -x
 APP=$1
+PORT1=$2
+PORT1=$3
 
 #nothing below this line should change.
 
@@ -19,17 +21,17 @@ PASTER=$ROOT_DIR/bin/pserve
 CONFIG=production.ini
 USER=web
 GROUP=web
-LOG_FILE=$ROOT_DIR/log/$DESC.log
-PID_FILE_5000=$ROOT_DIR/$DESC.5000.pid
-PID_FILE_5001=$ROOT_DIR/$DESC.5001.pid
+LOG_FILE_1=$ROOT_DIR/log/$DESC.$PORT1.log
+LOG_FILE_2=$ROOT_DIR/log/$DESC.$PORT2.log
+PID_FILE_1=$ROOT_DIR/$DESC.$PORT1.pid
+PID_FILE_2=$ROOT_DIR/$DESC.$PORT2.pid
 
 OPTIONS=" $CONFIG \
 --daemon \
 --user=$USER \
---group=$GROUP \
---log-file=$LOG_FILE"
+--group=$GROUP"
 
-echo -n $"Starting $DESC: "
+echo -n "Starting $DESC: "
 cd $APP_PATH
-$PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_5000 http_port=5000 &
-#$PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_5001 http_port=5001 &
+$PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_1 --log-file=$LOG_FILE_1 http_port=$PORT1 &
+$PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_2 --log-file=$LOG_FILE_2 http_port=$PORT2 &
