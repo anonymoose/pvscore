@@ -396,7 +396,7 @@ class Product(ORMBase, BaseModel):
     def link(self):
         """ KB: [2012-11-24]: This puts a dependency on the ecom URL layout, which may be too inflexible.  ok for now. """
         if self.name:
-            return "/product/%s/%s" % (util.html_literal(self.name.replace('#', '').replace('/', '-'), str(self.product_id))
+            return "/product/%s/%s" % (util.html_literal(self.name.replace('#', '').replace('/', '-'), str(self.product_id)))
         return "/product/%s" % str(self.product_id)
 
 
