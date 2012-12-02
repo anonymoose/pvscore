@@ -21,7 +21,7 @@ exit
 # psql -U postgres -c 'alter database wm owner to wm;'
 
 # ssh web01-bak.eyefound.it "pg_dump -U retail -O -c retail | gzip > production-retail.sql.gz"
-# scp kbedwell@web01-bak.eyefound.it:/home/kbedwell/production-retail.sql.gz .
+# Scp kbedwell@web01-bak.eyefound.it:/home/kbedwell/production-retail.sql.gz .
 # gunzip production-retail.sql.gz
 # psql -U retail -d retail -f production-retail.sql
 
@@ -41,33 +41,31 @@ exit
 # psql -U wm -d wm -f production-wm.sql
 
 
-psql -U postgres -d wm -f ../pvscore/docs/wm-reduce.sql
-#python ../pvscore/pvscore/bin/delete_enterprise.py retail2 3
-#python ../pvscore/pvscore/bin/uuidkey.py wm wm /Users/kbedwell/dev/pydev/pvs/storage
-python ../pvscore/pvscore/bin/uuidkey.py wm wm /apps/pvs/storage
+# psql -U postgres -d wm -f ../pvscore/docs/wm-reduce.sql
+# python ../pvscore/pvscore/bin/uuidkey.py wm wm /apps/pvs/storage
 
-update wm_portfolio from wm-keys.log
-    alter table wm_portfolio add column customer_id_uuid uuid;
-    update wm_portfolio set customer_id_uuid = '585aa316-faad-4a2f-9037-bd6db271b408' where customer_id = 272696;
-    ::::
-    alter table wm_portfolio drop column customer_id;
-    alter table wm_portfolio rename column customer_id_uuid to customer_id;
+# update wm_portfolio from wm-keys.log
+#     alter table wm_portfolio add column customer_id_uuid uuid;
+#     update wm_portfolio set customer_id_uuid = '585aa316-faad-4a2f-9037-bd6db271b408' where customer_id = 272696;
+#     ::::
+#     alter table wm_portfolio drop column customer_id;
+#     alter table wm_portfolio rename column customer_id_uuid to customer_id;
 
-pg_dump -U wm -O --data-only wm > wm-reduced.sql
-pg_dump -U retail -O -c retail > retail.sql
+# pg_dump -U wm -O --data-only wm > wm-reduced.sql
+# pg_dump -U retail -O -c retail > retail.sql
 
 #
 # on web01
 #
-sudo systemctl stop nginx
+# sudo systemctl stop nginx
 
 
 #
 # on db01, as kbedwell
 #
-cat retail.sql | awk '/DROP CONSTRAINT/' > constraint-drops.sql
-cat retail.sql | awk '/CREATE INDEX/ || /ALTER TABLE ONLY/ || /ADD CONSTRAINT/' > constraint-adds.sql
-psql -U retail -d retail -f constraint-drops.sql
+#cat retail.sql | awk '/DROP CONSTRAINT/' > constraint-drops.sql
+#cat retail.sql | awk '/CREATE INDEX/ || /ALTER TABLE ONLY/ || /ADD CONSTRAINT/' > constraint-adds.sql
+#psql -U retail -d retail -f constraint-drops.sql
 psql -U retail -d retail -f wm-reduced.sql
 psql -U retail -d retail -f constraint-adds.sql
 
@@ -101,3 +99,17 @@ sudo systemctl start pvs.service
 sudo systemctl enable wm.service
 sudo systemctl start wm.service
 --- check www.wealthmakers
+
+
+
+
+psql:../pvscore/docs/wm-reduce.sql:151: ERROR:  foreign key constraint "wm_ireport_status_id_fkey" cannot be implemented
+DETAIL:  Key columns "status_id" and "status_id" are of incompatible types: uuid and integer.
+
+
+psql:../pvscore/docs/wm-reduce.sql:155: ERROR:  foreign key constraint "wm_ireport_user_created_fkey" cannot be implemented
+DETAIL:  Key columns "user_created" and "username" are of incompatible types: uuid and character varying.
+
+
+psql:../pvscore/docs/wm-reduce.sql:159: ERROR:  foreign key constraint "wm_ireport_product_id_fkey" cannot be implemented
+DETAIL:  Key columns "product_id" and "product_id" are of incompatible types: uuid and integer.

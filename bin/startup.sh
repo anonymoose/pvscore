@@ -1,12 +1,13 @@
 #!/bin/bash
 set -x
+
 APP=$1
 PORT1=$2
 PORT2=$3
 
 #nothing below this line should change.
 
-ROOT_DIR=/apps/$APP
+ROOT_DIR=/apps/pvs
 source $ROOT_DIR/bin/activate
 export PATH=$PATH:/usr/local/bin
 export LD_LIBRARY_PATH=/usr/pgsql-9.1/lib:$LD_LIBRARY_PATH
