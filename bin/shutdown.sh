@@ -24,4 +24,4 @@ PID_FILE_5000=$ROOT_DIR/$DESC.5000.pid
 PID_FILE_5001=$ROOT_DIR/$DESC.5001.pid
 
 cat $PID_FILE_5000 | xargs kill
-cat $PID_FILE_5001 | xargs kill
+#cat $PID_FILE_5001 | xargs kill
