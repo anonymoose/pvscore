@@ -31,4 +31,3 @@ feedparser
 selenium
 stripe
 PyRSS2Gen
-numpy

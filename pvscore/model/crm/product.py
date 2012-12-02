@@ -1,5 +1,6 @@
 #pylint: disable-msg=E1101,C0103,R0913,C0302
 import math
+import urllib
 from sqlalchemy import Column, ForeignKey, and_, or_
 from sqlalchemy.types import Integer, String, DateTime, Text, Float, Boolean, DateTime
 from sqlalchemy.orm import relation, backref
@@ -396,7 +397,7 @@ class Product(ORMBase, BaseModel):
     def link(self):
         """ KB: [2012-11-24]: This puts a dependency on the ecom URL layout, which may be too inflexible.  ok for now. """
         if self.name:
-            return "/product/%s/%s" % (util.html_literal(self.name.replace('#', '').replace('/', '-')), str(self.product_id))
+            return "/product/%s/%s" % (util.html_literal(urllib.quote_plus(self.name).replace('%2F', '-')), str(self.product_id))
         return "/product/%s" % str(self.product_id)
 
 
