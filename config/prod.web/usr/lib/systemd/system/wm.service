@@ -1,7 +1,7 @@
 [Unit]
 Description=WealthMakers application
-Requires=postgresql-9.1.service redis.service
-After=postgresql-9.1.service redis.service
+Requires=redis.service
+After=redis.service
 
 [Service]
 Type=forking
