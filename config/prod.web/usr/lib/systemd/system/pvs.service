@@ -1,7 +1,7 @@
 [Unit]
 Description=PVS application
 Requires=redis.service
-After=sredis.service
+After=redis.service
 
 [Service]
 Type=forking
