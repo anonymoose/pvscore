@@ -16,6 +16,8 @@ from xml.dom.minidom import parseString
 
 log = logging.getLogger(__name__)
 
+def average(vals):
+    return float(sum(vals))/len(vals) if len(vals) > 0 else float('nan')
 
 def parse_date(strdt, fmt='%Y-%m-%d'):
     return datetime.datetime.strptime(strdt, fmt)
