@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 APP=$1
 
 #nothing below this line should change.
