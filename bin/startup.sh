@@ -32,4 +32,4 @@ OPTIONS=" $CONFIG \
 echo -n $"Starting $DESC: "
 cd $APP_PATH
 $PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_5000 http_port=5000 &
-$PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_5001 http_port=5001 &
+#$PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_5001 http_port=5001 &
