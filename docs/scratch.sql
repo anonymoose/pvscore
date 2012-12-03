@@ -4591,3 +4591,14 @@ select * from crm_company where company_id = '42d5ce7b-f5be-43fe-80b9-56a013b931
 
 alter table crm_order_item add column third_party_id varchar(100);
 alter table crm_customer_order add column third_party_id varchar(100);
+
+
+select count(0) cnt
+                               from crm_customer c, crm_campaign cmp, crm_company comp
+                               where c.email = %(email)s
+                               and c.password = %(pwd)s
+                               and c.campaign_id = cmp.campaign_id
+                               and cmp.company_id = comp.company_id
+                               and comp.company_id = %(company_id)s
+2012-12-03 13:40:47,636 INFO  [sqlalchemy.engine.base.Engine][Dummy-4] {'pwd': u'no1nose', 'email':
+ u'kyle.hewlett@raymondjames.com', 'company_id': UUID('acdeb7bf-1256-47cb-a5f8-065455c167d8')}

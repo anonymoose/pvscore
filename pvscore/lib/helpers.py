@@ -38,7 +38,7 @@ def state_select_list(selected_st=None):
 
 
 def google_analytics(site, script_tags=True):
-    if site and site.google_analytics_id:
+    if site and site.google_analytics_id and is_production():
         return literal("""
     {st_start}
       var _gaq = _gaq || [];
@@ -58,7 +58,7 @@ def google_analytics(site, script_tags=True):
 
 
 def piwik_analytics(site):
-    if site and site.google_analytics_id:
+    if site and site.google_analytics_id and is_production():
         return literal('''
     <!-- Piwik -->
 <script type="text/javascript">

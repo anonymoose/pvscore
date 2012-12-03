@@ -170,7 +170,7 @@ class Customer(ORMBase, BaseModel):
         val = Session.query('cnt')\
             .from_statement("""select count(0) cnt
                                from crm_customer c, crm_campaign cmp, crm_company comp
-                               where c.email = :email
+                               where lower(c.email) = lower(:email)
                                and c.password = :pwd
                                and c.campaign_id = cmp.campaign_id
                                and cmp.company_id = comp.company_id

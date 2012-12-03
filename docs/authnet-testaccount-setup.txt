@@ -1,7 +1,7 @@
 Go here https://developer.authorize.net/testaccount/
 
 kbedwell5150
-Zachary234
+G00df00d..5
 
 api login id = 95mDDjQ2p
 transaction key = 9H9H73r53xdeUJH3

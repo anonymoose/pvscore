@@ -727,7 +727,7 @@ class CustomerController(BaseController):
             try:
                 campaign.send_post_purchase_comm(order)
             except Exception as exc:  #pragma: no cover
-                log.warning(exc)
+                log.exception(exc)
             return cust
         else:
             (_, last_note) = api.get_last_status()
