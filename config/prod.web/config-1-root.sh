@@ -47,6 +47,7 @@ yum -y update
 yum -y groupinstall 'Development Tools'
 yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack.x86_64 lapack-devel.x86_64 atlas.x86_64 atlas.x86_64 blas.x86_64 blas-devel.x86_64 freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel nginx fail2ban redis postgresql91-server postgresql91-contrib postgresql91-devel python-psycopg2 nrpe nagios-plugins-all openssl-devel xinetd ntpdate
 yum -y install nagios nagios-common nagios-devel nagios-plugins-all nrpe nagios-plugins-nrpe
+yum -y install httpd php lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP freetype freetype-devel libpng libpng-devel pam_mysql fprintd-pam 
 updatedb
 
 ########################################################################
@@ -92,14 +93,12 @@ systemctl start redis.service
 echo postgres | passwd --stdin postgres
 usermod -a -G wheel postgres
 
-
 ################################################################
 # setup the pvs service.
 cp /apps/pvs/pvscore/config/prod.web/usr/lib/systemd/system/*.service /usr/lib/systemd/system
 ln -s /usr/lib/systemd/system/pvs.service /etc/systemd/system/multi-user.target.wants/pvs.service
 ln -s /usr/lib/systemd/system/wm.service /etc/systemd/system/multi-user.target.wants/wm.service
 systemctl daemon-reload
-
 
 ########################################################################
 # nagios
@@ -127,4 +126,10 @@ systemctl enable nrpe.service
 systemctl stop nrpe.service
 systemctl start nrpe.service
 
+
+########################################################################
+# apache
+systemctl enable httpd.service
+cp /apps/pvs/pvscore/config/prod.web/etc/httpd/conf.d/piwik-vhost.conf /etc/httpd/conf.d
+systemctl start httpd.service
 
