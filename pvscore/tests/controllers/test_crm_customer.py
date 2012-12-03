@@ -21,11 +21,11 @@ class TestCrmCustomer(TestController):
 
 
     def test_customer_login_to_link(self):
-        customer_id = self._create_new()
-        R = self.get('/crm/customer_login_to_link/%s/http%3A%7C%7Chealthyustore.net' % customer_id)  #pylint: disable-msg=E1300
+        cust = self.get_customer()
+        url = '/crm/customer_login_to_link/%s/%s' % (cust.customer_id, '%7C')  # go to '/'
+        R = self.get(url)  #pylint: disable-msg=E1300
         assert R.status_int == 200
-        R.mustcontain(customer_id)
-        self._delete_new(customer_id)
+        R.mustcontain(cust.customer_id)
 
 
     @secure

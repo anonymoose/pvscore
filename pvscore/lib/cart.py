@@ -19,7 +19,7 @@ class Cart(object):
         return len(self.items)
 
 
-    def add_item(self, product, campaign, quantity=1, price=None):
+    def add_item(self, product, campaign, quantity=1, price=None, start_dt=None):
         if not price:
             price = product.get_price(campaign)
         price = float(price)
@@ -31,6 +31,7 @@ class Cart(object):
                            'campaign_id': campaign.campaign_id,
                            'dt': datetime.datetime.date(datetime.datetime.now()),
                            'unit_price':price,
+                           'start_dt':util.parse_date_as_date(util.nvl(str(start_dt), util.str_today())),
                            'price': price*quantity,
                            'handling':(product.handling_price if product.handling_price else 0)*quantity,
                            'weight':(product.weight if product.weight else 0) * quantity})

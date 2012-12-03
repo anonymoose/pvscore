@@ -108,6 +108,9 @@ def words_date_time(d8e):
     return d8e.strftime("%B %d, %Y at %I:%M %p")
 
 
+def str_today():
+    return util.str_today()
+
 def slash_date(d8e):
     if d8e == '' or d8e == None:
         return ''

@@ -295,6 +295,7 @@ class TestCrmProduct(TestController):
     def test_list_with_new(self):
         product_id = self._create_new()
         R = self.get('/crm/product/list')
+        import pdb; pdb.set_trace()
         assert R.status_int == 200
         R.mustcontain('Test Product')
         self._delete_new(product_id)

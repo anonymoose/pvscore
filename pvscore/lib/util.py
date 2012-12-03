@@ -12,12 +12,23 @@ import logging
 import subprocess
 import uuid
 from xml.dom.minidom import parseString
-
+import urllib
 
 log = logging.getLogger(__name__)
 
+
+def urlencode(value):
+    return urllib.quote_plus(value)
+
+
+def urlencode_ex(value):
+    val = urlencode(value)
+    return val.replace('%2F', '-') if val else ''
+
+
 def average(vals):
     return float(sum(vals))/len(vals) if len(vals) > 0 else float('nan')
+
 
 def parse_date(strdt, fmt='%Y-%m-%d'):
     return datetime.datetime.strptime(strdt, fmt)

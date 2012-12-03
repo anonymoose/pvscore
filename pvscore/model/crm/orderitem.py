@@ -28,6 +28,7 @@ class OrderItem(ORMBase, BaseModel):
     unit_retail_price = Column(Float)
     create_dt = Column(DateTime, server_default = text('now()'))
     delete_dt = Column(DateTime)
+    start_dt = Column(DateTime)
     quantity = Column(Float)
     tax = Column(Float, default=0.0)
     third_party_id = Column(String(100))

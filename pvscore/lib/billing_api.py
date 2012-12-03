@@ -322,7 +322,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
                           'amount' : order_item.total(),
                           'card_number' : billing.get_cc_num(),
                           'exp_date' : billing.cc_exp,
-                          'start_date' : util.str_today(),
+                          'start_date' : util.format_date(order_item.start_dt) if order_item.start_dt else util.str_today(),
                           'total_occurrences' : 9999,
                           'interval_length' : 1,
                           'interval_unit' : 'months',

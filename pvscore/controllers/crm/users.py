@@ -84,6 +84,7 @@ class UsersController(BaseController):
             usr.password = orig_pass
         usr.save()
         usr.flush()
+        usr.invalidate_self()
 
         self.request.session.flash('Saved user %s' % usr.user_id)
         return HTTPFound('/crm/users/edit/%s' % usr.user_id)

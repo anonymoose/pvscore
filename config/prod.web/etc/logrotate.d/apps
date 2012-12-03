@@ -1,4 +1,4 @@
-/apps/pvs/app/*.log {
+/apps/pvs/log/*.log {
     daily
     rotate 10
     missingok

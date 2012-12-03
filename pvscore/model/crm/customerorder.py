@@ -65,6 +65,7 @@ class CustomerOrder(ORMBase, BaseModel):
             item.order = cord
             item.product = prd
             item.creator = user_created
+            item.start_dt = cart_item['start_dt']
             discount = prd.get_discount_price(campaign)
             retail = cart_item['unit_price'] if 'unit_price' in cart_item else prd.get_unit_price(campaign)
             item.quantity = float(cart_item['quantity'])
@@ -88,6 +89,7 @@ class CustomerOrder(ORMBase, BaseModel):
                         child_item.parent_id = item.order_item_id
                         child_item.product = kid.child
                         child_item.creator = user_created
+                        child_item.start_dt = cart_item['start_dt']
                         child_item.unit_price = 0.0
                         child_item.unit_discount_price = 0.0
                         child_item.unit_retail_price = 0.0

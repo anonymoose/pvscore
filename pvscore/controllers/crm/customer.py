@@ -623,7 +623,10 @@ class CustomerController(BaseController):
         for pid in product_ids.keys():
             quantity = product_ids[pid]
             price = prices[pid] if prices and pid in prices else None
-            cart.add_item(Product.load(pid), cust.campaign, quantity, price)
+            cart.add_item(product=Product.load(pid),
+                          campaign=cust.campaign,
+                          quantity=quantity,
+                          price=price)
         order = cust.add_order(cart, user, self.request.ctx.site, cust.campaign, incl_tax)
         order.flush()
         return order.order_id
@@ -706,7 +709,10 @@ class CustomerController(BaseController):
             for sku in product_skus:
                 prod = Product.find_by_sku(self.enterprise_id, campaign, sku)
                 if prod:
-                    cart.add_item(prod, cust.campaign)
+                    cart.add_item(product=prod,
+                                  campaign=cust.campaign,
+                                  start_dt=self.request.POST.get('bill_start_dt')
+                                  )
                 else:
                     self.flash("No such product sku: %s" % sku)
                     self.raise_redirect(self.request.referrer)

@@ -79,7 +79,7 @@ class ProductController(BaseController):
         return {'products' : Product.find_by_vendor(self.enterprise_id,
                                                     self.request.ctx.user.vendor) \
                     if self.request.ctx.user.is_vendor_user() \
-                    else Product.find_all (self.enterprise_id)}
+                    else Product.find_all(self.enterprise_id)}
 
 
     @view_config(route_name='crm.product.inventory_list', renderer='string')
