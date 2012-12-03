@@ -67,7 +67,7 @@
       <hr>
 
       <footer>
-        <p>&copy; ${request.ctx.enterprise.copyright if request.ctx.enterprise.copyright else h.literal('<a href="https://eyefound.it">EyeFound.IT</a>')} ${util.this_year()}</p>
+        <p>&copy; ${request.ctx.enterprise.copyright if request.ctx.enterprise.copyright else h.literal('<a href="https://eyefound.it">EyeFound.IT</a>')} ${h.this_year()}</p>
       </footer>
 
     </div> <!-- /container -->

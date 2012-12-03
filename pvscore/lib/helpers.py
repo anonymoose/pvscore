@@ -70,7 +70,7 @@ var piwikTracker = Piwik.getTracker(pkBaseURL + "stats/piwik.php", %s);
 piwikTracker.trackPageView();
 piwikTracker.enableLinkTracking();
 } catch( err ) {}
-</script><noscript><p><img src="http://eyefound.it/stats/piwik.php?idsite=%s" style="border:0" alt="" /></p></noscript>
+</script><noscript><p><img src="https://eyefound.it/stats/piwik.php?idsite=%s" style="border:0" alt="" /></p></noscript>
 <!-- End Piwik Tracking Code -->
     ''' % (site.google_analytics_id, site.google_analytics_id))
     return ''

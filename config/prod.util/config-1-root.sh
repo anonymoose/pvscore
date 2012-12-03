@@ -108,5 +108,6 @@ systemctl stop nrpe.service
 systemctl start nrpe.service
 
 cp /apps/pvs/pvscore/config/prod.util/etc/httpd/conf.d/nagios-vhost.conf /etc/httpd/conf.d
+usermod -a -G web apache
 systemctl start httpd.service
 
