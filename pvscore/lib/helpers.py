@@ -62,7 +62,7 @@ def piwik_analytics(site):
         return literal('''
     <!-- Piwik -->
 <script type="text/javascript">
-var pkBaseURL = (("https:" == document.location.protocol) ? "https://eyefound.it/" : "http://eyefound.it/");
+var pkBaseURL = (("https:" == document.location.protocol) ? "https://www.eyefound.it/" : "http://www.eyefound.it/");
 document.write(unescape("%%3Cscript src='" + pkBaseURL + "stats/piwik.js' type='text/javascript'%%3E%%3C/script%%3E"));
 </script><script type="text/javascript">
 try {
@@ -70,7 +70,7 @@ var piwikTracker = Piwik.getTracker(pkBaseURL + "stats/piwik.php", %s);
 piwikTracker.trackPageView();
 piwikTracker.enableLinkTracking();
 } catch( err ) {}
-</script><noscript><p><img src="https://eyefound.it/stats/piwik.php?idsite=%s" style="border:0" alt="" /></p></noscript>
+</script><noscript><p><img src="https://www.eyefound.it/stats/piwik.php?idsite=%s" style="border:0" alt="" /></p></noscript>
 <!-- End Piwik Tracking Code -->
     ''' % (site.google_analytics_id, site.google_analytics_id))
     return ''
