@@ -1,0 +1,34 @@
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+
+# For details see man 4 crontabs
+
+# Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name  command to be executed
+
+01            22       * * 1-5  web   /apps/pvs/wm/wm/bin/nightly.sh
+01            22       * * 6-7  web   /apps/pvs/wm/wm/bin/weekend.sh
+01            12       * * *    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest latest_predictions
+01            1        * * *    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest batting_average
+01            23       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_report run
+15            4        * * 7    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_holders
+10            9-18     * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest check_retired
+30            13       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_trade_director
+30            18       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_institutional
+35            20       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_trade_director_end_of_day 
+01            8        * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_results
+05,25,45      9-18     * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.market_latest update_intraday
+05,20,35,50   *        * * *    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_read process_new_customers
+01            9        * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_read run
+
+0 4 * * * root /usr/sbin/ntpdate pool.ntp.org
+0 4 * * * web /usr/bin/vacuumdb --analyze --verbose wm -U postgres > /tmp/pg-wm-vacuum.log
+0 3 * * * web /usr/bin/vacuumdb --analyze --verbose retail -U postgres > /tmp/pg-pvs-vacuum.log
+
