@@ -4602,3 +4602,11 @@ select count(0) cnt
                                and comp.company_id = %(company_id)s
 2012-12-03 13:40:47,636 INFO  [sqlalchemy.engine.base.Engine][Dummy-4] {'pwd': u'no1nose', 'email':
  u'kyle.hewlett@raymondjames.com', 'company_id': UUID('acdeb7bf-1256-47cb-a5f8-065455c167d8')}
+
+
+
+select ir.create_dt, ir.ireport_id 
+from wm_ireport ir , wm_ireport_active ira
+where ir.create_dt > '2012-12-04'
+and ir.ireport_id = ira.ireport_id
+and ira.delete_dt is null;
