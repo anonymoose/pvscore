@@ -129,15 +129,6 @@ class TestCrmProduct(TestController):
 
 
     @secure
-    def test_inventory_list(self):
-        R = self.get('/crm/product/inventory_list')
-        assert R.status_int == 200
-        prods = json.loads(R.body)
-        self.assertGreater(prods['records'], 100)
-        self.assertEqual(prods['records'], len(prods['rows']))
-
-
-    @secure
     def test_save_inventory(self):
         ent = Enterprise.find_by_name('Healthy U Store')
         cmpns = Campaign.find_all(ent.enterprise_id)
@@ -254,6 +245,15 @@ class TestCrmProduct(TestController):
 
 
     @secure
+    def test_show_new(self):
+        R = self.get('/crm/product/new')
+        assert R.status_int == 200
+        R.mustcontain('Edit Product')
+        f = R.forms['frm_product']
+        self.assertEqual(f['name'].value, '')
+
+
+    @secure
     def test_autocomplete_by_name(self):
         product_id = self._create_new()
         R = self.get('/crm/product/autocomplete_by_name',
@@ -272,17 +272,7 @@ class TestCrmProduct(TestController):
                      {'search_key': 'a'})
         R.mustcontain('Activated Charcoal')
         R.mustcontain('Alpha')
-
         self._delete_new(product_id)
-
-
-    @secure
-    def test_show_new(self):
-        R = self.get('/crm/product/new')
-        assert R.status_int == 200
-        R.mustcontain('Edit Product')
-        f = R.forms['frm_product']
-        self.assertEqual(f['name'].value, '')
 
 
     @secure
@@ -292,8 +282,34 @@ class TestCrmProduct(TestController):
 
 
     @secure
+    def test_delete_picture(self):
+        product_id = self._create_new()
+        # http://stackoverflow.com/questions/2488978/nose-tests-file-uploads
+        files = [("Filedata", "testimage.jpg", "not really a jpg")]
+        R = self.app.post('/crm/product/upload_picture/%s' % str(product_id),
+                          upload_files=files)
+        assert R.status_int == 200
+        asset_id = R.body
+        ass = Asset.load(asset_id)
+        assert ass is not None
+        assert os.path.exists(ass.filesystem_path)
+        R = self.app.get('/crm/product/delete_picture/%s/%s' % (str(product_id), str(ass.id)))
+        R.mustcontain('True')
+        assert not os.path.exists(ass.filesystem_path)
+        self._delete_new(product_id)
+
+
+    # @secure
+    # def test_inventory_list(self):
+    #     R = self.get('/crm/product/inventory_list')
+    #     assert R.status_int == 200
+    #     prods = json.loads(R.body)
+    #     self.assertGreater(prods['records'], 100)
+    #     self.assertEqual(prods['records'], len(prods['rows']))
+
+
+    @secure
     def test_list_with_new(self):
-        import pdb; pdb.set_trace()
         product_id = self._create_new()
         R = self.get('/crm/product/list')
         assert R.status_int == 200
@@ -318,21 +334,5 @@ class TestCrmProduct(TestController):
         self._delete_new(product_id)
 
 
-    @secure
-    def test_delete_picture(self):
-        product_id = self._create_new()
-        # http://stackoverflow.com/questions/2488978/nose-tests-file-uploads
-        files = [("Filedata", "testimage.jpg", "not really a jpg")]
-        R = self.app.post('/crm/product/upload_picture/%s' % str(product_id),
-                          upload_files=files)
-        assert R.status_int == 200
-        asset_id = R.body
-        ass = Asset.load(asset_id)
-        assert ass is not None
-        assert os.path.exists(ass.filesystem_path)
-        R = self.app.get('/crm/product/delete_picture/%s/%s' % (str(product_id), str(ass.id)))
-        R.mustcontain('True')
-        assert not os.path.exists(ass.filesystem_path)
-        self._delete_new(product_id)
 
 

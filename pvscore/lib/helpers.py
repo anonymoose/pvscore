@@ -76,6 +76,10 @@ piwikTracker.enableLinkTracking();
     return ''
 
 
+def is_today(dat):
+    return util.format_date(dat) == util.str_today()
+
+
 def is_production():
     return util.is_production()
 

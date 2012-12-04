@@ -115,7 +115,7 @@ ${self.pre_process()}
 <script src="/static/js/jquery/jqgrid/js/i18n/grid.locale-en.js"></script>
 <script src="/static/js/jquery/jqgrid/js/jquery.jqGrid.min.js"></script>
 <script src="/static/js/jquery/barcode/jquery-barcode-2.0.2.min.js"></script>
-
+<script src="/static/js/jquery/tablesorter/jquery.tablesorter.min.js"></script>
 <script src="/static/crm/js/pvs-jquery.js"></script>
 
 ${self.local_foot()}
@@ -361,6 +361,11 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
     <script src="/static/crm/js/content.js"></script>
     <script src="/static/crm/js/customer.js"></script>
     <script src="/static/crm/js/appointment.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('.sortable').tablesorter();
+    });
+    </script>
 </%def>
 
 <%def name="other_foot()">\
