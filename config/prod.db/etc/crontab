@@ -25,10 +25,14 @@ MAILTO=root
 35            20       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_trade_director_end_of_day 
 01            8        * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_results
 05,25,45      9-18     * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.market_latest update_intraday
-05,20,35,50   *        * * *    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_read process_new_customers
-01            9        * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_read run
 
 0 4 * * * root /usr/sbin/ntpdate pool.ntp.org
 0 4 * * * web /usr/bin/vacuumdb --analyze --verbose wm -U postgres > /tmp/pg-wm-vacuum.log
 0 3 * * * web /usr/bin/vacuumdb --analyze --verbose retail -U postgres > /tmp/pg-pvs-vacuum.log
 
+
+#######################################
+## OBSOLETE
+#######################################
+# 05,20,35,50   *        * * *    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_read process_new_customers
+# 01            9        * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_read run
