@@ -47,7 +47,7 @@ yum -y update
 yum -y groupinstall 'Development Tools'
 yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack.x86_64 lapack-devel.x86_64 atlas.x86_64 atlas.x86_64 blas.x86_64 blas-devel.x86_64 freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel nginx fail2ban redis postgresql91-server postgresql91-contrib postgresql91-devel python-psycopg2 nrpe nagios-plugins-all openssl-devel xinetd ntpdate htmldock
 yum -y install nagios nagios-common nagios-devel nagios-plugins-all nrpe nagios-plugins-nrpe
-yum -y install httpd php lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP freetype freetype-devel libpng libpng-devel pam_mysql fprintd-pam 
+yum -y install httpd php lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP freetype freetype-devel libpng libpng-devel pam_mysql fprintd-pam
 updatedb
 
 ########################################################################
@@ -61,7 +61,7 @@ systemctl enable nginx.service
 usermod -a -G web nginx
 cp /apps/pvs/pvscore/config/prod.web/etc/nginx/nginx.conf /etc/nginx/nginx.conf
 mkdir /etc/nginx/sites
-cp /apps/pvs/pvscore/config/prod.web/etc/nginx/sites/pvs.conf /etc/nginx/sites/pvs.conf
+cp /apps/pvs/pvscore/config/prod.web/etc/nginx/sites/*.conf /etc/nginx/sites
 mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.orig
 # don't start until web src is installed
 #systemctl start nginx.service

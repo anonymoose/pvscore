@@ -1,0 +1,39 @@
+#
+# for Mac
+#
+
+mkdir -p ~/src/numpy
+cd ~/src/numpy
+source ~/dev/pydev/pvs/bin/activate
+git clone https://github.com/numpy/numpy.git
+git clone https://github.com/scipy/scipy.git
+
+export CC=clang
+export CXX=clang
+export FFLAGS=-ff2c
+cd numpy
+python setup.py build
+python setup.py install
+
+cd ../scipy
+python setup.py build
+python setup.py install
+
+
+#
+# For Linux boxes
+#
+mkdir -p /apps/pvs/src
+cd /apps/pvs/src
+source /apps/pvs/bin/activate
+git clone https://github.com/numpy/numpy.git
+git clone https://github.com/scipy/scipy.git
+
+
+cd numpy
+python setup.py build
+python setup.py install
+
+cd ../scipy
+python setup.py build
+python setup.py install
