@@ -43,9 +43,14 @@ def format_date(d, fmt="%Y-%m-%d"):
     return d.strftime(fmt)
 
 
+def truncate_datetime(dt):
+    return datetime.datetime(dt.year, dt.month, dt.day)
+
+
 def is_today(dt):
     today_ = datetime.datetime.today()
     return (today_.year == dt.year and today_.month == dt.month and today_.day == dt.day)
+
 
 #<pubDate>Wed, 02 Oct 2002 08:00:00 EST</pubDate>
 def format_rss_date(d):
@@ -648,7 +653,7 @@ def year_list():
 # for line in runProcess(['mysqladmin', 'create', 'test', '-uroot', '-pmysqladmin12']):
 #     print line,
 #
-def run_process_loop(exe):    
+def run_process_loop(exe):
     proc = subprocess.Popen(exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     lines = []
     while (True):
@@ -660,7 +665,7 @@ def run_process_loop(exe):
             break
     return lines
 
-      
+
 def run_process(exe):
     return run_process_loop(exe)
 
@@ -686,7 +691,7 @@ def to_uuid(val):
 
 def is_uuid(val):
     return to_uuid(val) != None
-    
+
 
 
 def single_attr_array(obj_array, attr_name):
@@ -846,7 +851,7 @@ def xml_to_dict(node):
 
 # def nl2br(val):
 #     return val.replace('\n','<br>\n')
-        
+
 
 # def to_dict(obj, maxlevel=2, level=0, data=None):
 #     """ KB: [2010-09-23]: Recursively traverse trees of objects to attach dicts in order

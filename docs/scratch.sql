@@ -3483,7 +3483,7 @@ alter table crm_product drop column inventory_cached;
 update crm_product set inventory = (select sum(quantity) from crm_product_inventory_journal ij where ij.product_id = product_id);
 
 select p.product_id, p.inventory, (select sum(quantity) from crm_product_inventory_journal ij where ij.product_id = p.product_id)
-from crm_product p 
+from crm_product p
 where p.delete_dt is null;
 
 
@@ -3495,7 +3495,7 @@ where p.sku = 'WM-PT2-001' and
 p.product_id = oi.product_id and
 oi.order_id = o.order_id and
 o.customer_id = c.customer_id and
-c.campaign_id = cm.campaign_id 
+c.campaign_id = cm.campaign_id
  ) to '/tmp/rpt.csv' with csv header;
 
 \d crm_customer_order;
@@ -3539,7 +3539,7 @@ select * from crm_product_pricing where product_id = 1451;
 
 
 SELECT core_status_event_1.display_name, core_status.create_dt
-FROM core_status LEFT OUTER JOIN core_status_event AS core_status_event_1 ON core_status_event_1.event_id = core_status.event_id 
+FROM core_status LEFT OUTER JOIN core_status_event AS core_status_event_1 ON core_status_event_1.event_id = core_status.event_id
 WHERE core_status.customer_id = 220 ORDER BY core_status.status_id DESC;
 
 
@@ -3564,7 +3564,7 @@ select cust.customer_id,
   coalesce(  (select sum(coalesce(amount,0)) from crm_journal
      where order_id = o.order_id
     and type in ('FullPayment', 'PartialPayment')), 0) as "payments",
-   
+
   coalesce(  (sum(oi.unit_price*oi.quantity)+coalesce(o.shipping_total,0)+coalesce(o.handling_total,0))
     -coalesce((select sum(coalesce(amount,0)) from crm_journal
               where order_id = o.order_id
@@ -3598,7 +3598,7 @@ select domain, domain_alias0, domain_alias1, domain_alias2
 
 
 
-alter table crm_enterprise add column 
+alter table crm_enterprise add column
 
 alter table crm_enterprise add column     smtp_server varchar(50);
 alter table crm_enterprise add column     smtp_username varchar(50);
@@ -3612,30 +3612,30 @@ alter table crm_enterprise add column email varchar(50);
 select * from crm_customer where email = 'amers_j@yahoo.com';
 
 # index cache rate
-SELECT 
+SELECT
   sum(idx_blks_read) as idx_read,
   sum(idx_blks_hit)  as idx_hit,
   (sum(idx_blks_hit) - sum(idx_blks_read)) / sum(idx_blks_hit) as ratio
-FROM 
+FROM
   pg_statio_user_indexes;
 
 # index usage
-SELECT 
-  relname, 
-  100 * idx_scan / (seq_scan + idx_scan) percent_of_times_index_used, 
+SELECT
+  relname,
+  100 * idx_scan / (seq_scan + idx_scan) percent_of_times_index_used,
   n_live_tup rows_in_table
-FROM 
-  pg_stat_user_tables 
-ORDER BY 
+FROM
+  pg_stat_user_tables
+ORDER BY
   n_live_tup DESC;
 
 
 # cache hit rate
-SELECT 
+SELECT
   sum(heap_blks_read) as heap_read,
   sum(heap_blks_hit)  as heap_hit,
   (sum(heap_blks_hit) - sum(heap_blks_read)) / sum(heap_blks_hit) as ratio
-FROM 
+FROM
   pg_statio_user_tables;
 
 
@@ -3681,7 +3681,7 @@ select * from core_status_event where short_name = 'ASSET_PROCESSED';
 
 
 
-select e.short_name from 
+select e.short_name from
 core_status_event e, core_status s, pvs_listing l
 where l.status_id = s.status_id
 and s.event_id = e.event_id
@@ -3761,11 +3761,11 @@ insert into pvs_schema_map (domain_name, schema_name) values ('eyefound.it', 'ey
 select is_generated from information_schema.columns where table_name = 'crm_customer' and column_name = 'customer_id';
 
         SELECT
-            tc.constraint_name, tc.table_name, kcu.column_name, 
+            tc.constraint_name, tc.table_name, kcu.column_name,
             ccu.table_name AS foreign_table_name,
-            ccu.column_name AS foreign_column_name 
-        FROM 
-            information_schema.table_constraints AS tc 
+            ccu.column_name AS foreign_column_name
+        FROM
+            information_schema.table_constraints AS tc
             JOIN information_schema.key_column_usage AS kcu ON tc.constraint_name = kcu.constraint_name
             JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = tc.constraint_name
         WHERE constraint_type = 'FOREIGN KEY' and ccu.table_name = 'crm_customer';
@@ -3796,7 +3796,7 @@ update pvs_listing set site_id = 13 where customer_id = 1078;
 
 select * from cms_site;
 
-select s.domain, c.name, substring(c.data from 0 for 100) 
+select s.domain, c.name, substring(c.data from 0 for 100)
 from cms_content c, cms_page p, cms_site s
 where c.page_id = p.page_id
 and p.site_id = s.site_id
@@ -3851,7 +3851,7 @@ select
             i.relname;
 
 
-select count(0) from 
+select count(0) from
             pg_class t,
             pg_class i,
             pg_index ix,
@@ -3872,7 +3872,7 @@ select count(0) from
             i.relname;
 
 -- round 1
-alter table crm_customer add foreign key (status_id) references core_status;    
+alter table crm_customer add foreign key (status_id) references core_status;
 alter table core_attribute_value add foreign key (attr_id) references core_attribute;
 alter table crm_appointment add foreign key (user_assigned) references core_user;
 alter table crm_campaign add foreign key (comm_forgot_password_id) references crm_communication;
@@ -4049,7 +4049,7 @@ group by p.name, p.product_id
 
 -- create a table of customers we care about based on product_id
 drop table if exists tmp_keepers;
-create table tmp_keepers as 
+create table tmp_keepers as
 select c.customer_id, c.email, c.billing_id, oi.order_id, oi.order_item_id, oi.product_id
 from crm_customer c, crm_customer_order co, crm_order_item oi, crm_product p
 where
@@ -4064,44 +4064,44 @@ as select s.status_id
 from core_status s, tmp_keepers tk
 where s.customer_id = tk.customer_id;
 
-insert into tmp_status_keepers select x.status_id 
+insert into tmp_status_keepers select x.status_id
 from crm_billing  x, tmp_keepers tk
 where x.status_id is not null
 and tk.billing_id = x.billing_id;
 
-insert into tmp_status_keepers select x.status_id 
+insert into tmp_status_keepers select x.status_id
 from crm_company  x
 where x.status_id is not null;
 
-insert into tmp_status_keepers select x.status_id 
+insert into tmp_status_keepers select x.status_id
 from crm_customer_order  x, tmp_keepers tk
 where x.status_id is not null
 and tk.customer_id = x.customer_id;
 
-insert into tmp_status_keepers select x.status_id 
+insert into tmp_status_keepers select x.status_id
 from crm_customer  x, tmp_keepers tk
 where x.status_id is not null
 and tk.customer_id = x.customer_id;
 
-insert into tmp_status_keepers select x.status_id 
+insert into tmp_status_keepers select x.status_id
 from crm_order_item  x, tmp_keepers tk
 where x.status_id is not null
 and x.order_item_id = tk.order_item_id;
 
-insert into tmp_status_keepers select x.status_id 
+insert into tmp_status_keepers select x.status_id
 from crm_product  x
 where x.status_id is not null
 and x.product_id in (select distinct(product_id) from tmp_keepers);
 
-insert into tmp_status_keepers select x.status_id 
+insert into tmp_status_keepers select x.status_id
 from crm_purchase_order_item  x
 where x.status_id is not null;
 
-insert into tmp_status_keepers select x.status_id 
+insert into tmp_status_keepers select x.status_id
 from crm_purchase_order  x
 where x.status_id is not null;
 
-insert into tmp_status_keepers select x.status_id 
+insert into tmp_status_keepers select x.status_id
 from wm_ireport  x
 where x.status_id is not null;
 
@@ -4141,7 +4141,7 @@ copy crm_report to '/tmp/crm_report.copy';
 
 
 truncate table core_attribute_value cascade;
-truncate table crm_customer cascade;  -- 
+truncate table crm_customer cascade;  --
 truncate table crm_customer_order cascade;
 truncate table crm_order_item cascade;
 truncate table crm_journal cascade;
@@ -4188,7 +4188,7 @@ drop table tmp_status_keepers;
 
 
 -- highest revenue categories
-explain select x.* from 
+explain select x.* from
 (select pc.name, pc.category_id
 ,sum(oi.quantity) as quantity
 ,sum(oi.unit_price*oi.quantity) as revenue
@@ -4499,7 +4499,7 @@ SELECT anon_1.crm_customer_customer_id AS anon_1_crm_customer_customer_id
 , crm_billing_1.cc_exp AS crm_billing_1_cc_exp
 , crm_billing_1.is_primary AS crm_billing_1_is_primary
 , crm_billing_1.create_dt AS crm_billing_1_create_dt
-, crm_billing_1.delete_dt AS crm_billing_1_delete_dt 
+, crm_billing_1.delete_dt AS crm_billing_1_delete_dt
 FROM (SELECT crm_customer.customer_id AS crm_customer_customer_id
 , crm_customer.campaign_id AS crm_customer_campaign_id
 , crm_customer.billing_id AS crm_customer_billing_id
@@ -4543,8 +4543,8 @@ FROM (SELECT crm_customer.customer_id AS crm_customer_customer_id
 , crm_customer.cid_9 AS crm_customer_cid_9
 , crm_customer.ref_0 AS crm_customer_ref_0
 , crm_customer.ref_1 AS crm_customer_ref_1
-, crm_customer.ref_2 AS crm_customer_ref_2 
-FROM crm_customer JOIN crm_campaign ON crm_campaign.campaign_id = crm_customer.campaign_id 
+, crm_customer.ref_2 AS crm_customer_ref_2
+FROM crm_customer JOIN crm_campaign ON crm_campaign.campaign_id = crm_customer.campaign_id
 WHERE crm_customer.delete_dt IS NULL AND crm_campaign.company_id = '42d5ce7b-f5be-43fe-80b9-56a013b9314a' AND crm_customer.email ILIKE 'kenneth.bedwell@gmail.com' AND crm_customer.password = 'pass2'
  LIMIT 1 AS anon_1 LEFT OUTER JOIN crm_customer_order AS crm_customer_order_1 ON anon_1.crm_customer_customer_id = crm_customer_order_1.customer_id LEFT OUTER JOIN core_status AS core_status_1 ON core_status_1.status_id = crm_customer_order_1.status_id LEFT OUTER JOIN core_status_event AS core_status_event_1 ON core_status_event_1.event_id = core_status_1.event_id LEFT OUTER JOIN crm_order_item AS crm_order_item_1 ON crm_customer_order_1.order_id = crm_order_item_1.order_id LEFT OUTER JOIN crm_product AS crm_product_1 ON crm_product_1.product_id = crm_order_item_1.product_id LEFT OUTER JOIN crm_company AS crm_company_1 ON crm_company_1.company_id = crm_product_1.company_id LEFT OUTER JOIN crm_enterprise AS crm_enterprise_1 ON crm_enterprise_1.enterprise_id = crm_company_1.enterprise_id LEFT OUTER JOIN crm_product_pricing AS crm_product_pricing_1 ON crm_product_1.product_id = crm_product_pricing_1.product_id LEFT OUTER JOIN crm_journal AS crm_journal_1 ON crm_customer_order_1.order_id = crm_journal_1.order_id LEFT OUTER JOIN crm_campaign AS crm_campaign_1 ON crm_campaign_1.campaign_id = anon_1.crm_customer_campaign_id LEFT OUTER JOIN crm_company AS crm_company_2 ON crm_company_2.company_id = crm_campaign_1.company_id LEFT OUTER JOIN crm_enterprise AS crm_enterprise_2 ON crm_enterprise_2.enterprise_id = crm_company_2.enterprise_id LEFT OUTER JOIN crm_billing AS crm_billing_1 ON crm_billing_1.billing_id = anon_1.crm_customer_billing_id ORDER BY crm_customer_order_1.create_dt DESC
 , crm_order_item_1.create_dt ASC
@@ -4568,7 +4568,7 @@ and co.customer_id = c.customer_id
 and oi.order_id = co.order_id;
 
 
-select count(0) cnt 
+select count(0) cnt
                                from crm_customer c, crm_campaign cmp, crm_company comp
                                where c.email = 'kenneth.bedwell@gmail.com'
                                and c.password = 'pass2'
@@ -4577,7 +4577,7 @@ select count(0) cnt
                                and comp.company_id = '42d5ce7b-f5be-43fe-80b9-56a013b9314a';
 
 
-select count(0) cnt 
+select count(0) cnt
                                from crm_customer c
                                where c.email = 'kenneth.bedwell@gmail.com'
                                and c.password = 'pass2';
@@ -4605,8 +4605,25 @@ select count(0) cnt
 
 
 
-select ir.create_dt, ir.ireport_id 
+select ir.create_dt, ir.ireport_id
 from wm_ireport ir , wm_ireport_active ira
 where ir.create_dt > '2012-12-04'
 and ir.ireport_id = ira.ireport_id
 and ira.delete_dt is null;
+
+
+select * from wm_stock_symbol where symbol = 'XRTX';
+
+
+
+select prediction_id, symbol_id, create_dt from wm_prediction where symbol_id = 22162 order by create_dt desc;
+select ireport_id, create_dt from wm_ireport where symbol_id = 22162;
+select * from wm_ireport_prediction_join where ireport_id = 20001;
+
+
+delete from wm_ireport_prediction_join where prediction_id in (select prediction_id from wm_prediction where create_dt > '2012-12-10');
+delete from wm_ireport_prediction_join where ireport_id in (select ireport_id from wm_ireport where create_dt > '2012-12-10');
+delete from wm_ireport_active where ireport_id in (select ireport_id from wm_ireport where create_dt > '2012-12-10');
+delete from wm_ireport_alignment where ireport_id in (select ireport_id from wm_ireport where create_dt > '2012-12-10');
+delete from wm_ireport where create_dt > '2012-12-10';
+delete from wm_prediction where create_dt > '2012-12-10';

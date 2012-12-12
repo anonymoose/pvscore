@@ -8,6 +8,9 @@ import uuid
 log = logging.getLogger(__name__)
 
 
+def flush():
+    Session.flush()
+
 def commit():
     transaction.commit()
     return True

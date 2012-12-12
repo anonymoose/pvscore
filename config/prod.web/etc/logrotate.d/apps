@@ -5,6 +5,7 @@
     notifempty
     compress
     sharedscripts
+    su web web
     postrotate
         /bin/systemctl kill --signal=USR1 nginx.service
     endscript
