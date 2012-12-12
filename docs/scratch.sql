@@ -4621,9 +4621,9 @@ select ireport_id, create_dt from wm_ireport where symbol_id = 22162;
 select * from wm_ireport_prediction_join where ireport_id = 20001;
 
 
-delete from wm_ireport_prediction_join where prediction_id in (select prediction_id from wm_prediction where create_dt > '2012-12-10');
-delete from wm_ireport_prediction_join where ireport_id in (select ireport_id from wm_ireport where create_dt > '2012-12-10');
-delete from wm_ireport_active where ireport_id in (select ireport_id from wm_ireport where create_dt > '2012-12-10');
-delete from wm_ireport_alignment where ireport_id in (select ireport_id from wm_ireport where create_dt > '2012-12-10');
-delete from wm_ireport where create_dt > '2012-12-10';
-delete from wm_prediction where create_dt > '2012-12-10';
+delete from wm_ireport_prediction_join where prediction_id in (select prediction_id from wm_prediction where create_dt > '2012-12-06');
+delete from wm_ireport_prediction_join where ireport_id in (select ireport_id from wm_ireport where create_dt > '2012-12-06');
+delete from wm_ireport_active where ireport_id in (select ireport_id from wm_ireport where create_dt > '2012-12-06');
+delete from wm_ireport_alignment where ireport_id in (select ireport_id from wm_ireport where create_dt > '2012-12-06');
+delete from wm_ireport where create_dt > '2012-12-06';
+delete from wm_prediction where create_dt > '2012-12-06';
