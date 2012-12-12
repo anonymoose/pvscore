@@ -100,7 +100,7 @@ def crm_routes(config):
     adrt('crm.report.save', '/crm/report/save')
     adrt('crm.report.results', '/crm/report/results/{report_id}')
     adrt('crm.report.export', '/crm/report/results_export/{report_id}')
-    
+
     adrt('crm.purchase.vendor.new', '/crm/purchase/vendor/new')  #, controller='crm/purchase', action='new_vendor')
     adrt('crm.purchase.vendor.edit', '/crm/purchase/vendor/edit/{vendor_id}')  #controller='crm/purchase', action='edit_vendor')
     adrt('crm.purchase.vendor.list', '/crm/purchase/vendor/list')  #, controller='crm/purchase', action='list_vendors')
@@ -220,14 +220,14 @@ def crm_routes(config):
     adrt('crm.dashboard', '/crm/dashboard')
 
 
-    # KB: [2011-09-02]: Don't let /test into the nginx proxying namespace. 
+    # KB: [2011-09-02]: Don't let /test into the nginx proxying namespace.
     adrt('test.1', '/tsst/tsst_validate')
     adrt('test.2', '/tsst/tsst_admin_link')
-    adrt('test.10', '/tsst/tsst_customer_sidebar_link')
     adrt('test.3', '/tsst/tsst_float')
     adrt('test.4', '/tsst/tsst_int')
     adrt('test.5', '/tsst/tsst_string')
     adrt('test.6', '/tsst/tsst_number')
     adrt('test.7', '/tsst/tsst_equals')
     adrt('test.8', '/tsst/tsst_redirto')
-    adrt('test.9', '/tsst/tsst_redirto_post')#, controller='crm/tsst', action='tsst_redirto_post')
+    adrt('test.9', '/tsst/tsst_redirto_post')
+    adrt('test.10', '/tsst/tsst_customer_sidebar_link')
