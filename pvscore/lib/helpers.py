@@ -74,7 +74,8 @@ def eyefoundit_analytics(site):
 # <!-- End Piwik Tracking Code -->
 #     ''' % (site.eyefoundit_analytics_id, site.eyefoundit_analytics_id))
 #     return ''
-    pass
+    return ''
+
 
 def is_today(dat):
     return util.format_date(dat) == util.str_today()
