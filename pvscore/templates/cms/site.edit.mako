@@ -12,7 +12,7 @@
       ${h.hidden('site_id', value=site.site_id)}
       <div class="row">
         <div class="span9">
-       
+
           <div class="well">
             <div class="row">
               <div class="span3">
@@ -25,12 +25,12 @@
                 <label for="">Alias 1</label>
                 ${h.text('domain_alias0', value=site.domain_alias0)}
               </div>
-              
+
               <div class="span3">
                 <label for="">Alias 2</label>
                 ${h.text('domain_alias1', value=site.domain_alias1)}
               </div>
-              
+
               <div class="span2">
                   <label for="">Alias 3</label>
                   ${h.text('domain_alias2', value=site.domain_alias2)}
@@ -88,6 +88,12 @@
                   ${h.text('google_analytics_id', value=site.google_analytics_id)}
               </div>
               <div class="span3">
+                  <label for="">EyeFound.IT Analytics Id</label>
+                  ${h.text('eyefoundit_analytics_id', value=site.eyefoundit_analytics_id)}
+              </div>
+            </div>
+            <div class="row">
+              <div class="span3">
                   <label for="">Shipping Method</label>
                   ${h.select('shipping_method', site.shipping_method, shipping_methods)}
               </div>
@@ -112,4 +118,4 @@
 <div id="div_site_detail" style="display:none;">
 </div>
 
-    
+
