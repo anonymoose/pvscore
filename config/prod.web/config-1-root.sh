@@ -129,7 +129,11 @@ systemctl start nrpe.service
 
 ########################################################################
 # apache
+usermod -a -G web apache
 systemctl enable httpd.service
+rm -f /etc/httpd/conf/httpd.conf
+cp /apps/pvs/pvscore/config/prod.web/etc/httpd/conf/httpd.conf /etc/httpd/conf
 cp /apps/pvs/pvscore/config/prod.web/etc/httpd/conf.d/piwik-vhost.conf /etc/httpd/conf.d
-systemctl start httpd.service
+echo '5 * * * * web /bin/php /apps/pvs/stats/piwik/misc/cron/archive.php -- url=https://www.eyefound.it/stats/index.php > /apps/pvs/log/stats.archive.log' >> /etc/crontab
+# don't start it yet.
 

@@ -37,6 +37,7 @@ class Site(ORMBase, BaseModel):
     seo_keywords = Column(String(1000))
     seo_description = Column(String(1000))
     google_analytics_id = Column(String(20))
+    eyefoundit_analytics_id = Column(String(20))
     shipping_method = Column(String(50))
     tax_method = Column(String(50))
     robots_txt = Column(Text)
@@ -142,7 +143,7 @@ class Site(ORMBase, BaseModel):
     #     return "{root_dir}/{dirname}".format(root_dir=util.nvl(util.cache_get('pvs.site.root.dir'), 'sites'),
     #                                          dirname=self.site_directory)
 
-        
+
     # @property
     # def site_directory(self):
     #     return str(self.site_id)
@@ -159,4 +160,4 @@ class Site(ORMBase, BaseModel):
     # def site_web_directory(self, subdir=''):
     #     """ KB: [2011-02-02]: The "companies" below corresponds to the /companies location in the nginx conf file """
     #     return "/sites/{dirname}/{subdir}".format(dirname=self.site_directory, subdir=subdir)
-        
+

@@ -4627,3 +4627,6 @@ delete from wm_ireport_active where ireport_id in (select ireport_id from wm_ire
 delete from wm_ireport_alignment where ireport_id in (select ireport_id from wm_ireport where create_dt > '2012-12-06');
 delete from wm_ireport where create_dt > '2012-12-06';
 delete from wm_prediction where create_dt > '2012-12-06';
+
+
+alter table cms_site add column eyefoundit_analytics_id varchar(50);

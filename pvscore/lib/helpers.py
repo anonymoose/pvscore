@@ -57,8 +57,8 @@ def google_analytics(site, script_tags=True):
     return ''
 
 
-def piwik_analytics(site):
-    if site and site.google_analytics_id and is_production():
+def eyefoundit_analytics(site):
+    if site and site.eyefoundit_analytics_id and is_production():
         return literal('''
     <!-- Piwik -->
 <script type="text/javascript">
@@ -72,7 +72,7 @@ piwikTracker.enableLinkTracking();
 } catch( err ) {}
 </script><noscript><p><img src="https://www.eyefound.it/stats/piwik.php?idsite=%s" style="border:0" alt="" /></p></noscript>
 <!-- End Piwik Tracking Code -->
-    ''' % (site.google_analytics_id, site.google_analytics_id))
+    ''' % (site.eyefoundit_analytics_id, site.eyefoundit_analytics_id))
     return ''
 
 

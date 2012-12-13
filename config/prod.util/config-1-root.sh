@@ -36,8 +36,8 @@ systemctl restart sshd.service
 # yum it up.
 yum -y update
 yum -y groupinstall 'Development Tools'
-yum -y install nagios nagios-common nagios-devel nagios-plugins-nrpe nagios-plugins-all nrpe openssl-devel xinetd gcc glibc glibc-common gd gd-devel  dos2unix readline-devel zlib-devel emacs-nox mlocate at openssl xslt libxml libxml-devel libxslt libxslt-devel fail2ban 
-yum -y install httpd php lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP freetype freetype-devel libpng libpng-devel pam_mysql fprintd-pam 
+yum -y install nagios nagios-common nagios-devel nagios-plugins-nrpe nagios-plugins-all nrpe openssl-devel xinetd gcc glibc glibc-common gd gd-devel  dos2unix readline-devel zlib-devel emacs-nox mlocate at openssl xslt libxml libxml-devel libxslt libxslt-devel fail2ban
+yum -y install httpd php lighttpd-fastcgi php-cli php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-eaccelerator php-magickwand php-magpierss php-mapserver php-mbstring php-mcrypt php-mhash php-shout php-snmp php-soap php-tidy php-pear-Net-SMTP freetype freetype-devel libpng libpng-devel pam_mysql fprintd-pam
 yum -y install mysql mysql-server
 updatedb
 

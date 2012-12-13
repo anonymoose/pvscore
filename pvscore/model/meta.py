@@ -67,6 +67,11 @@ class BaseModel(object):
         Session.delete(self)    #pylint: disable-msg=E1101
 
 
+    @staticmethod
+    def delete_all(cls, where=''):
+        Session.execute('delete from %s %s' % (cls.__tablename__, where))
+
+
     def soft_delete(self):
         # If there is a delete_dt attribute, then set it to "now" and save it.
         self.invalidate_self()
@@ -169,7 +174,7 @@ class BaseModel(object):
 
 
     def get_attrs(self):
-        from pvscore.model.core.attribute import Attribute        
+        from pvscore.model.core.attribute import Attribute
         return Attribute.find_values(self)
 
 
@@ -192,7 +197,7 @@ class BaseAnalytic(object):
     def run(self):
         import pvscore.lib.db as db
         self.results = db.get_result_set(self.columns, self.query)
-        return self.results 
+        return self.results
 
 
     def col_max(self, colname, convert=float):
@@ -210,7 +215,7 @@ class BaseAnalytic(object):
     #     return len(self.results)
 
 
-    
+
 
 
     # def expire(self):
