@@ -58,23 +58,23 @@ def google_analytics(site, script_tags=True):
 
 
 def eyefoundit_analytics(site):
-    if site and site.eyefoundit_analytics_id and is_production():
-        return literal('''
-    <!-- Piwik -->
-<script type="text/javascript">
-var pkBaseURL = (("https:" == document.location.protocol) ? "https://www.eyefound.it/" : "http://www.eyefound.it/");
-document.write(unescape("%%3Cscript src='" + pkBaseURL + "stats/piwik.js' type='text/javascript'%%3E%%3C/script%%3E"));
-</script><script type="text/javascript">
-try {
-var piwikTracker = Piwik.getTracker(pkBaseURL + "stats/piwik.php", %s);
-piwikTracker.trackPageView();
-piwikTracker.enableLinkTracking();
-} catch( err ) {}
-</script><noscript><p><img src="https://www.eyefound.it/stats/piwik.php?idsite=%s" style="border:0" alt="" /></p></noscript>
-<!-- End Piwik Tracking Code -->
-    ''' % (site.eyefoundit_analytics_id, site.eyefoundit_analytics_id))
-    return ''
-
+#     if site and site.eyefoundit_analytics_id and is_production():
+#         return literal('''
+#     <!-- Piwik -->
+# <script type="text/javascript">
+# var pkBaseURL = (("https:" == document.location.protocol) ? "https://www.eyefound.it/" : "http://www.eyefound.it/");
+# document.write(unescape("%%3Cscript src='" + pkBaseURL + "stats/piwik.js' type='text/javascript'%%3E%%3C/script%%3E"));
+# </script><script type="text/javascript">
+# try {
+# var piwikTracker = Piwik.getTracker(pkBaseURL + "stats/piwik.php", %s);
+# piwikTracker.trackPageView();
+# piwikTracker.enableLinkTracking();
+# } catch( err ) {}
+# </script><noscript><p><img src="https://www.eyefound.it/stats/piwik.php?idsite=%s" style="border:0" alt="" /></p></noscript>
+# <!-- End Piwik Tracking Code -->
+#     ''' % (site.eyefoundit_analytics_id, site.eyefoundit_analytics_id))
+#     return ''
+    pass
 
 def is_today(dat):
     return util.format_date(dat) == util.str_today()
