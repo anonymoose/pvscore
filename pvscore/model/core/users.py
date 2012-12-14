@@ -29,9 +29,7 @@ class Users(ORMBase, BaseModel):
     type = Column(String(50))
     login_link = Column(String(100))
     default_timezone = Column(String(100))
-
     email = Column(String(50))
-
     smtp_server = Column(String(50))
     smtp_username = Column(String(50))
     smtp_password = Column(String(50))

@@ -4635,8 +4635,11 @@ alter table cms_site add column eyefoundit_analytics_id varchar(50);
 --
 -- customer phase install.
 --
+alter table core_user drop column default_timezone;
 alter table crm_customer drop column phase_id;
+alter table crm_appointment drop column timezone;
 drop table crm_customer_phase;
+
 create table crm_customer_phase (
     phase_id uuid primary key,
     enterprise_id uuid,
@@ -4651,10 +4654,8 @@ create table crm_customer_phase (
 alter table crm_customer_phase add foreign key (enterprise_id) references crm_enterprise;
 alter table crm_customer add column phase_id uuid;
 alter table crm_customer add foreign key (phase_id) references crm_customer_phase;
-alter table crm_appointment drop column timezone;
 alter table crm_appointment add column timezone varchar(100);
 alter table core_user drop column tz_offset;
-alter table core_user drop column default_timezone;
 alter table core_user add column default_timezone varchar(100);
 
 -- insert Suspect

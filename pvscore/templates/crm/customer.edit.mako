@@ -52,7 +52,11 @@
               </div>
             </div>
             <div class="row">
-              <div class="span2 offset6">
+              <div class="span2">
+                <label for="user_assigned">Assigned To</label>
+                ${h.select('user_assigned', str(customer.user_assigned), users)}
+              </div>
+              <div class="span2 offset4">
                 <label for="campaign_id">Campaign</label>
                 ${h.select('campaign_id', str(customer.campaign.campaign_id), campaigns)}
               </div>
@@ -157,13 +161,9 @@
       % if customer.customer_id:
       <div class="span3">
         <table>
-          <tr><td>Create Date</td><td>${h.nvl(customer.create_dt)}</td></tr>
-          <tr><td>Mod Date</td><td>${h.nvl(customer.mod_dt)}</td></tr>
-          <tr><td>Delete Date</td><td>${h.nvl(customer.delete_dt)}</td></tr>
-          <tr><td>Created By</td><td>${h.nvl(customer.user_created)}</td></tr>
-          <tr><td>Assigned To</td><td>${h.nvl(customer.user_assigned)}</td></tr>
-          <tr><td>Account Key</td><td>${h.nvl(customer.account_key())}</td></tr>
-          <tr><td>API Key</td><td>${h.nvl(customer.api_key())}</td></tr>
+          <tr><td>Creatd</td><td>${h.nvl(customer.create_dt)}</td></tr>
+          <tr><td>Modified</td><td>${h.nvl(customer.mod_dt)}</td></tr>
+          <tr><td>Deleted</td><td>${h.nvl(customer.delete_dt)}</td></tr>
         </table>
       </div>
       % endif

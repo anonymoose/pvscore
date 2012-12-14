@@ -14,7 +14,7 @@ import pvscore.lib.util as util
 log = logging.getLogger(__name__)
 
 class CommunicationController(BaseController):
-    
+
     @view_config(route_name='crm.communication.edit', renderer='/crm/communication.edit.mako')
     @authorize(IsLoggedIn())
     def edit(self):
@@ -48,7 +48,7 @@ class CommunicationController(BaseController):
     def list(self):
         return {'comms' : Communication.find_all(self.enterprise_id)}
 
-    
+
     @view_config(route_name='crm.communication.view_comm_dialog', renderer='/crm/passthru.mako')
     @authorize(IsLoggedIn())
     def view_comm_dialog(self):
@@ -84,25 +84,24 @@ class CommunicationController(BaseController):
             }
 
 
-    # @view_config(route_name='crm.communication.send_customer_comm', renderer='string')
-    # @authorize(IsLoggedIn())
-    # def send_customer_comm(self):
-    #     customer_id = self.request.matchdict.get('customer_id')
-    #     comm_id = self.request.matchdict.get('comm_id')
-    #     cust = Customer.load(customer_id)
-    #     self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
-    #     comm = Communication.load(comm_id)
-    #     self.forbid_if(not comm or comm.enterprise_id != BaseController.get_enterprise_id())
+    @view_config(route_name='crm.communication.send_customer_comm', renderer='string')
+    @authorize(IsLoggedIn())
+    def send_customer_comm(self):
+        customer_id = self.request.matchdict.get('customer_id')
+        comm_id = self.request.matchdict.get('comm_id')
+        cust = Customer.load(customer_id)
+        self.forbid_if(not cust or str(cust.campaign.company.enterprise_id) != str(self.enterprise_id))
+        comm = Communication.load(comm_id)
+        self.forbid_if(not comm or str(comm.enterprise_id) != str(self.enterprise_id))
+        if cust.campaign != None:
+            sender = cust.campaign.company
+        else:
+            sender = self.request.ctx.user
+        if comm.send_to_customer(sender, cust, None, self.request.POST.get('msg')):
+            return 'True'
+        else:
+            return 'Unable to send email to %s' % cust.email
 
-    #     if cust.campaign != None:
-    #         sender = cust.campaign.company
-    #     else:
-    #         sender = Users.load(session['user_id'])
-
-    #     if comm.send_to_customer(sender, cust, None, self.request.POST.get('msg')):
-    #         return 'True'
-    #     else:
-    #         return 'Unable to send email to %s' % cust.email
 
     @view_config(route_name='crm.communication.save', renderer='/crm/communication.edit.mako')
     @authorize(IsLoggedIn())

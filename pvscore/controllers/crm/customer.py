@@ -13,6 +13,7 @@ from pvscore.model.crm.journal import Journal
 from pvscore.model.crm.customerorder import CustomerOrder
 from pvscore.model.crm.orderitem import OrderItem, OrderItemTermsAcceptance
 from pvscore.model.core.status import Status
+from pvscore.model.core.users import Users
 from pvscore.model.core.statusevent import StatusEvent
 from pvscore.model.crm.billing import Billing
 from pvscore.lib.billing_api import BaseBillingApi
@@ -56,6 +57,7 @@ class CustomerController(BaseController):
             customer.campaign = self.request.ctx.site.company.default_campaign
         return {
             'customer' : customer,
+            'users' : util.select_list(Users.find_all(self.enterprise_id), 'user_id', ['fname', 'lname'], True),
             'phases' : util.select_list(CustomerPhase.find_all(self.enterprise_id), 'phase_id', 'display_name', True),
             'campaigns' : util.select_list(Campaign.find_all(self.enterprise_id), 'campaign_id', 'name')
             }
@@ -116,8 +118,9 @@ class CustomerController(BaseController):
             'lname' : None,
             'email' : None,
             'phone' : None,
-            'external_cart_id' : None,
-            'customers' : None
+            'customers' : None,
+            'user_assigned' : None,
+            'users' : util.select_list(Users.find_all(self.enterprise_id), 'user_id', ['fname', 'lname'], True)
             }
 
 
@@ -130,7 +133,9 @@ class CustomerController(BaseController):
             'lname' : None,
             'email' : None,
             'phone' : None,
-            'customers' : None
+            'customers' : None,
+            'user_assigned' : None,
+            'users' : util.select_list(Users.find_all(self.enterprise_id), 'user_id', ['fname', 'lname'], True)
             }
 
         ret['company_name'] = self.request.POST.get('company_name', self.request.GET.get('company_name'))
@@ -138,8 +143,9 @@ class CustomerController(BaseController):
         ret['lname'] = self.request.POST.get('lname', self.request.GET.get('lname'))
         ret['email'] = self.request.POST.get('email', self.request.GET.get('email'))
         ret['phone'] = self.request.POST.get('phone', self.request.GET.get('phone'))
+        ret['user_assigned'] = self.request.POST.get('user_assigned', self.request.GET.get('user_assigned'))
         ret['customers'] = Customer.search(self.enterprise_id, ret['company_name'], ret['fname'],
-                                           ret['lname'], ret['email'], ret['phone'])
+                                           ret['lname'], ret['email'], ret['phone'], ret['user_assigned'])
         if 'customers' in ret and len(ret['customers']) == 1:
             ret = HTTPFound('/crm/customer/edit/%s' % ret['customers'][0].customer_id)
         return ret
@@ -565,21 +571,21 @@ class CustomerController(BaseController):
         customer = Customer.load(customer_id)
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
         event = StatusEvent.load(self.request.POST.get('event_id'))
-        self.forbid_if(not event or not self.request.POST.get('event_id') or (not event.is_system and event.enterprise_id != self.enterprise_id))
+        self.forbid_if(not event or not self.request.POST.get('event_id') or (not event.is_system and event.enterprise_id is not None and event.enterprise_id != self.enterprise_id))
         order = None
         note = self.request.POST.get('note')
         if self.request.POST.get('order_id'):
             order = CustomerOrder.load(self.request.POST.get('order_id'))
             self.forbid_if(not order or order.campaign.company.enterprise_id != self.enterprise_id)
-            Status.add(customer, order, event, note)
+            Status.add(customer, order, event, note, self.request.ctx.user)
             self.flash('Statused Order to %s' % event.display_name)
         elif self.request.POST.get('order_item_id'):
             order_item = OrderItem.load(self.request.POST.get('order_item_id'))
             self.forbid_if(not order_item or order_item.order.campaign.company.enterprise_id != self.enterprise_id)
-            Status.add(customer, order_item, event, note)
+            Status.add(customer, order_item, event, note, self.request.ctx.user)
             self.flash('Statused Item to %s' % event.display_name)
         else:
-            Status.add(customer, customer, event, note)
+            Status.add(customer, customer, event, note, self.request.ctx.user)
             self.flash('Statused Customer to %s' % event.display_name)
         customer.invalidate_caches()
         return self.find_redirect()

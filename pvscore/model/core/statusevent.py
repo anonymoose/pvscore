@@ -37,19 +37,19 @@ class StatusEvent(ORMBase, BaseModel):
 
     @staticmethod
     def get_status_types():
-        return ['Customer', 
-                'CustomerOrder', 
-                'OrderItem', 
-                'Calendar', 
-                'Communication', 
-                'Company', 
+        return ['Customer',
+                'CustomerOrder',
+                'OrderItem',
+                'Calendar',
+                'Communication',
+                'Company',
                 'Product',
                 'PurchaseOrder']
 
-    
+
     @staticmethod
     def find(enterprise_id, event_type, short_name):
-        return Session.query(StatusEvent).filter(and_(StatusEvent.event_type == event_type, 
+        return Session.query(StatusEvent).filter(and_(StatusEvent.event_type == event_type,
                                                       StatusEvent.short_name == short_name,
                                                       or_(StatusEvent.enterprise_id == enterprise_id,
                                                           and_(StatusEvent.enterprise_id == None,
@@ -66,7 +66,7 @@ class StatusEvent(ORMBase, BaseModel):
         # KB: [2010-11-29]: Eventually this will get more complex and base its
         # behavior off the current state of the customer.
         return Session.query(StatusEvent)\
-            .filter(and_(StatusEvent.enterprise_id == enterprise_id,
+            .filter(and_(or_(StatusEvent.enterprise_id == enterprise_id, StatusEvent.enterprise_id == None),
                          StatusEvent.is_system == False,
                          StatusEvent.event_type == type(obj).__name__))\
                          .order_by(StatusEvent.short_name, StatusEvent.event_type).all()

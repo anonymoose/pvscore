@@ -136,7 +136,11 @@ def select_list(obj_array, id_attr, disp_attr, blank=False):
     if blank:
         arr.append(["",""])
     for obj in obj_array:
-        arr.append([getattr(obj, id_attr, None), getattr(obj, disp_attr, None)])
+        if type(disp_attr) == list:
+            arr.append([getattr(obj, id_attr, None),
+                        " ".join([getattr(obj, dattr, None) for dattr in disp_attr])])
+        else:
+            arr.append([getattr(obj, id_attr, None), getattr(obj, disp_attr, None)])
     return arr
 
 

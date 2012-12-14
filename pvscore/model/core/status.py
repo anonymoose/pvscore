@@ -55,7 +55,7 @@ class Status(ORMBase, BaseModel):
         return Session.query(Status)\
             .filter(and_(Status.fk_id==getattr(obj, obj.__pk__),
                          Status.fk_type==type(obj).__name__))\
-            .order_by(Status.status_id.desc()).all()
+            .order_by(Status.created_dt.desc()).all()
 
 
     @staticmethod
@@ -63,7 +63,7 @@ class Status(ORMBase, BaseModel):
         #pylint: disable-msg=E1101
         return Session.query(Status)\
             .filter(Status.customer_id==customer.customer_id)\
-            .order_by(Status.status_id.desc()).offset(offset).limit(limit).all()
+            .order_by(Status.create_dt.desc()).offset(offset).limit(limit).all()
 
 
 

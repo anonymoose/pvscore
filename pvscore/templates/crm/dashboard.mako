@@ -2,10 +2,14 @@
 
 
 <div id="dashboard" class="container " >
-  <h2>Dashboard</h2>
   <p>
     <div class="row">
-      <div id="chart_0" class="span4"> </div>
+      <div id="chart_0" class="span4">
+        % if len(appointments) > 0:
+          <b>Appointments</b>
+          <%include file="appointment.list_impl.mako"/>
+        % endif
+      </div>
       <div id="chart_1" class="span4"> </div>
       <div id="chart_2" class="span4"> </div>
     </div>
@@ -22,7 +26,7 @@
 <script>
 $(document).ready(function() {
   % for i in range(len(charts)):
-  $('#chart_'+'${i}').append('<img src="${charts[i].link(300,300,i)}" height="300" width="300"/>');
+  $('#chart_'+'${i+3}').append('<img src="${charts[i].link(300,300,i)}" height="300" width="300"/>');
   % endfor
 });
 </script>

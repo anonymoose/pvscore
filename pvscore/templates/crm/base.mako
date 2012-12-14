@@ -81,6 +81,19 @@ ${self.pre_process()}
   </div>
 </div>
 
+<div class="modal hide fade" id="dlg_email">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3 id="dlg_standard_title">Send Email</h3>
+  </div>
+  <div class="modal-body">
+  </div>
+  <div class="modal-footer">
+    <button id="btn_ok_dlg_standard" class="btn btn-primary" onclick="customer_send_email();">Ok</button>
+    <button class="btn btn-link" data-dismiss="modal" aria-hidden="true">Cancel</button>
+  </div>
+</div>
+
 <div class="modal hide fade" id="dlg_simple">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>

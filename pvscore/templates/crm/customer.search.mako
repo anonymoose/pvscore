@@ -32,8 +32,12 @@
                 <label for="phone">Phone</label>
                 ${h.text('phone', size=50, value=phone)}
               </div>
+              <div class="span3">
+                <label for="user_assigned">Assigned To</label>
+                ${h.select('user_assigned', user_assigned, users)}
+              </div>
             </div>
-          </div>        
+          </div>
         </div>
       </div>
       <div class="row">
@@ -50,7 +54,7 @@
   <table class="results sortable table table-striped">
     <thead>
       <tr>
-        <td>Email</td>        
+        <td>Email</td>
         <td>First</td>
         <td>Last</td>
         <td>Phone</td>

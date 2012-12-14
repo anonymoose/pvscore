@@ -25,7 +25,10 @@ ${next.body()}
       <li><b>${customer.fname} ${customer.lname}</b></li>
       <li>
         % if customer.email:
-        ${h.link_to(customer.email, 'javascript:customer_send_email()', id='link_send_email')}
+        <a data-toggle="modal" data-target="#dlg_email"
+           href="/crm/communication/send_comm_dialog?customer_id=${customer.customer_id}&dialog=1">
+          ${customer.email}
+        </a>
         % else:
         No Email
         % endif
@@ -44,7 +47,7 @@ ${next.body()}
       % endif
       % if request.ctx.user.priv.send_customer_emails:
       <li>
-        <a data-toggle="modal" data-target="#dlg_standard"
+        <a data-toggle="modal" data-target="#dlg_email"
            href="/crm/communication/send_comm_dialog?customer_id=${customer.customer_id}&dialog=1">
           Send Email
         </a>

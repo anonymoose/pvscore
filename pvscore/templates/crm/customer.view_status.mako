@@ -16,9 +16,9 @@
   <dt>ID</dt>
   <dd>${status.fk_id}</dd>
   <dt>Create Dt</dt>
-  <dd>${status.create_dt}</dd>
+  <dd>${h.slash_date(status.create_dt)}</dd>
   <dt>Created By</dt>
-  <dd>${status.username}</dd>
+  <dd>${status.user.email if status.user else 'None'}</dd>
   <dt>Note</dt>
   <dd>${h.literal(status.note)}</dd>
 </dt>

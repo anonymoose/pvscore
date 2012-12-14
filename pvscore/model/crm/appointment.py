@@ -71,7 +71,7 @@ class Appointment(ORMBase, BaseModel):
     @staticmethod
     def find_by_user(user):
         return Session.query(Appointment).filter(or_(Appointment.creator == user,
-                                                     Appointment.assigned == user)).order_by(Appointment.start_dt.desc(),
+                                                     Appointment.assigned == user)).order_by(Appointment.start_dt.asc(),
                                                                                              Appointment.start_time.asc()).all()
 
 

@@ -137,8 +137,8 @@ class Customer(ORMBase, BaseModel):
 
 
     @staticmethod
-    def search(enterprise_id, company_name, fname, lname, email, phone):   #pylint: disable-msg=R0913
-        cn_clause = f_clause = l_clause = e_clause = p_clause = ''
+    def search(enterprise_id, company_name, fname, lname, email, phone, user_assigned):   #pylint: disable-msg=R0913
+        cn_clause = f_clause = l_clause = e_clause = p_clause = a_clause =''
         if company_name:
             cn_clause = "and lower(cc.company_name) like '%{desc}%'".format(desc=company_name.lower())
         if fname:
@@ -149,13 +149,15 @@ class Customer(ORMBase, BaseModel):
             e_clause = "and lower(cc.email) like '%{desc}%'".format(desc=email.lower())
         if phone:
             p_clause = "and cc.phone = '%s'" % phone
+        if user_assigned:
+            a_clause = "and cc.user_assigned = '%s'" % user_assigned
         sql = """SELECT cc.* FROM crm_customer cc, crm_campaign cam, crm_company com
                  where cc.campaign_id = cam.campaign_id
                  and cam.company_id = com.company_id
                  and com.enterprise_id = '{ent_id}'
                  and cc.delete_dt is null
-                 {cn} {f} {l} {e} {p}
-              """.format(cn=cn_clause, f=f_clause, l=l_clause, e=e_clause, p=p_clause, ent_id=enterprise_id)
+                 {cn} {f} {l} {e} {p} {a}
+              """.format(cn=cn_clause, f=f_clause, l=l_clause, e=e_clause, p=p_clause, ent_id=enterprise_id, a=a_clause)
         return Session.query(Customer).from_statement(sql).all()
 
 

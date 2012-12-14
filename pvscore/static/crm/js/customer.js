@@ -141,35 +141,17 @@ customer_edit_billing_method = function() {
 Comms
 */
 customer_send_email = function() {
-    pvs.dialog.display({url:pvs.ajax.dialog({root: '/crm/communication/send_comm_dialog'}),
-                        title: 'Select Communication',
-                        width:700,
-                        height:430,
-                        after_display_impl:
-                        function() {
-                            comm_fixup_message();
-                        },
-                        on_ok:
-                        function() {
-                            var msg = null;
-                            try {
-                            msg = tinyMCE.get('message').getContent();
-                            tinyMCE.remove(tinyMCE.get('message'));
-                            } catch (e) {
+    pvs.ajax.post_array(pvs.ajax.api({root: '/crm/communication/send_customer_comm/' + $_('#customer_id') + '/' + $_('#comm_id')}),
+                        function(response) {
+                            $("#dlg_email").modal("hide");
+                            if (pvs.is_true(response)) {
+                                pvs.alert('Your Email has been sent.');
+                            } else {
+                                pvs.alert('Unable to send email:\n'+response);
                             }
-
-                            pvs.ajax.post_array(pvs.ajax.api({root: '/crm/communication/send_customer_comm/' + $_('#customer_id') + '/' + $_('#comm_id')}),
-                                                function(response) {
-                                                    if (pvs.is_true(response)) {
-                                                        pvs.alert('Your Email has been sent.');
-                                                    } else {
-                                                        pvs.alert('Unable to send email:\n'+response);
-                                                    }
-                                                },
-                                                {msg: msg}
-                                               );
                         }
-                       });
+                        //, {msg: msg}
+                       );
 };
 
 customer_view_packing_slip = function(order_id, comm_id) {
@@ -231,8 +213,8 @@ pvs.onload.push(function() {
 
 customer_add_order_submit = function() {
     if (!$('.product_chk:checked').length) {
-        pvs.alert("Please select products to add to the order.", 
-                  null, 
+        pvs.alert("Please select products to add to the order.",
+                  null,
                   function() {
                       $('#btn_add_order').button('reset');
                   });
@@ -441,7 +423,7 @@ pvs.onload.push(function() {
                 success: function(data) {
                     var return_list = [], i = data.length;
                     while (i--) {
-                        return_list[i] = {id: data[i].product_id, 
+                        return_list[i] = {id: data[i].product_id,
                                           value: data[i].name,
                                           unit_cost: data[i].unit_cost,
                                           retail_price: data[i].retail_price,
@@ -501,7 +483,7 @@ customer_edit_order_submit = function(reload) {
                                 if (reload == true) {
                                     document.location.reload(true);
                                 } else {
-                                    pvs.browser.goto_url('/crm/customer/apply_payment_dialog/'+$('#customer_id').val()+'/'+$('#oi_order_id').val()); 
+                                    pvs.browser.goto_url('/crm/customer/apply_payment_dialog/'+$('#customer_id').val()+'/'+$('#oi_order_id').val());
                                 }
                             } else {
                                 pvs.button.reset();
@@ -595,12 +577,12 @@ customer_order_recalc = function() {
 customer_order_apply_payment = function() {
     var url = '/crm/customer/apply_payment_dialog/'+$('#customer_id').val()+'/'+$('#oi_order_id').val()
     if ($('#order_dirty').val() == '1') {
-        pvs.confirm('You made changes to this order that have not been saved.\nIf you continue, your order will not reflect the changes you made.', null, 
+        pvs.confirm('You made changes to this order that have not been saved.\nIf you continue, your order will not reflect the changes you made.', null,
                     function() {
-                        pvs.browser.goto_url(url); 
+                        pvs.browser.goto_url(url);
                     });
     } else {
-        pvs.browser.goto_url(url); 
+        pvs.browser.goto_url(url);
     }
 };
 
@@ -674,7 +656,7 @@ pvs.onload.push(function () {
                 {
                     fname: 'required',
                     lname: 'required',
-                    
+
                     //password: 'required',
                     email: {
                         required: true,
