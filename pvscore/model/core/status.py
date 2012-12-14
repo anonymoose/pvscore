@@ -55,7 +55,7 @@ class Status(ORMBase, BaseModel):
         return Session.query(Status)\
             .filter(and_(Status.fk_id==getattr(obj, obj.__pk__),
                          Status.fk_type==type(obj).__name__))\
-            .order_by(Status.created_dt.desc()).all()
+            .order_by(Status.create_dt.desc()).all()
 
 
     @staticmethod
