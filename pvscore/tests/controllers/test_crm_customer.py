@@ -529,7 +529,6 @@ class TestCrmCustomer(TestController):
                        'bill_exp_year' : str(util.this_year()+1),
                        'redir' : '/'
                        })
-        import pdb; pdb.set_trace()
         assert R.status_int == 200
         assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
@@ -589,8 +588,6 @@ class TestCrmCustomer(TestController):
         R = self.get('/crm/customer/self_get_balance/%s' % customer_id)
         self.assertEqual(R.request.url, 'http://%s/?path=/crm/customer/self_get_balance/%s&vars=' % (self.get_host(), customer_id))
         self._delete_new(customer_id)
-
-
 
 
     @secure

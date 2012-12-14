@@ -15,11 +15,11 @@ def list_tables(cur):
 def list_keys(cur, tablename, keytype):
     cur.execute("""
         SELECT
-            tc.constraint_name, tc.table_name, kcu.column_name, 
+            tc.constraint_name, tc.table_name, kcu.column_name,
             ccu.table_name AS foreign_table_name,
-            ccu.column_name AS foreign_column_name 
-        FROM 
-            information_schema.table_constraints AS tc 
+            ccu.column_name AS foreign_column_name
+        FROM
+            information_schema.table_constraints AS tc
             JOIN information_schema.key_column_usage AS kcu ON tc.constraint_name = kcu.constraint_name
             JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = tc.constraint_name
         WHERE constraint_type = '%s KEY' AND tc.table_name='%s'""" % (keytype, tablename))
@@ -63,7 +63,7 @@ def update_uuid_for_pk(cur, table_name, pk_col_name, pk_val):
                                                      uid=uuid.uuid4(),
                                                      col=pk_col_name,
                                                      pk_val=pk_val))
-    
+
 
 def set_foreign_uuid_val(cur, table, pk_col_name, pk_val, fk_col_name, foreign_table_name, foreign_column_name):
     sql = """update {table} set {fk_col_name}_uuid = (select {foreign_column_name}_uuid from {foreign_table_name}
@@ -229,7 +229,7 @@ def fix_user_table_pre(conn, cur, tables):
     if 'wm_ireport' in tables:
         cur.execute('alter table wm_ireport add foreign key (user_created) REFERENCES core_user')
     conn.commit()
-    
+
 def fix_fk_type_table(conn, cur, table):
     cur.execute("alter table {table} add column fk_id_uuid uuid".format(table=table))
 
@@ -294,7 +294,7 @@ def fix_assets_b(conn, cur, dbname, storage_root):
                 enterprises.append(parts[1:])
             elif parts[0] == 'core_asset':
                 assets.append(parts[1:])
-        
+
     for ass in assets:
         cur.execute("select id, fk_type, fk_id, name, web_path from core_asset where id = '%s'" % ass[1][:-1]) #chop line feed
         assid, fk_type, fk_id, name, web_path = cur.fetchone()
@@ -353,36 +353,35 @@ def fix_assets_b(conn, cur, dbname, storage_root):
         else:
             print "Bogus company asset %s" % web_path
 
-        #    cur.execute("select 
-        #    print 'cp %s 
+        #    cur.execute("select
+        #    print 'cp %s
     conn.commit()
-        
+
 def fix_date(conn, cur):
     for table_name, column_name, data_type in get_columns_of_type(cur, 'date'):
         if table_name != 'wm_eod_quote':
             print "    fix_date-> %s %s" % (table_name, column_name)
             change_type(cur, table_name, column_name, 'timestamp')
-        
+
 
 # def dump_asset_keys(cur, dbname):
 #     with open("%s-filesystem-keys.log" % dbname, "w") as f:
 #         cur.execute("select site_id from cms_site")
 #         for site_id in [site_[0] for site_ in cur.fetchall()]:
 #             f.write("cms_site:%s:%s" % (site_id, md5(str(site_id)).hexdigest()))
-#    
+#
 #         cur.execute("select company_id, customer_id, listing_id from pvs_listing")
 #         for listing in cur.fetchall():
 #             salt = 'derf'
 #             #md5('%s%s%s%s' % (self.company_id, self.customer_id, self.listing_id, salt)).hexdigest()
 #             f.write("pvs_listing:%s:%s:%s:%s" % (listing[0], listing[1], listing[2], md5('%s%s%s%s' % (listing[0], listing[1], listing[2], salt)).hexdigest()))
-#    
+#
 #         cur.execute("select company_id from crm_company")
 #         for company_id in [comp[0] for comp in cur.fetchall()]:
 #             f.write("crm_company:%s:%s" % (str(company_id), md5(str(company_id)).hexdigest()))
 #
 #         cur.execute("select id, name, fk_type, fk_id from core_asset")
 #         for asset_id, filename, fk_type, fk_id in cur.fetchall():
-#             import pdb; pdb.set_trace()
 #             if "Listing" == fk_type:
 #                 filename = md5('%s%s' % (filename, fk_id)).hexdigest()
 #                 folder = 'images/%s/%s/%s' % (filename[0], filename[1], filename[2])
@@ -475,7 +474,7 @@ if __name__ == '__main__':
     # go drop the foreign key and primary key constraints on every
     # table.  It's ok to do this because we saved the current
     # configuration in primary_keys and foreign_keys.  We'll reconstruct
-    # everything later.                    
+    # everything later.
     for table in tables:
         if not table in primary_keys:
             continue
@@ -495,7 +494,7 @@ if __name__ == '__main__':
     fix_fk_type_table(conn, cur, 'core_status')
     fix_fk_type_table(conn, cur, 'core_asset')
     fix_fk_type_table(conn, cur, 'core_key_value')
-    
+
     # dump all the table_name : integer key -> uuid key
     with open('%s-keys.log' % sys.argv[1], 'w') as f:
         for table in tables:
@@ -509,7 +508,7 @@ if __name__ == '__main__':
                 f.write('%s:%s:%s\n' % (table, pk_val[0], pk_val[1]))
                 if (i % 1000) == 0:
                     print "    %s %s/%s" % (table, i+1, len(pk_vals))
-                    
+
     # drop integer columns and rename the *_uuid colums to the name of
     # the old pk columns
     for table in tables:
@@ -537,7 +536,7 @@ if __name__ == '__main__':
             foreign_table_name = fkey[3]
             add_foreign_key(table, fk_col_name, foreign_table_name)
             conn.commit()
-        
+
 
     # make sure all the non-pk indexes are still there.
     for table in [table for table in indexes if len(indexes[table]) > 0]:
@@ -546,7 +545,7 @@ if __name__ == '__main__':
             idx_cols = idx[2]
             recreate_index(cur, table, idx_name, idx_cols)
             conn.commit()
-                        
+
     conn.set_isolation_level(0)
     # analyze and vacuum tables
     for table in tables:
@@ -566,5 +565,5 @@ if __name__ == '__main__':
 
 
 
-    
-    
+
+

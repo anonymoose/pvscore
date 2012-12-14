@@ -16,9 +16,6 @@ class LoginController(BaseController):
         return {}
 
     @view_config(route_name="crm.login.post", renderer="/crm/login.mako")
-    @validate((('username', 'string'),
-               ('username', 'required'),
-               ('password', 'required')))
     def login(self):
         uid = self.request.POST.get('username')
         pwd = self.request.POST.get('password')

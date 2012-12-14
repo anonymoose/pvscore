@@ -33,7 +33,7 @@ class IsCustomerLoggedIn(object):
     def handler(self, exc, controller):        #pylint: disable-msg=W0613
         raise HTTPFound('/?path=%s&vars=%s' % (controller.request.path, urllib.quote(controller.request.query_string)))
 
-    
+
 # class AllMet(object):
 
 #     message = u'All of these conditions have to be met: %s.'
