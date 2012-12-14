@@ -30,7 +30,7 @@ class LoginController(BaseController):
                 self.session['user_id'] = user.user_id
                 self.session['customer_logged_in'] = False
                 self.session['crm_logged_in'] = True
-                # If they were on a page and got timed out, send them 
+                # If they were on a page and got timed out, send them
                 # back where they were as a convenience.
                 if util.get(self.request.POST, 'path'):
                     if util.get(self.request.POST, 'vars'):
@@ -107,7 +107,7 @@ class LoginController(BaseController):
         return self.find_redirect()
 
 
-    
+
     @view_config(route_name='crm.login.customer_login_to_link')
     def customer_login_to_link(self, ):
         """ KB: [2011-06-28]:
@@ -123,7 +123,7 @@ class LoginController(BaseController):
             url = link.replace('|', '/')
             log.info('customer %s (%s) login to %s' % (cust.customer_id, cust.email, url))
             return HTTPFound(url)
-        else:
+        else: #pragma: no cover
             self.flash('Invalid User or Password')
             return self.find_redirect('/')
 

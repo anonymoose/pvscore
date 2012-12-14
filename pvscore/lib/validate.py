@@ -5,7 +5,7 @@ from pyramid.httpexceptions import HTTPFound, HTTPForbidden
 
 log = logging.getLogger(__name__)
 
-def _die(msg, redir_to): 
+def _die(msg, redir_to):
     log.debug("*** VALIDATION ERROR: " + msg)
     #util.test_set_var(msg)
 
@@ -17,12 +17,12 @@ def _die(msg, redir_to):
 
 
 def validate(rules=(), redir_to=None):
-    """ KB: [2011-08-19]: 
-    @validate((('fname', 'required'), 
+    """ KB: [2011-08-19]:
+    @validate((('fname', 'required'),
     ('fname', 'string'),
-    ('lname', 'required'), 
+    ('lname', 'required'),
     ('lname', 'string'),
-    ('password', 'required'), 
+    ('password', 'required'),
     ('confirm', 'required'),
     ('password', 'equals', 'confirm')))
     def save(self):
@@ -39,12 +39,12 @@ def validate(rules=(), redir_to=None):
                 oval = self.request.matchdict.get(key)
             val = str(oval)
 
-            if 'required' == rule and util.is_empty(val):
+            if 'required' == rule and util.is_empty(oval) or util.is_empty(val):
                 _die('%s is required' % key, redir_to)
 
             if 'string' == rule and oval and not util.is_string(val):
                 _die('%s must not be a number' % key, redir_to)
-            
+
             if 'number' == rule and oval and not util.is_number(val):
                 _die('%s must be a number' % key, redir_to)
 
@@ -75,7 +75,7 @@ def validate(rules=(), redir_to=None):
 
 #             if 'string' == rule and val and not util.is_string(val):
 #                 _die('%s must not be a number' % key, redir_to)
-            
+
 #             if 'number' == rule and val and not util.is_number(val):
 #                 _die('%s must be a number %s %s' % (key, val, util.is_number(val)), redir_to)
 

@@ -514,6 +514,41 @@ class TestCrmCustomer(TestController):
         self._delete_new(customer_id)
 
 
+    @alternate_site('test2.com')
+    def test_signup_and_purchase(self):
+        R = self.post('/crm/customer/signup_and_purchase',
+                      {'fname' : 'Ken',
+                       'lname' : 'Bedwell',
+                       'email' : 'test@test.com',
+                       'password' : 'password',
+                       'product_sku' : 'T2-002',   # recurring prod
+                       'confirmpassword' : 'password',
+                       'bill_cc_num' : '4007000000027',
+                       'bill_cc_cvv' : '123',
+                       'bill_exp_month' : '02',
+                       'bill_exp_year' : str(util.this_year()+1),
+                       'redir' : '/'
+                       })
+        import pdb; pdb.set_trace()
+        assert R.status_int == 200
+        assert 'customer_id' in R.request.params
+        customer_id = R.request.params['customer_id']
+        cust = Customer.load(customer_id)
+        self.assertEqual(str(cust.customer_id), str(customer_id))
+        self.assertEqual(cust.fname, 'Ken')
+        self.assertEqual(cust.lname, 'Bedwell')
+        self.assertEqual(cust.email, 'test@test.com')
+        R = self.post('/crm/customer/self_cancel_order',
+                      {'username': cust.email,
+                       'password': cust.password})
+        assert R.status_int == 200
+        R.mustcontain('Order cancelled.')
+        cust.invalidate_caches()
+        cust = Customer.load(customer_id)
+        self.assertEqual(len(cust.get_active_orders()), 0)
+        self._delete_new(customer_id)
+
+
     @secure
     def test_signup_exists(self):
         customer_id = self._create_new()
@@ -952,7 +987,7 @@ class TestCrmCustomer(TestController):
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',
                        'accept_terms' : '1',
-                       'product_sku' : 'T2-001',   # recurring prod
+                       'product_sku' : 'T2-001',   # non-recurring prod
                        'bill_cc_num' : '4007000000027',
                        'bill_cc_cvv' : '123',
                        'bill_exp_month' : '02',
@@ -988,7 +1023,7 @@ class TestCrmCustomer(TestController):
         R = self.post('/crm/customer/save_and_purchase',
                       {'fname' : 'Ken Test',
                        'accept_terms' : '1',
-                       'product_sku' : 'T2-001',   # recurring prod
+                       'product_sku' : 'T2-001',   # non-recurring prod
                        'bill_cc_num' : '40070000bogus',
                        'bill_cc_cvv' : '123',
                        'bill_exp_month' : '02',

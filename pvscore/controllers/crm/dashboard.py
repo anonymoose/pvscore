@@ -6,7 +6,7 @@ from pyramid.view import view_config
 from pvscore.controllers.base import BaseController
 from pvscore.model.crm.company import Company
 from pvscore.model.crm.customerorder import PeriodOrderSummary, MTDSalesByVendor
-from pvscore.model.crm.customer import PeriodCustomerCountSummary
+#from pvscore.model.crm.customer import PeriodCustomerCountSummary
 from pvscore.model.crm.appointment import Appointment
 
 log = logging.getLogger(__name__)

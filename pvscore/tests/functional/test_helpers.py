@@ -18,6 +18,8 @@ class TestHelpers(TestController):
     def test_dates(self):
         d8e = util.today_date()
         dtime = util.today()
+        assert h.is_today(d8e)
+        assert h.str_today() == util.str_today()
         assert h.date_time(None) == ''
         assert h.date_time(d8e) == d8e.strftime("%Y-%m-%d %H:%M:%S")
         assert h.date_(None) == ''
@@ -55,7 +57,7 @@ class TestHelpers(TestController):
         assert h.onvl(dobj, 'x', '_default_') == '_default_'
         assert h.onvl(None, 'x', '_default_') == '_default_'
         assert h.is_production() == False
-
+        assert '<option value="TN" selected>Tennessee</option>' in h.state_select_list('TN')
 
 class TestObj(object):
     def __init__(self):

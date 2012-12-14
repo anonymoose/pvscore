@@ -5,7 +5,7 @@ log = logging.getLogger(__name__)
 
 
 class TestValidate(TestController):
-    
+
     def test_invalid_login(self):
         #KB: [2011-09-02]: Everything is valid except that we are not logged in. Should redirect
         barfed = False
@@ -18,6 +18,17 @@ class TestValidate(TestController):
             log.info(exc)
             barfed = True
         assert barfed
+
+
+    @secure
+    def test_required_missing(self):
+        excepted = False
+        try:
+            self.get('/tsst/tsst_validate2')
+        except Exception as exc:
+            log.info(exc)
+            excepted = True
+        assert excepted
 
 
     @secure
@@ -118,5 +129,5 @@ class TestValidate(TestController):
 
 
 
-        
+
 

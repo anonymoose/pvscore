@@ -110,6 +110,8 @@ class TestCrmCommunication(TestController):
     def test_send_customer_comm(self):
         ent = Enterprise.find_by_name('Healthy U Store')
         cust = self.get_customer()
-        comms = Communication.find_all(ent.enterprise_id)[0]
+        comms = Communication.find_all(ent.enterprise_id)
         order = cust.get_active_orders()[0]
-
+        R = self.get('/crm/communication/send_customer_comm/%s/%s' % (cust.customer_id, comms[0].comm_id))
+        assert R.status_int == 200
+        assert R.body == 'True'

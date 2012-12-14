@@ -57,7 +57,7 @@ class NullBillingApi(BaseBillingApi):
 class StripeBillingApi(BaseBillingApi):
     """ KB: [2012-02-10]:
     API for http://stripe.com
-    
+
     *Recurring Billing*
     To make recurring billing work, ensure you have configured a plan with an ID
     @stripe = product.sku @pvs
@@ -90,7 +90,7 @@ class StripeBillingApi(BaseBillingApi):
 
 
     def purchase(self, order, billing, cart, remote_ip=None):
-        """ KB: [2012-09-10]: 
+        """ KB: [2012-09-10]:
         If it's subscription, then subscribe this customer to the plan.
         Otherwise just hit them up non-recurring.
         """
@@ -275,16 +275,16 @@ class AuthorizeNetBillingApi(BaseBillingApi):
                           'card_number' : billing.get_cc_num(),
                           'exp_date' : billing.cc_exp
                           })
-    
+
             headers = {'content-type': 'text/xml'}
-    
+
             conn = urllib2.Request(url=self._arb_url, data=xml, headers=headers)
             try:
                 open_conn = urllib2.urlopen(conn)
                 xml_response = open_conn.read()
-            except urllib2.URLError:
+            except urllib2.URLError: #pragma: no cover
                 return (5, '1', 'Could not talk to payment gateway.')
-    
+
             response = util.xml_str_to_dict(xml_response)['ARBUpdateSubscriptionResponse']
             if response['messages']['resultCode'].lower() != 'ok':
                 message = response['messages']['message']
@@ -330,16 +330,16 @@ class AuthorizeNetBillingApi(BaseBillingApi):
                           'first_name' : customer.fname,
                           'last_name' : customer.lname
                           })
-    
+
             headers = {'content-type': 'text/xml'}
-    
+
             conn = urllib2.Request(url=self._arb_url, data=xml, headers=headers)
             try:
                 open_conn = urllib2.urlopen(conn)
                 xml_response = open_conn.read()
-            except urllib2.URLError:
+            except urllib2.URLError: #pragma: no cover
                 return (5, '1', 'Could not talk to payment gateway.')
-    
+
             response = util.xml_str_to_dict(xml_response)['ARBCreateSubscriptionResponse']
             if response['messages']['resultCode'].lower() != 'ok':
                 message = response['messages']['message']
@@ -354,7 +354,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
         except Exception as exc2: #pragma: no cover
             self.last_status = -1
             self.last_note = exc2.message
-        return False
+        return False  #pragma: no cover
 
 
     def _cancel_subscription(self, customer, order, order_item):
@@ -364,18 +364,18 @@ class AuthorizeNetBillingApi(BaseBillingApi):
                           'auth_key' : self.authnet_transaction_key,
                           'subscription_id' : order_item.third_party_id
                           })
-    
+
             headers = {'content-type': 'text/xml'}
-    
+
             conn = urllib2.Request(url=self._arb_url, data=xml, headers=headers)
             try:
                 open_conn = urllib2.urlopen(conn)
                 xml_response = open_conn.read()
-            except urllib2.URLError:
+            except urllib2.URLError: #pragma: no cover
                 return (5, '1', 'Could not talk to payment gateway.')
-    
+
             response = util.xml_str_to_dict(xml_response)['ARBCancelSubscriptionResponse']
-    
+
             if response['messages']['resultCode'].lower() != 'ok':
                 message = response['messages']['message']
                 if type(message) == list:
@@ -387,7 +387,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
         except Exception as exc2: #pragma: no cover
             self.last_status = -1
             self.last_note = exc2.message
-        return False
+        return False  #pragma: no cover
 
 
     def _charge_card(self, amount, order, customer, billing):
@@ -430,7 +430,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
         """add API details, gateway response formating options
         to the request parameters"""
         if not parameters:
-            parameters = {}
+            parameters = {}   #pragma: no cover
         post = {}
         post['version'] = API_VERSION
         post['login'] = self.authnet_login_id
@@ -453,7 +453,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
         try:
             open_conn = urllib2.urlopen(conn)
             response = open_conn.read()
-        except urllib2.URLError:
+        except urllib2.URLError: #pragma: no cover
             return (5, '1', 'Could not talk to payment gateway.')
         fields = response[1:-1].split('%s%s%s' % (ENCAP_CHAR, DELIM_CHAR, ENCAP_CHAR))
         return self._save_authorize_response(fields)
@@ -473,7 +473,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
         data['method'] = response[10]
         data['transaction_type'] = response[11]
         data['customer_id'] = response[12]
-    
+
         data['first_name'] = response[13]
         data['last_name'] = response[14]
         data['company'] = response[15]
@@ -485,7 +485,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
         data['phone'] = response[21]
         data['fax'] = response[22]
         data['email'] = response[23]
-    
+
         data['shipping_first_name'] = response[24]
         data['shipping_last_name'] = response[25]
         data['shipping_company'] = response[26]
@@ -496,7 +496,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
         data['shipping_country'] = response[31]
         data['card_code_response'] = response[38]
         return data
-    
+
 
 # """
 # Gateway run by Matt Piruvil (mpirvul@eaccounts.net)

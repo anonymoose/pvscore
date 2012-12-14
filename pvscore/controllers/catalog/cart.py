@@ -88,7 +88,7 @@ class CartController(CatalogBaseController):
     @view_config(route_name='ecom.site.cart.set_shipping', renderer="string")
     def set_shipping(self):
         if not 'cart' in self.session:
-            return 'True'
+            return 'True'  #pragma: no cover
         redir = self.request.GET.get('redir')
         cart = self.session['cart']
         shipping_code = self.request.matchdict.get('shipping_code')

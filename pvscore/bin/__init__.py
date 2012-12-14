@@ -29,7 +29,7 @@ class SingleInstance(object):
     def __init__(self, pid_path):
         """ KB: [2012-01-04]:
         http://code.activestate.com/recipes/546512/
-        
+
         pid_path - full path/filename where pid for running application is to be
                   stored.  Often this is ./var/<pgmname>.pid
         """
@@ -63,7 +63,7 @@ class PVSOptionParser(OptionParser):
     def error(self, msg):
         pass  #pragma: no cover
 
-# KB: [2011-11-08]: This is so OptionParser will work, provided -I /whatever is the first arg 
+# KB: [2011-11-08]: This is so OptionParser will work, provided -I /whatever is the first arg
 ARGV = sys.argv[sys.argv.index('-I')+1:] if '-I' in sys.argv else sys.argv
 
 # call scripts like so
@@ -117,8 +117,9 @@ def log(msg):
     sys.stdout.flush()
 
 
-def email(to, subj, msg):
+def email(to, subj, msg): #pragma: no cover
     pass
+
 #    from app.lib.base import BaseUI
 #    from app.model.crm.company import Company, Enterprise
 #    Enterprise.load(BaseUI.get_enterprise_id())

@@ -17,7 +17,7 @@ class BaseUI(object):
 
     # def db_doom(self):
     #     transaction.doom()
-        
+
 
     # def db_delete(self, obj):
     #     Session.delete(obj)
@@ -51,8 +51,8 @@ class BaseController(BaseUI):
 
 
     def redir_if(self, result, goto='/', msg=None):
-        if result:
-            if msg:  #pragma: no cover
+        if result: #pragma: no cover
+            if msg:
                 log.info(msg)
             raise HTTPFound(goto)
 

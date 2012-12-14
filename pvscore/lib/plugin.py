@@ -24,15 +24,15 @@ class PluginRegistry(object):
             obj = self.registry[category][name]
             if hasattr(obj, attr):
                 return getattr(obj, attr)
-        return ''
+        return ''  #pragma: no cover
 
 
     def is_applicable(self, category, name, request):
         if category in self.registry and name in self.registry[category]:
             obj = self.registry[category][name]
             return obj.is_applicable(request)
-        return False
-    
+        return False  #pragma: no cover
+
 
 class PluginRegistryItem(object):
     def __init__(self, decorator):
@@ -48,7 +48,7 @@ class PluginRegistryItem(object):
             if self.custom_predicates is not None and len(self.custom_predicates) > 0:
                 ret = False not in [pred(None, request) for pred in self.custom_predicates]
         return ret
-                
+
 
 plugin_registry = PluginRegistry()
 

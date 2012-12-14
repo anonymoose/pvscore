@@ -37,7 +37,7 @@ def state_select_list(selected_st=None):
     return util.state_select_list(selected_st)
 
 
-def google_analytics(site, script_tags=True):
+def google_analytics(site, script_tags=True):  #pragma: no cover
     if site and site.google_analytics_id and is_production():
         return literal("""
     {st_start}
@@ -57,7 +57,7 @@ def google_analytics(site, script_tags=True):
     return ''
 
 
-def eyefoundit_analytics(site):
+def eyefoundit_analytics(site): #pragma: no cover
     if site and site.eyefoundit_analytics_id and is_production():
         return literal('''
      <!-- Piwik -->
@@ -114,6 +114,7 @@ def words_date_time(d8e):
 
 def str_today():
     return util.str_today()
+
 
 def slash_date(d8e):
     if d8e == '' or d8e == None:

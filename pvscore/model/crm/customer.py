@@ -241,71 +241,6 @@ class Customer(ORMBase, BaseModel):
             Session.execute("delete from crm_billing where billing_id = '%s'" % bill_id)
 
 
-class PeriodCustomerCountSummary(BaseAnalytic):
-    """ KB: [2011-11-02]: Google charts report for customer count over a period """
-
-    def __init__(self, request, days=7):
-        super(PeriodCustomerCountSummary, self).__init__()
-        self.request = request
-        self.days = days
-        self.run()
-
-
-    def link(self, height, width, i):
-        return "http://{i}.chart.apis.google.com/chart?chxl=1:{google_y_labels}&chxr={google_range}&chxt=y,x&chbh=a,10&chs={height}x{width}&cht=bvs&chco=A2C180,3D7930&chds={google_scale}&chd=t:{google_data}&chma=10,10,10,10&chtt=New+Customers+by+Day&chts=006699,12.167"\
-            .format(google_y_labels=self.google_y_labels,
-                    google_range=self.google_range,
-                    google_scale=self.google_scale,
-                    google_data=self.google_data,
-                    height=height,
-                    width=width, i=i)
-
-
-    @property
-    def google_range(self):
-        max_ = self.col_max('cnt')
-        interval = math.floor(max_/10)
-        return '0,%s,%s' % (interval, int(max_+(2*interval)))
-
-
-    @property
-    def google_data(self):
-        return ','.join([str(res.cnt) for res in self.results])
-
-
-    @property
-    def google_y_labels(self):
-        return '|%s|' % '|'.join([util.format_date(res.create_dt)[5:] for res in self.results])
-
-
-    @property
-    def google_scale(self):
-        max_ = self.col_max('cnt')
-        interval = int(math.floor(max_/10))
-        scale = '%s,%s' % (interval, int(max_+(2*interval)))
-        return '%s,%s' % (scale, scale)
-
-
-    @property
-    def columns(self):
-        return ("cnt", "create_dt")
-
-
-    @property
-    def query(self):
-        return """select count(0) as cnt, cust.create_dt
-                    from
-                    crm_customer cust, crm_campaign cmp, crm_company co
-                    where
-                    cust.campaign_id = cmp.campaign_id and
-                    cmp.company_id = co.company_id and
-                    co.enterprise_id = '{entid}' and
-                    cust.delete_dt is null and
-                    cust.create_dt between current_date - {d} and current_date
-                    group by cust.create_dt
-                    order by cust.create_dt asc""".format(d=self.days, entid=self.request.ctx.enterprise.enterprise_id)
-
-
 def load_customer(request, default_to_new_customer=False):
     """ KB: [2012-09-12]: Get the customer_id from the various places it
     may be stashed.  session first."""
@@ -350,7 +285,10 @@ class CustomerPhase(ORMBase, BaseModel):
                          .order_by(CustomerPhase.short_name.asc()).all()
 
 
-
+    @staticmethod
+    def full_delete(phase_id):
+        Session.execute("update crm_customer set phase_id = null where phase_id = '%s'" % str(phase_id))
+        Session.execute("delete from crm_customer_phase where phase_id = '%s'" % str(phase_id))
 
 
 
@@ -410,3 +348,67 @@ class CustomerPhase(ORMBase, BaseModel):
     #     return password
 
 
+
+# class PeriodCustomerCountSummary(BaseAnalytic):
+#     """ KB: [2011-11-02]: Google charts report for customer count over a period """
+
+#     def __init__(self, request, days=7):
+#         super(PeriodCustomerCountSummary, self).__init__()
+#         self.request = request
+#         self.days = days
+#         self.run()
+
+
+#     def link(self, height, width, i):
+#         return "http://{i}.chart.apis.google.com/chart?chxl=1:{google_y_labels}&chxr={google_range}&chxt=y,x&chbh=a,10&chs={height}x{width}&cht=bvs&chco=A2C180,3D7930&chds={google_scale}&chd=t:{google_data}&chma=10,10,10,10&chtt=New+Customers+by+Day&chts=006699,12.167"\
+#             .format(google_y_labels=self.google_y_labels,
+#                     google_range=self.google_range,
+#                     google_scale=self.google_scale,
+#                     google_data=self.google_data,
+#                     height=height,
+#                     width=width, i=i)
+
+
+#     @property
+#     def google_range(self):
+#         max_ = self.col_max('cnt')
+#         interval = math.floor(max_/10)
+#         return '0,%s,%s' % (interval, int(max_+(2*interval)))
+
+
+#     @property
+#     def google_data(self):
+#         return ','.join([str(res.cnt) for res in self.results])
+
+
+#     @property
+#     def google_y_labels(self):
+#         return '|%s|' % '|'.join([util.format_date(res.create_dt)[5:] for res in self.results])
+
+
+#     @property
+#     def google_scale(self):
+#         max_ = self.col_max('cnt')
+#         interval = int(math.floor(max_/10))
+#         scale = '%s,%s' % (interval, int(max_+(2*interval)))
+#         return '%s,%s' % (scale, scale)
+
+
+#     @property
+#     def columns(self):
+#         return ("cnt", "create_dt")
+
+
+#     @property
+#     def query(self):
+#         return """select count(0) as cnt, cust.create_dt
+#                     from
+#                     crm_customer cust, crm_campaign cmp, crm_company co
+#                     where
+#                     cust.campaign_id = cmp.campaign_id and
+#                     cmp.company_id = co.company_id and
+#                     co.enterprise_id = '{entid}' and
+#                     cust.delete_dt is null and
+#                     cust.create_dt between current_date - {d} and current_date
+#                     group by cust.create_dt
+#                     order by cust.create_dt asc""".format(d=self.days, entid=self.request.ctx.enterprise.enterprise_id)

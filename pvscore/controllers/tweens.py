@@ -7,6 +7,7 @@ from pvscore.model.cms.site import Site
 from pvscore.model.core.users import Users
 from pvscore.model.crm.customer import Customer
 from pyramid.httpexceptions import HTTPFound, HTTPForbidden
+from pvscore.lib.geoip.geo import Geo
 import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
@@ -40,22 +41,25 @@ def request_context_tween_factory(handler, registry):
             log.debug("URL: %s" % request.url)
             if not hasattr(request, 'ctx'):
                 request.ctx = util.DataObj({})
-    
+
             if not request.ctx.site:
                 if not _remember_site(request):
                     return HTTPFound("http://www.google.com")
-                
+
             if not request.ctx.campaign:
                 _remember_campaign(request)
-    
+
             if not request.ctx.enterprise:
                 _remember_enterprise(request)
-                
+
             if not request.ctx.customer:
                 _remember_customer(request)
 
             if not request.ctx.user:
                 _remember_user(request)
+
+            if not request.ctx.geo:
+                _remember_geo(request)
 
             request.tmpl_context.site = request.ctx.site
             request.tmpl_context.enterprise = request.ctx.enterprise
@@ -115,4 +119,8 @@ def _remember_user(request):
         request.ctx.user = Users.load(request.session['user_id'])
 
 
-        
+def _remember_geo(request):
+    geo = Geo()
+    if 'X-Real-Ip' in request.headers:
+        request.ctx.geo = geo.by_ip(request.headers['X-Real-Ip'])
+

@@ -238,3 +238,4 @@ def crm_routes(config):
     adrt('test.8', '/tsst/tsst_redirto')
     adrt('test.9', '/tsst/tsst_redirto_post')
     adrt('test.10', '/tsst/tsst_customer_sidebar_link')
+    adrt('test.11', '/tsst/tsst_validate2')

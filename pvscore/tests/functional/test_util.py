@@ -23,6 +23,9 @@ class TestUtil(TestController):
         assert util.get_first_day(today_) == util.get_first_day(today_)  # this is pretty dumb.  it works, just get it covered.
         assert util.get_last_day(today_) == util.get_last_day(today_)
         assert util.to_uuid('ken') == None
+        assert int(util.average([1,2,3])) == 2
+        assert util.format_date(util.truncate_datetime(dtime)) == util.str_today()
+        assert util.is_today(d8e) == True
 
 
     def test_states(self):
@@ -34,3 +37,18 @@ class TestUtil(TestController):
     def test_run_process(self):
         output = util.run_process(['/bin/cat', '/etc/passwd'])
         assert len([out for out in output if 'root' in out]) > 0
+
+
+
+    def test_array_stuff(self):
+        aaa, bbb, ccc = [util.DataObj({}), util.DataObj({}), util.DataObj({})]
+        aaa.name = 'a'
+        bbb.name = 'b'
+        ccc.name = 'c'
+        ret = util.single_attr_array([aaa, bbb, ccc], 'name')
+        assert ret == ['a', 'b', 'c']
+
+
+        aaa, bbb, ccc = [{'name' : 'a'}, {'name' : 'b'}, {'name' : 'c'}]
+        ret = util.single_key_array([aaa, bbb, ccc], 'name')
+        assert ret == ['a', 'b', 'c']

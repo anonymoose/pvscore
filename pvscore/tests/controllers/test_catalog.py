@@ -17,6 +17,19 @@ log = logging.getLogger(__name__)
 class TestCatalog(TestController):
 
 
+    def test_misc(self):
+        # really contrived example to get coverage in pvscore.lib.cart
+        ent = Enterprise.find_by_name('Healthy U Store')
+        cust = self.get_customer()
+        order = cust.get_active_orders()[0]
+        cart = Cart(self.site)
+        prod = self.get_prod()
+        camp = cust.campaign
+        prod = order.items[0].product
+        cart.add_item(prod, cust.campaign)
+        assert int(cart.total) == int(prod.get_price(camp))
+
+
     def test_search(self):
         prod = self.get_prod()
         R = self.get('/ecom/search/catalog_search_results?search=%s' % prod.name)

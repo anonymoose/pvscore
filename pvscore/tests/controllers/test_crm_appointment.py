@@ -31,7 +31,7 @@ class TestCrmAppointment(TestController):
         f.set('description', 'Test Description')
         f.set('start_dt', util.format_date(TOMORROW))
         f.set('start_time', '09:00')
-        f.set('end_time', '10:00')        
+        f.set('end_time', '10:00')
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
@@ -59,7 +59,7 @@ class TestCrmAppointment(TestController):
         f.set('description', 'Test Description')
         f.set('start_dt', util.format_date(TOMORROW))
         f.set('start_time', '09:00')
-        f.set('end_time', '10:00')        
+        f.set('end_time', '10:00')
 
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
@@ -101,7 +101,7 @@ class TestCrmAppointment(TestController):
         f = R.forms['frm_appointment']
         R.mustcontain('Edit Appointment')
         self.assertEqual(str(f['appointment_id'].value) , str(appointment_id))
-        
+
         self.assertEqual(f['title'].value, 'Test Appointment')
         self.assertEqual(f['description'].value, 'Test Description')
 
@@ -137,7 +137,7 @@ class TestCrmAppointment(TestController):
         R.mustcontain('Edit Customer Appointment')
         self.assertEqual(str(f['appointment_id'].value) , str(appointment_id))
         self.assertEqual(str(f['customer_id'].value) , str(appt.customer_id))
-        
+
         self.assertEqual(f['title'].value, 'Test Customer Appointment')
         self.assertEqual(f['description'].value, 'Test Description')
 
@@ -166,7 +166,7 @@ class TestCrmAppointment(TestController):
         assert R.status_int == 200
         R.mustcontain('Test Customer Appointment')
         self._delete_new(appointment_id)
-        
+
 
     @secure
     def test_search(self):
@@ -181,6 +181,24 @@ class TestCrmAppointment(TestController):
         f.set('title', 'Test')
         f.set('description', 'Test Description')
         R = f.submit('submit')
+        assert R.status_int == 200
+        R.mustcontain('Appointment Search')
+        R.mustcontain('Test Appointment')
+        R.mustcontain('Test Customer Appointment')
+        R.mustcontain('/crm/appointment/edit_for_customer/%s/%s' % (appt1.customer_id, appointment_id1))
+        R.mustcontain('/crm/appointment/edit/%s' % appointment_id2)
+        self._delete_new(appointment_id2)
+        self._delete_new(appointment_id2)
+
+
+    @secure
+    def test_inline_search(self):
+        appointment_id1 = self._create_new_for_customer()
+        appointment_id2 = self._create_new()
+        appt1 = Appointment.load(appointment_id1)
+        assert appt1 is not None
+        R = self.post('/crm/appointment/search',
+                      {'title' : 'Test'})
         assert R.status_int == 200
         R.mustcontain('Appointment Search')
         R.mustcontain('Test Appointment')
@@ -226,7 +244,7 @@ class TestCrmAppointment(TestController):
         self._delete_new(appointment_id2)
         R = self.get('/crm/appointment/this_month')
         assert R.status_int == 200
-        
-        
-              
+
+
+
 

@@ -262,7 +262,7 @@ def money(dbl, zero=False):
         return '%.2f' % float(dbl)
     elif zero:
         return '0.00'
-    else: return ''
+    else: return ''  #pragma: no cover
 
 
 def get(arry, key, default=None):
@@ -743,7 +743,7 @@ def xml_str_to_dict(xmlstr):
     return xml_to_dict(parseString(xmlstr))
 
 
-def xml_to_dict(node):
+def xml_to_dict(node):  #pragma: no cover
     """
     xml_to_dict() scans through the children of node and makes a
     dictionary from the content.
