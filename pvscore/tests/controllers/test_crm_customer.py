@@ -1,5 +1,5 @@
 #pylint: disable-msg=C0103,C0302
-from pvscore.tests import TestController, secure, alternate_site
+from pvscore.tests import TestController, secure, alternate_site, TEST_CUSTOMER_EMAIL
 from pvscore.model.crm.customer import Customer
 from pvscore.model.crm.customerorder import CustomerOrder
 from pvscore.model.crm.orderitem import OrderItem
@@ -13,7 +13,7 @@ import pvscore.lib.util as util
 # bin/T pvscore.tests.controllers.test_crm_customer
 
 def find_customer(campaign):
-    return Customer.find('amers_j@yahoo.com', campaign)
+    return Customer.find(TEST_CUSTOMER_EMAIL, campaign)
 
 class TestCrmCustomer(TestController):
     def test_misc(self):
@@ -50,8 +50,8 @@ class TestCrmCustomer(TestController):
         f.set('email', 'ken@testxyz.com')
         f.set('addr1', '123 Elm')
         f.set('city', 'Jacksonville')
-        f.set('phone', '9041112222') 
-        f.set('password', 'password')        
+        f.set('phone', '9041112222')
+        f.set('password', 'password')
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
@@ -96,7 +96,7 @@ class TestCrmCustomer(TestController):
         for oid in oids:
             R.mustcontain('quantity%s' % oid)
         R.mustcontain('$%.2f' % total)
-        
+
         # add something to the order
         post_data = {'shipping_total' : '0.00', 'create_dt' : '2011-07-23'}
         for oid in oids:
@@ -169,7 +169,7 @@ class TestCrmCustomer(TestController):
         assert R.status_int == 200
         R.mustcontain('Customer Attributes')
         self._delete_new(customer_id)
-        
+
 
     @secure
     def test_search(self):
@@ -300,7 +300,7 @@ class TestCrmCustomer(TestController):
         Journal.find_credits_by_order(order)
         self._delete_new(customer_id)
 
-    
+
     def _test_return_impl(self, return_type, customer_id):
         cust = Customer.load(customer_id)
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
@@ -351,7 +351,7 @@ class TestCrmCustomer(TestController):
         f.set('email', 'ken@testxyz.com')
         f.set('addr1', '123 Elm')
         f.set('city', 'Jacksonville')
-        f.set('phone', '9041112222')        
+        f.set('phone', '9041112222')
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
@@ -407,8 +407,8 @@ class TestCrmCustomer(TestController):
         assert R.status_int == 200
         self.assertEqual(R.body, 'False')
         self._delete_new(customer_id)
-        
-        
+
+
     @secure
     def test_customer_status(self):
         customer_id = self._create_new()
@@ -504,7 +504,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -554,9 +554,9 @@ class TestCrmCustomer(TestController):
         R = self.get('/crm/customer/self_get_balance/%s' % customer_id)
         self.assertEqual(R.request.url, 'http://%s/?path=/crm/customer/self_get_balance/%s&vars=' % (self.get_host(), customer_id))
         self._delete_new(customer_id)
-        
 
-        
+
+
 
     @secure
     def test_self_save(self):
@@ -644,7 +644,7 @@ class TestCrmCustomer(TestController):
         assert R.status_int == 200
         custs = Customer.find_all_by_email('testcontact@test.com')
         assert len(custs) == 0
-        
+
 
     def test_contact_save(self):
         custs = Customer.find_all_by_email('testcontact@test.com')
@@ -677,7 +677,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -712,7 +712,7 @@ class TestCrmCustomer(TestController):
         R = R.follow()
         assert R.status_int == 200
         assert url not in R.body
-        self._delete_new(customer_id)        
+        self._delete_new(customer_id)
 
 
     def test_stripe_save_and_purchase(self):
@@ -727,7 +727,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -744,7 +744,7 @@ class TestCrmCustomer(TestController):
         assert R.status_int == 200
         assert 'customer_id' in R.request.params
         self.assertEqual(str(R.request.params['customer_id']), str(customer_id))
-        self._delete_new(customer_id)        
+        self._delete_new(customer_id)
 
 
     def test_stripe_save_and_purchase_invalid_sku(self):
@@ -759,7 +759,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -774,7 +774,7 @@ class TestCrmCustomer(TestController):
                        })
         assert R.status_int == 200
         R.mustcontain("No such product sku: crapcrap")
-        self._delete_new(customer_id)        
+        self._delete_new(customer_id)
 
 
     def test_stripe_save_and_purchase_invalid_cc(self):
@@ -789,7 +789,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -805,7 +805,7 @@ class TestCrmCustomer(TestController):
                        })
         assert R.status_int == 200
         R.mustcontain("Unable to bill credit card:")
-        self._delete_new(customer_id)        
+        self._delete_new(customer_id)
 
 
     def test_stripe_self_save_billing(self):
@@ -820,7 +820,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -843,7 +843,7 @@ class TestCrmCustomer(TestController):
                        })
         assert R.status_int == 200
         R.mustcontain("Successfully saved billing information.")
-        self._delete_new(customer_id)        
+        self._delete_new(customer_id)
 
 
     def test_stripe_self_save_billing_invalid(self):
@@ -858,7 +858,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -881,7 +881,7 @@ class TestCrmCustomer(TestController):
                        })
         assert R.status_int == 200
         R.mustcontain("Unable to save credit card information")
-        self._delete_new(customer_id) 
+        self._delete_new(customer_id)
 
     @secure
     def test_stripe_self_cancel_at_gateway(self):
@@ -896,7 +896,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -926,7 +926,7 @@ class TestCrmCustomer(TestController):
         #self.logout_customer()
         self._delete_new(customer_id)
 
-        
+
     @alternate_site('test2.com')
     def test_authnet_purchase_nrc(self):
         R = self.post('/crm/customer/signup',
@@ -942,7 +942,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -978,7 +978,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -1012,7 +1012,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -1066,7 +1066,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -1120,7 +1120,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))
@@ -1138,7 +1138,7 @@ class TestCrmCustomer(TestController):
                        })
         assert R.status_int == 200
         R.mustcontain("Unable to bill credit card:")
-        self._delete_new(customer_id)        
+        self._delete_new(customer_id)
 
 
     @alternate_site('test2.com')
@@ -1152,7 +1152,7 @@ class TestCrmCustomer(TestController):
                        'redir' : '/'
                        })
         assert R.status_int == 200
-        assert 'customer_id' in R.request.params 
+        assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
         self.assertEqual(str(cust.customer_id), str(customer_id))

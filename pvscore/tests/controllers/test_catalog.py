@@ -1,10 +1,14 @@
 import logging
-from pvscore.tests import TestController, secure, customer_logged_in
+from pvscore.tests import TestController, secure, customer_logged_in, TEST_CUSTOMER_EMAIL
 from pvscore.model.crm.company import Enterprise
 from pvscore.model.crm.product import ProductCategory
 from pvscore.tests.controllers.test_cms_content import content_create_new, content_delete_new
 from pvscore.model.cms.content import Content
 from pvscore.lib.billing_api import StripeBillingApi
+from pvscore.lib.shipping.shipping import UPSShipping
+from pvscore.lib.cart import Cart
+from pvscore.model.crm.customer import Customer
+from pvscore.model.crm.campaign import Campaign
 
 log = logging.getLogger(__name__)
 
@@ -20,10 +24,10 @@ class TestCatalog(TestController):
         R.mustcontain(prod.name)
         R = self.get('/ecom/search/catalog_search_results?search=BOGUSSSSS')
         assert R.status_int == 200
-        
+
 
     @secure
-    def test_page(self): 
+    def test_page(self):
         content_id = content_create_new(self)
         cnt = Content.load(content_id)
         R = self.get('/ecom/page/content?content_name=%s' % cnt.name)
@@ -47,7 +51,7 @@ class TestCatalog(TestController):
     def test_login(self):
         R = self.get('/ecom/login/catalog_login?nextlink=/ecom/page/catalog_login_follow')
         R.mustcontain('this is the login page')
-        
+
 
     @customer_logged_in
     def test_already_logged_in(self):
@@ -72,6 +76,14 @@ class TestCatalog(TestController):
         R = self.get('/cart/catalog_cart')
         assert R.status_int == 200
         assert 'product_id=%s' % prod.product_id in R.body
+        assert 'quantity=%s/2.0' % prod.product_id in R.body
+        R = self.get('/ecom/cart/update/%s/9' % prod.product_id)
+        assert R.status_int == 200
+        assert R.body == 'True'
+        R = self.get('/cart/catalog_cart')
+        assert R.status_int == 200
+        assert 'product_id=%s' % prod.product_id in R.body
+        assert 'quantity=%s/9.0' % prod.product_id in R.body
         R = self.post("/crm/customer/purchase_cart",
                       {'redir' : '/ecom/page/catalog_thanks',
                       'accept_terms' : '1',
@@ -111,7 +123,7 @@ class TestCatalog(TestController):
         R.mustcontain('product_id=%s' % prod.product_id)
         R.mustcontain('product_name=%s' % prod.name)
 
-        
+
     def test_products_specials(self):
         R = self.get('/products/specials/catalog_products')
         assert R.status_int == 200
@@ -141,7 +153,7 @@ class TestCatalog(TestController):
         R = self.get('/cart/catalog_cart')
         assert R.status_int == 200
         assert 'product_id' not in R.body
-        
+
 
     def test_add_to_cart(self):
         R = self.get('/ecom/cart/clear')
@@ -179,7 +191,7 @@ class TestCatalog(TestController):
         R = self.get('/cart/catalog_cart')
         assert R.status_int == 200
         assert 'product_id=%s' % prod.product_id not in R.body
-        
+
     @customer_logged_in
     def test_shipping(self):
         R = self.get('/ecom/cart/clear')
@@ -201,7 +213,13 @@ class TestCatalog(TestController):
         R.mustcontain('3 Day Select')
         R.mustcontain('Second Day Air')
         R.mustcontain('Next Day Air Saver')
-        
+        # this yields "03" by looking for Ground/03 in the returned string
+        ground = [line.split('/')[1] for line in R.body.split("\n") if line.startswith('Ground/')][0]
+        R = self.get('/ecom/cart/set_shipping/%s' % ground)
+        assert R.status_int == 200
+        assert R.body == 'True'
+
+
     def test_alternate_product_search_by_name(self):
         #http://healthyustore.net/product/Saccharomyces%20Boulardii%20
         R = self.get('/product/Saccharomyces%20Boulardii%20')

@@ -22,12 +22,12 @@
     <Description>Rate Description</Description>
     <Shipper>
       <Name>${company.name}</Name>
-      <PhoneNumber>${company.phone.replace('-', '')}</PhoneNumber>
+      <PhoneNumber>${company.phone.replace('-', '') if company.phone else ''}</PhoneNumber>
       <ShipperNumber>${account}</ShipperNumber>
       <Address>
         <AddressLine1>${company.addr1}</AddressLine1>
         % if company.addr2:
-        <AddressLine2>${company.addr2}</AddressLine2> 
+        <AddressLine2>${company.addr2}</AddressLine2>
         % endif
         <City>${company.city}</City>
         <StateProvinceCode>${company.state}</StateProvinceCode>
@@ -37,26 +37,26 @@
     </Shipper>
     <ShipTo>
       <CompanyName>${cust.fname} ${cust.lname}</CompanyName>
-      <PhoneNumber>${cust.phone.replace('-', '')}</PhoneNumber>
+      <PhoneNumber>${cust.phone.replace('-', '') if cust.phone else ''}</PhoneNumber>
       <Address>
         <AddressLine1>${cust.addr1}</AddressLine1>
-        % if cust.addr2: 
-        <AddressLine2>${cust.addr2}</AddressLine2> 
+        % if cust.addr2:
+        <AddressLine2>${cust.addr2}</AddressLine2>
         % endif
         <City>${cust.city}</City>
         <StateProvinceCode>${cust.state}</StateProvinceCode>
-        <PostalCode>${cust.zip}</PostalCode> 
+        <PostalCode>${cust.zip}</PostalCode>
         <CountryCode>${cust.country if cust.country else 'US'}</CountryCode>
       </Address>
     </ShipTo>
     <ShipFrom>
       <CompanyName>${company.name}</CompanyName>
-      <PhoneNumber>${company.phone.replace('-', '')}</PhoneNumber>
+      <PhoneNumber>${company.phone.replace('-', '') if company.phone else ''}</PhoneNumber>
       <ShipperNumber>${account}</ShipperNumber>
       <Address>
         <AddressLine1>${company.addr1}</AddressLine1>
-        % if company.addr2: 
-        <AddressLine2>${company.addr2}</AddressLine2> 
+        % if company.addr2:
+        <AddressLine2>${company.addr2}</AddressLine2>
         % endif
         <City>${company.city}</City>
         <StateProvinceCode>${company.state}</StateProvinceCode>
@@ -83,7 +83,7 @@
           <Code>LBS</Code>
         </UnitOfMeasurement>
         <Weight>${total_weight}</Weight>
-      </PackageWeight> 
+      </PackageWeight>
     </Package>
   </Shipment>
 </RatingServiceSelectionRequest>

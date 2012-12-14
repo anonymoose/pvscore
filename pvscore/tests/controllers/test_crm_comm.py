@@ -5,7 +5,7 @@ from pvscore.model.crm.company import Enterprise
 # T pvscore.tests.controllers.test_crm_comm
 
 class TestCrmCommunication(TestController):
-    
+
     def _create_new(self):
         R = self.get('/crm/communication/new')
         assert R.status_int == 200
@@ -14,7 +14,6 @@ class TestCrmCommunication(TestController):
         self.assertEqual(f['comm_id'].value, '')
         f.set('name', 'Test Comm')
         f.set('from_addr', 'from@pvs.com')
-
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
@@ -64,24 +63,20 @@ class TestCrmCommunication(TestController):
         R = self.get('/crm/communication/list')
         assert R.status_int == 200
         R.mustcontain('Test Comm')
-
         R = self.get('/crm/communication/edit/%s' % comm_id)
         R.mustcontain('Edit Email Template')
         f = R.forms['frm_comm']
         f.set('name', 'Test Comm New')
         f.set('from_addr', 'fromnew@pvs.com')
-
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
         assert R.status_int == 200
         f = R.forms['frm_comm']
         R.mustcontain('Edit Email Template')
-
         self.assertEqual(f['comm_id'].value, comm_id)
         self.assertEqual(f['name'].value, 'Test Comm New')
         self.assertEqual(f['from_addr'].value, 'fromnew@pvs.com')
-
         self._delete_new(comm_id)
 
 
@@ -109,5 +104,12 @@ class TestCrmCommunication(TestController):
         R = self.get('/crm/communication/send_comm_dialog?dialog=1')
         assert R.status_int == 200
         R.mustcontain('Invoice')
-        
-        
+
+
+    @secure
+    def test_send_customer_comm(self):
+        ent = Enterprise.find_by_name('Healthy U Store')
+        cust = self.get_customer()
+        comms = Communication.find_all(ent.enterprise_id)[0]
+        order = cust.get_active_orders()[0]
+

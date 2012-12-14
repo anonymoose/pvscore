@@ -1,4 +1,4 @@
-from pvscore.tests import TestController, UID, PWD
+from pvscore.tests import TestController, UID, PWD, TEST_CUSTOMER_EMAIL, TEST_CUSTOMER_PASSWORD
 from pvscore.model.crm.customer import Customer
 import logging
 
@@ -62,15 +62,15 @@ class TestCrmLogin(TestController):
 
 
     def test_customer_login(self):
-        R = self.post('/crm/customer_login', {'username': 'amers_j@yahoo.com', 'password': 'geology'})
+        R = self.post('/crm/customer_login', {'username': TEST_CUSTOMER_EMAIL, 'password': TEST_CUSTOMER_PASSWORD})
         assert R.status_int == 200
         R.mustcontain('this is the index')
         self.app.reset()
 
     def test_customer_login_redirect(self):
         R = self.post('/crm/customer_login',
-                      {'username': 'amers_j@yahoo.com',
-                       'password': 'geology',
+                      {'username': TEST_CUSTOMER_EMAIL,
+                       'password': TEST_CUSTOMER_PASSWORD,
                        'redir' : '/'})
         assert R.status_int == 200
         R.mustcontain('this is the index')
@@ -78,7 +78,7 @@ class TestCrmLogin(TestController):
 
 
     def test_customer_login_invalid(self):
-        R = self.post('/crm/customer_login', {'username': 'amers_j@yahoo.com', 'password': 'bogus'})
+        R = self.post('/crm/customer_login', {'username': TEST_CUSTOMER_EMAIL, 'password': 'bogus'})
         assert R.status_int == 200
         R.mustcontain('this is the index')
         self.assertEqual(R.request.path, '/')
@@ -94,14 +94,14 @@ class TestCrmLogin(TestController):
 
     def test_customer_forgot_password(self):
         R = self.post('/crm/customer_forgot_password',
-                      {'username': 'amers_j@yahoo.com'})
+                      {'username': TEST_CUSTOMER_EMAIL})
         assert R.status_int == 200
         assert "Your new password has been sent" in R.body
-        custs = Customer.find_all_by_email('amers_j@yahoo.com')
+        custs = Customer.find_all_by_email(TEST_CUSTOMER_EMAIL)
         assert len(custs) > 0
         cust = custs[0]
-        assert cust.password != 'geology'
-        cust.password = 'geology'
+        assert cust.password != TEST_CUSTOMER_PASSWORD
+        cust.password = TEST_CUSTOMER_PASSWORD
         cust.save()
         self.commit()
 
@@ -113,6 +113,6 @@ class TestCrmLogin(TestController):
     #     except Exception as exc:
     #         log.debug(exc)
 
-        
+
 
 

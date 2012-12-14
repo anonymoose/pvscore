@@ -437,7 +437,7 @@ class PeriodOrderSummary(BaseAnalytic):
     #                                                             CustomerOrder.delete_dt==None,
     #                                                             CustomerOrder.cancel_dt==None))\
     #                                                            .order_by(CustomerOrder.create_dt.desc()).all()
-        
+
 
 
     # @staticmethod

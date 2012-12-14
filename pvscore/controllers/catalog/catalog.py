@@ -34,8 +34,8 @@ class CatalogBaseController(BaseController):
                 'back_link' : self.session.get('back_link'),
                 'specials' : self.specials_product_list(0, 4)
                 }
-    
-    
+
+
     def render(self, mako_file, params=None):
         site = self.request.ctx.site
         path = "/%s/%s.mako" % (site.namespace, mako_file)
@@ -152,7 +152,7 @@ class CatalogController(CatalogBaseController):
                                             self.request.GET.get('offset'),
                                             self.request.GET.get('limit'))
         return self.render(page, params)
-        
+
 
     @view_config(route_name='ecom.site.page')
     def page(self):
@@ -166,7 +166,7 @@ class CatalogController(CatalogBaseController):
         params = self.params()
         params['content_name'] = self.request.matchdict.get('content_name')
         return self.render(page, params)
-    
+
 
     @view_config(route_name='ecom.site.login.default')
     @view_config(route_name='ecom.site.login')

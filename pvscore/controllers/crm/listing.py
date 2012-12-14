@@ -71,7 +71,7 @@ class ListingController(BaseController):
             'listing' : listing
             }
 
-    
+
     @view_config(route_name='crm.listing.show_add_picture', renderer="/crm/listing.add_picture.mako")
     @authorize(IsCustomerLoggedIn())
     def add_picture(self):
@@ -133,7 +133,7 @@ class ListingController(BaseController):
         ass = Asset.create_new(lis, self.enterprise_id, self.request)
         Status.add(lis.customer, lis, Status.find_event(self.enterprise_id, lis, 'ASSET_UPLOAD'), ass.name)
         return str(ass.id)
-        
+
 
 
     # def category_search(self, category_id, category=None):

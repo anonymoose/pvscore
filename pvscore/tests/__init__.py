@@ -33,7 +33,8 @@ PWD = 'Zachary234'
 TEST_UID = 'test_kwbedwell@hotmail.com'
 TEST_UID_PASSWORD = 'swordfish'
 T_PRODUCT = 'Test Product for Nose'
-TEST_CUSTOMER_EMAIL = 'amers_j@yahoo.com'
+TEST_CUSTOMER_EMAIL = 'kenneth.bedwell@gmail.com'
+TEST_CUSTOMER_PASSWORD = 'password'
 
 class TestController(TestCase):
 
@@ -74,12 +75,13 @@ class TestController(TestCase):
                                         }
 
 
-    def get_customer(self, username="amers_j@yahoo.com"):
+    def get_customer(self, username=TEST_CUSTOMER_EMAIL):
         custs = Customer.find_all_by_email(username)
         assert custs is not None and len(custs) > 0
         return custs[0]
 
-    def login_customer(self, username='amers_j@yahoo.com', password='geology'):
+
+    def login_customer(self, username=TEST_CUSTOMER_EMAIL, password=TEST_CUSTOMER_PASSWORD):
         # this sets the site it.
         self.post('/crm/customer_login',
                   {'username' : username, 'password' : password})
@@ -91,7 +93,7 @@ class TestController(TestCase):
         return self.logout_crm()
 
 
-    def login_crm(self, username='kenneth.bedwell@gmail.com', password='Zachary234'):
+    def login_crm(self, username=UID, password=PWD):
         # this sets the site it.
         self.get('/crm')
 
@@ -150,7 +152,7 @@ class TestController(TestCase):
 
 
 
-def customer_logged_in(func, username="amers_j@yahoo.com", password="geology"):
+def customer_logged_in(func, username=TEST_CUSTOMER_EMAIL, password=TEST_CUSTOMER_PASSWORD):
     def wrap(self):
         self.login_customer(username, password)
         ret = func(self)
@@ -160,7 +162,7 @@ def customer_logged_in(func, username="amers_j@yahoo.com", password="geology"):
     return wrap
 
 
-def secure(func, username='kenneth.bedwell@gmail.com', password='Zachary234'):
+def secure(func, username=UID, password=PWD):
     def wrap(self):
         self.login_crm(username, password)
         ret = func(self)

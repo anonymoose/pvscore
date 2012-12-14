@@ -12,7 +12,7 @@ import simplejson as json
 # bin/T pvscore.tests.controllers.test_crm_listing
 
 class TestCrmListing(TestController):
-    
+
     def _create_new(self):
         R = self.post('/crm/listing/save',
                       {'redir' : '/crm/listing/json_get',
