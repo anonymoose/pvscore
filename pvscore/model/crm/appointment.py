@@ -12,6 +12,7 @@ from pvscore.lib.sqla import GUID
 log = logging.getLogger(__name__)
 
 class Appointment(ORMBase, BaseModel):
+
     __tablename__ = 'crm_appointment'
     __pk__ = 'appointment_id'
 
@@ -32,6 +33,7 @@ class Appointment(ORMBase, BaseModel):
     start_time = Column(String(20))
     end_time = Column(String(20))
     end_dt = Column(DateTime)
+    timezone = Column(String(100))
     private = Column(Boolean)
     phone = Column(String(20))
     data_1 = Column(String(250))
@@ -54,8 +56,8 @@ class Appointment(ORMBase, BaseModel):
         sql = """SELECT appt.* FROM crm_appointment appt, core_user u where
                  u.user_id = appt.user_created
                  and (u.enterprise_id = '{entid}' or u.enterprise_id is null)
-                {title} {descr}""".format(entid=enterprise_id, 
-                                          title=t_clause, 
+                {title} {descr}""".format(entid=enterprise_id,
+                                          title=t_clause,
                                           descr=d_clause)
         return Session.query(Appointment).from_statement(sql).all()
 
@@ -65,7 +67,7 @@ class Appointment(ORMBase, BaseModel):
         return Session.query(Appointment).filter(Appointment.customer == customer).order_by(Appointment.start_dt.desc(),
                                                                                              Appointment.start_time.asc()).all()
 
-    
+
     @staticmethod
     def find_by_user(user):
         return Session.query(Appointment).filter(or_(Appointment.creator == user,
@@ -75,20 +77,19 @@ class Appointment(ORMBase, BaseModel):
 
     @staticmethod
     def find_by_month(year, month, user):
-        #return Session.query(Appointment).from_statement("""select *, ((start_time + 5) - %s) from crm_appointment where % user.tz_offset
-        return Session.query(Appointment).from_statement("""select * from crm_appointment where 
+        return Session.query(Appointment).from_statement("""select * from crm_appointment where
                                                             (user_created = :creator or user_assigned = :creator)
                                                             and date_part('month', start_dt) = :month
-                                                            and date_part('year', start_dt) = :year 
+                                                            and date_part('year', start_dt) = :year
                                                             order by start_time asc""" ).params(creator=user.user_id, year=year, month=month).all()
 
 
     @staticmethod
     def find_by_day(year, month, day, user):
-        return Session.query(Appointment).from_statement("""select * from crm_appointment where 
+        return Session.query(Appointment).from_statement("""select * from crm_appointment where
                                                             (user_created = :creator or user_assigned = :creator)
                                                             and date_part('month', start_dt) = :month
-                                                            and date_part('year', start_dt) = :year 
+                                                            and date_part('year', start_dt) = :year
                                                             and date_part('day', start_dt) = :day
                                                             order by start_time asc""").params(creator=user.user_id, year=year, month=month, day=day).all()
 
@@ -96,4 +97,3 @@ class Appointment(ORMBase, BaseModel):
     def full_delete(appointment_id):
         Session.execute("delete from crm_appointment where appointment_id = '%s'" % appointment_id)
 
-        

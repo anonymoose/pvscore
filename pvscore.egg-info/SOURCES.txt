@@ -39,6 +39,7 @@ pvscore/controllers/crm/dashboard.py
 pvscore/controllers/crm/event.py
 pvscore/controllers/crm/listing.py
 pvscore/controllers/crm/login.py
+pvscore/controllers/crm/phase.py
 pvscore/controllers/crm/product.py
 pvscore/controllers/crm/purchase.py
 pvscore/controllers/crm/report.py
@@ -5703,6 +5704,9 @@ pvscore/templates/crm/local_base.mako
 pvscore/templates/crm/login.mako
 pvscore/templates/crm/login.pick_enterprise.mako
 pvscore/templates/crm/passthru.mako
+pvscore/templates/crm/phase.base.mako
+pvscore/templates/crm/phase.edit.mako
+pvscore/templates/crm/phase.list.mako
 pvscore/templates/crm/product.all_barcodes.mako
 pvscore/templates/crm/product.barcode.mako
 pvscore/templates/crm/product.base.mako

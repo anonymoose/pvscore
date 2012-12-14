@@ -18,7 +18,7 @@
                 ${h.text('description', value=description)}
               </div>
             </div>
-          </div>        
+          </div>
         </div>
       </div>
       <div class="row">
@@ -35,8 +35,11 @@
   <table class="results sortable table table-striped">
     <thead>
       <tr>
-        <td>Description</td>        
-        <td>Appointment Date</td>
+        <td>Title</td>
+        <td>Appt Date</td>
+        <td>Customer</td>
+        <td>Creator</td>
+        <td>Status</td>
       </tr>
     </thead>
     <tbody>
@@ -47,7 +50,10 @@
         % else:
           <td nowrap><a href="/crm/appointment/edit/${app.appointment_id}">${app.title}</a></td>
         % endif
-        <td nowrap>${app.start_dt}</td>
+        <td nowrap>${h.slash_date(app.start_dt)}</td>
+        <td nowrap>${app.customer.email if app.customer else 'None'}</td>
+        <td nowrap>${app.creator.email}</td>
+        <td nowrap>${app.status.event.short_name if app.status else ''}</td>
       </tr>
       % endfor
     </tbody>

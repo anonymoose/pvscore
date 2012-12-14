@@ -3,11 +3,12 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.lib.validate import validate
 from pvscore.controllers.base import BaseController
-from pvscore.lib.decorators.authorize import authorize 
+from pvscore.lib.decorators.authorize import authorize
 from pvscore.lib.auth_conditions import IsLoggedIn
 from pvscore.model.core.users import Users, UserPriv
 from pvscore.model.crm.purchase import Vendor
 import pvscore.lib.util as util
+from pytz import country_timezones
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class UsersController(BaseController):
     def edit(self):
         return self._edit_impl(self.request.matchdict.get('user_id'))
 
-        
+
     @view_config(route_name='crm.users.new', renderer='/crm/users.edit.mako')
     @authorize(IsLoggedIn())
     def new(self):
@@ -39,8 +40,9 @@ class UsersController(BaseController):
             user = Users()
             priv = UserPriv()
         return {
-            'user_types':Users.get_user_types(),
-            'vendors' :util.select_list(Vendor.find_all(self.enterprise_id), 'vendor_id', 'name', True),
+            'user_types': Users.get_user_types(),
+            'vendors' : util.select_list(Vendor.find_all(self.enterprise_id), 'vendor_id', 'name', True),
+            'timezones' : country_timezones('US'),
             'user' : user,
             'priv' : priv
             }
@@ -54,11 +56,11 @@ class UsersController(BaseController):
 
     @view_config(route_name='crm.users.save')
     @authorize(IsLoggedIn())
-    @validate((('fname', 'required'), 
+    @validate((('fname', 'required'),
                ('fname', 'string'),
-               ('lname', 'required'), 
+               ('lname', 'required'),
                ('lname', 'string'),
-               ('email', 'required'), 
+               ('email', 'required'),
                ('email', 'string'),
                ('email', 'email'),
                ('password', 'equals', 'confirm')))
@@ -73,7 +75,7 @@ class UsersController(BaseController):
         usr.priv.bind(self.request.POST, True, 'pv')
         usr.priv.save()
         usr.priv.flush()
-        
+
         orig_pass = usr.password
         bogus_pass = ''.join(['-' for _ in range(usr.password_len)]) if usr.password_len else '-'
         usr.bind(self.request.POST)
@@ -107,7 +109,7 @@ class UsersController(BaseController):
     # @view_config(route_name='crm.users.search', renderer='/crm/users.search.mako')
     # @authorize(IsLoggedIn())
     # def search(self):
-    #     username = self.request.POST.get('username') 
+    #     username = self.request.POST.get('username')
     #     fname = self.request.POST.get('fname')
     #     lname = self.request.POST.get('lname')
     #     email = self.request.POST.get('email')

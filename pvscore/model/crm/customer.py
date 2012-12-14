@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101
 import math
-from sqlalchemy import Column, ForeignKey, and_
+from sqlalchemy import Column, ForeignKey, and_, or_
 from sqlalchemy.types import Integer, String, DateTime, Text, Float, DateTime
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
@@ -14,6 +14,7 @@ import uuid
 from pvscore.lib.sqla import GUID
 from pvscore.model.core.status import Status
 from pyramid.httpexceptions import HTTPForbidden
+
 
 class Customer(ORMBase, BaseModel):
 
@@ -51,6 +52,7 @@ class Customer(ORMBase, BaseModel):
     third_party_id = Column(String(100))
     default_latitude = Column(Float)
     default_longitude = Column(Float)
+    phase_id = Column(GUID, ForeignKey('crm_customer_phase.phase_id'))
 
     cid_0 = Column(String(50))
     cid_1 = Column(String(50))
@@ -72,6 +74,7 @@ class Customer(ORMBase, BaseModel):
     campaign = relation('Campaign', lazy="joined")
     status = relation('Status', primaryjoin=Status.status_id == status_id)
     billing = relation('Billing', lazy="joined")
+    phase = relation('CustomerPhase', lazy="joined")
 
     def __repr__(self):
         return '%s : %s %s %s' % (self.customer_id, self.email, self.fname, self.lname)
@@ -90,7 +93,7 @@ class Customer(ORMBase, BaseModel):
     def find_by_key(key):
         return Customer.load(key)
 
-    
+
     @staticmethod
     def find(email, campaign):
         """ KB: [2010-12-15]: Find another customer that is in the same company. """
@@ -132,7 +135,7 @@ class Customer(ORMBase, BaseModel):
                          Campaign.company_id == company.company_id,
                          Customer.email.ilike(email))).first()
 
-    
+
     @staticmethod
     def search(enterprise_id, company_name, fname, lname, email, phone):   #pylint: disable-msg=R0913
         cn_clause = f_clause = l_clause = e_clause = p_clause = ''
@@ -235,7 +238,7 @@ class Customer(ORMBase, BaseModel):
         for bill_id in billing_ids:
             Session.execute("delete from crm_billing where billing_id = '%s'" % bill_id)
 
-        
+
 class PeriodCustomerCountSummary(BaseAnalytic):
     """ KB: [2011-11-02]: Google charts report for customer count over a period """
 
@@ -267,7 +270,7 @@ class PeriodCustomerCountSummary(BaseAnalytic):
     def google_data(self):
         return ','.join([str(res.cnt) for res in self.results])
 
-    
+
     @property
     def google_y_labels(self):
         return '|%s|' % '|'.join([util.format_date(res.create_dt)[5:] for res in self.results])
@@ -320,6 +323,34 @@ def load_customer(request, default_to_new_customer=False):
         return customer
     elif default_to_new_customer:
         return Customer()
+
+
+class CustomerPhase(ORMBase, BaseModel):
+    __tablename__ = 'crm_customer_phase'
+    __pk__ = 'phase_id'
+
+    phase_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    enterprise_id = Column(GUID, ForeignKey('crm_enterprise'))
+    short_name = Column(String(20))
+    display_name = Column(String(20))
+    description = Column(Text)
+    sort_order = Column(Integer)
+    create_dt = Column(DateTime, server_default = text('now()'))
+    delete_dt = Column(DateTime, server_default=text('now()'))
+    color = Column(String(20))
+
+    @staticmethod
+    def find_all(enterprise_id):
+        return Session.query(CustomerPhase)\
+            .filter(and_(or_(CustomerPhase.enterprise_id == enterprise_id,
+                             CustomerPhase.enterprise_id == None),
+                         CustomerPhase.delete_dt == None))\
+                         .order_by(CustomerPhase.short_name.asc()).all()
+
+
+
+
+
 
 
     # @staticmethod
@@ -375,4 +406,5 @@ def load_customer(request, default_to_new_customer=False):
     # def encode_password(password):
     #     # return md5(password).hexdigest()
     #     return password
-    
+
+

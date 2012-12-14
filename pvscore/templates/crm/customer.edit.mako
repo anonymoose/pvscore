@@ -6,13 +6,19 @@
     <form id="frm_customer" method="POST" action="/crm/customer/save">
       ${h.hidden('customer_id', value=customer.customer_id)}
       <div class="row">
-        <div class="span7">
+        <div class="span3">
           % if customer.customer_id:
-          <h1>Edit Customer</h1>  
+          <h1>Edit Customer</h1>
           % else:
-          <h1>New Customer</h1>  
+          <h1>New Customer</h1>
           % endif
+
         </div>
+        % if customer.phase:
+        <div class="span6" style="text-align: center; background-color:${customer.phase.color};">
+          <h1>Phase: ${customer.phase.display_name}</h1>
+        </div>
+        % endif
       </div>
       <div class="row">
         <div class="span9">
@@ -27,8 +33,8 @@
                 ${h.text('lname', size=50, value=customer.lname)}
               </div>
               <div class="span2">
-                <label for="campaign_id">Campaign</label>
-                ${h.select('campaign_id', str(customer.campaign.campaign_id), campaigns)}
+                <label for="phase_id">Customer Phase</label>
+                ${h.select('phase_id', str(customer.phase_id), phases)}
               </div>
             </div>
             <div class="row">
@@ -45,6 +51,12 @@
                 ${h.text('balance', size=10, value=h.money(customer.get_current_balance()), disabled=True)}
               </div>
             </div>
+            <div class="row">
+              <div class="span2 offset6">
+                <label for="campaign_id">Campaign</label>
+                ${h.select('campaign_id', str(customer.campaign.campaign_id), campaigns)}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -57,44 +69,44 @@
                 <label for="addr1">Address</label>
                 ${h.text('addr1', size=50, value=customer.addr1)}
                 ${h.text('addr2', size=50, value=customer.addr2)}
-                
+
                 <label for="city">City</label>
                 ${h.text('city', size=50, value=customer.city)}
-                
+
                 <label for="state">State</label>
                 ${h.text('state', size=50, value=customer.state)}
-                
+
                 <label for="zip">Zip</label>
                 ${h.text('zip', size=50, value=customer.zip)}
               </div>
-              
+
               <div class="span3">
                 <label for="phone">Phone</label>
                 ${h.text('phone', size=20, value=customer.phone)}
-                
-                
+
+
                 <label for="alt_phone">Alternate Phone</label>
                 ${h.text('alt_phone', size=20, value=customer.alt_phone)}
-                
-                
+
+
                 <label for="fax">Fax</label>
                 ${h.text('fax', size=20, value=customer.fax)}
-                
-                
+
+
                 <label for="country">Country</label>
                 <select id="country" name="country">
                   ${self.country_list()}
                 </select>
               </div>
-              
-              
+
+
               <div class="span2">
                 <label for="title">Title</label>
                 ${h.text('title', size=50, value=customer.title)}
-                
+
                 <label for="company_name">Company Name</label>
                 ${h.text('company_name', size=50, value=customer.company_name)}
-                
+
               </div>
             </div>
             <div class="row">
@@ -159,5 +171,5 @@
   </div>
 </div>
 
-  
-  
+
+

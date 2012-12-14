@@ -12,7 +12,7 @@ appointment_edit = function(appointment_id, year, month, current_day) {
     }
     pvs.dialog.display({url: url,
                        title: title,
-                       width:590, 
+                       width:590,
                        height:400,
                        validator: {
                            form : '#appointment_form',
@@ -24,12 +24,12 @@ appointment_edit = function(appointment_id, year, month, current_day) {
                        },
                        after_display_impl:
                        function() {
-                           appointment_init_calendar('#start_dt'); 
+                           appointment_init_calendar('#start_dt');
                            if ($_('#a_title') == '') {
                                if ($_('#fname') && $_('#lname')) {
                                    pvs.ui.set('#a_title', $_('#fname') + ' ' + $_('#lname')
                                              + ($_('#title') || $_('#company') ? ' - '  : '')
-                                             + ($_('#title') ? $_('#title') + ', ' : '') 
+                                             + ($_('#title') ? $_('#title') + ', ' : '')
                                              + ($_('#company') ? $_('#company') + '' : ''));
                                }
                            }
@@ -40,9 +40,9 @@ appointment_edit = function(appointment_id, year, month, current_day) {
                                pvs.ui.set('#a_start_dt', year+'-'+month+'-'+current_day)
                            }
                        },
-                       on_ok: 
+                       on_ok:
                        function() {
-                           pvs.form.post('#appointment_form', 
+                           pvs.form.post('#appointment_form',
                                          pvs.ajax.api({root: '/crm/appointment/save', customer_id: $_('#customer_id')}),
                                          function(response) {
                                              if (pvs.is_true(response)) {
@@ -58,3 +58,5 @@ appointment_edit = function(appointment_id, year, month, current_day) {
                                          });
                        }});
 };
+
+

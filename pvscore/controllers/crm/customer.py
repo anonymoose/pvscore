@@ -6,7 +6,7 @@ from pyramid.httpexceptions import HTTPFound
 from pvscore.lib.validate import validate
 from pvscore.lib.decorators.authorize import authorize
 from pvscore.lib.auth_conditions import IsLoggedIn, IsCustomerLoggedIn
-from pvscore.model.crm.customer import Customer
+from pvscore.model.crm.customer import Customer, CustomerPhase
 from pvscore.model.crm.product import Product, ProductReturn, InventoryJournal
 from pvscore.model.crm.campaign import Campaign
 from pvscore.model.crm.journal import Journal
@@ -56,6 +56,7 @@ class CustomerController(BaseController):
             customer.campaign = self.request.ctx.site.company.default_campaign
         return {
             'customer' : customer,
+            'phases' : util.select_list(CustomerPhase.find_all(self.enterprise_id), 'phase_id', 'display_name', True),
             'campaigns' : util.select_list(Campaign.find_all(self.enterprise_id), 'campaign_id', 'name')
             }
 
@@ -89,7 +90,6 @@ class CustomerController(BaseController):
             attr_value = self.request.POST.get('attr_value[%d]' % i)
             if attr_name and attr_value:
                 cust.set_attr(attr_name, attr_value)
-
         self.flash('Successfully saved %s %s.' % (cust.fname, cust.lname))
         if do_redir:
             redir = self.request.POST.get('redir')
@@ -168,7 +168,7 @@ class CustomerController(BaseController):
             'history' : Status.find_by_customer(customer, self.offset),
             'offset' : self.offset
             }
-    
+
 
     @view_config(route_name='crm.customer.show_attributes', renderer='/crm/customer.attributes.mako')
     @authorize(IsLoggedIn())
@@ -211,7 +211,7 @@ class CustomerController(BaseController):
 
 
     @view_config(route_name='crm.customer.cancel_order_dialog', renderer='/crm/customer.cancel_order.mako')
-    @authorize(IsLoggedIn())    
+    @authorize(IsLoggedIn())
     def cancel_order_dialog(self):
         customer_id = self.request.matchdict.get('customer_id')
         order_id = self.request.matchdict.get('order_id')
@@ -226,7 +226,7 @@ class CustomerController(BaseController):
 
 
     @view_config(route_name='crm.customer.cancel_order', renderer='string')
-    @authorize(IsLoggedIn())    
+    @authorize(IsLoggedIn())
     def cancel_order(self):
         customer_id = self.request.matchdict.get('customer_id')
         order_id = self.request.matchdict.get('order_id')
@@ -423,7 +423,7 @@ class CustomerController(BaseController):
 
         self.forbid_if(round(amt + balance_amount_to_apply, 2) > round(prior_total_due, 2),
                        "amt + balance_amount_to_apply > prior_total_due")
-        self.forbid_if(current_customer_balance > 0 and round(balance_amount_to_apply, 2) > round(current_customer_balance, 2), 
+        self.forbid_if(current_customer_balance > 0 and round(balance_amount_to_apply, 2) > round(current_customer_balance, 2),
                        "balance_amount_to_apply > current_customer_balance")
 
         pmt_type = 'PartialPayment'
@@ -443,7 +443,7 @@ class CustomerController(BaseController):
         customer.flush()
         return 'True'
 
-    
+
     @view_config(route_name='crm.customer.edit_order', renderer='string')
     @authorize(IsLoggedIn())
     def edit_order(self):   #pylint: disable-msg=R0915
@@ -603,7 +603,7 @@ class CustomerController(BaseController):
         cust = Customer.find(email, self.request.ctx.site.company)
         return 'True' if cust else 'False'
 
-    
+
     def _prep_add_order_dialog(self, customer_id):
         customer = Customer.load(customer_id)
         self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
@@ -640,14 +640,14 @@ class CustomerController(BaseController):
         self._site_purchase(cust, self.session['cart'])
         cart.remove_all()
         return self.find_redirect()
-        
+
 
     @view_config(route_name='crm.customer.signup')
     def signup(self):
         cust = self._signup()
         if cust:
             return self.find_redirect('?customer_id=' + str(cust.customer_id))
-    
+
 
     @validate((('fname', 'string'), ('fname', 'required'),
               ('lname', 'string'), ('lname', 'required'),
@@ -661,7 +661,7 @@ class CustomerController(BaseController):
         Try to find the customer by the email provided.
         - If found by email, redirect back to the calling page (POST['url_path'] with msg = already_exists
         Save the customer object and store in the self.session as though the customer has logged in.
-        
+
         If something goes wrong, redirect back to the calling page with msg = signup_failed
         """
         self.forbid_if(self.request.POST.get('customer_id') or self.request.ctx.customer or not self.request.ctx.campaign)
@@ -688,7 +688,7 @@ class CustomerController(BaseController):
         cust = self._save(self.request.ctx.customer.customer_id, False) # don't let it redirect
         self._site_purchase(cust)
         return HTTPFound(util.nvl(self.request.POST.get('redir'), '/') + '?customer_id=' + str(cust.customer_id)) #pylint: disable-msg=E1103
-    
+
 
     def _site_purchase(self, cust, cart=None):  #pylint: disable-msg=R0912,R0915
         bill = Billing.create(cust)
@@ -728,7 +728,7 @@ class CustomerController(BaseController):
                 accept.signature = cust.email
                 accept.save()
                 accept.flush()
- 
+
             self._apply_payment(cust.customer_id, order.order_id, order.total_price(), api.payment_method)
             try:
                 campaign.send_post_purchase_comm(order)
@@ -751,7 +751,7 @@ class CustomerController(BaseController):
         # fix this.  double lookup of customer is lame.
         return self._save(self.request.ctx.customer.customer_id)
 
-    
+
     @view_config(route_name='crm.customer.self_save_billing')
     @authorize(IsCustomerLoggedIn())
     def self_save_billing(self):
@@ -760,13 +760,13 @@ class CustomerController(BaseController):
         bill = cust.billing
         if not bill:
             bill = Billing.create(cust, True)
- 
+
         bill.set_cc_info(self.request.POST.get('bill_cc_num'), self.request.POST.get('bill_cc_cvv'))
         bill.cc_exp = self.request.POST.get('bill_cc_exp')
         bill.cc_token = self.request.POST.get('bill_cc_token')
         if 'bill_exp_month' in self.request.POST and 'bill_exp_year' in self.request.POST:
             bill.cc_exp = self.request.POST.get('bill_exp_month') + '/' + self.request.POST.get('bill_exp_year')
- 
+
         bill.bind(self.request.POST, False, 'bill')
         bill.save()
         cust.save()
@@ -783,7 +783,7 @@ class CustomerController(BaseController):
             self.flash('Unable to save credit card information: %s' % last_note)
             log.error('CC CHANGE DECLINED %s %s %s' % (cust.customer_id, cust.email, last_note))
             self.raise_redirect(self.request.referrer)
- 
+
 
     @view_config(route_name='crm.customer.self_cancel_order')
     @authorize(IsCustomerLoggedIn())
@@ -798,7 +798,7 @@ class CustomerController(BaseController):
         if not cust.authenticate(self.request.POST.get('username'), self.request.POST.get('password'), cust.campaign.company):
             self.flash('Username or password incorrect.  Unable to cancel.')
             self.raise_redirect()
- 
+
         if self.request.POST.get('order_id'):
             self._cancel_order_impl(self.request.POST.get('order_id'),
                                     None, True)
@@ -810,7 +810,7 @@ class CustomerController(BaseController):
         cust.invalidate_caches()
         cust.campaign.send_post_cancel_comm(cust)
         return self.find_redirect()
- 
+
 
     @view_config(route_name='crm.customer.get_balance', renderer='string')
     @authorize(IsLoggedIn())
@@ -944,7 +944,7 @@ class CustomerController(BaseController):
     #         return HTTPFound(self.request.referrer)
 
 
-    
+
     # @view_config(route_name='crm.customer.edit_billing_dialog', renderer='/crm/customer.edit_billing.mako')
     # @authorize(IsLoggedIn())
     # def edit_billing_dialog(self):

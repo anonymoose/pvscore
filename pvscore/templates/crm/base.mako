@@ -9,9 +9,9 @@ ${self.pre_process()}
   <meta name="Description" content="${self.meta_description()}" />
   <meta name="Version" content="${self.meta_version()}" />
   <meta name="Keywords" content="${self.meta_keywords()}" />
-  
+
   <title>${self.meta_title()}</title>
-  
+
   ${h.stylesheet_link('/static/bootstrap/css/bootstrap.css')}
   <style type="text/css">
     body {
@@ -20,15 +20,15 @@ ${self.pre_process()}
     }
   </style>
   ${h.stylesheet_link('/static/bootstrap/css/bootstrap-responsive.css')}
-  
+
   ${h.stylesheet_link('/static/js/jquery/jqgrid/css/ui.jqgrid.css')}
   ${h.stylesheet_link('/static/bootstrap-extensions/datepicker/css/datepicker.css')}
   ${h.stylesheet_link('/static/css/pvs.css')}
   ${h.stylesheet_link('/static/css/appointment.css')}
-  
+
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
   <%include file="style_override.mako"/>
-  
+
   ${self.local_head()}
   ${self.other_head()}
 </head>
@@ -177,7 +177,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
       <li>
         <form id="frm_lname_complete" class="navbar-form pull-left">
           <input name="lname_complete" type="text"
-                 placeholder="Last Name Search" 
+                 placeholder="Last Name Search"
                  id="lname_complete" data-provide="typeahead" data-source="[]" maxlength="30" autocomplete="off"/>
         </form>
       </li>
@@ -264,7 +264,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
           </ul>
         </li>
         % endif
-        
+
         % if request.ctx.user.priv.edit_purchasing or request.ctx.user.priv.view_purchasing:
         <li class="dropdown-submenu">
           <a tabindex="-1" href="#">Suppliers</a>
@@ -281,7 +281,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
           </ul>
         </li>
         % endif
-        
+
         % if request.ctx.user.priv.view_users or request.ctx.user.priv.edit_users:
         <li class="dropdown-submenu">
           <a tabindex="-1" href="#">Users</a>
@@ -303,7 +303,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
           </ul>
         </li>
         % endif
-        
+
         % if request.ctx.user.priv.edit_event or request.ctx.user.priv.view_event:
         <li class="dropdown-submenu">
           <a tabindex="-1" href="#">Workflow</a>
@@ -312,10 +312,14 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
             <li><a href="/crm/event/new">Add Workflow Event</a></li>
             % endif
             <li><a href="/crm/event/list">List All Workflow Events</a> </li>
+            % if request.ctx.user.priv.edit_event:
+            <li><a href="/crm/phase/new">Add Customer Phase</a></li>
+            % endif
+            <li><a href="/crm/phase/list">List All Customer Phases</a> </li>
           </ul>
         </li>
         % endif
-       
+
         % for link_name in plugin_registry.category('administration_link'):
           % if plugin_registry.is_applicable('administration_link', link_name, request):
             <li><a href="${plugin_registry.getattr('administration_link', link_name, 'href')}">${link_name}</a></li>

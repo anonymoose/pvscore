@@ -23,7 +23,7 @@ ${next.body()}
       <li>
         <form id="frm_product_search" class="form-inline">
           <input name="product_search" type="text"
-                 placeholder="Product Search" 
+                 placeholder="Product Search"
                  id="product_search" data-provide="typeahead" data-source="[]" maxlength="30" autocomplete="off"/>
         </form>
       </li>

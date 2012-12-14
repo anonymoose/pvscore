@@ -93,6 +93,13 @@ def crm_routes(config):
     adrt('crm.event.search', '/crm/event/search')
     adrt('crm.event.list', '/crm/event/list')
 
+    adrt('crm.phase.new', '/crm/phase/new')
+    adrt('crm.phase.edit', '/crm/phase/edit/{phase_id}')
+    adrt('crm.phase.save', '/crm/phase/save')
+    adrt('crm.phase.search', '/crm/phase/search')
+    adrt('crm.phase.list', '/crm/phase/list')
+
+
     adrt('crm.report.new', '/crm/report/new')
     adrt('crm.report.edit', '/crm/report/edit/{report_id}')
     adrt('crm.report.show', '/crm/report/show/{report_id}')

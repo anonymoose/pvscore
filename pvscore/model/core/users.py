@@ -27,8 +27,8 @@ class Users(ORMBase, BaseModel):
     delete_dt = Column(DateTime)
     api_key = Column(String(50))
     type = Column(String(50))
-    tz_offset = Column(Integer, default=5)
     login_link = Column(String(100))
+    default_timezone = Column(String(100))
 
     email = Column(String(50))
 
@@ -62,10 +62,10 @@ class Users(ORMBase, BaseModel):
 
     @staticmethod
     def authenticate(username, pwd):
-        """ KB: [2010-10-05]: See if there is a user that matches the UID and password supplied 
+        """ KB: [2010-10-05]: See if there is a user that matches the UID and password supplied
         Also determine if this guy is allowed into the crm/cms area of the app.
-        """        
-        return Session.query(Users).filter(and_(Users.username == username, 
+        """
+        return Session.query(Users).filter(and_(Users.username == username,
                                                 Users.password == Users.encode_password(pwd))).first()
 
 
@@ -82,7 +82,7 @@ class Users(ORMBase, BaseModel):
     @staticmethod
     def encode_password(password):
         return md5(password).hexdigest()
-    
+
 
     @staticmethod
     def find_all(enterprise_id):
@@ -125,7 +125,7 @@ class UserPriv(ORMBase, BaseModel):
     modify_customer_order = Column(Boolean, default=False)
     view_purchasing = Column(Boolean, default=False)
     edit_purchasing = Column(Boolean, default=False)
-    cms = Column(Boolean, default=False)    
+    cms = Column(Boolean, default=False)
     edit_category = Column(Boolean, default=False)
     barcode_order = Column(Boolean, default=False)
     edit_discount = Column(Boolean, default=False)
@@ -167,12 +167,12 @@ class UserPriv(ORMBase, BaseModel):
     #         l_clause = "and lower(lname) like '%s%%'" % lname.lower()
     #     if email:
     #         e_clause = "and lower(email) like '%s%%'" % email.lower()
-    #     sql = """SELECT * FROM core_user where 1=1 
+    #     sql = """SELECT * FROM core_user where 1=1
     #           and enterprise_id = {entid}
-    #           {uname} {fname} {lname} {email} """.format(uname=u_clause, 
-    #                                                      fname=f_clause, 
-    #                                                      lname=l_clause, 
-    #                                                      email=e_clause, 
+    #           {uname} {fname} {lname} {email} """.format(uname=u_clause,
+    #                                                      fname=f_clause,
+    #                                                      lname=l_clause,
+    #                                                      email=e_clause,
     #                                                      entid=enterprise_id)
     #     return Session.query(Users).from_statement(sql).all()
-    
+

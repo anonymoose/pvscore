@@ -39,7 +39,8 @@ requires = [
     'selenium',
     'stripe',
     'PyRSS2Gen',
-    'nose-cov'
+    'nose-cov',
+    'pytz'
     ]
 
 setup(name='pvscore',

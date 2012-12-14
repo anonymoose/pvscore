@@ -58,16 +58,16 @@ ${next.body()}
         </a>
       </li>
       % endif
-      
+
       <li id="show_history">${h.link_to('History', '/crm/customer/show_history/%s' % customer.customer_id)}</li>
       % if request.ctx.user.priv.add_customer_billing:
       <li id="show_billings">${h.link_to('Billing', '/crm/customer/show_billings/%s' % customer.customer_id)}</li>
       % endif
       <li id="show_attributes">${h.link_to('Attributes', '/crm/customer/show_attributes/%s' % customer.customer_id)}</li>
-      
+
       <li id="new_for_customer"><a href="/crm/appointment/new_for_customer/${customer.customer_id}">Add Appt</a></li>
       <li id="show_appointments">${h.link_to('Appointments', '/crm/appointment/show_appointments/%s' % customer.customer_id, id='link_appointments')}</li>
-      
+
       % endif
       % if customer.customer_id:
         <li><hr></li>

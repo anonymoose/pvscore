@@ -4,11 +4,12 @@ import datetime, calendar
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.controllers.base import BaseController
-from pvscore.lib.decorators.authorize import authorize 
+from pvscore.lib.decorators.authorize import authorize
 from pvscore.lib.auth_conditions import IsLoggedIn
 from pvscore.model.crm.appointment import Appointment
 from pvscore.model.crm.customer import Customer
 import pvscore.lib.util as util
+from pytz import country_timezones
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +57,7 @@ class AppointmentPlugin(BaseController):
             'tomorrow' : util.today_date() + datetime.timedelta(days=1),
             'customer' : customer,
             'appointment' : appointment,
+            'timezones' : country_timezones('US'),
             'hours' : hours
             }
 
@@ -73,8 +75,12 @@ class AppointmentPlugin(BaseController):
     @view_config(route_name="crm.appointment.search", renderer='/crm/appointment.search.mako')
     @authorize(IsLoggedIn())
     def search(self):
-        title = self.request.POST.get('title') 
-        description = self.request.POST.get('description') 
+        title = self.request.POST.get('title')
+        if 'description' not in self.request.POST:
+            # KB: [2012-12-13]: This happens when we come from the inline search and only one field is passed (it's title)
+            description = title
+        else:
+            description = self.request.POST.get('description')
         appts = Appointment.search(self.enterprise_id, title, description)
         return {
             'title' : title,
@@ -113,7 +119,7 @@ class AppointmentPlugin(BaseController):
             apt.user_created = self.request.ctx.user.user_id
         apt.bind(self.request.POST, False)
         if customer_id != '':
-            apt.customer_id = customer_id 
+            apt.customer_id = customer_id
         apt.save()
         apt.flush()
         self.flash('Successfully saved "%s".' % apt.title)
@@ -128,11 +134,11 @@ class AppointmentPlugin(BaseController):
     def day_view(self):
         return self._day_view_impl()
 
-    
+
     @view_config(route_name="crm.appointment.this_day", renderer="/crm/appointment.cal_day.mako")
     @authorize(IsLoggedIn())
     def this_day(self):
-        today = datetime.datetime.date(datetime.datetime.now()) 
+        today = datetime.datetime.date(datetime.datetime.now())
         return self._day_view_impl(int(today.year), int(today.month), int(today.day))
 
 
@@ -152,7 +158,7 @@ class AppointmentPlugin(BaseController):
     @view_config(route_name="crm.appointment.this_month", renderer="/crm/appointment.cal_month.mako")
     @authorize(IsLoggedIn())
     def this_month(self):
-        today = datetime.datetime.date(datetime.datetime.now()) 
+        today = datetime.datetime.date(datetime.datetime.now())
         return self._month_view_impl(int(today.year), int(today.month))
 
 
