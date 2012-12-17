@@ -8,8 +8,6 @@ cd ~/src/numpy
 source ~/dev/pydev/pvs/bin/activate
 git clone https://github.com/numpy/numpy.git
 git clone https://github.com/scipy/scipy.git
-git clone git@github.com:matplotlib/matplotlib.git
-easy_install pygtk≈
 
 export CC=clang
 export CXX=clang
@@ -23,7 +21,7 @@ cd ../scipy
 python setup.py build
 python setup.py install
 
-
+pip --verbose install git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib
 
 
 #
