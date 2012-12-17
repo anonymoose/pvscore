@@ -6,7 +6,7 @@ tags
 public/err.html
 *.elc
 *.pyc
-*.dat
+#*.dat
 *.rdb
 *~
 tmp/*
