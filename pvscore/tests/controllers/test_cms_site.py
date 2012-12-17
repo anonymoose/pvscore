@@ -120,12 +120,12 @@ Disallow: /cms/cart/add/*""")
     def test_dynamic_1deep(self):
         R = self.get('/subdir1-in_subdir_1/220/123')
         R.mustcontain('this is in subdir1 param0 = 220 param1 = 123 param2 = None')
-        
+
 
     def test_dynamic_2deep(self):
         R = self.get('/subdir1-subdir2-in_subdir_2/220/123')
         R.mustcontain('this is in subdir2 param0 = 220 param1 = 123 param2 = None')
-        
+
 
     def test_dynamic_not_found(self):
         excepted = False
@@ -135,7 +135,7 @@ Disallow: /cms/cart/add/*""")
             log.info(notfound)
             excepted = True
         self.assertEqual(excepted, True)
-        
+
 
     def test_customer_found(self):
         cust = self.get_customer()
@@ -157,8 +157,8 @@ Disallow: /cms/cart/add/*""")
             log.debug(forbid)
             return
         # should never get here.
-        self.assertEqual(True, False)
+        self.assertEqual(True, False)  #pragma: no cover
 
 
 
-        
+

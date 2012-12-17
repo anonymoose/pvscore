@@ -23,7 +23,7 @@ class TestUtil(TestController):
         assert util.get_first_day(today_) == util.get_first_day(today_)  # this is pretty dumb.  it works, just get it covered.
         assert util.get_last_day(today_) == util.get_last_day(today_)
         assert util.to_uuid('ken') == None
-        assert int(util.average([1,2,3])) == 2
+        assert int(util.average([1, 2, 3])) == 2
         assert util.format_date(util.truncate_datetime(dtime)) == util.str_today()
         assert util.is_today(d8e) == True
 

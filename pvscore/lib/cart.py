@@ -19,7 +19,7 @@ class Cart(object):
         return len(self.items)
 
 
-    def add_item(self, product, campaign, quantity=1, price=None, start_dt=None):
+    def add_item(self, product, campaign, quantity=1, price=None, start_dt=None): #pylint: disable-msg=R0913
         if not price:
             price = product.get_price(campaign)
         price = float(price)
@@ -78,7 +78,7 @@ class Cart(object):
     def has_product_id(self, product_id):
         return len([item for item in self.items if item['product'].product_id == product_id]) > 0
 
-        
+
     def remove_item(self, product):
         found = False
         for i in range(len(self.items)-1, -1, -1):
@@ -136,7 +136,7 @@ class Cart(object):
     #    if not cart.timeframe:
     #        cart.set_shipping_timeframe(self.get_shipping_default_timeframe())
     #        cart.get_shipping_total(None, True)
-    #        session.save() 
+    #        session.save()
 
 #    def get_categories(self):
 #        return ProductCategory.find_by_campaign(self.campaign)
@@ -234,4 +234,4 @@ class Cart(object):
 #     def get_shipping_default_timeframe(self):
 #         shipping = self.site.get_shipping()
 #         return shipping.get_default_timeframe(self.site)
-    
+

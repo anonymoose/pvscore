@@ -67,9 +67,9 @@ class BaseModel(object):
         Session.delete(self)    #pylint: disable-msg=E1101
 
 
-    @staticmethod
+    @classmethod
     def delete_all(cls, where=''):
-        Session.execute('delete from %s %s' % (cls.__tablename__, where))
+        Session.execute('delete from %s %s' % (cls.__tablename__, where))   #pylint: disable-msg=E1101
 
 
     def soft_delete(self):

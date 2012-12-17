@@ -661,8 +661,8 @@ def run_process_loop(exe):
     proc = subprocess.Popen(exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     lines = []
     while (True):
-        retcode = proc.poll() #returns None while subprocess is running
-        line = proc.stdout.readline()
+        retcode = proc.poll() #pylint: disable-msg=E1101
+        line = proc.stdout.readline() #pylint: disable-msg=E1101
         if line:
             lines.append(line)
         elif retcode is not None:
@@ -691,6 +691,7 @@ def to_uuid(val):
     try:
         return uuid.UUID(val)
     except Exception as exc:   #pragma: no cover
+        log.warn(exc)
         return None
 
 def is_uuid(val):

@@ -1,4 +1,4 @@
-#pylint: disable-msg=C0103,R0903
+#pylint: disable-msg=C0103,R0903,E1101
 import venusian
 
 class PluginRegistry(object):

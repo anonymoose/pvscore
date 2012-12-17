@@ -10,7 +10,7 @@ class TestBin(TestCase):
         os.environ['is_debug'] = 'True'
         try:
             pyramid_script_t()
-            self.assertEqual(True, False)
+            self.assertEqual(True, False)  #pragma: no cover
         except Warning as war:
             log(war)
         finally:
@@ -38,7 +38,7 @@ class TestBin(TestCase):
         excepted = False
         try:
             pyramid_barf_script()
-        except Exception as exc:
+        except Exception as exc: #pragma: no cover
             log(exc)
             excepted = True
         finally:

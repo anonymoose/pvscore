@@ -1,14 +1,12 @@
+#pylint: disable-msg=C0103
 import logging
-from pvscore.tests import TestController, secure, customer_logged_in, TEST_CUSTOMER_EMAIL
+from pvscore.tests import TestController, secure, customer_logged_in
 from pvscore.model.crm.company import Enterprise
 from pvscore.model.crm.product import ProductCategory
 from pvscore.tests.controllers.test_cms_content import content_create_new, content_delete_new
 from pvscore.model.cms.content import Content
 from pvscore.lib.billing_api import StripeBillingApi
-from pvscore.lib.shipping.shipping import UPSShipping
 from pvscore.lib.cart import Cart
-from pvscore.model.crm.customer import Customer
-from pvscore.model.crm.campaign import Campaign
 
 log = logging.getLogger(__name__)
 
@@ -19,7 +17,6 @@ class TestCatalog(TestController):
 
     def test_misc(self):
         # really contrived example to get coverage in pvscore.lib.cart
-        ent = Enterprise.find_by_name('Healthy U Store')
         cust = self.get_customer()
         order = cust.get_active_orders()[0]
         cart = Cart(self.site)

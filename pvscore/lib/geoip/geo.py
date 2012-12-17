@@ -1,7 +1,6 @@
 import pygeoip
 import logging
 import os
-import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
 

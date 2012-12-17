@@ -4,13 +4,12 @@ from sqlalchemy.types import String, DateTime, Float, Text
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
-import pvscore.lib.util as util
 from pvscore.thirdparty.dbcache import invalidate
 import uuid
 from pvscore.lib.sqla import GUID
 
 class Journal(ORMBase, BaseModel):
-    """ KB: [2012-09-03]: 
+    """ KB: [2012-09-03]:
         Scenario 1
             Buy Something
             -------------------
@@ -22,13 +21,13 @@ class Journal(ORMBase, BaseModel):
 
             Discount = 5
             **PartialPayment = 20
-    
+
             Total Applied = Payments + Discount + CreditDecreases = (20 + 5 + 0) = 25
             Total Due = Order Total - Total Applied = 5
 
             Customer Balance = -1 * (Total Due - TotalCreditIncrease) = -5
 
-    
+
             Return Item A
             -------------------
             Total Due = 5
@@ -42,13 +41,13 @@ class Journal(ORMBase, BaseModel):
             Order Tot = 30
 
             Customer Balance Pre Txn = 50
-    
+
             Discount = 0
             **Apply CreditDecrease = 30
-    
+
             Total Applied = Payments + Discount + CreditDecreases = 0 + 0 + 30 = 30
             Total Due = Order Total - Total Applied = 0
-    
+
             Return Item A
             -------------------
             Total Due = 0
@@ -75,11 +74,6 @@ class Journal(ORMBase, BaseModel):
 
     def __repr__(self):
         return '%s %s %s = %s' % (self.journal_id, self.type, self.method, self.amount)
-
-
-    def cancel(self):
-        self.delete_dt = util.today()
-        self.save()
 
 
     @staticmethod
@@ -133,7 +127,7 @@ class Journal(ORMBase, BaseModel):
     @staticmethod
     def filter_discounts(order):
         return Journal._filter_by_types(order, ['Discount'])
-    
+
 
     @staticmethod
     def total_credit_decreases(order):

@@ -1,15 +1,13 @@
 #pylint: disable-msg=E1101
-import math
 from sqlalchemy import Column, ForeignKey, and_, or_
 from sqlalchemy.types import Integer, String, DateTime, Text, Float, DateTime
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
-from pvscore.model.meta import ORMBase, BaseModel, Session, BaseAnalytic
+from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.crm.customerorder import CustomerOrder
 from pvscore.model.core.users import Users
 from pvscore.model.crm.journal import Journal
 import pvscore.lib.db as db
-import pvscore.lib.util as util
 import uuid
 from pvscore.lib.sqla import GUID
 from pvscore.model.core.status import Status
@@ -138,7 +136,7 @@ class Customer(ORMBase, BaseModel):
 
     @staticmethod
     def search(enterprise_id, company_name, fname, lname, email, phone, user_assigned):   #pylint: disable-msg=R0913
-        cn_clause = f_clause = l_clause = e_clause = p_clause = a_clause =''
+        cn_clause = f_clause = l_clause = e_clause = p_clause = a_clause = ''
         if company_name:
             cn_clause = "and lower(cc.company_name) like '%{desc}%'".format(desc=company_name.lower())
         if fname:

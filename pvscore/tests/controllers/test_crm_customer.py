@@ -1,5 +1,5 @@
 #pylint: disable-msg=C0103,C0302
-from pvscore.tests import TestController, secure, alternate_site, TEST_CUSTOMER_EMAIL
+from pvscore.tests import TestController, secure, alternate_site
 from pvscore.model.crm.customer import Customer
 from pvscore.model.crm.customerorder import CustomerOrder
 from pvscore.model.crm.orderitem import OrderItem
@@ -12,12 +12,18 @@ import pvscore.lib.util as util
 
 # bin/T pvscore.tests.controllers.test_crm_customer
 
-def find_customer(campaign):
-    return Customer.find(TEST_CUSTOMER_EMAIL, campaign)
+#def find_customer(campaign):
+#    return Customer.find(TEST_CUSTOMER_EMAIL, campaign)
 
 class TestCrmCustomer(TestController):
     def test_misc(self):
+        cust = self.get_customer()
+        cust2 = Customer.load(str(cust.customer_id), False)
+        assert cust2 is not None
+        assert str(cust.customer_id) == str(cust2.customer_id)
         assert 'FullPayment' in Journal.get_types()
+        assert 1 == Customer.count("where customer_id = '%s'" % str(cust.customer_id))
+        assert cust.get_attr('BOGUS', 'defaultx') == 'defaultx'
 
 
     def test_customer_login_to_link(self):
@@ -83,6 +89,7 @@ class TestCrmCustomer(TestController):
         for item in order.items:
             self.assertEqual(item.product_id in (prods[0].product_id, prods[1].product_id, prods[2].product_id), True)
             oids.append(item.order_item_id)
+            assert [] == item.children
         R = self.get('/crm/customer/show_orders/%s' % customer_id)
         assert R.status_int == 200
         R.mustcontain('Edit Order (%s)' % order_id)
@@ -126,6 +133,7 @@ class TestCrmCustomer(TestController):
 
     def _delete_new(self, customer_id):
         Customer.full_delete(customer_id)
+        Customer.delete_all("where customer_id = '%s'" % str(customer_id))  # this is just for coverage for the delete_all method in meta.py
         self.commit()
 
 
