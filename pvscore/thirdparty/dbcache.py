@@ -1,3 +1,4 @@
+#pragma: no cover
 #pylint: disable-msg=W0212,W0231,C0103,W0107,E1101
 """
 KB: [2011-02-07]: This is lifted directly from the SQLAlchemy examples.  Props to them.
