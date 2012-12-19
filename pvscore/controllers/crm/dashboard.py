@@ -20,11 +20,10 @@ class DashboardController(BaseController):
             charts.append(PeriodOrderSummary(self.request))
             charts.append(MTDSalesByVendor(self.request))
             #charts.append(PeriodCustomerCountSummary(self.request))
-
         return {
             'companies': Company.find_all(self.request.ctx.enterprise.enterprise_id),
             'charts' : charts,
-            'appointments' : Appointment.find_by_user(self.request.ctx.user)[:10]
+            'appointments' : Appointment.find_future_by_user(self.request.ctx.user)[:10]
             }
 
     @view_config(route_name="crm.dashboard", renderer="/crm/dashboard.mako")

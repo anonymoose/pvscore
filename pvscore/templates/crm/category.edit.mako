@@ -1,7 +1,7 @@
 
 <%inherit file="product.base.mako"/>\
 
-<div> 
+<div>
   <h1>Edit Product Category</h1>
   <form method="POST" action="/crm/product/category/save" id="frm_category">
     ${h.hidden('category_id', value=category.category_id)}
@@ -16,7 +16,7 @@
           <label for="company_id">Company</label>
           ${h.select('company_id', str(category.company_id), companies)}
         </div>
-      </div> 
+      </div>
 
       <div class="row">
         <div class="span8">
@@ -50,7 +50,19 @@
             <div class="span4">
               % if all_products:
               <h3>Child Products</h3>
-              <div style="overflow: scroll; height: 400px;">
+              <style>
+                div::-webkit-scrollbar {
+                  -webkit-appearance: none;
+                  width: 11px;
+                  height: 11px;
+                }
+                div::-webkit-scrollbar-thumb {
+                  border-radius: 8px;
+                  border: 2px solid white; /* should match background, can't be transparent */
+                  background-color: rgba(0, 0, 0, .5);
+                }
+              </style>
+              <div style="overflow: scroll; height: 400px; -webkit-appearance: none;">
                 <table>
                   <tr><th></th><th>Include?</th></tr>
                   % for p in category.products:
@@ -58,7 +70,7 @@
                     <td>${p.name}</td>
                     <td nowrap>${h.checkbox('child_incl_%s' % p.product_id, checked=True, value=p.product_id, class_='product_chk')}</td>
                   </tr>
-                  % endfor          
+                  % endfor
                   <%
                      kids = category.products
                      non_kids = []
@@ -77,11 +89,11 @@
                     <td>${p.name}</td>
                     <td nowrap>${h.checkbox('child_incl_%s' % p.product_id, checked=False, value=p.product_id, class_='product_chk')}</td>
                   </tr>
-                  % endfor          
+                  % endfor
                 </table>
               </div>
               % endif
-    
+
               <div class="span3">
                 % if category.category_id:
                 <table>

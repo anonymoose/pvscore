@@ -6,7 +6,7 @@ import os
 
 
 def is_true(info, request): #pylint: disable-msg=W0613
-    return True
+    return True  #pragma: no cover
 
 
 if 'PVS_TESTING' in os.environ and os.environ['PVS_TESTING'] == 'TRUE':
@@ -37,7 +37,7 @@ if 'PVS_TESTING' in os.environ and os.environ['PVS_TESTING'] == 'TRUE':
         @plugin_administration_link(link_text="admin test 1", href="/tsst/test_admin_link")
         @view_config(route_name='test.2', renderer="string")
         def tsst_admin_link(self):
-            return "Admin link landing page"
+            return "Admin link landing page"  #pragma: no cover
 
 
         @view_config(route_name='test.3', renderer='string')
@@ -84,14 +84,14 @@ if 'PVS_TESTING' in os.environ and os.environ['PVS_TESTING'] == 'TRUE':
         @plugin_customer_sidebar_link(link_text="customer sidebar test 1", href="/tsst/test_customer_sidebar_link", custom_predicates=(is_true,))
         @view_config(route_name='test.10', renderer="string")
         def tsst_customer_sidebar_link(self):
-            return "Customer sidebar landing page"
+            return "Customer sidebar landing page"  #pragma: no cover
 
 
         @view_config(route_name='test.11', renderer='string')
         @validate((('fname', 'required'),
                    ('fname', 'string')))
         def tsst_validate2(self):
-            return 'CALLED:tsst_validate2'
+            return 'CALLED:tsst_validate2'  #pragma: no cover
 
 
 

@@ -12,8 +12,10 @@ import pvscore.lib.db as db
 from pvscore.thirdparty.dbcache import FromCache, invalidate
 from sqlalchemy.orm.collections import attribute_mapped_collection
 import pvscore.lib.util as util
-import uuid
+import uuid, logging
 from pvscore.lib.sqla import GUID
+
+log = logging.getLogger(__name__)
 
 class Product(ORMBase, BaseModel):
     __tablename__ = 'crm_product'
@@ -137,7 +139,7 @@ class Product(ORMBase, BaseModel):
                              or_(Product.type == 'Top Level', Product.type == 'Parent or Child'))).order_by(Product.name).all()
         else: return []
 
-    
+
     @staticmethod
     def find_ordered_list(campaign, which, order_by='revenue'):
         if 'new' == which:
@@ -396,8 +398,11 @@ class Product(ORMBase, BaseModel):
     @property
     def link(self):
         """ KB: [2012-11-24]: This puts a dependency on the ecom URL layout, which may be too inflexible.  ok for now. """
-        if self.name:
-            return "/product/%s/%s" % (util.html_literal(util.urlencode_ex(self.name)), str(self.product_id))
+        try:
+            if self.name:
+                return "/product/%s/%s" % (util.html_literal(util.urlencode_ex(self.name)), str(self.product_id))
+        except Exception as exc:
+            log.warn("Invalid product link for product_id = %s" % str(self.product_id))
         return "/product/%s" % str(self.product_id)
 
 
@@ -938,7 +943,7 @@ class InventoryJournal(ORMBase, BaseModel):
     #         .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
     #         .filter(and_(Product.delete_dt == None,
     #                      Product.enabled == True,
-    #                      Company.enterprise_id == enterprise_id, 
+    #                      Company.enterprise_id == enterprise_id,
     #                      ProductPricing.delete_dt == None,
     #                      ProductPricing.campaign == campaign,
     #                      #or_(Product.inventory == None, Product.inventory > 0, Product.show_negative_inventory == True),
@@ -957,7 +962,7 @@ class InventoryJournal(ORMBase, BaseModel):
     #         .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
     #         .filter(and_(Product.delete_dt == None,
     #                      Product.enabled == True,
-    #                      Company.enterprise_id == enterprise_id, 
+    #                      Company.enterprise_id == enterprise_id,
     #                      ProductPricing.delete_dt == None,
     #                      ProductPricing.campaign == campaign,
     #                      Product.web_visible == True,
@@ -1016,4 +1021,4 @@ class InventoryJournal(ORMBase, BaseModel):
     #             'Cancelled Item'     # user removed a single item from the order
     #             ]
 
-    
+

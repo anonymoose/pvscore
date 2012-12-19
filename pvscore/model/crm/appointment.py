@@ -1,10 +1,11 @@
 #pylint: disable-msg=E1101
-from sqlalchemy import Column, ForeignKey, or_
+from sqlalchemy import Column, ForeignKey, or_, and_
 from sqlalchemy.types import String, DateTime, Text, Boolean
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.core.users import Users
+import pvscore.lib.util as util
 import logging
 import uuid
 from pvscore.lib.sqla import GUID
@@ -74,6 +75,13 @@ class Appointment(ORMBase, BaseModel):
                                                      Appointment.assigned == user)).order_by(Appointment.start_dt.asc(),
                                                                                              Appointment.start_time.asc()).all()
 
+
+    @staticmethod
+    def find_future_by_user(user):
+        return Session.query(Appointment).filter(and_(Appointment.start_dt > util.yesterday(),
+                                                      or_(Appointment.creator == user,
+                                                          Appointment.assigned == user))).order_by(Appointment.start_dt.asc(),
+                                                                                                  Appointment.start_time.asc()).all()
 
     @staticmethod
     def find_by_month(year, month, user):

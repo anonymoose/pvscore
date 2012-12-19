@@ -541,6 +541,11 @@ class TestCrmCustomer(TestController):
         assert 'customer_id' in R.request.params
         customer_id = R.request.params['customer_id']
         cust = Customer.load(customer_id)
+        prod = Product.find_by_sku(self.site.company.enterprise_id, cust.campaign, 'T2-002')
+        custs = prod.get_customers()
+        assert str(cust.customer_id) in [str(cust_.customer_id) for cust_ in custs]
+        custs = prod.get_customers_created_today()
+        assert str(cust.customer_id) in [str(cust_.customer_id) for cust_ in custs]
         self.assertEqual(str(cust.customer_id), str(customer_id))
         self.assertEqual(cust.fname, 'Ken')
         self.assertEqual(cust.lname, 'Bedwell')

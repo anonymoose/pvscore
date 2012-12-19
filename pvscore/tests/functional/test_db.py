@@ -11,6 +11,7 @@ class TestDb(TestController):
         db.execute("drop table if exists testtable")
         db.execute("create table testtable ( x int not null )")
         db.execute("insert into testtable (x) values (123)")
+        db.flush()
         db.commit()
         v = db.get_value("select x from testtable")
         assert v == 123

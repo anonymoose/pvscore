@@ -288,10 +288,7 @@ class CustomerController(BaseController):
 
     @property
     def incl_tax(self):
-        incl_tax = 1
-        if 'incl_tax' in self.request.POST or 'incl_tax' in self.request.GET:
-            incl_tax = int(self.request.POST.get('incl_tax', self.request.GET.get('incl_tax', 1)))
-        return incl_tax
+        return int(self.request.POST.get('incl_tax', self.request.GET.get('incl_tax', 1)))
 
 
     @view_config(route_name='crm.customer.edit_order_dialog', renderer='/crm/customer.edit_order.mako')

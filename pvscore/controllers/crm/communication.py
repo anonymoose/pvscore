@@ -93,14 +93,9 @@ class CommunicationController(BaseController):
         self.forbid_if(not cust or str(cust.campaign.company.enterprise_id) != str(self.enterprise_id))
         comm = Communication.load(comm_id)
         self.forbid_if(not comm or str(comm.enterprise_id) != str(self.enterprise_id))
-        if cust.campaign != None:
-            sender = cust.campaign.company
-        else:
-            sender = self.request.ctx.user
-        if comm.send_to_customer(sender, cust, None, self.request.POST.get('msg')):
-            return 'True'
-        else:
-            return 'Unable to send email to %s' % cust.email
+        sender = cust.campaign.company if cust.campaign != None else self.request.ctx.user
+        return 'True' if comm.send_to_customer(sender, cust, None, self.request.POST.get('msg')) \
+            else 'Unable to send email to %s' % cust.email
 
 
     @view_config(route_name='crm.communication.save', renderer='/crm/communication.edit.mako')
