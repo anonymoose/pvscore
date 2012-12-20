@@ -5657,6 +5657,7 @@ pvscore/templates/crm/appointment.edit.mako
 pvscore/templates/crm/appointment.edit_customer.mako
 pvscore/templates/crm/appointment.edit_impl.mako
 pvscore/templates/crm/appointment.list.mako
+pvscore/templates/crm/appointment.list_impl.mako
 pvscore/templates/crm/appointment.search.mako
 pvscore/templates/crm/base.mako
 pvscore/templates/crm/campaign.edit.mako
@@ -5760,6 +5761,7 @@ pvscore/tests/controllers/test_crm_dashboard.py
 pvscore/tests/controllers/test_crm_event.py
 pvscore/tests/controllers/test_crm_listing.py
 pvscore/tests/controllers/test_crm_login.py
+pvscore/tests/controllers/test_crm_phase.py
 pvscore/tests/controllers/test_crm_product.py
 pvscore/tests/controllers/test_crm_purchase.py
 pvscore/tests/controllers/test_crm_report.py
@@ -5767,12 +5769,12 @@ pvscore/tests/controllers/test_crm_users.py
 pvscore/tests/functional/__init__.py
 pvscore/tests/functional/test_base.py
 pvscore/tests/functional/test_billing_api.py
-pvscore/tests/functional/test_bin.py
 pvscore/tests/functional/test_db.py
 pvscore/tests/functional/test_helpers.py
 pvscore/tests/functional/test_mail.py
 pvscore/tests/functional/test_plugin.py
 pvscore/tests/functional/test_util.py
 pvscore/tests/functional/test_validate.py
+pvscore/tests/functional/test_z_bin.py
 pvscore/thirdparty/__init__.py
 pvscore/thirdparty/dbcache.py

@@ -1,35 +1,49 @@
+http://www.thisisthegreenroom.com/2011/installing-python-numpy-scipy-matplotlib-and-ipython-on-lion/
 
 # Ensure python 2.7.x installed on local system.
 python --version
 
-# ensure dev libs for XML are installed
-sudo yum -y install libxml2 libxml2-devel libxslt libxslt-devel
+# install python via brew
+brew install python --framework --universal
+cd /System/Library/Frameworks/Python.framework/Versions
+sudo rm Current
+ln -s /usr/local/Cellar/python/2.7.3/Frameworks/Python.framework/Versions/Current
+
+# add the following to your .profile
+export PATH=$PATH:/usr/local/share/python
+export PYTHONPATH=/usr/local/lib/python2.7/site-packages:$PYTHONPATH
+
+# restart shell
 
 # ensure that the server can talk to github.  see git-notes.txt
 
-#
-# set up virtualenv of python 2.7, download everything and install libs.
-#
-cd /apps
-mkdir pvs
-chown -R kbedwell:web pvs
 
-cd /apps/pvs
-mkdir log
+# set up virtualenv of python 2.7, download everything and install libs.
+
+cd ~/dev/pydev
+mkdir pvs
+cd pvs
+
 mkdir .python-eggs
-mkdir -p storage/sites
-mkdir -p storage/companies
-chown -R kbedwell:web .
-export PYTHON_EGG_CACHE=/apps/pvs/.python-eggs
+mkdir -p storage/enterprise
+mkdir -p storage/wm/pdf
 
 wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
 
 python virtualenv.py --no-site-packages .
 source bin/activate
-easy_install pyramid
+pip install numpy
+pip install -e git+https://github.com/scipy/scipy#egg=scipy-dev
+pip install git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib-dev
+pip install ipython
+brew install pyqt
+pip install pyramid
+
 
 git clone git@github.com:anonymoose/pvscore.git
 git clone git@github.com:anonymoose/pvs.git
+git clone git@github.com:anonymoose/wm.git
+git clone git@github.com:anonymoose/stats.git
 
 chmod g+wx pvs
 
@@ -37,6 +51,10 @@ cd pvscore
 python setup.py develop
 cd ../pvs
 python setup.py develop
+cd ../wm
+python setup.py develop
+
+
 
 cd /apps/pvs
 chown -R kbedwell:web .
