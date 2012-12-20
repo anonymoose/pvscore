@@ -8,5 +8,7 @@
     su web web
     postrotate
         /bin/systemctl kill --signal=USR1 nginx.service
+	/bin/systemctl restart pvs.service
+	/bin/systemctl restart wm.service
     endscript
 }

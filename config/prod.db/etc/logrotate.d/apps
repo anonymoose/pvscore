@@ -1,11 +1,12 @@
 /apps/pvs/log/*.log {
     daily
-    rotate 10
+    rotate 10 
+    su web web
+    size=10M
     missingok
     notifempty
     compress
     sharedscripts
-    su web web
     postrotate
         /bin/systemctl kill --signal=USR1 nginx.service
     endscript
