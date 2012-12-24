@@ -45,7 +45,7 @@ class Content(ORMBase, BaseModel):
             .options(FromCache('Content.find_by_site', site.site_id))\
             .filter(and_(Content.site == site,
                          Content.delete_dt == None)).order_by(Content.name).all()
-    
+
 
     @staticmethod
     def find_by_name(site, name):
@@ -54,7 +54,7 @@ class Content(ORMBase, BaseModel):
             .filter(and_(Content.site == site,
                          Content.name == name,
                          Content.delete_dt == None)).first()
-    
+
 
     def invalidate_caches(self, **kwargs):
         invalidate(self, 'Content.find_by_name', '%s/%s' % (self.site_id, self.name))

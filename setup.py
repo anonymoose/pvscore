@@ -16,14 +16,14 @@ requires = [
     'zope.sqlalchemy',
     'waitress',
     'psycopg2',
-    'redis==2.6.0',
+    'redis',
     'html5lib',
     'lxml',
     'suds',
     'pygeoip',
     'tweepy',
     'prettytable',
-    'Mako==0.7.2',
+    'Mako',
     'simplejson',
     'webhelpers',
     'beaker',
@@ -40,7 +40,9 @@ requires = [
     'stripe',
     'PyRSS2Gen',
     'nose-cov',
-    'pytz'
+    'pytz',
+    'pycurl'
+    #'requests==0.8.8'
     ]
 
 setup(name='pvscore',

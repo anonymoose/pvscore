@@ -32,7 +32,7 @@ class CatalogBaseController(BaseController):
                 'customer' : load_customer(self.request, True),  # this way customer is always there, just may be empty
                 'matchdict' : self.request.matchdict,
                 'back_link' : self.session.get('back_link'),
-                'specials' : self.specials_product_list(0, 4)
+                'specials' : self.specials_product_list(self.request.GET.get('specials_category_id'), 0, 4)
                 }
 
 
@@ -62,8 +62,12 @@ class CatalogBaseController(BaseController):
         return SmartCatalog.new_product_list(self.request.ctx.campaign, offset, limit)
 
 
-    def specials_product_list(self, offset=None, limit=None):
-        return SmartCatalog.specials_product_list(self.request.ctx.campaign, offset, limit)
+    def specials_product_list(self, specials_category_id, offset=None, limit=None):
+        """ KB: [2012-12-24]: You can pass "specials_category_id=qwerqewfzdsxfdsfg" in the URL anywhere and the specials will show up as that category. """
+        if specials_category_id:
+            return SmartCatalog.category_product_list(self.request.ctx.campaign, specials_category_id, offset, limit)
+        else:
+            return SmartCatalog.specials_product_list(self.request.ctx.campaign, offset, limit)
 
 
     def featured_product_list(self, offset=None, limit=None):

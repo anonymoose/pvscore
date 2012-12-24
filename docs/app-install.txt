@@ -4,10 +4,10 @@ http://www.thisisthegreenroom.com/2011/installing-python-numpy-scipy-matplotlib-
 python --version
 
 # install python via brew
-brew install python --framework --universal
+brew install python --framework --universal --with-brewed-openssl
 cd /System/Library/Frameworks/Python.framework/Versions
 sudo rm Current
-ln -s /usr/local/Cellar/python/2.7.3/Frameworks/Python.framework/Versions/Current
+sudo ln -s /usr/local/Cellar/python/2.7.3/Frameworks/Python.framework/Versions/Current
 
 # add the following to your .profile
 export PATH=$PATH:/usr/local/share/python
@@ -15,8 +15,7 @@ export PYTHONPATH=/usr/local/lib/python2.7/site-packages:$PYTHONPATH
 
 # restart shell
 
-# ensure that the server can talk to github.  see git-notes.txt
-
+# ensure that the server can talk to github to clone private repos.  see git-notes.txt
 
 # set up virtualenv of python 2.7, download everything and install libs.
 
@@ -37,6 +36,8 @@ pip install -e git+https://github.com/scipy/scipy#egg=scipy-dev
 pip install git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib-dev
 pip install ipython
 brew install pyqt
+
+
 pip install pyramid
 
 
@@ -55,6 +56,3 @@ cd ../wm
 python setup.py develop
 
 
-
-cd /apps/pvs
-chown -R kbedwell:web .

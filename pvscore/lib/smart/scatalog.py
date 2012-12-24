@@ -28,6 +28,11 @@ class SmartCatalog(object):
         return util.page_list(products if len(products) > 0 else Product.find_new_by_campaign(campaign, 'new', 'revenue'), offset, limit)
 
 
+    @staticmethod
+    def category_product_list(campaign, category_id, offset=None, limit=None):
+        category = ProductCategory.load(category_id)
+        return util.page_list(category.products if len(category.products) > 0 else Product.find_new_by_campaign(campaign, 'new', 'revenue'), offset, limit)
+
 
 class SmartSeo(object):
 

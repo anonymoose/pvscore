@@ -8,14 +8,14 @@ pyramid_exclog
 zope.sqlalchemy
 waitress
 psycopg2
-redis==2.6.0
+redis
 html5lib
 lxml
 suds
 pygeoip
 tweepy
 prettytable
-Mako==0.7.2
+Mako
 simplejson
 webhelpers
 beaker
@@ -33,3 +33,4 @@ stripe
 PyRSS2Gen
 nose-cov
 pytz
+pycurl
