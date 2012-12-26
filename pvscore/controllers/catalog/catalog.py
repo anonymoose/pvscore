@@ -9,6 +9,7 @@ from pvscore.lib.cart import Cart
 from pvscore.model.crm.product import Product, ProductCategory
 import pvscore.lib.util as util
 from pvscore.lib.smart.scatalog import SmartCatalog, SmartPricing, SmartSeo
+from pvscore.model.cms.content import Content
 
 log = logging.getLogger(__name__)
 
@@ -24,9 +25,9 @@ class CatalogBaseController(BaseController):
                 'base' : '%s/%s/' % (self.request.host_url.replace('http', 'https') if util.is_production() else self.request.host_url , site.namespace),
                 'user' : self.request.ctx.user,
                 'cart' : cart,
-                'seo_title' : '',
-                'seo_keywords' : '',
-                'seo_description' : '',
+                'seo_title' : site.seo_title,
+                'seo_keywords' : site.seo_keywords,
+                'seo_description' : site.seo_description,
                 'campaign' : campaign,
                 'categories' : SmartCatalog.category_list(campaign),
                 'customer' : load_customer(self.request, True),  # this way customer is always there, just may be empty
@@ -168,7 +169,9 @@ class CatalogController(CatalogBaseController):
     def content(self):
         page = self.request.matchdict.get('page', 'content')
         params = self.params()
-        params['content_name'] = self.request.matchdict.get('content_name')
+        params['content_name'] = content_name = self.request.matchdict.get('content_name')
+        content = Content.find_by_name(self.request.ctx.site, content_name)
+        (params['seo_title'], params['seo_keywords'], params['seo_description']) = SmartSeo.obj_seo(content, self.request.ctx.site)
         return self.render(page, params)
 
 

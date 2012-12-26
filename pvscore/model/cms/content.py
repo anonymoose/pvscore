@@ -17,11 +17,9 @@ log = logging.getLogger(__name__)
 
 class Content(ORMBase, BaseModel):
     """
-    truncate table cms_content;
-    alter table cms_content drop column page_id;
-    alter table cms_content drop column is_dynamic;
-    alter table cms_content add column site_id uuid;
-    alter table cms_content add foreign key (site_id) references cms_site;
+    alter table cms_content add column seo_title varchar(500);
+    alter table cms_content add column seo_keywords varchar(1000);
+    alter table cms_content add column seo_description varchar(1000);
     """
 
     __tablename__ = 'cms_content'
@@ -33,6 +31,9 @@ class Content(ORMBase, BaseModel):
     type = Column(String(50))
     name = Column(String(50))
     data = Column(Text)
+    seo_title = Column(String(512))
+    seo_keywords = Column(String(1000))
+    seo_description = Column(String(1000))
     create_dt = Column(DateTime, server_default = text('now()'))
     delete_dt = Column(DateTime)
 

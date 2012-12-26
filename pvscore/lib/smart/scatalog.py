@@ -37,19 +37,20 @@ class SmartCatalog(object):
 class SmartSeo(object):
 
     @staticmethod
-    def product_seo(product, site):
-        title = util.nvl(product.seo_title, site.seo_title)
-        keywords = util.nvl(product.seo_keywords, site.seo_title)
-        description = util.nvl(product.seo_description, site.seo_title)
+    def obj_seo(obj, site):
+        title = util.nvl(obj.seo_title, site.seo_title)
+        keywords = util.nvl(obj.seo_keywords, site.seo_title)
+        description = util.nvl(obj.seo_description, site.seo_title)
         return (title, keywords, description)
 
 
     @staticmethod
+    def product_seo(product, site):
+        return SmartSeo.obj_seo(product, site)
+
+    @staticmethod
     def category_seo(category, site):
-        title = util.nvl(category.seo_title, site.seo_title)
-        keywords = util.nvl(category.seo_keywords, site.seo_title)
-        description = util.nvl(category.seo_description, site.seo_title)
-        return (title, keywords, description)
+        return SmartSeo.obj_seo(category, site)
 
 
 class SmartPricing(object):

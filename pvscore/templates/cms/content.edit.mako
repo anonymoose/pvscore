@@ -21,6 +21,25 @@
               </div>
             </div>
             <div class="row">
+              <div class="span7">
+                <h3>Search Engine Keywords</h3>
+                <div class="row">
+                  <div class="span3">
+                    <label for="seo_keywords">Keywords</label>
+                    ${h.text('seo_keywords', class_="input-xlarge", value=content.seo_keywords)}
+                  </div>
+                  <div class="span4">
+                    <label for="seo_title">Title</label>
+                    ${h.text('seo_title', class_="input-xlarge", value=content.seo_title)}
+                  </div>
+                  <div class="span4">
+                    <label for="seo_description">Description</label>
+                    ${h.text('seo_description', class_="input-xlarge", value=content.seo_description)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
               <div class="span8">
                 <label for="notes">Content</label>
                 ${h.textarea('data', style="width: 800px; height: 520px;", content=h.literal(content.data if content.data else ''), class_='content_editor')}
@@ -47,4 +66,4 @@
 </%def>
 
 
-    
+
