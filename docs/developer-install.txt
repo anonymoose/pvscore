@@ -4,9 +4,10 @@ http://www.thisisthegreenroom.com/2011/installing-python-numpy-scipy-matplotlib-
 python --version
 
 # install python via brew
+rm -rf /usr/local/lib/python2.7
 brew install python --framework --universal --with-brewed-openssl
 cd /System/Library/Frameworks/Python.framework/Versions
-sudo rm Current
+sudo rm -rf Current
 sudo ln -s /usr/local/Cellar/python/2.7.3/Frameworks/Python.framework/Versions/Current
 
 # add the following to your .profile
@@ -31,16 +32,7 @@ wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
 
 python virtualenv.py --no-site-packages .
 source bin/activate
-pip install numpy
-pip install -e git+https://github.com/scipy/scipy#egg=scipy-dev
-pip install git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib-dev
-pip install ipython
-brew install pyqt
-
-
 pip install pyramid
-
-
 git clone git@github.com:anonymoose/pvscore.git
 git clone git@github.com:anonymoose/pvs.git
 git clone git@github.com:anonymoose/wm.git
@@ -54,5 +46,17 @@ cd ../pvs
 python setup.py develop
 cd ../wm
 python setup.py develop
+
+
+brew install pyqt
+pip install numpy
+pip install -e git+https://github.com/scipy/scipy#egg=scipy-dev
+pip install git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib-dev
+pip install ipython
+
+
+
+
+
 
 

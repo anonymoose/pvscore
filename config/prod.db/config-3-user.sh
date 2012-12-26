@@ -28,3 +28,8 @@ cd ../wm
 python setup.py develop
 
 
+########################################################################
+# numpy/scipy
+pip install numpy
+pip install scipy
+pip install matplotlib

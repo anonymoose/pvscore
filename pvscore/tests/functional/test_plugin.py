@@ -5,7 +5,7 @@ from pvscore import init_pvscore
 import paste.deploy
 
 class TestPlugin(TestController):
-    
+
     @secure
     def test_configuration(self):
         settings = paste.deploy.appconfig('config:unittest.ini', relative_to='.')
@@ -17,6 +17,6 @@ class TestPlugin(TestController):
         self.assertEqual(plugin_registry.category('customer_sidebar_link')[0], 'customer sidebar test 1')
         self.assertEqual(plugin_registry.getattr('customer_sidebar_link', 'customer sidebar test 1', 'href'), '/tsst/test_customer_sidebar_link')
 
-        
+
 
 

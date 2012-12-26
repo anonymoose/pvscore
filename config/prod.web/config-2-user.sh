@@ -31,19 +31,9 @@ python setup.py develop
 
 ########################################################################
 # numpy/scipy
-mkdir -p /apps/pvs/src
-cd /apps/pvs/src
-source /apps/pvs/bin/activate
-git clone https://github.com/numpy/numpy.git
-git clone https://github.com/scipy/scipy.git
-
-cd /apps/pvs/src/numpy
-python setup.py build
-python setup.py install
-
-cd /apps/pvs/src/scipy
-python setup.py build
-python setup.py install
+pip install numpy
+pip install scipy
+pip install matplotlib
 
 
 ########################################################################

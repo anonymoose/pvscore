@@ -34,3 +34,4 @@ PyRSS2Gen
 nose-cov
 pytz
 pycurl
+coverage

@@ -41,7 +41,8 @@ requires = [
     'PyRSS2Gen',
     'nose-cov',
     'pytz',
-    'pycurl'
+    'pycurl',
+    'coverage'
     #'requests==0.8.8'
     ]
 
