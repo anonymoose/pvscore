@@ -35,3 +35,7 @@ nose-cov
 pytz
 pycurl
 coverage
+restkit
+oauth2
+certifi
+beautifulsoup4

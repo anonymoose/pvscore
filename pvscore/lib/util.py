@@ -65,6 +65,10 @@ def words_date(d):
     return d.strftime("%B %d, %Y")
 
 
+def add_days(dt, amount):
+    return dt + datetime.timedelta(days=amount)
+
+
 def str_today():
     return datetime.datetime.today().strftime("%Y-%m-%d")
 

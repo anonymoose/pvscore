@@ -4665,3 +4665,50 @@ alter table core_user add column default_timezone varchar(100);
 -- insert Customer
 
 -- python setup.py develop   # in pvscore
+
+
+--
+-- wm earnings and events mods
+--
+
+drop table wm_earnings_performance;
+drop table wm_earnings_date;
+drop table wm_economic_event;
+
+create table wm_earnings_performance (
+    performance_id uuid primary key,
+    symbol_id integer not null,
+    exchange_id integer not null,
+    earnings_dt date not null,
+    actual float,
+    expected float,
+    previous float,
+    create_dt timestamp default now()
+);
+
+create table wm_earnings_date (
+    earnings_date_id uuid primary key,
+    symbol_id integer not null,
+    exchange_id integer not null,
+    earnings_dt date not null,
+    create_dt timestamp default now()
+);
+
+create table wm_economic_event (
+    economic_event_id uuid primary key,
+    name  varchar(100) not null,
+    for_period varchar(20),
+    actual varchar(20),
+    forecast varchar(20),
+    consensus varchar(20),
+    prior varchar(20),
+    revised_from varchar(20),
+    event_dt date not null,
+    create_dt timestamp default now()
+);
+
+
+select e.* from
+wm_earnings_performance e, wm_stock_symbol ss
+where e.symbol_id = ss.symbol_id
+and ss.symbol = 'WWWW';

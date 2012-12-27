@@ -42,7 +42,11 @@ requires = [
     'nose-cov',
     'pytz',
     'pycurl',
-    'coverage'
+    'coverage',
+    'restkit',
+    'oauth2',
+    'certifi',
+    'beautifulsoup4'
     #'requests==0.8.8'
     ]
 
