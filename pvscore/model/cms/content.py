@@ -49,12 +49,18 @@ class Content(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_by_name(site, name):
-        return Session.query(Content)\
-            .options(FromCache('Content.find_by_name', "%s/%s" % (site.site_id, name)))\
-            .filter(and_(Content.site == site,
-                         Content.name == name,
-                         Content.delete_dt == None)).first()
+    def find_by_name(site, name, cached=True):
+        if cached:
+            return Session.query(Content)\
+                .options(FromCache('Content.find_by_name', "%s/%s" % (site.site_id, name)))\
+                .filter(and_(Content.site == site,
+                             Content.name == name,
+                             Content.delete_dt == None)).first()
+        else:
+            return Session.query(Content)\
+                .filter(and_(Content.site == site,
+                             Content.name == name,
+                             Content.delete_dt == None)).first()
 
 
     def invalidate_caches(self, **kwargs):
@@ -72,7 +78,7 @@ class Content(ORMBase, BaseModel):
 
 
 def make_content_function(site, request):
-    def content(name):
-        content = Content.find_by_name(site, name)
+    def content(name, cached=True):
+        content = Content.find_by_name(site, name, cached)
         return content.render(request=request) if content else ''
     return content

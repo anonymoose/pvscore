@@ -55,7 +55,10 @@ pip install git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib-dev
 pip install ipython
 
 
-
+brew install hdf5
+pip install numexpr
+pip install Cython
+pip install -e git+https://github.com/PyTables/PyTables.git@v.2.4.0#egg=tables
 
 
 

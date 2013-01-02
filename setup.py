@@ -47,7 +47,9 @@ requires = [
     'oauth2',
     'certifi',
     'beautifulsoup4',
-    'pandas'
+    'pandas',
+    'numexpr',
+    'Cython'
     #'requests==0.8.8'
     ]
 

@@ -40,3 +40,5 @@ oauth2
 certifi
 beautifulsoup4
 pandas
+numexpr
+Cython
