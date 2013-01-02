@@ -4667,6 +4667,48 @@ alter table core_user add column default_timezone varchar(100);
 -- python setup.py develop   # in pvscore
 
 
+
+
+select e.* from
+wm_earnings_date e, wm_stock_symbol ss
+where e.symbol_id = ss.symbol_id
+and ss.symbol = 'WWWW'
+;
+
+
+
+
+select ed.earnings_dt, ed.symbol_id
+from wm_earnings_date ed, wm_stock_symbol ss
+where ed.symbol_id = ss.symbol_id
+and ss.symbol = 'WWWW'
+and ed.earnings_dt > '2007-01-01'
+order by ed.earnings_dt asc;
+
+
+
+select ed.earnings_dt, ed.symbol_id
+from wm_earnings_performance ed, wm_stock_symbol ss
+where ed.symbol_id = ss.symbol_id
+and ss.symbol = 'WWWW'
+order by ed.earnings_dt asc;
+
+
+
+
+select count(0), ed.symbol_id
+from wm_earnings_date ed, wm_stock_symbol ss, wm_earnings_performance ep
+where ed.symbol_id = ss.symbol_id
+and ss.symbol = 'WWWW'
+and ep.symbol_id = ed.symbol_id
+and ep.earnings_dt between ed.earnings_dt - interval '3 days' and ed.earnings_dt + interval '3 days'
+group by ed.symbol_id;
+
+
+select count(distinct ed.symbol_id)
+from wm_earnings_date ed, wm_stock_symbol ss
+where ed.symbol_id = ss.symbol_id;
+
 --
 -- wm earnings and events mods
 --
@@ -4708,7 +4750,25 @@ create table wm_economic_event (
 );
 
 
-select e.* from
-wm_earnings_performance e, wm_stock_symbol ss
-where e.symbol_id = ss.symbol_id
-and ss.symbol = 'WWWW';
+--
+-- end wm earnings
+--
+
+select symbol_id from wm_stock_symbol where symbol in
+select * from wm_exchange where symbol in ('NASDAQ', 'NYSE');
+
+explain select avg(volume) from wm_eod_quote where symbol_id = 22139;
+
+
+explain
+select ss.symbol, qt.create_dt, avg(volume)
+over (partition by qt.quote_dt)
+from
+wm_eod_quote qt,
+wm_stock_symbol ss,
+wm_exchange ex
+where ex.symbol in ('NASDAQ', 'NYSE')
+and ss.symbol in ('MSFT')
+and ex.exchange_id = ss.exchange_id
+and qt.symbol_id = ss.symbol_id
+and qt.quote_dt between '2012-01-01' and '2012-02-01';

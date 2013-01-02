@@ -46,7 +46,8 @@ requires = [
     'restkit',
     'oauth2',
     'certifi',
-    'beautifulsoup4'
+    'beautifulsoup4',
+    'pandas'
     #'requests==0.8.8'
     ]
 
