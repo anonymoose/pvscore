@@ -9,6 +9,10 @@ export db=$2
 
 set -x
 
+dropdb -U postgres $2
+createdb -U postgres $2
+psql -U postgres "alter database $2 owner to $2"
+
 ssh $svr "rm production-$svr-$db.sql.gz"
 ssh $svr "pg_dump -U $db -O -c $db > production-$svr-$db.sql"
 ssh $svr "gzip production-$svr-$db.sql"
