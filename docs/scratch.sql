@@ -4772,3 +4772,6 @@ and ss.symbol in ('MSFT')
 and ex.exchange_id = ss.exchange_id
 and qt.symbol_id = ss.symbol_id
 and qt.quote_dt between '2012-01-01' and '2012-02-01';
+
+
+select symbol_id, symbol, name from wm_stock_symbol where symbol = 'WWWW';
