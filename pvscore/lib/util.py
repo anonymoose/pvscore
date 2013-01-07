@@ -149,7 +149,7 @@ def select_list(obj_array, id_attr, disp_attr, blank=False):
 
 
 def quickmail(subject, text, from_addr='kenneth.bedwell@gmail.com', to_addr='kenneth.bedwell@gmail.com'):
-    return sendmail(from_addr, to_addr, subject, text, 'kenneth.bedwell@gmail.com', 'Zachary345', 'smtp.gmail.com', '587')
+    return sendmail(from_addr, to_addr, subject, text, 'info@eyefound.it', 'g00df00d', 'smtp.gmail.com', '587')
 
 
 def sendmail(from_addr, to_addr, subject, text, username, password, server, port):   #pylint: disable-msg=R0913

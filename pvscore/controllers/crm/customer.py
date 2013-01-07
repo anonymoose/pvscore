@@ -1,4 +1,4 @@
-#pylint: disable-msg=C0302%g
+#pylint: disable-msg=C0302
 import logging, re
 from pvscore.controllers.base import BaseController
 from pyramid.view import view_config

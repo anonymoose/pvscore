@@ -60,6 +60,7 @@ class SmartSeo(object):
     def product_seo(product, site):
         return SmartSeo.obj_seo(product, site)
 
+
     @staticmethod
     def category_seo(category, site):
         return SmartSeo.obj_seo(category, site)

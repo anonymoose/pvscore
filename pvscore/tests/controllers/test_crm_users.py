@@ -1,11 +1,13 @@
 from pvscore.tests import TestController, secure, UID
 from pvscore.model.core.users import Users
+from pvscore.model.crm.company import Enterprise
 
 # T pvscore.tests.controllers.test_crm_users
 
 class TestCrmUsers(TestController):
-    
+
     def _create_new(self):
+        ent = Enterprise.find_by_name('Healthy U Store')
         R = self.get('/crm/users/new')
         assert R.status_int == 200
         R.mustcontain('Edit User')
@@ -17,6 +19,7 @@ class TestCrmUsers(TestController):
         f.set('lname', 'User')
         f.set('password', 'fishsticks')
         f.set('confirm', 'fishsticks')
+        f.set('enterprise_id', str(ent.enterprise_id))
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
