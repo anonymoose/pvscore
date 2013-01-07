@@ -4,7 +4,7 @@
 <div>
   <h1>Edit Enterprise</h1>
   <div class="container">
-    
+
     <form method="POST" action="/crm/company/enterprise/save" id="frm_enterprise">
       ${h.hidden('enterprise_id', value=the_enterprise.enterprise_id)}
       <div class="well">
@@ -17,7 +17,7 @@
             <label for="logo_path">Logo Path</label>
             ${h.text('logo_path', size=50, value=the_enterprise.logo_path)}
           </div>
-          
+
           <div class="span3">
             <label for="logo_path">Support Email</label>
             ${h.text('support_email', size=50, value=the_enterprise.support_email)}
@@ -81,7 +81,7 @@
 
       <div class="row">
         <div class="span6">
-          <h3>Company Attributes</h3>
+          <h3>Enterprise Attributes</h3>
           <table>
             <%
                attrs = the_enterprise.get_attrs()
@@ -106,7 +106,7 @@
           ${h.textarea('crm_style', style="width: 100%; height: 100px;", content=the_enterprise.crm_style)}
         </div>
       </div>
-      
+
       <div class="row">
         <div class="span2 offset10">
           <input type="submit" name="submit" class="btn btn-primary btn-large" value="Save"/>

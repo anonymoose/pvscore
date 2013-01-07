@@ -7,6 +7,7 @@ from pvscore.lib.decorators.authorize import authorize
 from pvscore.lib.auth_conditions import IsLoggedIn
 from pvscore.model.core.users import Users, UserPriv
 from pvscore.model.crm.purchase import Vendor
+from pvscore.model.crm.company import Enterprise
 import pvscore.lib.util as util
 from pytz import country_timezones
 
@@ -40,6 +41,7 @@ class UsersController(BaseController):
             user = Users()
             priv = UserPriv()
         return {
+            'enterprises' : util.select_list(Enterprise.find_all(), 'enterprise_id', 'name', True),
             'user_types': Users.get_user_types(),
             'vendors' : util.select_list(Vendor.find_all(self.enterprise_id), 'vendor_id', 'name', True),
             'timezones' : country_timezones('US'),
@@ -68,7 +70,8 @@ class UsersController(BaseController):
         usr = Users.load(self.request.POST.get('user_id'))
         if not usr:
             usr = Users()
-            usr.enterprise_id = self.enterprise_id
+            if 'enterprise_id' not in self.request.POST:
+                usr.enterprise_id = self.enterprise_id
 
         if not usr.priv:
             usr.priv = UserPriv()

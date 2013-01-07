@@ -1,4 +1,4 @@
-#pylint: disable-msg=C0302
+#pylint: disable-msg=C0302%g
 import logging, re
 from pvscore.controllers.base import BaseController
 from pyramid.view import view_config
@@ -630,7 +630,7 @@ class CustomerController(BaseController):
                           campaign=cust.campaign,
                           quantity=quantity,
                           price=price)
-        order = cust.add_order(cart, user, self.request.ctx.site, cust.campaign, incl_tax)
+        order = cust.add_order(cart, user, self.enterprise_id, cust.campaign, incl_tax)
         order.flush()
         return order.order_id
 
@@ -720,7 +720,7 @@ class CustomerController(BaseController):
                     self.flash("No such product sku: %s" % sku)
                     self.raise_redirect(self.request.referrer)
 
-        order = cust.add_order(cart, None, self.request.ctx.site, campaign)
+        order = cust.add_order(cart, None, self.enterprise_id, campaign)
         api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
         api.set_coupon(self.request.POST.get('coupon_code'))
         if api.purchase(order, bill, util.request_ip(self.request)):

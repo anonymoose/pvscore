@@ -50,6 +50,7 @@ class Product(ORMBase, BaseModel):
     seo_description = Column(String(1000))
     subscription = Column(Boolean, default=False)
     inventory = Column(Integer) # this is derived from InventoryJournal and updated in "create_new"
+    url = Column(String(100))
 
     company = relation('Company', lazy='joined', backref=backref('products', order_by='Product.name'))
     status = relation('Status')

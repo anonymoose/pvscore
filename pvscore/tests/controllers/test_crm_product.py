@@ -10,7 +10,7 @@ import os
 # T pvscore.tests.controllers.test_crm_product
 
 class TestCrmProduct(TestController):
-    
+
     """
     def test_ref(self):
         for e in Enterprise.find_all():
@@ -170,7 +170,7 @@ class TestCrmProduct(TestController):
         self.assertEqual(f['product_id'].value, pid)
         self.assertEqual(f['name'].value, name + ' xxx')
 
-    
+
     @secure
     def test_save_existing(self):
         ent = Enterprise.find_by_name('Healthy U Store')
@@ -215,7 +215,7 @@ class TestCrmProduct(TestController):
         self.assertEqual(f['name'].value, 'Test Product New')
         self.assertEqual(f['seo_keywords'].value, 'SEO Test New')
         self.assertEqual(f['campaign_price[%s]' % cmpns[0].campaign_id].value, "123.00")
-        self.assertEqual(f['campaign_price[%s]' % cmpns[1].campaign_id].value, "-1.00")
+        self.assertEqual(f['campaign_price[%s]' % cmpns[1].campaign_id].value, "")
 
         #self.assertEqual(f['category_id'].value, cat.category_id)
 

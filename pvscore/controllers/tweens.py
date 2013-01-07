@@ -117,6 +117,11 @@ def _remember_customer(request):
 def _remember_user(request):
     if 'user_id' in request.session:
         request.ctx.user = Users.load(request.session['user_id'])
+        # KB: [2013-01-07]: override the enterprise ID if this user has one.
+        # Allows us secure multi hosting.
+        if request.ctx.user.enterprise:
+            request.ctx.enterprise = request.ctx.user.enterprise
+            request.session['enterprise_id'] = request.ctx.enterprise.enterprise_id
 
 
 def _remember_geo(request):

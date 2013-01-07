@@ -4781,3 +4781,15 @@ select symbol_id, symbol, name from wm_stock_symbol where symbol = 'WWWW';
 select company_id, enterprise_id, name from crm_company;
 
 select name from crm_product where company_id = '7e03f6f2-465d-4eb4-a611-7ff5a5ad19dd';
+
+
+alter table crm_product add column url varchar(100);
+
+select e.name, c.email
+from core_user c, crm_enterprise e
+where c.enterprise_id = e.enterprise_id
+and c.email = 'charlie@wealthmakers.com';
+
+delete from core_user where email = 'charlie@wealthmakers.com';
+
+

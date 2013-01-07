@@ -180,6 +180,22 @@
           </div>
         </div>
       </div>
+
+      <div class="row">
+        <div class="span9">
+          <div class="well">
+            <h3>Action Configuration</h3>
+            <div class="row">
+              <div class="span3">
+                <label for="url">URL</label>
+                ${h.text('url', size=50, value=product.url)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
       <div class="row">
         <div class="span9">
           <div class="row">

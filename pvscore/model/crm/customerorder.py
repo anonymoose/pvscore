@@ -45,11 +45,10 @@ class CustomerOrder(ORMBase, BaseModel):
     journal_entries = relation('Journal', lazy="joined", backref=backref('order'), order_by='asc(Journal.journal_id)')
 
     @staticmethod
-    def create_new(cart, customer, site, campaign, user_created, incl_tax=True):
+    def create_new(cart, customer, enterprise_id, campaign, user_created, incl_tax=True):
         """ KB: [2010-09-09]: Given a cart full of products, create a new order and return it.
         if a given product is a parent, then create an kid order_item of zero cost and attach it to the parent.
         """
-        enterprise_id = site.company.enterprise_id
         cord = CustomerOrder()
         cord.creator = user_created
         cord.customer = customer

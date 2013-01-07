@@ -36,7 +36,14 @@
             <label for="confirm">Confirm</label>
             ${h.password('confirm', value=''.join(['-' for i in range(user.password_len)]) if user.password_len else '',  onclick="$('#confirm').val('')")}
           </div>
+          % if request.ctx.user.enterprise_id == None:
+            <div class="span3">
+              <label for="enterprise_id">Enterprise</label>
+              ${h.select('enterprise_id', str(user.enterprise_id), enterprises)}
+            </div>
+          % endif
         </div>
+        % if request.ctx.user.enterprise_id == None:
         <div class="row">
           <div class="span4">
             <b>Permissions</b>
@@ -84,6 +91,7 @@
             </table>
           </div>
         </div>
+        % endif
       </div>
 
       <h3>Email</h3>
