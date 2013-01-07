@@ -24,6 +24,7 @@ class CatalogBaseController(BaseController):
         return {'site' : site,
                 'base' : '%s/%s/' % (self.request.host_url.replace('http', 'https') if util.is_production() else self.request.host_url , site.namespace),
                 'user' : self.request.ctx.user,
+                'products_related' : None,
                 'cart' : cart,
                 'seo_title' : site.seo_title,
                 'seo_keywords' : site.seo_keywords,
@@ -107,6 +108,8 @@ class CatalogController(CatalogBaseController):
         #         special_attrs.append(sattr)
         # params['special_attrs'] = special_attrs
         params['product'] = prod
+        params['products_also_liked'] = SmartCatalog.also_liked_product_list(prod, params['campaign'])
+        params['products_related'] = SmartCatalog.related_product_list(prod, params['campaign'])
         params['attrs'] = attrs
         params['price'] = SmartPricing.product_price(prod, params['campaign'])
         (params['seo_title'], params['seo_keywords'], params['seo_description']) = SmartSeo.product_seo(prod, self.request.ctx.site)

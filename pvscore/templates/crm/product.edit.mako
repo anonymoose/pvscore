@@ -3,7 +3,7 @@
 
 <div id="div_product_edit">
   <div class="container">
-    <form method="POST" action="/crm/product/save" id="frm_product">
+    <form method="POST" action="/crm/product/save" autocomplete="off" id="frm_product">
       ${h.hidden('product_id', value=product.product_id)}
 
       <div class="row">
@@ -16,11 +16,11 @@
           % endif
         </div>
       </div>
-      
+
       <div class="row">
         <div class="span9">
           <div class="well">
-            <h3>General Information</h3>    
+            <h3>General Information</h3>
             <div class="row">
               <div class="span3">
                 <label for="name">Name</label>
@@ -32,14 +32,14 @@
                 ${h.select('category_id', str(product_categories[0].category_id) if len(product_categories) == 1 else None, categories)}
                 % endif
               </div>
-            </div> 
-            
+            </div>
+
             <div class="row">
               <div class="span8">
                 <label for="description">Simple Description</label>
                 ${h.textarea('description', style="width: 100%; height: 70px;", content=product.description)}
               </div>
-            </div> 
+            </div>
             <div class="row">
               <div class="span8">
                 <label for="detail_description">Detailed Description</label>
@@ -68,7 +68,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="row">
         <div class="span9">
           <div class="well">
@@ -103,7 +103,7 @@
               <div class="span1">
                 <div class="row">
                   <div class="span2">
-                    ${h.checkbox('subscription', checked=product.subscription, label=' Subscription?')} 
+                    ${h.checkbox('subscription', checked=product.subscription, label=' Subscription?')}
                   </div>
                 </div>
                 <div class="row">
@@ -157,8 +157,8 @@
                     <label for="third_party_id">Third Party ID</label>
                     ${h.text('third_party_id', class_="input-small", value=product.third_party_id)}
                   </div>
-                </div>      
-              </div>              
+                </div>
+              </div>
             </div>
             <div class="row">
               <div class="span7">
@@ -176,9 +176,9 @@
                   % endif
                 </div>
               </div>
-            </div>            
+            </div>
           </div>
-        </div>      
+        </div>
       </div>
       <div class="row">
         <div class="span9">
@@ -243,7 +243,7 @@
                     <td nowrap>${h.text('child_quantity_%s' % p.child.product_id, value=p.child_quantity, class_="input-small")}</td>
                   </tr>
                   % endfor
-                  
+
                   % for p in non_children:
                   <tr>
                     <td>${p.name}</td>

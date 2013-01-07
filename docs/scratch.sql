@@ -4775,3 +4775,9 @@ and qt.quote_dt between '2012-01-01' and '2012-02-01';
 
 
 select symbol_id, symbol, name from wm_stock_symbol where symbol = 'WWWW';
+
+
+
+select company_id, enterprise_id, name from crm_company;
+
+select name from crm_product where company_id = '7e03f6f2-465d-4eb4-a611-7ff5a5ad19dd';

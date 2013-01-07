@@ -102,24 +102,24 @@ class AttributeValue(ORMBase, BaseModel):
     @staticmethod
     def find_all(obj):
         #pylint: disable-msg=E1101
-        fk_type = type(obj).__name__ 
+        fk_type = type(obj).__name__
         fk_id = getattr(obj, obj.__pk__)
-
-        # TODO: Fix attribute value caching:    .options(FromCache('AttributeValue.%s.%s' % (fk_type, fk_id))) \
-        return Session.query(AttributeValue).join((Attribute, AttributeValue.attr_id == Attribute.attr_id)) \
-            .options(joinedload('attribute')) \
-            .filter(and_(AttributeValue.fk_type == fk_type,
-                         AttributeValue.fk_id == fk_id)) \
-                         .order_by(AttributeValue.attr_value_id).all()
-
+        if fk_id:
+            # TODO: Fix attribute value caching:    .options(FromCache('AttributeValue.%s.%s' % (fk_type, fk_id))) \
+            return Session.query(AttributeValue).join((Attribute, AttributeValue.attr_id == Attribute.attr_id)) \
+                .options(joinedload('attribute')) \
+                .filter(and_(AttributeValue.fk_type == fk_type,
+                             AttributeValue.fk_id == fk_id)) \
+                             .order_by(AttributeValue.attr_value_id).all()
+        return []
 
     @staticmethod
     def invalidate_attributes(obj):
         pass
-        #fk_type = type(obj).__name__ 
+        #fk_type = type(obj).__name__
         #fk_id = getattr(obj, obj.__pk__)
         #invalidate(obj, 'AttributeValue.%s.%s' % (fk_type, fk_id))
-        
+
     # @staticmethod
     # def find_fk_id_by_value(fk_type, attr_name, attr_value):
     #     #pylint: disable-msg=E1101
@@ -129,9 +129,9 @@ class AttributeValue(ORMBase, BaseModel):
     #                                              ca.fk_type = '{fk_type}' and
     #                                              ca.attr_name = '{attr_name}' and
     #                                              cav.fk_type = '{fk_type}' and
-    #                                              cav.attr_value = '{attr_value}'""".format(fk_type=fk_type, 
+    #                                              cav.attr_value = '{attr_value}'""".format(fk_type=fk_type,
     #                                                                                        attr_name=attr_name,
     #                                                                                        attr_value=attr_value)).one()
     #     return ret[0]
 
-                       
+

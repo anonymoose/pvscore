@@ -420,24 +420,21 @@ class Product(ORMBase, BaseModel):
 
     def get_price(self, campaign):
         """ KB: [2011-02-02]: Returns the discounted price if there is one, otherwise returns retail price """
-        if not campaign.campaign_id in self.campaign_prices:
-            return -1   #pragma: no cover
-        pri = self.campaign_prices[campaign.campaign_id]
-        return pri.discount_price if pri.discount_price else pri.retail_price
+        if campaign.campaign_id in self.campaign_prices:
+            pri = self.campaign_prices[campaign.campaign_id]
+            return pri.discount_price if pri.discount_price else pri.retail_price
 
 
     def get_retail_price(self, campaign):
         """ KB: [2011-02-02]: Returns the retail price regardless of discount """
-        if not campaign.campaign_id in self.campaign_prices:
-            return -1
-        return self.campaign_prices[campaign.campaign_id].retail_price
+        if campaign.campaign_id in self.campaign_prices:
+            return self.campaign_prices[campaign.campaign_id].retail_price
 
 
     def get_discount_price(self, campaign):
         """ KB: [2011-02-02]: Returns the discount price """
-        if not campaign.campaign_id in self.campaign_prices:
-            return -1
-        return self.campaign_prices[campaign.campaign_id].discount_price
+        if campaign.campaign_id in self.campaign_prices:
+            return self.campaign_prices[campaign.campaign_id].discount_price
 
 
     def set_price(self, campaign, price, discount=None):
