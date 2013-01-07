@@ -21,6 +21,10 @@ wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
 python virtualenv.py --no-site-packages .
 source bin/activate
 easy_install pyramid
+pip install numpy
+pip install scipy
+pip install matplotlib
+
 
 cd pvscore
 python setup.py develop
@@ -29,11 +33,6 @@ python setup.py develop
 cd ../wm
 python setup.py develop
 
-########################################################################
-# numpy/scipy
-pip install numpy
-pip install scipy
-pip install matplotlib
 
 
 ########################################################################
