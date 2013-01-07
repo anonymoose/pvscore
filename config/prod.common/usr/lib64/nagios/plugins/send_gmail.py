@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import string, os, sys, time 
+import string, os, sys, time
 import os.path
 import smtplib
 from optparse import OptionParser
@@ -16,7 +16,7 @@ Requires smtplib, python 2.4.4c1+ and optparse
 Usage:
 send_gmail.py -a [to address] -s [subject] -b [message body]
 
-New lines can be inserted in the message body by using   \nnn 
+New lines can be inserted in the message body by using   \nnn
 Multiple to addresses must be seperated by commas (a space character may preceed and/or follow the comma)
 
 Example:
@@ -32,29 +32,32 @@ smtplib's .sendmail() requires an array to send to multiple addresses. If all ad
 
 """
 
+UID = 'info@eyefound.it'
+PWD = 'g00df00d'
+
 def main():
     p = optparse.OptionParser( )
     p.add_option('--address', '-a', action='store', type='string')
     p.add_option('--body', '-b', action='store', type='string')
     p.add_option('--subject', '-s', action='store', type='string')
     options, arguments = p.parse_args()
-   
+
     body = options.body
     address = options.address
     Addresses = address.split(',') #turns string into array by splitting string at commas.
-    subject = options.subject  
-    
+    subject = options.subject
+
     body = '\n'.join(body.split('\\nnn'))
-            
+
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.set_debuglevel(1) #0 for quiet or 1 for verbosity
-    server.ehlo('kenneth.bedwell@gmail.com')
+    server.ehlo(UID)
     server.starttls()
-    server.ehlo('kenneth.bedwell@gmail.com')  # say hello again
-    server.login('kenneth.bedwell@gmail.com', 'Zachary345')
-    
-    server.sendmail('kenneth.bedwell@gmail.com', Addresses, "Subject: " + subject + '\nTo:' + address + '\n\n' + body)
-    
+    server.ehlo(UID)  # say hello again
+    server.login(UID, PWD)
+
+    server.sendmail(UID, Addresses, "Subject: " + subject + '\nTo:' + address + '\n\n' + body)
+
     server.quit()
 
 if __name__ == '__main__':
