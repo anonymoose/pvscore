@@ -28,9 +28,16 @@ class BaseController(BaseUI):
         if request:
             self.request = request
             self.session = request.session
-            self.enterprise_id = self.request.ctx.enterprise.enterprise_id
             self.user = self.request.ctx.user
             self.plugin_registry = plugin_registry
+
+            self.enterprise_id = self.request.ctx.enterprise.enterprise_id
+            # KB: [2013-01-07]: override the enterprise ID if this user has one.
+            # Allows us secure multi hosting.
+            if self.request.ctx.user and self.request.ctx.user.enterprise_id:
+                self.enterprise_id = self.request.ctx.user.enterprise_id
+                self.request.session['enterprise_id'] = self.request.ctx.user.enterprise_id
+
         super(BaseController, self).__init__()
 
 
