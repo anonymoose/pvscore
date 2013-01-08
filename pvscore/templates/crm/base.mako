@@ -227,10 +227,10 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
             <li><a href="/crm/campaign/new">Add New Campaign</a></li>
             % endif
             <li><a href="/crm/campaign/list">List All Campaigns</a></li>
-            % if request.ctx.user.priv.edit_enterprise:
+            % if request.ctx.user.enterprise_id == None:
             <li><a href="/crm/company/enterprise/new">Add New Enterprise</a></li>
-            % endif
             <li><a href="/crm/company/enterprise/list">List All Enterprises</a></li>
+            % endif
           </ul>
         </li>
         % endif

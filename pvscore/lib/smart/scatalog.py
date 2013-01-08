@@ -46,6 +46,12 @@ class SmartCatalog(object):
         return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new', 'revenue'), offset, limit)
 
 
+    @staticmethod
+    def related_product_list_cart(cart, campaign, offset=None, limit=None):
+        products = Product.find_ordered_list(campaign, 'specials', 'revenue')
+        return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new', 'revenue'), offset, limit)
+
+
 class SmartSeo(object):
 
     @staticmethod

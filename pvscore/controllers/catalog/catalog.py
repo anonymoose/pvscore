@@ -25,6 +25,7 @@ class CatalogBaseController(BaseController):
                 'base' : '%s/%s/' % (self.request.host_url.replace('http', 'https') if util.is_production() else self.request.host_url , site.namespace),
                 'user' : self.request.ctx.user,
                 'products_related' : None,
+                'category' : None,
                 'cart' : cart,
                 'seo_title' : site.seo_title,
                 'seo_keywords' : site.seo_keywords,

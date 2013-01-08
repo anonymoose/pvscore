@@ -3,6 +3,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.model.crm.product import Product
 from pvscore.controllers.catalog.catalog import CatalogBaseController
+from pvscore.lib.smart.scatalog import SmartCatalog
 from pvscore.lib.shipping.shipping import UPSShipping
 
 log = logging.getLogger(__name__)
@@ -14,6 +15,7 @@ class CartController(CatalogBaseController):
     def cart(self):
         page = self.request.matchdict.get('page', 'cart')
         params = self.params()
+        params['products_related'] = SmartCatalog.related_product_list_cart(params['cart'], params['campaign'])
         return self.render(page, params)
 
 

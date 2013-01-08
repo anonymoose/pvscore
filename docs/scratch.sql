@@ -4788,7 +4788,7 @@ alter table crm_product add column url varchar(100);
 select e.name, c.email
 from core_user c, crm_enterprise e
 where c.enterprise_id = e.enterprise_id
-and c.email = 'charlie@wealthmakers.com';
+and c.email = 'mr.smartconsult@gmail.com';
 
 delete from core_user where email = 'charlie@wealthmakers.com';
 
