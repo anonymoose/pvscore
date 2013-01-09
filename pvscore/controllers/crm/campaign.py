@@ -12,13 +12,13 @@ import pvscore.lib.util as util
 log = logging.getLogger(__name__)
 
 class CampaignController(BaseController):
-    
+
     @view_config(route_name="crm.campaign.edit", renderer='/crm/campaign.edit.mako')
     @authorize(IsLoggedIn())
     def edit(self):
         return self._edit_impl()
 
-    
+
     @view_config(route_name="crm.campaign.new", renderer='/crm/campaign.edit.mako')
     @authorize(IsLoggedIn())
     def new(self):
@@ -81,6 +81,7 @@ class CampaignController(BaseController):
                 cmpn.set_attr(attr_name, attr_value)
 
         cmpn.flush()
+        cmpn.invalidate_caches()
         self.request.session.flash('Successfully saved %s.' % cmpn.name)
         return HTTPFound('/crm/campaign/edit/%s' % cmpn.campaign_id)
 

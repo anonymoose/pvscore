@@ -45,7 +45,7 @@ class Campaign(ORMBase, BaseModel):
             return MailInfo(self)
         if self.company:
             return self.company.get_email_info()  #pylint: disable-msg=E1101
-    
+
 
     @staticmethod
     def find_all(enterprise_id):
@@ -88,7 +88,7 @@ class Campaign(ORMBase, BaseModel):
             from pvscore.model.crm.comm import Communication
             comm = Communication.load(comm_id)
             comm.send_to_customer(self, customer, order)
-            
+
 
     def send_post_purchase_comm(self, order):
         return self._send_impl(order.customer, order, self.comm_post_purchase_id)
@@ -103,7 +103,10 @@ class Campaign(ORMBase, BaseModel):
 
 
     def invalidate_caches(self, **kwargs):
-        invalidate(self, 'Campaign.find_all', self.company.enterprise_id)    #pylint: disable-msg=E1101
+        if self.company_id:
+            company = Company.load(self.company_id)
+            if company:
+                invalidate(self, 'Campaign.find_all', str(company.enterprise_id))    #pylint: disable-msg=E1101
 
 
     # def get_product_specials(self):
