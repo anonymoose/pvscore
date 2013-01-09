@@ -22,19 +22,19 @@ pvs = function(){
                 $('#modal-confirm').modal('hide');
             }
             $('#modal-confirm').remove();
-            $('body').append('<div id="modal-confirm" class="modal hide fade">' + 
-                             '    <div class="modal-header">' + 
-                             '      <a href="#" class="close">&times;</a>' + 
-                             '      <h3>'+title+'</h3>' + 
-                             '    </div>' + 
-                             '    <div class="modal-body">' + 
-                             '      <p>'+msg+'</p>' + 
-                             '      <p>Do you want to proceed?</p>' + 
-                             '    </div>' + 
-                             '    <div class="modal-footer">' + 
-                             '      <a href="#" onclick="pvs_alert_yes()" class="btn danger">Yes</a>' + 
-                             '      <a href="#" class="btn btn-primary close">No</a>' + 
-                             '    </div>' + 
+            $('body').append('<div id="modal-confirm" class="modal hide fade">' +
+                             '    <div class="modal-header">' +
+                             '      <a href="#" class="close">&times;</a>' +
+                             '      <h3>'+title+'</h3>' +
+                             '    </div>' +
+                             '    <div class="modal-body">' +
+                             '      <p>'+msg+'</p>' +
+                             '      <p>Do you want to proceed?</p>' +
+                             '    </div>' +
+                             '    <div class="modal-footer">' +
+                             '      <a href="#" onclick="pvs_alert_yes()" class="btn danger">Yes</a>' +
+                             '      <a href="#" class="btn btn-primary close">No</a>' +
+                             '    </div>' +
                              '</div>');
 
             $('.close').click(function() {
@@ -53,17 +53,17 @@ pvs = function(){
                 window.pvs_alert_ok = null;
             }
             $('#modal-alert').remove();
-            $('body').append('<div id="modal-alert" class="modal hide fade">' + 
-                             '    <div class="modal-header">' + 
-                             '      <a href="#" class="close">&times;</a>' + 
-                             '      <h3>'+title+'</h3>' + 
-                             '    </div>' + 
-                             '    <div class="modal-body">' + 
-                             '      <p>'+msg+'</p>' + 
-                             '    </div>' + 
-                             '    <div class="modal-footer">' + 
-                             '      <a href="#" class="btn btn-primary close" onclick="pvs_alert_ok()">Ok</a>' + 
-                             '    </div>' + 
+            $('body').append('<div id="modal-alert" class="modal hide fade">' +
+                             '    <div class="modal-header">' +
+                             '      <a href="#" class="close">&times;</a>' +
+                             '      <h3>'+title+'</h3>' +
+                             '    </div>' +
+                             '    <div class="modal-body">' +
+                             '      <p>'+msg+'</p>' +
+                             '    </div>' +
+                             '    <div class="modal-footer">' +
+                             '      <a href="#" class="btn btn-primary close" onclick="pvs_alert_ok()">Ok</a>' +
+                             '    </div>' +
                              '</div>');
             $('.close').click(function() {
                 $('#modal-alert').modal('hide');
@@ -84,17 +84,20 @@ pvs.validate = function() {
     pub = {
         options : function(rules, messages) {
             return {
-                errorClass:'error alert alert-error',
+                //errorClass:'error alert alert-error alert-pvs',
+                errorClass:'error alert-pvs',
                 validClass:'success',
                 errorElement:'span',
-                highlight: function (element, errorClass, validClass) { 
-                    $(element).siblings('label').children('span').remove();
-                    $(element).parent().addClass(errorClass).removeClass(validClass); 
-                }, 
-                unhighlight: function (element, errorClass, validClass) { 
-                    $(element).siblings('label').children('span').remove();
-                    $(element).parent().addClass(validClass).removeClass(errorClass); 
+                /*
+                highlight: function (element, errorClass, validClass) {
+                    //$(element).siblings('label').children('span').remove();
+                    //$(element).parent().addClass(errorClass).removeClass(validClass);
                 },
+                unhighlight: function (element, errorClass, validClass) {
+                    //$(element).siblings('label').children('span').remove();
+                    //$(element).parent().addClass(validClass).removeClass(errorClass);
+                },
+                */
                 errorPlacement : function(error, element) {
                     $(element).siblings('label').children('span').remove();
                     error.appendTo($(element).siblings('label'));
@@ -590,15 +593,15 @@ pvs.form = function(){
                 elements: element_id,
 	        theme : "advanced",
                 plugins: '',
-                
+
                 convert_urls: false,
                 forced_root_block : false,
                 force_p_newlines : 'false',
                 remove_linebreaks : false,
                 force_br_newlines : true,              //btw, I still get <p> tags if this is false
-                remove_trailing_nbsp : false,   
+                remove_trailing_nbsp : false,
                 verify_html : false,
-                
+
                 theme_advanced_buttons1 : "bold,italic,underline,separator,justifyleft,justifycenter,justifyright, justifyfull,bullist,numlist,undo,redo,link,unlink,separator,code",
                 theme_advanced_buttons2 : "",
                 theme_advanced_buttons3 : "",

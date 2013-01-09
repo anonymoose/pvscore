@@ -12,7 +12,6 @@
           % else:
           <h1>New Customer</h1>
           % endif
-
         </div>
         % if customer.phase:
         <div class="span6" style="text-align: center; background-color:${customer.phase.color};">

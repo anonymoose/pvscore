@@ -23,7 +23,7 @@ ${self.pre_process()}
 
   ${h.stylesheet_link('/static/js/jquery/jqgrid/css/ui.jqgrid.css')}
   ${h.stylesheet_link('/static/bootstrap-extensions/datepicker/css/datepicker.css')}
-  ${h.stylesheet_link('/static/css/pvs.css')}
+  ${h.stylesheet_link('/static/css/pvs.css?rnd=123')}
   ${h.stylesheet_link('/static/css/appointment.css')}
 
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
@@ -129,7 +129,7 @@ ${self.pre_process()}
 <script src="/static/js/jquery/jqgrid/js/jquery.jqGrid.min.js"></script>
 <script src="/static/js/jquery/barcode/jquery-barcode-2.0.2.min.js"></script>
 <script src="/static/js/jquery/tablesorter/jquery.tablesorter.min.js"></script>
-<script src="/static/crm/js/pvs-jquery.js"></script>
+<script src="/static/crm/js/pvs-jquery.js?rnd=1234"></script>
 
 ${self.local_foot()}
 ${self.other_foot()}
@@ -376,7 +376,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
     <script src="/static/crm/js/purchase.js"></script>
     <script src="/static/crm/js/comm.js"></script>
     <script src="/static/crm/js/content.js"></script>
-    <script src="/static/crm/js/customer.js"></script>
+    <script src="/static/crm/js/customer.js?rnd=12345"></script>
     <script src="/static/crm/js/appointment.js"></script>
     <script>
     $(document).ready(function() {

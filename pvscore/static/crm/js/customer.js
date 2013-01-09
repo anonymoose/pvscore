@@ -650,17 +650,34 @@ customer_show_balance = function() {
 };
 
 pvs.onload.push(function () {
-    if ($('#customer_form').length) {
-        $('#customer_form').validate(
+    if ($('#frm_customer').length) {
+        $('#frm_customer').validate(
             pvs.validate.options(
                 {
-                    fname: 'required',
-                    lname: 'required',
-
-                    //password: 'required',
+                    fname: {
+                        required: true,
+                        maxlength: 50
+                    },
+                    lname: {
+                        required: true,
+                        maxlength: 50
+                    },
                     email: {
                         required: true,
+                        maxlength: 50,
                         email: true
+                    },
+                    password: {
+                        maxlength: 50
+                    },
+                    addr1 : {
+                        maxlength: 50
+                    },
+                    addr2 : {
+                        maxlength: 50
+                    },
+                    city: {
+                        maxlength: 50
                     },
                     state: {
                         maxlength: 2
@@ -668,6 +685,12 @@ pvs.onload.push(function () {
                     zip: {
                         digits: true,
                         maxlength: 5
+                    },
+                    title: {
+                        maxlength: 50
+                    },
+                    company_name: {
+                        maxlength: 50
                     },
                     phone: { phoneUS: true },
                     alt_phone: { phoneUS: true },
