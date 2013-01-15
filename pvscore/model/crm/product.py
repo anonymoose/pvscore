@@ -142,7 +142,7 @@ class Product(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_ordered_list(campaign, which, order_by='revenue'):
+    def find_ordered_list(campaign, which):
         if 'new' == which:
             return Product.find_new_by_campaign(campaign)
         elif 'specials' == which:
@@ -403,7 +403,7 @@ class Product(ORMBase, BaseModel):
             if self.name:
                 return "/product/%s/%s" % (util.html_literal(util.urlencode_ex(self.name)), str(self.product_id))
         except Exception as exc:
-            log.warn("Invalid product link for product_id = %s" % str(self.product_id))
+            log.warn("Invalid product link for product_id = %s %s" % (str(self.product_id)), exc)
         return "/product/%s" % str(self.product_id)
 
 

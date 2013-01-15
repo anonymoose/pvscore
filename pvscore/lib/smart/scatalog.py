@@ -18,38 +18,38 @@ class SmartCatalog(object):
 
     @staticmethod
     def specials_product_list(campaign, offset=None, limit=None):
-        products = Product.find_ordered_list(campaign, 'specials', 'revenue')
-        return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new', 'revenue'), offset, limit)
+        products = Product.find_ordered_list(campaign, 'specials')
+        return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new'), offset, limit)
 
 
     @staticmethod
     def featured_product_list(campaign, offset=None, limit=None):
-        products = Product.find_ordered_list(campaign, 'featured', 'revenue')
-        return util.page_list(products if len(products) > 0 else Product.find_new_by_campaign(campaign, 'new', 'revenue'), offset, limit)
+        products = Product.find_ordered_list(campaign, 'featured')
+        return util.page_list(products if len(products) > 0 else Product.find_new_by_campaign(campaign), offset, limit)
 
 
     @staticmethod
     def category_product_list(campaign, category_id, offset=None, limit=None):
         category = ProductCategory.load(category_id)
-        return util.page_list(category.products if len(category.products) > 0 else Product.find_new_by_campaign(campaign, 'new', 'revenue'), offset, limit)
+        return util.page_list(category.products if len(category.products) > 0 else Product.find_new_by_campaign(campaign), offset, limit)
 
 
     @staticmethod
     def also_liked_product_list(product, campaign, offset=None, limit=None):
-        products = Product.find_ordered_list(campaign, 'specials', 'revenue')
-        return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new', 'revenue'), offset, limit)
+        products = Product.find_ordered_list(campaign, 'specials')
+        return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new'), offset, limit)
 
 
     @staticmethod
     def related_product_list(product, campaign, offset=None, limit=None):
-        products = Product.find_ordered_list(campaign, 'specials', 'revenue')
-        return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new', 'revenue'), offset, limit)
+        products = Product.find_ordered_list(campaign, 'specials')
+        return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new'), offset, limit)
 
 
     @staticmethod
     def related_product_list_cart(cart, campaign, offset=None, limit=None):
-        products = Product.find_ordered_list(campaign, 'specials', 'revenue')
-        return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new', 'revenue'), offset, limit)
+        products = Product.find_ordered_list(campaign, 'specials')
+        return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new'), offset, limit)
 
 
 class SmartSeo(object):

@@ -17,7 +17,7 @@ from pvscore.model.crm.journal import Journal
 from pvscore.model.cms.site import Site
 #from pvscore.lib.catalog import Catalog, Cart
 import ConfigParser
-import paste.deploy
+import paste.deploy   #pylint: disable-msg=F0401
 from pyramid import testing
 import logging
 from pvscore import command_line_main
@@ -28,8 +28,12 @@ logger = logging.getLogger(__name__)
 
 environ = {}
 
-UID = 'kenneth.bedwell@gmail.com'
-PWD = 'Zachary234'
+PVS_ROOT_UID = 'kenneth.bedwell@gmail.com'
+PVS_ROOT_PWD = 'Zachary234'
+
+UID = 'supplement@pppvonline.com'
+PWD = 'password'
+
 TEST_UID = 'test_kwbedwell@hotmail.com'
 TEST_UID_PASSWORD = 'swordfish'
 T_PRODUCT = 'Test Product for Nose'
@@ -157,6 +161,16 @@ def customer_logged_in(func, username=TEST_CUSTOMER_EMAIL, password=TEST_CUSTOME
         self.login_customer(username, password)
         ret = func(self)
         self.logout_customer()
+        return ret
+    wrap.__name__ = func.__name__
+    return wrap
+
+
+def secure_as_root(func, username=PVS_ROOT_UID, password=PVS_ROOT_PWD):
+    def wrap(self):
+        self.login_crm(username, password)
+        ret = func(self)
+        self.logout_crm()
         return ret
     wrap.__name__ = func.__name__
     return wrap

@@ -10,7 +10,7 @@ from zope.sqlalchemy import ZopeTransactionExtension  #pylint: disable-msg=E0611
 
 log = logging.getLogger(__name__)
 
-__all__ = ['Base', 'Session', 'Redis']
+__all__ = ['Session']
 Session = scoped_session(          #pylint: disable-msg=C0103
                 sessionmaker(
                     expire_on_commit=False,

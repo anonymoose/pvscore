@@ -4793,3 +4793,6 @@ and c.email = 'mr.smartconsult@gmail.com';
 delete from core_user where email = 'charlie@wealthmakers.com';
 
 
+select site_id, domain, namespace from cms_site;
+
+update cms_site set namespace = 'ecom/amy2' where site_id = '539083a5-2172-4e4a-bcaa-51416a2e56cf';

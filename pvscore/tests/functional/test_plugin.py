@@ -2,7 +2,7 @@ from pvscore.tests import TestController, secure
 from pvscore.lib.plugin import init_controllers, plugin_registry
 from pyramid.config import Configurator
 from pvscore import init_pvscore
-import paste.deploy
+import paste.deploy   #pylint: disable-msg=F0401
 
 class TestPlugin(TestController):
 
