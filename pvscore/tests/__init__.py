@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 environ = {}
 
 PVS_ROOT_UID = 'kenneth.bedwell@gmail.com'
-PVS_ROOT_PWD = 'Zachary234'
+PVS_ROOT_PWD = 'password'
 
 UID = 'supplement@pppvonline.com'
 PWD = 'password'
@@ -102,8 +102,8 @@ class TestController(TestCase):
         self.get('/crm')
 
         # this logs us into that site.
-        self.post('/crm/login', {'username': username,
-                                 'password': password})
+        R = self.post('/crm/login', {'username': username,
+                                     'password': password})
         assert self.site
         os.environ['enterprise_id'] = str(self.site.company.enterprise_id)
 

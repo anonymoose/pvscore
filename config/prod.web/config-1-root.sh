@@ -93,6 +93,20 @@ systemctl start redis.service
 echo postgres | passwd --stdin postgres
 usermod -a -G wheel postgres
 
+########################################################################
+# TA-LIB
+cd ~
+mkdir src
+cd src
+curl -L "http://downloads.sourceforge.net/project/ta-lib/ta-lib/0.4.0/ta-lib-0.4.0-src.tar.gz?r=http%3A%2F%2Fwww.ta-lib.org%2Fhdr_dw.html&ts=1358287707&use_mirror=iweb" > talib.tar.gz
+tar zxvf talib.tar.gz
+cd ta-lib
+./configure
+make
+make install
+cd ~
+
+
 ################################################################
 # setup the pvs service.
 cp /apps/pvs/pvscore/config/prod.web/usr/lib/systemd/system/*.service /usr/lib/systemd/system

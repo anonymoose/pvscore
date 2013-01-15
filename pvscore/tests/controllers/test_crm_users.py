@@ -1,4 +1,4 @@
-from pvscore.tests import TestController, secure, UID
+from pvscore.tests import TestController, secure, secure_as_root, UID, PVS_ROOT_UID
 from pvscore.model.core.users import Users
 from pvscore.model.crm.company import Enterprise
 
@@ -6,7 +6,7 @@ from pvscore.model.crm.company import Enterprise
 
 class TestCrmUsers(TestController):
 
-    def _create_new(self):
+    def _create_new(self, set_enterprise_id=False):
         ent = Enterprise.find_by_name('Healthy U Store')
         R = self.get('/crm/users/new')
         assert R.status_int == 200
@@ -19,17 +19,19 @@ class TestCrmUsers(TestController):
         f.set('lname', 'User')
         f.set('password', 'fishsticks')
         f.set('confirm', 'fishsticks')
-        f.set('enterprise_id', str(ent.enterprise_id))
+        if set_enterprise_id:
+            f.set('enterprise_id', str(ent.enterprise_id))
         R = f.submit('submit')
         self.assertEqual(R.status_int, 302)
         R = R.follow()
         assert R.status_int == 200
         f = R.forms['frm_users']
-        R.mustcontain('Edit Users')
+        R.mustcontain('Edit User')
         user_id = f['user_id'].value
         self.assertEqual(f['username'].value, 'test@tester.com')
         self.assertEqual(f['email'].value, 'test@tester.com')
         usr = Users.load(user_id)
+        assert str(usr.enterprise_id) == str(ent.enterprise_id)
         assert usr is not None
         assert usr.get_email_info() is not None
         return user_id
@@ -41,7 +43,27 @@ class TestCrmUsers(TestController):
 
 
     @secure
+    def test_create_new(self):
+        user_id = self._create_new()
+        self._delete_new(user_id)
+
+
+    @secure_as_root
+    def test_create_new_as_root(self):
+        user_id = self._create_new(True)
+        self._delete_new(user_id)
+
+
+    @secure
     def test_save_password(self):
+        self._test_save_password()
+
+    @secure_as_root
+    def test_save_password_as_root(self):
+        self._test_save_password()
+
+
+    def _test_save_password(self):
         user_id = self._create_new()
         usr = Users.load(user_id)
         orig_pwd = usr.password
@@ -52,12 +74,6 @@ class TestCrmUsers(TestController):
         usr.invalidate_caches()
         usr = Users.load(user_id)
         self.assertNotEqual(usr.password, orig_pwd)
-        self._delete_new(user_id)
-
-
-    @secure
-    def test_create_new(self):
-        user_id = self._create_new()
         self._delete_new(user_id)
 
 
@@ -73,7 +89,16 @@ class TestCrmUsers(TestController):
 
     @secure
     def test_list_with_new(self):
-        user_id = self._create_new()
+        self._test_list_with_new()
+
+
+    @secure_as_root
+    def test_list_with_new_as_root(self):
+        self._test_list_with_new(True)
+
+
+    def _test_list_with_new(self, as_root=False):
+        user_id = self._create_new(as_root)
         R = self.get('/crm/users/list')
         assert R.status_int == 200
         R.mustcontain('test@tester.com')
@@ -87,9 +112,25 @@ class TestCrmUsers(TestController):
         R.mustcontain(UID)
 
 
+    @secure_as_root
+    def test_edit_current_as_root(self):
+        R = self.get('/crm/users/edit_current')
+        assert R.status_int == 200
+        R.mustcontain(PVS_ROOT_UID)
+
+
     @secure
     def test_save_existing(self):
-        user_id = self._create_new()
+        self._test_save_existing()
+
+
+    @secure_as_root
+    def test_save_existing(self):
+        self._test_save_existing(True)
+
+
+    def _test_save_existing(self, as_root=False):
+        user_id = self._create_new(as_root)
         R = self.get('/crm/users/list')
         assert R.status_int == 200
         R.mustcontain('test@tester.com')

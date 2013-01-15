@@ -1,4 +1,4 @@
-from pvscore.tests import TestController, secure
+from pvscore.tests import TestController, secure, secure_as_root
 from pvscore.model.core.asset import Asset
 from pvscore.model.crm.company import Enterprise, Company
 from pvscore.model.crm.campaign import Campaign
@@ -60,6 +60,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_save_status(self):
+        self._test_save_status()
+
+
+    @secure_as_root
+    def test_save_status_as_root(self):
+        self._test_save_status()
+
+
+    def _test_save_status(self):
         ent = Enterprise.find_by_name('Healthy U Store')
         product_id = self._create_new()
         product = Product.load(product_id)
@@ -82,6 +91,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_show_orders(self):
+        self._test_show_orders()
+
+
+    @secure_as_root
+    def test_show_orders_as_root(self):
+        self._test_show_orders()
+
+
+    def _test_show_orders(self):
         product_id = self._create_new()
         R = self.get('/crm/product/show_orders/%s' % product_id)
         assert R.status_int == 200
@@ -90,6 +108,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_show_sales(self):
+        self._test_show_sales()
+
+
+    @secure_as_root
+    def test_show_sales_as_root(self):
+        self._test_show_sales()
+
+
+    def _test_show_sales(self):
         product_id = self._create_new()
         R = self.get('/crm/product/show_sales/%s' % product_id)
         assert R.status_int == 200
@@ -98,6 +125,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_show_purchases(self):
+        self._test_show_purchases()
+
+
+    @secure_as_root
+    def test_show_purchases_as_root(self):
+        self._test_show_purchases()
+
+
+    def _test_show_purchases(self):
         product_id = self._create_new()
         R = self.get('/crm/product/show_purchases/%s' % product_id)
         assert R.status_int == 200
@@ -106,6 +142,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_show_history(self):
+        self._test_show_history()
+
+
+    @secure_as_root
+    def test_show_history_as_root(self):
+        self._test_show_history()
+
+
+    def _test_show_history(self):
         product_id = self._create_new()
         R = self.get('/crm/product/show_history/%s' % product_id)
         assert R.status_int == 200
@@ -115,6 +160,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_show_returns(self):
+        self._test_show_returns()
+
+
+    @secure_as_root
+    def test_show_returns_as_root(self):
+        self._test_show_returns()
+
+
+    def _test_show_returns(self):
         product_id = self._create_new()
         R = self.get('/crm/product/show_returns/%s' % product_id)
         assert R.status_int == 200
@@ -123,6 +177,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_show_inventory(self):
+        self._test_show_inventory()
+
+
+    @secure_as_root
+    def test_show_inventory_as_root(self):
+        self._test_show_inventory()
+
+
+    def _test_show_inventory(self):
         R = self.get('/crm/product/show_inventory')
         assert R.status_int == 200
         R.mustcontain('Product Quick Editor')
@@ -130,6 +193,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_save_inventory(self):
+        self._test_save_inventory()
+
+
+    @secure_as_root
+    def test_save_inventory_as_root(self):
+        self._test_save_inventory()
+
+
+    def _test_save_inventory(self):
         ent = Enterprise.find_by_name('Healthy U Store')
         cmpns = Campaign.find_all(ent.enterprise_id)
 
@@ -173,6 +245,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_save_existing(self):
+        self._test_save_existing()
+
+
+    @secure_as_root
+    def test_save_existing_as_root(self):
+        self._test_save_existing()
+
+
+    def _test_save_existing(self):
         ent = Enterprise.find_by_name('Healthy U Store')
         cmpns = Campaign.find_all(ent.enterprise_id)
 
@@ -240,12 +321,20 @@ class TestCrmProduct(TestController):
         R.mustcontain('Edit Product')
         self.assertEqual(f['product_id'].value, product_id)
         self.assertEqual(f['campaign_price[%s]' % cmpns[1].campaign_id].value, "234.00")
-
         self._delete_new(product_id)
 
 
     @secure
     def test_show_new(self):
+        self._test_show_new()
+
+
+    @secure_as_root
+    def test_show_new_as_root(self):
+        self._test_show_new()
+
+
+    def _test_show_new(self):
         R = self.get('/crm/product/new')
         assert R.status_int == 200
         R.mustcontain('Edit Product')
@@ -255,6 +344,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_autocomplete_by_name(self):
+        self._test_autocomplete_by_name()
+
+
+    @secure_as_root
+    def test_autocomplete_by_name_as_root(self):
+        self._test_autocomplete_by_name()
+
+
+    def _test_autocomplete_by_name(self):
         product_id = self._create_new()
         R = self.get('/crm/product/autocomplete_by_name',
                       {'search_key': 'test'})
@@ -277,12 +375,30 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_create_new(self):
+        self._test_create_new()
+
+
+    @secure_as_root
+    def test_create_new_as_root(self):
+        self._test_create_new()
+
+
+    def _test_create_new(self):
         product_id = self._create_new()
         self._delete_new(product_id)
 
 
     @secure
     def test_delete_picture(self):
+        self._test_delete_picture()
+
+
+    @secure_as_root
+    def test_delete_picture_as_root(self):
+        self._test_delete_picture()
+
+
+    def _test_delete_picture(self):
         product_id = self._create_new()
         # http://stackoverflow.com/questions/2488978/nose-tests-file-uploads
         files = [("Filedata", "testimage.jpg", "not really a jpg")]
@@ -299,17 +415,17 @@ class TestCrmProduct(TestController):
         self._delete_new(product_id)
 
 
-    # @secure
-    # def test_inventory_list(self):
-    #     R = self.get('/crm/product/inventory_list')
-    #     assert R.status_int == 200
-    #     prods = json.loads(R.body)
-    #     self.assertGreater(prods['records'], 100)
-    #     self.assertEqual(prods['records'], len(prods['rows']))
-
-
     @secure
     def test_list_with_new(self):
+        self._test_list_with_new()
+
+
+    @secure_as_root
+    def test_list_with_new_as_root(self):
+        self._test_list_with_new()
+
+
+    def _test_list_with_new(self):
         product_id = self._create_new()
         R = self.get('/crm/product/list')
         assert R.status_int == 200
@@ -319,6 +435,15 @@ class TestCrmProduct(TestController):
 
     @secure
     def test_upload_picture(self):
+        self._test_upload_picture()
+
+
+    @secure
+    def test_upload_picture(self):
+        self._test_upload_picture()
+
+
+    def _test_upload_picture(self):
         product_id = self._create_new()
         # http://stackoverflow.com/questions/2488978/nose-tests-file-uploads
         files = [("Filedata", "testimage.jpg", "not really a jpg")]
@@ -334,5 +459,11 @@ class TestCrmProduct(TestController):
         self._delete_new(product_id)
 
 
-
+    # @secure
+    # def test_inventory_list(self):
+    #     R = self.get('/crm/product/inventory_list')
+    #     assert R.status_int == 200
+    #     prods = json.loads(R.body)
+    #     self.assertGreater(prods['records'], 100)
+    #     self.assertEqual(prods['records'], len(prods['rows']))
 

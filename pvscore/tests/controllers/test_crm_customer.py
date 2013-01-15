@@ -1,5 +1,5 @@
 #pylint: disable-msg=C0103,C0302
-from pvscore.tests import TestController, secure, alternate_site
+from pvscore.tests import TestController, secure, alternate_site, secure_as_root
 from pvscore.model.crm.customer import Customer
 from pvscore.model.crm.customerorder import CustomerOrder
 from pvscore.model.crm.orderitem import OrderItem
@@ -32,15 +32,6 @@ class TestCrmCustomer(TestController):
         R = self.get(url)  #pylint: disable-msg=E1300
         assert R.status_int == 200
         R.mustcontain(cust.customer_id)
-
-
-    @secure
-    def test_show_new(self):
-        R = self.get('/crm/customer/new')
-        assert R.status_int == 200
-        R.mustcontain('New Customer')
-        f = R.forms['frm_customer']
-        self.assertEqual(f['fname'].value, '')
 
 
     def _create_new(self):  #pylint: disable-msg=R0915
@@ -138,13 +129,49 @@ class TestCrmCustomer(TestController):
 
 
     @secure
+    def test_show_new(self):
+        self._test_show_new()
+
+
+    @secure_as_root
+    def test_show_new_as_root(self):
+        self._test_show_new()
+
+
+    def _test_show_new(self):
+        R = self.get('/crm/customer/new')
+        assert R.status_int == 200
+        R.mustcontain('New Customer')
+        f = R.forms['frm_customer']
+        self.assertEqual(f['fname'].value, '')
+
+
+    @secure
     def test_create_new(self):
+        self._test_create_new()
+
+
+    @secure_as_root
+    def test_create_new_as_root(self):
+        self._test_create_new()
+
+
+    def _test_create_new(self):
         customer_id = self._create_new()
         self._delete_new(customer_id)
 
 
     @secure
     def test_show_history(self):
+        self._test_show_history()
+
+
+    @secure_as_root
+    def test_show_history_as_root(self):
+        self._test_show_history()
+
+
+    def _test_show_history(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/edit/%s' % customer_id)
         assert R.status_int == 200
@@ -157,6 +184,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_show_billing(self):
+        self._test_show_billing()
+
+
+    @secure_as_root
+    def test_show_billing_as_root(self):
+        self._test_show_billing()
+
+
+    def _test_show_billing(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/edit/%s' % customer_id)
         assert R.status_int == 200
@@ -170,6 +206,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_show_attributes(self):
+        self._test_show_attributes()
+
+
+    @secure_as_root
+    def test_show_attributes_as_root(self):
+        self._test_show_attributes()
+
+
+    def _test_show_attributes(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/edit/%s' % customer_id)
         assert R.status_int == 200
@@ -181,6 +226,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_search(self):
+        self._test_search()
+
+
+    @secure_as_root
+    def test_search_as_root(self):
+        self._test_search()
+
+
+    def _test_search(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/show_search')
         assert R.status_int == 200
@@ -201,6 +255,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_save_existing(self):
+        self._test_save_existing()
+
+
+    @secure_as_root
+    def test_save_existing_as_root(self):
+        self._test_save_existing()
+
+
+    def _test_save_existing(self):
         customer_id = self._create_new()
 
         R = self.get('/crm/customer/edit/%s' % customer_id)
@@ -234,6 +297,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_autocomplete(self):
+        self._test_autocomplete()
+
+
+    @secure_as_root
+    def test_autocomplete_as_root(self):
+        self._test_autocomplete()
+
+
+    def _test_autocomplete(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/autocomplete',
                       {'search_key': 'Bedw'})
@@ -257,6 +329,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_add_order(self):
+        self._test_add_order()
+
+
+    @secure_as_root
+    def test_add_order_as_root(self):
+        self._test_add_order()
+
+
+    def _test_add_order(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/add_order_dialog/%s' % customer_id)
         assert R.status_int == 200
@@ -285,6 +366,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_show_billing_dialog(self):
+        self._test_show_billing_dialog()
+
+
+    @secure_as_root
+    def test_show_billing_dialog_as_root(self):
+        self._test_show_billing_dialog()
+
+
+    def _test_show_billing_dialog(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         R = self.get('/crm/customer/show_billings/%s' % customer_id)
@@ -335,6 +425,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_return_item_credit(self):
+        self._test_return_item_credit()
+
+
+    @secure_as_root
+    def test_return_item_credit_as_root(self):
+        self._test_return_item_credit()
+
+
+    def _test_return_item_credit(self):
         customer_id = self._create_new()
         self._test_return_impl('CreditIncrease', customer_id)
         self._delete_new(customer_id)
@@ -342,6 +441,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_return_item_refund(self):
+        self._test_return_item_refund()
+
+
+    @secure_as_root
+    def test_return_item_refund_as_root(self):
+        self._test_return_item_refund()
+
+
+    def _test_return_item_refund(self):
         customer_id = self._create_new()
         self._test_return_impl('Refund', customer_id)
         self._delete_new(customer_id)
@@ -349,6 +457,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_return_single_item(self):  #pylint: disable-msg=R0915
+        self._test_return_single_item()
+
+
+    @secure_as_root
+    def test_return_single_item_as_root(self):  #pylint: disable-msg=R0915
+        self._test_return_single_item()
+
+
+    def _test_return_single_item(self):  #pylint: disable-msg=R0915
         R = self.get('/crm/customer/new')
         assert R.status_int == 200
         R.mustcontain('New Customer')
@@ -406,6 +523,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_check_duplicate_email(self):
+        self._test_check_duplicate_email()
+
+
+    @secure_as_root
+    def test_check_duplicate_email_as_root(self):
+        self._test_check_duplicate_email()
+
+
+    def _test_check_duplicate_email(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         R = self.get('/crm/customer/check_duplicate_email/%s' % cust.email)
@@ -419,6 +545,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_customer_status(self):
+        self._test_customer_status()
+
+
+    @secure_as_root
+    def test_customer_status_as_root(self):
+        self._test_customer_status()
+
+
+    def _test_customer_status(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         R = self.get('/crm/customer/status_dialog/%s?dialog=1' % customer_id)
@@ -437,6 +572,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_order_status(self):
+        self._test_order_status()
+
+
+    @secure_as_root
+    def test_order_status_as_root(self):
+        self._test_order_status()
+
+
+    def _test_order_status(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         order = cust.orders[0]
@@ -457,6 +601,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_order_item_status(self):
+        self._test_order_item_status()
+
+
+    @secure_as_root
+    def test_order_item_status_as_root(self):
+        self._test_order_item_status()
+
+
+    def _test_order_item_status(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         order = cust.orders[0]
@@ -478,6 +631,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_customer_status_dialog(self):
+        self._test_customer_status_dialog()
+
+
+    @secure_as_root
+    def test_customer_status_dialog_as_root(self):
+        self._test_customer_status_dialog()
+
+
+    def _test_customer_status_dialog(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         hist = Status.find_by_customer(cust, 0)[0]
@@ -488,6 +650,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_customer_delete(self):
+        self._test_customer_delete()
+
+
+    @secure_as_root
+    def test_customer_delete_as_root(self):
+        self._test_customer_delete()
+
+
+    def _test_customer_delete(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         self.assertEqual(cust.delete_dt, None)
@@ -563,6 +734,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_signup_exists(self):
+        self._test_signup_exists()
+
+
+    @secure_as_root
+    def test_signup_exists_as_root(self):
+        self._test_signup_exists()
+
+
+    def _test_signup_exists(self):
         customer_id = self._create_new()
         R = self.post('/crm/customer/signup',
                       {'fname' : 'Ken',
@@ -578,6 +758,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_get_balance(self):
+        self._test_get_balance()
+
+
+    @secure_as_root
+    def test_get_balance_as_root(self):
+        self._test_get_balance()
+
+
+    def _test_get_balance(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/get_balance/%s' % customer_id)
         self.assertEqual(R.body, "0.0")
@@ -586,6 +775,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_self_get_balance(self):
+        self._test_self_get_balance()
+
+
+    @secure_as_root
+    def test_self_get_balance_as_root(self):
+        self._test_self_get_balance()
+
+
+    def _test_self_get_balance(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         self.login_customer(cust.email, 'password')
@@ -597,6 +795,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_not_logged_in(self):
+        self._test_not_logged_in()
+
+
+    @secure_as_root
+    def test_not_logged_in_as_root(self):
+        self._test_not_logged_in()
+
+
+    def _test_not_logged_in(self):
         customer_id = self._create_new()
         R = self.get('/crm/customer/self_get_balance/%s' % customer_id)
         self.assertEqual(R.request.url, 'http://%s/?path=/crm/customer/self_get_balance/%s&vars=' % (self.get_host(), customer_id))
@@ -605,6 +812,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_self_save(self):
+        self._test_self_save()
+
+
+    @secure_as_root
+    def test_self_save_as_root(self):
+        self._test_self_save()
+
+
+    def _test_self_save(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         self.login_customer(cust.email, cust.password)
@@ -621,6 +837,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_self_cancel_invalid_password(self):
+        self._test_self_cancel_invalid_password()
+
+
+    @secure_as_root
+    def test_self_cancel_invalid_password_as_root(self):
+        self._test_self_cancel_invalid_password()
+
+
+    def _test_self_cancel_invalid_password(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         self.login_customer(cust.email, cust.password)
@@ -641,6 +866,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_self_cancel_one(self):
+        self._test_self_cancel_one()
+
+
+    @secure_as_root
+    def test_self_cancel_one_as_root(self):
+        self._test_self_cancel_one()
+
+
+    def _test_self_cancel_one(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         self.login_customer(cust.email, cust.password)
@@ -660,6 +894,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_self_cancel_all(self):
+        self._test_self_cancel_all()
+
+
+    @secure_as_root
+    def test_self_cancel_all_as_root(self):
+        self._test_self_cancel_all()
+
+
+    def _test_self_cancel_all(self):
         customer_id = self._create_new()
         cust = Customer.load(customer_id)
         self.login_customer(cust.email, cust.password)
@@ -711,6 +954,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_stripe_cancel_order(self):
+        self._test_stripe_cancel_order()
+
+
+    @secure_as_root
+    def test_stripe_cancel_order_as_root(self):
+        self._test_stripe_cancel_order()
+
+
+    def _test_stripe_cancel_order(self):
         ent = Enterprise.find_by_name('Healthy U Store')
         api = StripeBillingApi(ent)
         R = self.post('/crm/customer/signup',
@@ -930,6 +1182,15 @@ class TestCrmCustomer(TestController):
 
     @secure
     def test_stripe_self_cancel_at_gateway(self):
+        self._test_stripe_self_cancel_at_gateway()
+
+
+    @secure_as_root
+    def test_stripe_self_cancel_at_gateway_as_root(self):
+        self._test_stripe_self_cancel_at_gateway()
+
+
+    def _test_stripe_self_cancel_at_gateway(self):
         ent = Enterprise.find_by_name('Healthy U Store')
         api = StripeBillingApi(ent)
         R = self.post('/crm/customer/signup',
