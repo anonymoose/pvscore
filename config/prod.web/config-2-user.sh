@@ -24,6 +24,7 @@ easy_install pyramid
 pip install numpy
 pip install scipy
 pip install matplotlib
+pip install TA-Lib
 
 
 cd pvscore

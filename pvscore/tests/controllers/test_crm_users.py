@@ -31,7 +31,10 @@ class TestCrmUsers(TestController):
         self.assertEqual(f['username'].value, 'test@tester.com')
         self.assertEqual(f['email'].value, 'test@tester.com')
         usr = Users.load(user_id)
-        assert str(usr.enterprise_id) == str(ent.enterprise_id)
+        if set_enterprise_id:
+            assert str(usr.enterprise_id) == str(ent.enterprise_id)
+        else:
+            assert usr.enterprise_id == None
         assert usr is not None
         assert usr.get_email_info() is not None
         return user_id

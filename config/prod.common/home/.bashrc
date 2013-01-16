@@ -17,7 +17,7 @@ fi
 # User specific aliases and functions
 export HISTFILESIZE=1000000000
 export HISTSIZE=1000000
-export HISTCONTROL=ignoredups 
+export HISTCONTROL=ignoredups
 export PATH=$PATH:.:/usr/pgsql-9.1/bin
 alias ll="ls -aGFlh"
 alias ...="cd ../.."
@@ -32,5 +32,5 @@ alias lt='ls -ltr'              # sort by date
 alias lm='ls -al |more'         # pipe through 'more'
 
 
-export LD_LIBRARY_PATH=/usr/pgsql-9.1/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/pgsql-9.1/lib:$LD_LIBRARY_PATH
 
