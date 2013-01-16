@@ -438,8 +438,8 @@ class TestCrmProduct(TestController):
         self._test_upload_picture()
 
 
-    @secure
-    def test_upload_picture(self):
+    @secure_as_root
+    def test_upload_picture_as_root(self):
         self._test_upload_picture()
 
 
@@ -459,11 +459,11 @@ class TestCrmProduct(TestController):
         self._delete_new(product_id)
 
 
-    # @secure
-    # def test_inventory_list(self):
-    #     R = self.get('/crm/product/inventory_list')
-    #     assert R.status_int == 200
-    #     prods = json.loads(R.body)
-    #     self.assertGreater(prods['records'], 100)
-    #     self.assertEqual(prods['records'], len(prods['rows']))
+    @secure
+    def test_inventory_list(self):
+        R = self.get('/crm/product/inventory_list')
+        assert R.status_int == 200
+        prods = json.loads(R.body)
+        self.assertGreater(prods['records'], 100)
+        self.assertEqual(prods['records'], len(prods['rows']))
 

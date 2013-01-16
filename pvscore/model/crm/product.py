@@ -99,23 +99,23 @@ class Product(ORMBase, BaseModel):
             .join((Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
                          Company.enterprise_id == enterprise_id,
-                         Product.vendor_id == vendor.vendor_id)) \
+                         Product.vendor_id == vendor.vendor_id if vendor else None)) \
                          .order_by(Product.name) \
                          .all()
 
 
-    @staticmethod
-    def find_by_manufacturer(enterprise_id, mfr_name, for_web=True):
-        return Session.query(Product) \
-            .options(FromCache('Product.find_by_manufacturer', '%s/%s' % (mfr_name, enterprise_id))) \
-            .join((Company, Product.company_id == Company.company_id)) \
-            .filter(and_(Product.delete_dt == None,
-                         Product.enabled == True,
-                         Product.manufacturer.like('%'+mfr_name+'%'),
-                         Company.enterprise_id == enterprise_id,
-                         or_(Product.web_visible == True, Product.web_visible==for_web)
-                         )) \
-                         .order_by(Product.name).all()
+    # @staticmethod
+    # def find_by_manufacturer(enterprise_id, mfr_name, for_web=True):
+    #     return Session.query(Product) \
+    #         .options(FromCache('Product.find_by_manufacturer', '%s/%s' % (mfr_name, enterprise_id))) \
+    #         .join((Company, Product.company_id == Company.company_id)) \
+    #         .filter(and_(Product.delete_dt == None,
+    #                      Product.enabled == True,
+    #                      Product.manufacturer.like('%'+mfr_name+'%'),
+    #                      Company.enterprise_id == enterprise_id,
+    #                      or_(Product.web_visible == True, Product.web_visible==for_web)
+    #                      )) \
+    #                      .order_by(Product.name).all()
 
 
     @staticmethod

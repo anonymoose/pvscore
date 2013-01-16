@@ -33,8 +33,6 @@ class TestCrmUsers(TestController):
         usr = Users.load(user_id)
         if set_enterprise_id:
             assert str(usr.enterprise_id) == str(ent.enterprise_id)
-        else:
-            assert usr.enterprise_id == None
         assert usr is not None
         assert usr.get_email_info() is not None
         return user_id
@@ -63,11 +61,11 @@ class TestCrmUsers(TestController):
 
     @secure_as_root
     def test_save_password_as_root(self):
-        self._test_save_password()
+        self._test_save_password(True)
 
 
-    def _test_save_password(self):
-        user_id = self._create_new()
+    def _test_save_password(self, as_root=False):
+        user_id = self._create_new(as_root)
         usr = Users.load(user_id)
         orig_pwd = usr.password
         R = self.post('/crm/users/save_password',
@@ -128,7 +126,7 @@ class TestCrmUsers(TestController):
 
 
     @secure_as_root
-    def test_save_existing(self):
+    def test_save_existing_as_root(self):
         self._test_save_existing(True)
 
 
