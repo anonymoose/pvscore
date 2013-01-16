@@ -26,7 +26,7 @@ class Company(ORMBase, BaseModel):
 
     anon_customer_email = Column(String(75))
 
-    
+
     addr1 = Column(String(50))
     addr2 = Column(String(50))
     city = Column(String(50))
@@ -212,10 +212,11 @@ class Enterprise(ORMBase, BaseModel):
         product_ids = db.get_list("""select product_id from crm_product where
                                      company_id in (select company_id from crm_company where enterprise_id = '%s')""" % enterprise_id)
 
-        for cid in customer_ids:
+        # KB: [2013-01-15]: pragma no cover on this because it is not possible to create customers or products on one campaign from another.
+        for cid in customer_ids:  #pragma: no cover
             Customer.full_delete(cid[0])
 
-        for pid in product_ids:
+        for pid in product_ids:   #pragma: no cover
             product_id = pid[0]
             Session.execute("delete from crm_product_return where product_id = '%s'" % product_id)
             Session.execute("delete from crm_product_category_join where product_id = '%s'" % product_id)
@@ -316,7 +317,7 @@ class Enterprise(ORMBase, BaseModel):
     #         .filter(and_(Enterprise.delete_dt == None,
     #                      Enterprise.customer_id == None)).order_by(Enterprise.name).all()
 
-        
+
     # @property
     # def web_full_directory(self):
     #     return "{root_dir}/{dirname}".format(root_dir=util.cache_get('pvs.company.web.root.dir'),

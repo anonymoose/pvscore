@@ -249,7 +249,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
                     return self._cancel_subscription(cust, order, oitem)
         except Exception as exc2: #pragma: no cover
             self.last_note = exc2.message
-        return False
+        return False  #pragma: no cover
 
 
     def update_billing(self, cust, billing):
@@ -263,7 +263,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
             return True
         except Exception as exc2: #pragma: no cover
             self.last_note = exc2.message
-        return False
+        return False  #pragma: no cover
 
 
     def _update_subscription(self, customer, order, order_item, billing):
@@ -287,9 +287,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
 
             response = util.xml_str_to_dict(xml_response)['ARBUpdateSubscriptionResponse']
             if response['messages']['resultCode'].lower() != 'ok':
-                message = response['messages']['message']
-                if type(message) == list:
-                    message = message[0]
+                message = message[0] if type(message) == list else response['messages']['message']
                 self.last_status = message['code']
                 self.last_note = message['text']
                 return False
@@ -297,7 +295,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
         except Exception as exc2: #pragma: no cover
             self.last_status = -1
             self.last_note = exc2.message
-        return False
+        return False  #pragma: no cover
 
 
     def get_last_status(self):
@@ -342,9 +340,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
 
             response = util.xml_str_to_dict(xml_response)['ARBCreateSubscriptionResponse']
             if response['messages']['resultCode'].lower() != 'ok':
-                message = response['messages']['message']
-                if type(message) == list:
-                    message = message[0]
+                message = message[0] if type(message) == list else response['messages']['message']
                 self.last_status = message['code']
                 self.last_note = message['text']
                 return False
@@ -377,9 +373,7 @@ class AuthorizeNetBillingApi(BaseBillingApi):
             response = util.xml_str_to_dict(xml_response)['ARBCancelSubscriptionResponse']
 
             if response['messages']['resultCode'].lower() != 'ok':
-                message = response['messages']['message']
-                if type(message) == list:
-                    message = message[0]
+                message = message[0] if type(message) == list else response['messages']['message']
                 self.last_status = message['code']
                 self.last_note = message['text']
                 return False
