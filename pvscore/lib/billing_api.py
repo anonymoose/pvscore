@@ -287,7 +287,8 @@ class AuthorizeNetBillingApi(BaseBillingApi):
 
             response = util.xml_str_to_dict(xml_response)['ARBUpdateSubscriptionResponse']
             if response['messages']['resultCode'].lower() != 'ok':
-                message = message[0] if type(message) == list else response['messages']['message']
+                message = response['messages']['message']
+                message = message[0] if type(message) == list else message
                 self.last_status = message['code']
                 self.last_note = message['text']
                 return False
@@ -340,7 +341,8 @@ class AuthorizeNetBillingApi(BaseBillingApi):
 
             response = util.xml_str_to_dict(xml_response)['ARBCreateSubscriptionResponse']
             if response['messages']['resultCode'].lower() != 'ok':
-                message = message[0] if type(message) == list else response['messages']['message']
+                message = response['messages']['message']
+                message = message[0] if type(message) == list else message
                 self.last_status = message['code']
                 self.last_note = message['text']
                 return False
@@ -373,7 +375,8 @@ class AuthorizeNetBillingApi(BaseBillingApi):
             response = util.xml_str_to_dict(xml_response)['ARBCancelSubscriptionResponse']
 
             if response['messages']['resultCode'].lower() != 'ok':
-                message = message[0] if type(message) == list else response['messages']['message']
+                message = response['messages']['message']
+                message = message[0] if type(message) == list else message
                 self.last_status = message['code']
                 self.last_note = message['text']
                 return False

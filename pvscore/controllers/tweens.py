@@ -7,10 +7,69 @@ from pvscore.model.cms.site import Site
 from pvscore.model.core.users import Users
 from pvscore.model.crm.customer import Customer
 from pyramid.httpexceptions import HTTPFound, HTTPForbidden
+from pyramid.httpexceptions import WSGIHTTPException
+from textwrap import dedent
 from pvscore.lib.geoip.geo import Geo
 import pvscore.lib.util as util
+from pprint import pprint, pformat
 
 log = logging.getLogger(__name__)
+
+def exclog_tween_factory(handler, registry):
+    get = registry.settings.get
+    ignored = get('exclog.ignore', (WSGIHTTPException,))
+    extra_info = get('exclog.extra_info', False)
+    def exclog_tween(request, getLogger=logging.getLogger):
+        # getLogger injected for testing purposes
+        try:
+            return handler(request)
+        except ignored:
+            raise
+        except:
+            logger = getLogger('exc_logger')
+
+            ent = None
+            if 'enterprise_id' in request.session:
+                ent = Enterprise.load(request.session['enterprise_id'])
+            cust = None
+            if 'customer_id' in request.session:
+                cust = Customer.load(request.session['customer_id'])
+            user = None
+            if 'user_id' in request.session:
+                user = Users.load(request.session['user_id'])
+
+            if extra_info:
+                message = dedent("""\n
+                %(url)s
+
+                ENTERPRISE: %(ent)s
+                CUSTOMER: %(cust)s
+                USER: %(user)s
+
+                SESSION
+                %(sess)s
+
+                ENVIRONMENT
+                %(env)s
+
+                PARAMETERS
+                %(params)s
+
+
+                """ % dict(url=request.url,
+                           sess=pformat(request.session.items()),
+                           ent ="%s : %s" % (ent.enterprise_id, ent.name) if ent else None,
+                           cust="%s : %s" % (cust.customer_id, cust.email) if cust else None,
+                           user="%s : %s" % (user.user_id, user.email) if user else None,
+                           env=pformat(request.environ),
+                           params=pformat(request.params)))
+            else:
+                message = request.url
+            logger.exception(message)
+            raise
+
+    return exclog_tween
+
 
 def timing_tween_factory(handler, registry):
     # if timing support is enabled, return a wrapper

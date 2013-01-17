@@ -85,7 +85,7 @@ class UserMail(object):
             #else:
 
 
- 
+
 
 class GmailLogHandler(logging.handlers.SMTPHandler):
     """ KB : [2012-11-21]:
@@ -106,6 +106,7 @@ class GmailLogHandler(logging.handlers.SMTPHandler):
             port = self.mailport if self.mailport else smtplib.SMTP_PORT
             smtp = smtplib.SMTP(self.mailhost, port)
             msg = self.format(record)
+
             msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
                             self.fromaddr,
                             ",".join(self.toaddrs),
@@ -122,4 +123,6 @@ class GmailLogHandler(logging.handlers.SMTPHandler):
             raise
         except:  #pragma: no cover
             self.handleError(record)
- 
+
+    def getSubject(self, record):
+        return 'EXCEPTION %s' % record.asctime
