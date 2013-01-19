@@ -4807,3 +4807,5 @@ sele
 select fname, lname from crm_customer where email = 'mr.smartconsult@gmail.com';
 
 select fname, lname, email from crm_customer where lname like 'Lewis';
+
+select * from cms_site where domain = 'eyefound.it';
