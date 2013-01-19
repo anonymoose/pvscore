@@ -4796,3 +4796,14 @@ delete from core_user where email = 'charlie@wealthmakers.com';
 select site_id, domain, namespace from cms_site;
 
 update cms_site set namespace = 'ecom/amy2' where site_id = '539083a5-2172-4e4a-bcaa-51416a2e56cf';
+
+
+select name, enterprise_id from crm_enterprise;
+
+sele
+
+\d crm_customer;
+
+select fname, lname from crm_customer where email = 'mr.smartconsult@gmail.com';
+
+select fname, lname, email from crm_customer where lname like 'Lewis';

@@ -49,7 +49,7 @@ class Site(ORMBase, BaseModel):
     creator = relation('Users', primaryjoin=Users.user_id == user_created)
 
     def __repr__(self):  #pragma: no cover
-        return '%s : %s' % (self.domain, self.company.name)
+        return '%s : %s' % (self.domain, self.company.name if self.company else '')
 
 
     @staticmethod
