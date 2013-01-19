@@ -13,26 +13,31 @@ MAILTO=root
 # |  |  |  |  |
 # *  *  *  *  * user-name  command to be executed
 
+#
+# wealthmakers.com
+#
 01            22       * * 1-5  web   /apps/pvs/wm/wm/bin/nightly.sh
 01            22       * * 6-7  web   /apps/pvs/wm/wm/bin/weekend.sh
+01            4        * * *    web   /apps/pvs/pvscore/pvscore/bin/backup_db.sh wm wm
+01            5        * * *    web   /apps/pvs/pvscore/pvscore/bin/backup_db.sh retail retail
 01            12       * * *    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest latest_predictions
 01            1        * * *    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest batting_average
 01            23       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_report run
-15            4        * * 7    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_holders
 10            9-18     * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest check_retired
-30            13       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_trade_director
-30            18       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_institutional
-35            20       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_trade_director_end_of_day 
+30            14       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_trade_director
+30            19       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_institutional
+35            21       * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_trade_director_end_of_day 
 01            8        * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_results
 05,25,45      9-18     * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.market_latest update_intraday
+#05,20,35,50   *        * * *    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_read process_new_customers
+#01            9        * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_read run
+#15            4        * * 7    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.buyins_latest run_holders
+
+#
+# eyefound.it
+#
+01,10,20,30,40,50 *    * * *    web   /apps/pvs/pvscore/pvscore/bin/exec.sh pvs pvs.bin.eye_process process_upload
 
 0 4 * * * root /usr/sbin/ntpdate pool.ntp.org
 0 4 * * * web /usr/bin/vacuumdb --analyze --verbose wm -U postgres > /tmp/pg-wm-vacuum.log
 0 3 * * * web /usr/bin/vacuumdb --analyze --verbose retail -U postgres > /tmp/pg-pvs-vacuum.log
-
-
-#######################################
-## OBSOLETE
-#######################################
-# 05,20,35,50   *        * * *    web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_read process_new_customers
-# 01            9        * * 1-5  web   /apps/pvs/pvscore/pvscore/bin/exec.sh wm wm.bin.daily_read run
