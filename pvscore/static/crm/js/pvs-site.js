@@ -1,4 +1,5 @@
 /* KB: [2010-11-09]: Functions for use with the front end site. */
+;(function($) {
 
 is_true = function(val) {
     return (val === true || val === 'True' || val == 'true' || val === 'Y' || val === 'y');
@@ -111,3 +112,4 @@ cms.catalog = function() {
     return pub;
 }();
 
+})(jQuery);

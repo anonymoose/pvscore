@@ -1,3 +1,5 @@
+;(function($) {
+
 /*!
  * PVS wrapper library for JQuery
  * Copyright(c) 2010 Palm Valley Software, LLC.
@@ -1679,3 +1681,5 @@ var css_browser_selector = function() {
 	h.className += h.className?' '+c:c;
 }();
 // KB: [2007-02-16]: This crazy thing allows us to have CSS dependant on browser */
+
+})(jQuery);

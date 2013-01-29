@@ -30,14 +30,15 @@ class UPSShipping(object):
         site_config = json.loads(site.config_json) if site.config_json else None
         if not site_config: #pragma: no cover
             raise Exception("No site config for UPS Shipping.")
-        
         shipping_config = site_config[0]['shipping']
+        campaign = customer.campaign if customer else site.default_campaign
+        company = customer.campaign.company if customer else site.company
         xml = util.literal(render('/catalog/shipping.ups_pricing_call.mako',
                                   {'cart' : cart,
                                    'site' : site,
                                    'cust' : customer,
-                                   'campaign' : customer.campaign,
-                                   'company' : customer.campaign.company,
+                                   'campaign' : campaign,
+                                   'company' : company,
                                    'api_key' : shipping_config['api_key'],
                                    'user_id' : shipping_config['user_id'],
                                    'account' : shipping_config['account'],

@@ -68,12 +68,14 @@ class CartController(CatalogBaseController):
         return 'True' if not redir else HTTPFound(redir)
 
 
+    @view_config(route_name='ecom.site.cart.checkout.default')
     @view_config(route_name='ecom.site.cart.checkout')
     def checkout(self):
         page = self.request.matchdict.get('page')
         if 'cart' not in self.session:
             return HTTPFound('/')   #pragma: no cover
         params = self.params()
+
         cart = self.session['cart']
         if self.request.ctx.site.config_json and not cart.shipping_options:
             shipper = None

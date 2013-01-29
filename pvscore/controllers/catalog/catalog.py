@@ -24,6 +24,7 @@ class CatalogBaseController(BaseController):
         return {'site' : site,
                 'base' : '%s/%s/' % (self.request.host_url.replace('http', 'https') if util.is_production() else self.request.host_url , site.namespace),
                 'user' : self.request.ctx.user,
+                'product' : None,
                 'products_related' : None,
                 'category' : None,
                 'cart' : cart,
@@ -35,7 +36,8 @@ class CatalogBaseController(BaseController):
                 'customer' : load_customer(self.request, True),  # this way customer is always there, just may be empty
                 'matchdict' : self.request.matchdict,
                 'back_link' : self.session.get('back_link'),
-                'specials' : self.specials_product_list(self.request.GET.get('specials_category_id'), 0, 4)
+                'specials' : self.specials_product_list(self.request.GET.get('specials_category_id'), 0, 4),
+                'recent_products' : self.session['recent_products'] if 'recent_products' in self.session else {}
                 }
 
 
@@ -95,6 +97,7 @@ class CatalogController(CatalogBaseController):
         self.session['last_product_id'] = product_id
         self.session['back_link'] = '/product/%s' % product_id
         params = self.params()
+        self._add_to_recent_products(prod)
 
         # KB: [2011-06-09]:  If there are 2 stars at the beginning of the attribute name
         # then it is a special attribute that can be handled however you like in the templates.
@@ -115,6 +118,12 @@ class CatalogController(CatalogBaseController):
         params['price'] = SmartPricing.product_price(prod, params['campaign'])
         (params['seo_title'], params['seo_keywords'], params['seo_description']) = SmartSeo.product_seo(prod, self.request.ctx.site)
         return self.render(page, params)
+
+
+    def _add_to_recent_products(self, prod):
+        if not 'recent_products' in self.session:
+            self.session['recent_products'] = {}
+        self.session['recent_products'][prod.product_id] = prod.name
 
 
     @view_config(route_name='ecom.site.products')

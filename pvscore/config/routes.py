@@ -198,6 +198,7 @@ def crm_routes(config):
     adrt('ecom.site.cart.update', '/ecom/cart/update/{product_id}/{quantity}')
     adrt('ecom.site.cart.clear', '/ecom/cart/clear')
     adrt('ecom.site.cart.remove', '/ecom/cart/remove/{product_id}')
+    adrt('ecom.site.cart.checkout.default', '/checkout')
     adrt('ecom.site.cart.checkout', '/checkout/{page}')
     adrt('ecom.site.cart.set_shipping', '/ecom/cart/set_shipping/{shipping_code}')
 
