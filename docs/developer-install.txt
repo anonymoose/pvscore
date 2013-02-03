@@ -5,6 +5,7 @@ python --version
 
 # install python via brew
 rm -rf /usr/local/lib/python2.7
+brew unlink python
 brew install python --framework --universal --with-brewed-openssl
 cd /System/Library/Frameworks/Python.framework/Versions
 sudo rm -rf Current
@@ -40,6 +41,18 @@ git clone git@github.com:anonymoose/stats.git
 
 chmod g+wx pvs
 
+brew install pyqt
+pip install numpy
+pip install -e git+https://github.com/scipy/scipy#egg=scipy-dev
+pip install git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib-dev
+pip install ipython
+brew install hdf5
+pip install numexpr
+pip install Cython
+pip install -e git+https://github.com/PyTables/PyTables.git@v.2.4.0#egg=tables
+brew install ta-lib
+pip install TA-Lib
+
 cd pvscore
 python setup.py develop
 cd ../pvs
@@ -47,18 +60,6 @@ python setup.py develop
 cd ../wm
 python setup.py develop
 
-
-brew install pyqt
-pip install numpy
-pip install -e git+https://github.com/scipy/scipy#egg=scipy-dev
-pip install git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib-dev
-pip install ipython
-
-
-brew install hdf5
-pip install numexpr
-pip install Cython
-pip install -e git+https://github.com/PyTables/PyTables.git@v.2.4.0#egg=tables
 
 
 
