@@ -569,6 +569,20 @@ class ProductCategory(ORMBase, BaseModel):
                   (Company, ProductCategory.company_id == Company.company_id))\
                   .filter(ProductCategory.category_id == self.category_id).all()
 
+    @property
+    def web_products(self):
+        if not self.category_id:
+            return []
+        # TODO: Fix Category Caching .options(FromCache("ProductCategory.products", self.category_id))\
+        return Session.query(Product)\
+            .join((ProductCategoryJoin, Product.product_id == ProductCategoryJoin.product_id),
+                  (ProductCategory, ProductCategoryJoin.category_id == ProductCategory.category_id),
+                  (Company, ProductCategory.company_id == Company.company_id))\
+                  .filter(and_(ProductCategory.category_id == self.category_id,
+                               Product.web_visible == True,
+                               Product.enabled == True
+                               )).all()
+
 
     def add_product(self, product_id):
         return ProductCategoryJoin.create_new(self.category_id, product_id)

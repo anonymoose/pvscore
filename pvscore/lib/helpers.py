@@ -37,6 +37,10 @@ def state_select_list(selected_st=None):
     return util.state_select_list(selected_st)
 
 
+def country_select_list(selected_country=None):
+    return util.country_select_list(selected_country)
+
+
 def google_analytics(site, script_tags=True):  #pragma: no cover
     if site and site.google_analytics_id and is_production():
         return literal("""

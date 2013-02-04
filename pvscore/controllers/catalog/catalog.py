@@ -153,7 +153,8 @@ class CatalogController(CatalogBaseController):
         self.redir_if(not category)
         self.session['back_link'] = '/category/%s' % category_id
         params = self.params()
-        params['products'] = util.page_list(category.products, self.request.GET.get('offset'), self.request.GET.get('limit'))
+        params['products'] = util.page_list(SmartCatalog.category_product_list(self.request.ctx.campaign, category_id),
+                                            self.request.GET.get('offset'), self.request.GET.get('limit'))
         params['category'] = category
         (params['seo_title'], params['seo_keywords'], params['seo_description']) = SmartSeo.category_seo(category, self.request.ctx.site)
         return self.render(page, params)
