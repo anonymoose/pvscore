@@ -43,6 +43,9 @@ def format_date(d, fmt="%Y-%m-%d"):
     return d.strftime(fmt)
 
 
+def format_datetime(d, fmt="%Y-%m-%d %H:%M:%S"):
+    return d.strftime(fmt)
+
 def truncate_datetime(dt):
     return datetime.datetime(dt.year, dt.month, dt.day)
 
