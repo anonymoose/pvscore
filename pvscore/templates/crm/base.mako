@@ -129,7 +129,7 @@ ${self.pre_process()}
 <script src="/static/js/jquery/jqgrid/js/jquery.jqGrid.min.js"></script>
 <script src="/static/js/jquery/barcode/jquery-barcode-2.0.2.min.js"></script>
 <script src="/static/js/jquery/tablesorter/jquery.tablesorter.min.js"></script>
-<script src="/static/crm/js/pvs-jquery.js?rnd=1234"></script>
+<script src="/static/crm/js/pvs-jquery.js?rnd=234"></script>
 
 ${self.local_foot()}
 ${self.other_foot()}

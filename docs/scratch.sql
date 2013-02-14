@@ -4795,7 +4795,7 @@ delete from core_user where email = 'charlie@wealthmakers.com';
 
 select site_id, domain, namespace from cms_site;
 
-update cms_site set namespace = 'ecom/amy2' where site_id = '539083a5-2172-4e4a-bcaa-51416a2e56cf';
+update cms_site set namespace = 'ecom/whitesquares' where site_id = '539083a5-2172-4e4a-bcaa-51416a2e56cf';
 
 
 select symbol_id, symbol, name from wm_stock_symbol where symbol_id in (20110,20119,20144,20154,20228,20229,20246,20264,20480);
@@ -4803,3 +4803,4 @@ select symbol_id, symbol, name from wm_stock_symbol where symbol_id in (20110,20
 
 
 
+select

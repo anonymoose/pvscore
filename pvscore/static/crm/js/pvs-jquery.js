@@ -545,8 +545,7 @@ pvs.dom = function(){
     return pub;
 }();
 
-/* KB: [2010-08-16]: Set up some short cuts to commonly used dom finding functions */
-var $_ = pvs.dom.get_value;
+
 
 pvs.json = function() {
     pub = {
@@ -1683,3 +1682,7 @@ var css_browser_selector = function() {
 // KB: [2007-02-16]: This crazy thing allows us to have CSS dependant on browser */
 
 })(jQuery);
+
+
+/* KB: [2010-08-16]: Set up some short cuts to commonly used dom finding functions */
+var $_ = pvs.dom.get_value;
