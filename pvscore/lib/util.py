@@ -548,7 +548,7 @@ def country_abbreviation_dict():
         'UA' : 'UKRAINE',
         'AE' : 'UNITED ARAB EMIRATES',
         'GB' : 'UNITED KINGDOM',
-        'UM' : 'UNITED STATES MINOR OUTLYING ISLANDS',
+        #'UM' : 'UNITED STATES MINOR OUTLYING ISLANDS',
         'UY' : 'URUGUAY',
         'UZ' : 'UZBEKISTAN',
         'VU' : 'VANUATU',

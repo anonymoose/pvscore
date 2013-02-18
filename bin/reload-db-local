@@ -1,0 +1,16 @@
+#!/bin/bash
+
+
+# ../pvscore/bin/reload-db-local retail ../backup/pg-retail.sql
+
+export db=$1
+export dbfile=$2
+
+set -x
+
+dropdb -U postgres $db
+createdb -U postgres $db
+psql -U postgres -c "alter database $db owner to $db"
+
+psql -U $db -d $db -f $dbfile > /tmp/Tfull.log 2>&1
+

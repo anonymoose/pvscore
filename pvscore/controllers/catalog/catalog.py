@@ -185,7 +185,9 @@ class CatalogController(CatalogBaseController):
         params = self.params()
         params['content_name'] = content_name = self.request.matchdict.get('content_name')
         content = Content.find_by_name(self.request.ctx.site, content_name)
-        (params['seo_title'], params['seo_keywords'], params['seo_description']) = SmartSeo.obj_seo(content, self.request.ctx.site)
+        import pdb; pdb.set_trace()
+        if content:
+            (params['seo_title'], params['seo_keywords'], params['seo_description']) = SmartSeo.obj_seo(content, self.request.ctx.site)
         return self.render(page, params)
 
 

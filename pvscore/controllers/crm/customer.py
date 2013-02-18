@@ -649,6 +649,7 @@ class CustomerController(BaseController):
     def signup(self):
         cust = self._signup()
         if cust:
+            self.flash('Customer created: %s %s' % (cust.fname, cust.lname))
             return self.find_redirect('?customer_id=' + str(cust.customer_id))
 
 
@@ -674,11 +675,12 @@ class CustomerController(BaseController):
             self.flash('Email %s already in use' % cust.email)
             self.raise_redirect(self.request.referrer)
         cust = Customer()
-        cust.campaign = campaign
+        cust.campaign_id = campaign.campaign_id
         cust.bind(self.request.POST)
         cust.save()
         cust.flush()
         self.session['customer_id'] = cust.customer_id
+        cust.invalidate_caches()
         return cust
 
 

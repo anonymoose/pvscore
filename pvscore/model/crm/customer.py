@@ -69,7 +69,7 @@ class Customer(ORMBase, BaseModel):
     creator = relation('Users', primaryjoin=Users.user_id == user_created)
     assigned_to = relation('Users', primaryjoin=Users.user_id == user_assigned)
     orders = relation('CustomerOrder', lazy="joined", order_by="desc(CustomerOrder.create_dt)")
-    campaign = relation('Campaign', lazy="joined")
+    campaign = relation('Campaign')
     status = relation('Status', primaryjoin=Status.status_id == status_id)
     billing = relation('Billing', lazy="joined")
     phase = relation('CustomerPhase', lazy="joined")

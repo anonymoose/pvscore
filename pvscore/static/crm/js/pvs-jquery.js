@@ -1686,3 +1686,11 @@ var css_browser_selector = function() {
 
 /* KB: [2010-08-16]: Set up some short cuts to commonly used dom finding functions */
 var $_ = pvs.dom.get_value;
+
+
+/* KB: [2013-02-15]: Genius.
+http://www.silverwareconsulting.com/index.cfm/2010/6/7/Checking-for-JavaScript-Errors-with-Selenium
+*/
+window.onerror=function(msg){
+    $("body").attr("js_error",msg);
+};
