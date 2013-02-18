@@ -73,6 +73,12 @@ class SiteController(BaseController):
         return HTTPFound('/cms/site/edit/%s' % site.site_id)
 
 
+    @view_config(route_name='cms.site.exception')
+    def exception_test(self):
+        import pdb; pdb.set_trace()
+        raise Exception("This is expected")
+
+
 def dynamic_url_lookup(request):
     """ KB: [2012-09-12]: This will render dynamic content.
     http://stackoverflow.com/questions/6321625/pyramid-is-it-possible-to-render-my-mako-template-as-a-string-within-my-view-c
@@ -107,7 +113,7 @@ def dynamic_url_lookup(request):
                                 'user' : request.ctx.user,
                                 'campaign' : request.ctx.campaign,
                                 'customer' : load_customer(request),
-                                'matchdict' : matchdict},                                
+                                'matchdict' : matchdict},
                                request))
     except TopLevelLookupException as exc:
         log.error(exc)

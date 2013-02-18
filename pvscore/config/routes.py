@@ -178,6 +178,7 @@ def crm_routes(config):
     adrt('cms.site.edit', '/cms/site/edit/{site_id}')
     adrt('cms.site.save', '/cms/site/save')
     adrt('cms.site.list', '/cms/site/list')
+    adrt('cms.site.exception', '/cms/site/exception')
 
     adrt('cms.content.new', '/cms/content/new/{site_id}')
     adrt('cms.content.edit', '/cms/content/edit/{site_id}/{content_id}')
@@ -240,3 +241,4 @@ def crm_routes(config):
     adrt('test.9', '/tsst/tsst_redirto_post')
     adrt('test.10', '/tsst/tsst_customer_sidebar_link')
     adrt('test.11', '/tsst/tsst_validate2')
+

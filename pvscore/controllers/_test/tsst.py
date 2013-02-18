@@ -93,5 +93,3 @@ if 'PVS_TESTING' in os.environ and os.environ['PVS_TESTING'] == 'TRUE':
         def tsst_validate2(self):
             return 'CALLED:tsst_validate2'  #pragma: no cover
 
-
-
