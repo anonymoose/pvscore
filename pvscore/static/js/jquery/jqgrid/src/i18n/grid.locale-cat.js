@@ -7,12 +7,13 @@
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
 **/
-$.jgrid = {
+$.jgrid = $.jgrid || {};
+$.extend($.jgrid,{
 	defaults : {
 		recordtext: "Mostrant {0} - {1} de {2}",
 	    emptyrecords: "Sense registres que mostrar",
 		loadtext: "Carregant...",
-		pgtext : "Page {0} of {1}"
+		pgtext : "Pàgina {0} de {1}"
 	},
 	search : {
 		caption: "Cerca...",
@@ -124,5 +125,5 @@ $.jgrid = {
 	    checkbox : {disabled:true},
 		idName : 'id'
 	}
-};
+});
 })(jQuery);

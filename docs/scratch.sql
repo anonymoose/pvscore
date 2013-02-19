@@ -4820,3 +4820,12 @@ alter table crm_customer_order add column shipping_state varchar(50);
 alter table crm_customer_order add column shipping_zip varchar(50);
 alter table crm_customer_order add column shipping_country varchar(50);
 alter table crm_customer_order add column shipping_phone varchar(20);
+
+
+
+----- product attributes.
+alter table crm_product add column typex varchar(20) default 'Parent';
+update crm_product set typex = type;
+alter table crm_product drop column type;
+alter table crm_product rename column typex to type;
+

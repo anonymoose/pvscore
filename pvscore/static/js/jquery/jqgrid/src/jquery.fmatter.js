@@ -12,8 +12,11 @@
  * http://www.gnu.org/licenses/gpl-2.0.html
  * 
 **/
+/*jshint eqeqeq:false */
+/*global jQuery */
 
-;(function($) {
+(function($) {
+"use strict";	
 	$.fmatter = {};
 	//opts can be id:row id for the row, rowdata:the data for the row, colmodel:the column model for this column
 	//example {id:1234,}
@@ -34,7 +37,7 @@
 			return o === null;
 		},
 		isUndefined : function(o) {
-			return typeof o === 'undefined';
+			return o === undefined;
 		},
 		isValue : function (o) {
 			return (this.isObject(o) || this.isString(o) || this.isNumber(o) || this.isBoolean(o));
@@ -42,7 +45,8 @@
 		isEmpty : function(o) {
 			if(!this.isString(o) && this.isValue(o)) {
 				return false;
-			}else if (!this.isValue(o)){
+			}
+			if (!this.isValue(o)){
 				return true;
 			}
 			o = $.trim(o).replace(/\&nbsp\;/ig,'').replace(/\&#160\;/ig,'');
@@ -54,9 +58,9 @@
 		var v=cellval;
 		opts = $.extend({}, $.jgrid.formatter, opts);
 
-		if ($.fn.fmatter[formatType]){
-			v = $.fn.fmatter[formatType](cellval, opts, rwd, act);
-		}
+		try {
+			v = $.fn.fmatter[formatType].call(this, cellval, opts, rwd, act);
+		} catch(fe){}
 		return v;
 	};
 	$.fmatter.util = {
@@ -67,14 +71,14 @@
 			}
 			if($.fmatter.isNumber(nData)) {
 				var bNegative = (nData < 0);
-				var sOutput = nData + "";
-				var sDecimalSeparator = (opts.decimalSeparator) ? opts.decimalSeparator : ".";
+				var sOutput = String(nData);
+				var sDecimalSeparator = opts.decimalSeparator || ".";
 				var nDotIndex;
 				if($.fmatter.isNumber(opts.decimalPlaces)) {
 					// Round to the correct decimal place
 					var nDecimalPlaces = opts.decimalPlaces;
 					var nDecimal = Math.pow(10, nDecimalPlaces);
-					sOutput = Math.round(nData*nDecimal)/nDecimal + "";
+					sOutput = String(Math.round(nData*nDecimal)/nDecimal);
 					nDotIndex = sOutput.lastIndexOf(".");
 					if(nDecimalPlaces > 0) {
 					// Add the decimal separator
@@ -97,8 +101,8 @@
 					nDotIndex = sOutput.lastIndexOf(sDecimalSeparator);
 					nDotIndex = (nDotIndex > -1) ? nDotIndex : sOutput.length;
 					var sNewOutput = sOutput.substring(nDotIndex);
-					var nCount = -1;
-					for (var i=nDotIndex; i>0; i--) {
+					var nCount = -1, i;
+					for (i=nDotIndex; i>0; i--) {
 						nCount++;
 						if ((nCount%3 === 0) && (i !== nDotIndex) && (!bNegative || (i > 1))) {
 							sNewOutput = sThousandsSeparator + sNewOutput;
@@ -113,9 +117,8 @@
 				sOutput = (opts.suffix) ? sOutput + opts.suffix : sOutput;
 				return sOutput;
 				
-			} else {
-				return nData;
 			}
+			return nData;
 		},
 		// Tony Tomov
 		// PHP implementation. Sorry not all options are supported.
@@ -124,6 +127,8 @@
 			var	token = /\\.|[dDjlNSwzWFmMntLoYyaABgGhHisueIOPTZcrU]/g,
 			timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
 			timezoneClip = /[^-+\dA-Z]/g,
+			msDateRegExp = new RegExp("^\/Date\\((([-+])?[0-9]+)(([-+])([0-9]{2})([0-9]{2}))?\\)\/$"),
+			msMatch = ((typeof date === 'string') ? date.match(msDateRegExp): null),
 			pad = function (value, length) {
 				value = String(value);
 				length = parseInt(length,10) || 2;
@@ -138,13 +143,23 @@
 				dayNames: opts.dayNames,
 				monthNames: opts.monthNames
 			};
-			if( format in opts.masks ) { format = opts.masks[format]; }
-			if(date.constructor === Number) {
-			    timestamp = new Date(date);
+			if( opts.masks.hasOwnProperty(format) ) { format = opts.masks[format]; }
+			if( !isNaN( date - 0 ) && String(format).toLowerCase() == "u") {
+				//Unix timestamp
+				timestamp = new Date( parseFloat(date)*1000 );
 			} else if(date.constructor === Date) {
 				timestamp = date;
+				// Microsoft date format support
+			} else if( msMatch !== null ) {
+				timestamp = new Date(parseInt(msMatch[1], 10));
+				if (msMatch[3]) {
+					var offset = Number(msMatch[5]) * 60 + Number(msMatch[6]);
+					offset *= ((msMatch[4] == '-') ? 1 : -1);
+					offset -= timestamp.getTimezoneOffset();
+					timestamp.setTime(Number(Number(timestamp) + (offset * 60 * 1000)));
+				}
 			} else {
-				date = date.split(/[\\\/:_;.,\t\T\s-]/);
+				date = String(date).split(/[\\\/:_;.,\t\T\s-]/);
 				format = format.split(/[\\\/:_;.,\t\T\s-]/);
 				// parsing for month names
 				for(k=0,hl=format.length;k<hl;k++){
@@ -160,18 +175,18 @@
 						ts[format[k].toLowerCase()] = parseInt(date[k],10);
 					}
 				}
-				if(ts.f) { ts.m = ts.f; }
+				if(ts.f) {ts.m = ts.f;}
 				if( ts.m === 0 && ts.y === 0 && ts.d === 0) {
 					return "&#160;" ;
 				}
 				ts.m = parseInt(ts.m,10)-1;
 				var ty = ts.y;
-				if (ty >= 70 && ty <= 99) { ts.y = 1900+ts.y; }
-				else if (ty >=0 && ty <=69) { ts.y= 2000+ts.y; }
+				if (ty >= 70 && ty <= 99) {ts.y = 1900+ts.y;}
+				else if (ty >=0 && ty <=69) {ts.y= 2000+ts.y;}
 				timestamp = new Date(ts.y, ts.m, ts.d, ts.h, ts.i, ts.s, ts.u);
 			}
 			
-			if( newformat in opts.masks )  {
+			if( opts.masks.hasOwnProperty(newformat) )  {
 				newformat = opts.masks[newformat];
 			} else if ( !newformat ) {
 				newformat = 'Y-m-d';
@@ -236,61 +251,59 @@
 					U: Math.floor(timestamp / 1000)
 				};	
 			return newformat.replace(token, function ($0) {
-				return $0 in flags ? flags[$0] : $0.substring(1);
+				return flags.hasOwnProperty($0) ? flags[$0] : $0.substring(1);
 			});			
 		}
 	};
 	$.fn.fmatter.defaultFormat = function(cellval, opts) {
-		return ($.fmatter.isValue(cellval) && cellval!=="" ) ?  cellval : opts.defaultValue ? opts.defaultValue : "&#160;";
+		return ($.fmatter.isValue(cellval) && cellval!=="" ) ?  cellval : opts.defaultValue || "&#160;";
 	};
 	$.fn.fmatter.email = function(cellval, opts) {
 		if(!$.fmatter.isEmpty(cellval)) {
 			return "<a href=\"mailto:" + cellval + "\">" + cellval + "</a>";
-		}else {
-			return $.fn.fmatter.defaultFormat(cellval,opts );
 		}
+		return $.fn.fmatter.defaultFormat(cellval,opts );
 	};
 	$.fn.fmatter.checkbox =function(cval, opts) {
 		var op = $.extend({},opts.checkbox), ds;
-		if(!$.fmatter.isUndefined(opts.colModel.formatoptions)) {
+		if(opts.colModel !== undefined && !$.fmatter.isUndefined(opts.colModel.formatoptions)) {
 			op = $.extend({},op,opts.colModel.formatoptions);
 		}
 		if(op.disabled===true) {ds = "disabled=\"disabled\"";} else {ds="";}
-		if($.fmatter.isEmpty(cval) || $.fmatter.isUndefined(cval) ) { cval = $.fn.fmatter.defaultFormat(cval,op); }
-		cval=cval+""; cval=cval.toLowerCase();
-		var bchk = cval.search(/(false|0|no|off)/i)<0 ? " checked='checked' " : "";
+		if($.fmatter.isEmpty(cval) || $.fmatter.isUndefined(cval) ) {cval = $.fn.fmatter.defaultFormat(cval,op);}
+		cval=String(cval);
+		cval=cval.toLowerCase();
+		var bchk = cval.search(/(false|0|no|n|off)/i)<0 ? " checked='checked' " : "";
 		return "<input type=\"checkbox\" " + bchk  + " value=\""+ cval+"\" offval=\"no\" "+ds+ "/>";
 	};
 	$.fn.fmatter.link = function(cellval, opts) {
-		var op = {target:opts.target };
+		var op = {target:opts.target};
 		var target = "";
-		if(!$.fmatter.isUndefined(opts.colModel.formatoptions)) {
+		if(opts.colModel !== undefined && !$.fmatter.isUndefined(opts.colModel.formatoptions)) {
 			op = $.extend({},op,opts.colModel.formatoptions);
 		}
 		if(op.target) {target = 'target=' + op.target;}
 		if(!$.fmatter.isEmpty(cellval)) {
 			return "<a "+target+" href=\"" + cellval + "\">" + cellval + "</a>";
-		}else {
-			return $.fn.fmatter.defaultFormat(cellval,opts);
 		}
+		return $.fn.fmatter.defaultFormat(cellval,opts);
 	};
 	$.fn.fmatter.showlink = function(cellval, opts) {
-		var op = {baseLinkUrl: opts.baseLinkUrl,showAction:opts.showAction, addParam: opts.addParam || "", target: opts.target, idName: opts.idName },
+		var op = {baseLinkUrl: opts.baseLinkUrl,showAction:opts.showAction, addParam: opts.addParam || "", target: opts.target, idName: opts.idName},
 		target = "", idUrl;
-		if(!$.fmatter.isUndefined(opts.colModel.formatoptions)) {
+		if(opts.colModel !== undefined && !$.fmatter.isUndefined(opts.colModel.formatoptions)) {
 			op = $.extend({},op,opts.colModel.formatoptions);
 		}
 		if(op.target) {target = 'target=' + op.target;}
 		idUrl = op.baseLinkUrl+op.showAction + '?'+ op.idName+'='+opts.rowId+op.addParam;
 		if($.fmatter.isString(cellval) || $.fmatter.isNumber(cellval)) {	//add this one even if its blank string
 			return "<a "+target+" href=\"" + idUrl + "\">" + cellval + "</a>";
-		}else {
-			return $.fn.fmatter.defaultFormat(cellval,opts);
 		}
+		return $.fn.fmatter.defaultFormat(cellval,opts);
 	};
 	$.fn.fmatter.integer = function(cellval, opts) {
 		var op = $.extend({},opts.integer);
-		if(!$.fmatter.isUndefined(opts.colModel.formatoptions)) {
+		if(opts.colModel !== undefined && !$.fmatter.isUndefined(opts.colModel.formatoptions)) {
 			op = $.extend({},op,opts.colModel.formatoptions);
 		}
 		if($.fmatter.isEmpty(cellval)) {
@@ -300,7 +313,7 @@
 	};
 	$.fn.fmatter.number = function (cellval, opts) {
 		var op = $.extend({},opts.number);
-		if(!$.fmatter.isUndefined(opts.colModel.formatoptions)) {
+		if(opts.colModel !== undefined && !$.fmatter.isUndefined(opts.colModel.formatoptions)) {
 			op = $.extend({},op,opts.colModel.formatoptions);
 		}
 		if($.fmatter.isEmpty(cellval)) {
@@ -310,7 +323,7 @@
 	};
 	$.fn.fmatter.currency = function (cellval, opts) {
 		var op = $.extend({},opts.currency);
-		if(!$.fmatter.isUndefined(opts.colModel.formatoptions)) {
+		if(opts.colModel !== undefined && !$.fmatter.isUndefined(opts.colModel.formatoptions)) {
 			op = $.extend({},op,opts.colModel.formatoptions);
 		}
 		if($.fmatter.isEmpty(cellval)) {
@@ -320,25 +333,29 @@
 	};
 	$.fn.fmatter.date = function (cellval, opts, rwd, act) {
 		var op = $.extend({},opts.date);
-		if(!$.fmatter.isUndefined(opts.colModel.formatoptions)) {
+		if(opts.colModel !== undefined && !$.fmatter.isUndefined(opts.colModel.formatoptions)) {
 			op = $.extend({},op,opts.colModel.formatoptions);
 		}
 		if(!op.reformatAfterEdit && act=='edit'){
 			return $.fn.fmatter.defaultFormat(cellval, opts);
-		} else if(!$.fmatter.isEmpty(cellval)) {
-			return  $.fmatter.util.DateFormat(op.srcformat,cellval,op.newformat,op);
-		} else {
-			return $.fn.fmatter.defaultFormat(cellval, opts);
 		}
+		if(!$.fmatter.isEmpty(cellval)) {
+			return $.fmatter.util.DateFormat(op.srcformat,cellval,op.newformat,op);
+		}
+		return $.fn.fmatter.defaultFormat(cellval, opts);
 	};
-	$.fn.fmatter.select = function (cellval,opts, rwd, act) {
+	$.fn.fmatter.select = function (cellval,opts) {
 		// jqGrid specific
-		cellval = cellval + "";
-		var oSelect = false, ret=[];
+		cellval = String(cellval);
+		var oSelect = false, ret=[], sep, delim;
 		if(!$.fmatter.isUndefined(opts.colModel.formatoptions)){
 			oSelect= opts.colModel.formatoptions.value;
+			sep = opts.colModel.formatoptions.separator === undefined ? ":" : opts.colModel.formatoptions.separator;
+			delim = opts.colModel.formatoptions.delimiter === undefined ? ";" : opts.colModel.formatoptions.delimiter;
 		} else if(!$.fmatter.isUndefined(opts.colModel.editoptions)){
 			oSelect= opts.colModel.editoptions.value;
+			sep = opts.colModel.editoptions.separator === undefined ? ":" : opts.colModel.editoptions.separator;
+			delim = opts.colModel.editoptions.delimiter === undefined ? ";" : opts.colModel.editoptions.delimiter;
 		}
 		if (oSelect) {
 			var	msl =  opts.colModel.editoptions.multiple === true ? true : false,
@@ -346,14 +363,14 @@
 			if(msl) {scell = cellval.split(",");scell = $.map(scell,function(n){return $.trim(n);});}
 			if ($.fmatter.isString(oSelect)) {
 				// mybe here we can use some caching with care ????
-				var so = oSelect.split(";"), j=0;
-				for(var i=0; i<so.length;i++){
-					sv = so[i].split(":");
+				var so = oSelect.split(delim), j=0, i;
+				for(i=0; i<so.length;i++){
+					sv = so[i].split(sep);
 					if(sv.length > 2 ) {
-						sv[1] = jQuery.map(sv,function(n,i){if(i>0) { return n; } }).join(":");
+						sv[1] = $.map(sv,function(n,i){if(i>0) {return n;}}).join(sep);
 					}
 					if(msl) {
-						if(jQuery.inArray(sv[0],scell)>-1) {
+						if($.inArray(sv[0],scell)>-1) {
 							ret[j] = sv[1];
 							j++;
 						}
@@ -365,7 +382,7 @@
 			} else if($.fmatter.isObject(oSelect)) {
 				// this is quicker
 				if(msl) {
-					ret = jQuery.map(scell, function(n, i){
+					ret = $.map(scell, function(n){
 						return oSelect[n];
 					});
 				} else {
@@ -376,50 +393,116 @@
 		cellval = ret.join(", ");
 		return  cellval === "" ? $.fn.fmatter.defaultFormat(cellval,opts) : cellval;
 	};
-	$.fn.fmatter.rowactions = function(rid,gid,act,keys) {
+	$.fn.fmatter.rowactions = function(act) {
+		var $tr = $(this).closest("tr.jqgrow"),
+			$actionsDiv = $(this).parent(),
+			rid = $tr.attr("id"),
+			$grid = $(this).closest("table.ui-jqgrid-btable"),
+			$t = $grid[0],
+			p = $t.p,
+			cm = p.colModel[$.jgrid.getCellIndex(this)],
+			op = {
+				keys: false,
+				onEdit: null, 
+				onSuccess: null, 
+				afterSave: null,
+				onError: null,
+				afterRestore: null,
+				extraparam: {},
+				url: null,
+				restoreAfterError: true,
+				mtype: "POST",
+				delOptions: {},
+				editOptions: {}
+			},
+			saverow = function(rowid, res) {
+				if($.isFunction(op.afterSave)) { op.afterSave.call($t, rowid, res); }
+				$actionsDiv.find("div.ui-inline-edit,div.ui-inline-del").show();
+				$actionsDiv.find("div.ui-inline-save,div.ui-inline-cancel").hide();
+			},
+			restorerow = function(rowid) {
+				if($.isFunction(op.afterRestore)) { op.afterRestore.call($t, rowid); }
+				$actionsDiv.find("div.ui-inline-edit,div.ui-inline-del").show();
+				$actionsDiv.find("div.ui-inline-save,div.ui-inline-cancel").hide();
+			};
+
+		if (!$.fmatter.isUndefined(cm.formatoptions)) {
+			op = $.extend(op,cm.formatoptions);
+		}
+		if (!$.fmatter.isUndefined(p.editOptions)) {
+			op.editOptions = p.editOptions;
+		}
+		if (!$.fmatter.isUndefined(p.delOptions)) {
+			op.delOptions = p.delOptions;
+		}
+		if ($tr.hasClass("jqgrid-new-row")){
+			op.extraparam[p.prmNames.oper] = p.prmNames.addoper;
+		}
+		var actop = {
+			keys: op.keys,
+			oneditfunc: op.onEdit,
+			successfunc: op.onSuccess,
+			url: op.url,
+			extraparam: op.extraparam,
+			aftersavefunc: saverow,
+			errorfunc: op.onError,
+			afterrestorefunc: restorerow,
+			restoreAfterError: op.restoreAfterError,
+			mtype: op.mtype
+		};
 		switch(act)
 		{
 			case 'edit':
-				var restorerow = function()	{
-					$("tr#"+rid+" div.ui-inline-edit, "+"tr#"+rid+" div.ui-inline-del","#"+gid).show();
-					$("tr#"+rid+" div.ui-inline-save, "+"tr#"+rid+" div.ui-inline-cancel","#"+gid).hide();
-				};
-				$('#'+gid).jqGrid('editRow',rid,keys,null,null,null,{oper:'edit'},restorerow,null,restorerow);
-				$("tr#"+rid+" div.ui-inline-edit, "+"tr#"+rid+" div.ui-inline-del","#"+gid).hide();
-				$("tr#"+rid+" div.ui-inline-save, "+"tr#"+rid+" div.ui-inline-cancel","#"+gid).show();
-			break;
+				$grid.jqGrid('editRow', rid, actop);
+				$actionsDiv.find("div.ui-inline-edit,div.ui-inline-del").hide();
+				$actionsDiv.find("div.ui-inline-save,div.ui-inline-cancel").show();
+				$grid.triggerHandler("jqGridAfterGridComplete");
+				break;
 			case 'save':
-				$('#'+gid).jqGrid('saveRow',rid,null,null );
-				$("tr#"+rid+" div.ui-inline-edit, "+"tr#"+rid+" div.ui-inline-del","#"+gid).show();
-				$("tr#"+rid+" div.ui-inline-save, "+"tr#"+rid+" div.ui-inline-cancel","#"+gid).hide();
+				if ($grid.jqGrid('saveRow', rid, actop)) {
+					$actionsDiv.find("div.ui-inline-edit,div.ui-inline-del").show();
+					$actionsDiv.find("div.ui-inline-save,div.ui-inline-cancel").hide();
+					$grid.triggerHandler("jqGridAfterGridComplete");
+				}
 				break;
 			case 'cancel' :
-				$('#'+gid).jqGrid('restoreRow',rid);
-				$("tr#"+rid+" div.ui-inline-edit, "+"tr#"+rid+" div.ui-inline-del","#"+gid).show();
-				$("tr#"+rid+" div.ui-inline-save, "+"tr#"+rid+" div.ui-inline-cancel","#"+gid).hide();
+				$grid.jqGrid('restoreRow', rid, restorerow);
+				$actionsDiv.find("div.ui-inline-edit,div.ui-inline-del").show();
+				$actionsDiv.find("div.ui-inline-save,div.ui-inline-cancel").hide();
+				$grid.triggerHandler("jqGridAfterGridComplete");
+				break;
+			case 'del':
+				$grid.jqGrid('delGridRow', rid, op.delOptions);
+				break;
+			case 'formedit':
+				$grid.jqGrid('setSelection', rid);
+				$grid.jqGrid('editGridRow', rid, op.editOptions);
 				break;
 		}
 	};
-	$.fn.fmatter.actions = function(cellval,opts, rwd) {
-		var op ={keys:false, editbutton:true, delbutton:true};
+	$.fn.fmatter.actions = function(cellval,opts) {
+		var op={keys:false, editbutton:true, delbutton:true, editformbutton: false},
+			rowid=opts.rowId, str="",ocl;
 		if(!$.fmatter.isUndefined(opts.colModel.formatoptions)) {
 			op = $.extend(op,opts.colModel.formatoptions);
 		}
-		var rowid = opts.rowId, str="",ocl;
-		if(typeof(rowid) =='undefined' || $.fmatter.isEmpty(rowid)) { return ""; }
-		if(op.editbutton){
-			ocl = "onclick=$.fn.fmatter.rowactions('"+rowid+"','"+opts.gid+"','edit',"+op.keys+");";
-			str =str+ "<div style='margin-left:8px;'><div title='"+$.jgrid.nav.edittitle+"' style='float:left;cursor:pointer;' class='ui-pg-div ui-inline-edit' "+ocl+"><span class='ui-icon ui-icon-pencil'></span></div>";
+		if(rowid === undefined || $.fmatter.isEmpty(rowid)) {return "";}
+		if(op.editformbutton){
+			ocl = "onclick=jQuery.fn.fmatter.rowactions.call(this,'formedit'); onmouseover=jQuery(this).addClass('ui-state-hover'); onmouseout=jQuery(this).removeClass('ui-state-hover'); ";
+			str += "<div title='"+$.jgrid.nav.edittitle+"' style='float:left;cursor:pointer;' class='ui-pg-div ui-inline-edit' "+ocl+"><span class='ui-icon ui-icon-pencil'></span></div>";
+		} else if(op.editbutton){
+			ocl = "onclick=jQuery.fn.fmatter.rowactions.call(this,'edit'); onmouseover=jQuery(this).addClass('ui-state-hover'); onmouseout=jQuery(this).removeClass('ui-state-hover') ";
+			str += "<div title='"+$.jgrid.nav.edittitle+"' style='float:left;cursor:pointer;' class='ui-pg-div ui-inline-edit' "+ocl+"><span class='ui-icon ui-icon-pencil'></span></div>";
 		}
 		if(op.delbutton) {
-			ocl = "onclick=jQuery('#"+opts.gid+"').jqGrid('delGridRow','"+rowid+"');";
-			str = str+"<div title='"+$.jgrid.nav.deltitle+"' style='float:left;margin-left:5px;' class='ui-pg-div ui-inline-del' "+ocl+"><span class='ui-icon ui-icon-trash'></span></div>";
+			ocl = "onclick=jQuery.fn.fmatter.rowactions.call(this,'del'); onmouseover=jQuery(this).addClass('ui-state-hover'); onmouseout=jQuery(this).removeClass('ui-state-hover'); ";
+			str += "<div title='"+$.jgrid.nav.deltitle+"' style='float:left;margin-left:5px;' class='ui-pg-div ui-inline-del' "+ocl+"><span class='ui-icon ui-icon-trash'></span></div>";
 		}
-		ocl = "onclick=$.fn.fmatter.rowactions('"+rowid+"','"+opts.gid+"','save',false);";
-		str = str+"<div title='"+$.jgrid.edit.bSubmit+"' style='float:left;display:none' class='ui-pg-div ui-inline-save'><span class='ui-icon ui-icon-disk' "+ocl+"></span></div>";
-		ocl = "onclick=$.fn.fmatter.rowactions('"+rowid+"','"+opts.gid+"','cancel',false);";
-		str = str+"<div title='"+$.jgrid.edit.bCancel+"' style='float:left;display:none;margin-left:5px;' class='ui-pg-div ui-inline-cancel'><span class='ui-icon ui-icon-cancel' "+ocl+"></span></div></div>";
-		return str;
+		ocl = "onclick=jQuery.fn.fmatter.rowactions.call(this,'save'); onmouseover=jQuery(this).addClass('ui-state-hover'); onmouseout=jQuery(this).removeClass('ui-state-hover'); ";
+		str += "<div title='"+$.jgrid.edit.bSubmit+"' style='float:left;display:none' class='ui-pg-div ui-inline-save' "+ocl+"><span class='ui-icon ui-icon-disk'></span></div>";
+		ocl = "onclick=jQuery.fn.fmatter.rowactions.call(this,'cancel'); onmouseover=jQuery(this).addClass('ui-state-hover'); onmouseout=jQuery(this).removeClass('ui-state-hover'); ";
+		str += "<div title='"+$.jgrid.edit.bCancel+"' style='float:left;display:none;margin-left:5px;' class='ui-pg-div ui-inline-cancel' "+ocl+"><span class='ui-icon ui-icon-cancel'></span></div>";
+		return "<div style='margin-left:8px;'>" + str + "</div>";
 	};
 	$.unformat = function (cellval,options,pos,cnt) {
 		// specific for jqGrid only
@@ -427,8 +510,8 @@
 		op =options.colModel.formatoptions || {}, sep,
 		re = /([\.\*\_\'\(\)\{\}\+\?\\])/g,
 		unformatFunc = options.colModel.unformat||($.fn.fmatter[formatType] && $.fn.fmatter[formatType].unformat);
-		if(typeof unformatFunc !== 'undefined' && $.isFunction(unformatFunc) ) {
-			ret = unformatFunc($(cellval).text(), options, cellval);
+		if(unformatFunc !== undefined && $.isFunction(unformatFunc) ) {
+			ret = unformatFunc.call(this, $(cellval).text(), options, cellval);
 		} else if(!$.fmatter.isUndefined(formatType) && $.fmatter.isString(formatType) ) {
 			var opts = $.jgrid.formatter || {}, stripTag;
 			switch(formatType) {
@@ -448,11 +531,18 @@
 					op = $.extend({},opts.currency,op);
 					sep = op.thousandsSeparator.replace(re,"\\$1");
 					stripTag = new RegExp(sep, "g");
-					ret = $(cellval).text().replace(stripTag,'').replace(op.decimalSeparator,'.').replace(op.prefix,'').replace(op.suffix,'');
+					ret = $(cellval).text();
+					if (op.prefix && op.prefix.length) {
+						ret = ret.substr(op.prefix.length);
+					}
+					if (op.suffix && op.suffix.length) {
+						ret = ret.substr(0, ret.length - op.suffix.length);
+					}
+					ret = ret.replace(stripTag,'').replace(op.decimalSeparator,'.');
 					break;
 				case 'checkbox':
 					var cbv = (options.colModel.editoptions) ? options.colModel.editoptions.value.split(":") : ["Yes","No"];
-					ret = $('input',cellval).attr("checked") ? cbv[0] : cbv[1];
+					ret = $('input',cellval).is(":checked") ? cbv[0] : cbv[1];
 					break;
 				case 'select' :
 					ret = $.unformat.select(cellval,options,pos,cnt);
@@ -463,29 +553,32 @@
 					ret= $(cellval).text();
 			}
 		}
-		return ret ? ret : cnt===true ? $(cellval).text() : $.jgrid.htmlDecode($(cellval).html());
+		return ret !== undefined ? ret : cnt===true ? $(cellval).text() : $.jgrid.htmlDecode($(cellval).html());
 	};
 	$.unformat.select = function (cellval,options,pos,cnt) {
 		// Spacial case when we have local data and perform a sort
 		// cnt is set to true only in sortDataArray
 		var ret = [];
 		var cell = $(cellval).text();
-		if(cnt===true) { return cell; }
-		var op = $.extend({},options.colModel.editoptions);
+		if(cnt===true) {return cell;}
+		var op = $.extend({}, !$.fmatter.isUndefined(options.colModel.formatoptions) ? options.colModel.formatoptions: options.colModel.editoptions),
+		sep = op.separator === undefined ? ":" : op.separator,
+		delim = op.delimiter === undefined ? ";" : op.delimiter;
+		
 		if(op.value){
 			var oSelect = op.value,
 			msl =  op.multiple === true ? true : false,
 			scell = [], sv;
-			if(msl) { scell = cell.split(","); scell = $.map(scell,function(n){return $.trim(n);}); }
+			if(msl) {scell = cell.split(",");scell = $.map(scell,function(n){return $.trim(n);});}
 			if ($.fmatter.isString(oSelect)) {
-				var so = oSelect.split(";"), j=0;
-				for(var i=0; i<so.length;i++){
-					sv = so[i].split(":");
+				var so = oSelect.split(delim), j=0, i;
+				for(i=0; i<so.length;i++){
+					sv = so[i].split(sep);
 					if(sv.length > 2 ) {
-						sv[1] = jQuery.map(sv,function(n,i){if(i>0) { return n; } }).join(":");
+						sv[1] = $.map(sv,function(n,i){if(i>0) {return n;}}).join(sep);
 					}					
 					if(msl) {
-						if(jQuery.inArray(sv[1],scell)>-1) {
+						if($.inArray(sv[1],scell)>-1) {
 							ret[j] = sv[0];
 							j++;
 						}
@@ -495,8 +588,8 @@
 					}
 				}
 			} else if($.fmatter.isObject(oSelect) || $.isArray(oSelect) ){
-				if(!msl) { scell[0] =  cell; }
-				ret = jQuery.map(scell, function(n){
+				if(!msl) {scell[0] =  cell;}
+				ret = $.map(scell, function(n){
 					var rv;
 					$.each(oSelect, function(i,val){
 						if (val == n) {
@@ -504,13 +597,12 @@
 							return false;
 						}
 					});
-					if( typeof(rv) != 'undefined' ) { return rv; }
+					if( rv !== undefined ) {return rv;}
 				});
 			}
 			return ret.join(", ");
-		} else {
-			return cell || "";
 		}
+		return cell || "";
 	};
 	$.unformat.date = function (cellval, opts) {
 		var op = $.jgrid.formatter.date || {};
@@ -518,9 +610,8 @@
 			op = $.extend({},op,opts.formatoptions);
 		}		
 		if(!$.fmatter.isEmpty(cellval)) {
-			return  $.fmatter.util.DateFormat(op.newformat,cellval,op.srcformat,op);
-		} else {
-			return $.fn.fmatter.defaultFormat(cellval, opts);
+			return $.fmatter.util.DateFormat(op.newformat,cellval,op.srcformat,op);
 		}
+		return $.fn.fmatter.defaultFormat(cellval, opts);
 	};
 })(jQuery);

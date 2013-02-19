@@ -701,9 +701,11 @@ pvs.onload.push(function () {
     }
 });
 
+customer_lname_complete_reference = {}
+
 pvs.onload.push(function() {
     $('#lname_complete').typeahead({
-        source: function(typeahead, query) {
+        source: function(query, process) {
             $.ajax({
                 url: "/crm/customer/autocomplete",
                 dataType: "json",
@@ -715,15 +717,20 @@ pvs.onload.push(function() {
                 },
                 success: function(data) {
                     var return_list = [], i = data.length;
-                    while (i--) {
-                        return_list[i] = {id: data[i].customer_id, value: data[i].name};
+                    customer_lname_complete_reference = {}
+                    while (i > 0) {
+                        i--;
+                        customer_lname_complete_reference[data[i].name] = data[i].customer_id;
+                        //return_list[i] = {id: data[i].customer_id, value: data[i].name};
+                        return_list[i] = data[i].name;
                     }
-                    typeahead.process(return_list);
+                    process(return_list);
                 }
             });
         },
-        onselect: function(obj) {
-            pvs.browser.goto_url('/crm/customer/edit/'+obj.id);
+        updater: function(item) {
+            var customer_id = customer_lname_complete_reference[item];
+            pvs.browser.goto_url('/crm/customer/edit/'+customer_id);
         }
     });
 });

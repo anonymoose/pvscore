@@ -112,7 +112,7 @@ ${self.pre_process()}
 
 <script src="/static/bootstrap/js/jquery.js"></script>
 <script src="/static/bootstrap/js/bootstrap.js"></script>
-<script src="/static/bootstrap-extensions/bootstrap-typeahead.js"></script>
+<!--script src="/static/bootstrap-extensions/bootstrap-typeahead.js"></script-->
 <script src="/static/bootstrap-extensions/datepicker/js/bootstrap-datepicker.js"></script>
 
 
