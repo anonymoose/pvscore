@@ -5,6 +5,7 @@ from pvscore.model.crm.product import Product
 from pvscore.controllers.catalog.catalog import CatalogBaseController
 from pvscore.lib.smart.scatalog import SmartCatalog
 from pvscore.lib.shipping.shipping import UPSShipping
+import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
 
@@ -75,7 +76,6 @@ class CartController(CatalogBaseController):
         if 'cart' not in self.session:
             return HTTPFound('/')   #pragma: no cover
         params = self.params()
-
         cart = self.session['cart']
         if self.request.ctx.site.config_json and not cart.shipping_options:
             shipper = None
@@ -89,15 +89,24 @@ class CartController(CatalogBaseController):
         return self.render(page, params)
 
 
-    @view_config(route_name='ecom.site.cart.set_shipping', renderer="string")
-    def set_shipping(self):
+    @view_config(route_name='ecom.site.cart.save_shipping')
+    def save_shipping(self):
         if not 'cart' in self.session:
             return 'True'  #pragma: no cover
         redir = self.request.GET.get('redir')
         cart = self.session['cart']
-        shipping_code = self.request.matchdict.get('shipping_code')
+        shipping_code = self.request.POST.get('shipping_code')
+        cust = self.request.ctx.customer
+        self.redir_if(not cust or not cart)
         cart.shipping_selection = shipping_code
+        cart.shipping_addr1 = util.nvl(self.request.POST.get('shipping_addr1'), cust.addr1)
+        cart.shipping_addr2 = util.nvl(self.request.POST.get('shipping_addr2'), cust.addr2)
+        cart.shipping_city = util.nvl(self.request.POST.get('shipping_city'), cust.city)
+        cart.shipping_state = util.nvl(self.request.POST.get('shipping_state'), cust.state)
+        cart.shipping_zip = util.nvl(self.request.POST.get('shipping_zip'), cust.zip)
+        cart.shipping_country = util.nvl(self.request.POST.get('shipping_country'), cust.country)
+        cart.shipping_phone = util.nvl(self.request.POST.get('shipping_phone'), cust.phone)
         self.session.changed()
-        return 'True' if not redir else HTTPFound(redir)
+        return self.find_redirect()
 
 

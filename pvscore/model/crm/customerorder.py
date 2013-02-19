@@ -36,7 +36,6 @@ class CustomerOrder(ORMBase, BaseModel):
     handling_total = Column(Float)
     external_cart_id = Column(String(100))
     third_party_id = Column(String(100))
-
     shipping_addr1 = Column(String(50))
     shipping_addr2 = Column(String(50))
     shipping_city = Column(String(50))
@@ -44,7 +43,6 @@ class CustomerOrder(ORMBase, BaseModel):
     shipping_zip = Column(String(50))
     shipping_country = Column(String(50))
     shipping_phone = Column(String(20))
-
     customer = relation('Customer')
     campaign = relation('Campaign')
     creator = relation('Users')
@@ -64,6 +62,13 @@ class CustomerOrder(ORMBase, BaseModel):
         cord.shipping_total = util.nvl(cart.shipping_total, 0.0)
         cord.shipping_note = cart.shipping_selection_name
         cord.handling_total = util.nvl(cart.handling_total, 0.0)
+        cord.shipping_addr1 = cart.shipping_addr1
+        cord.shipping_addr2 = cart.shipping_addr2
+        cord.shipping_city = cart.shipping_city
+        cord.shipping_state = cart.shipping_state
+        cord.shipping_zip = cart.shipping_zip
+        cord.shipping_country = cart.shipping_country
+        cord.shipping_phone = cart.shipping_phone
         cord.save()
         cord.flush()
         for cart_item in cart.items:

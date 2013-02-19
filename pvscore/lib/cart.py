@@ -12,6 +12,13 @@ class Cart(object):
         self.site_id = site.site_id if site else None
         self.shipping_options = None
         self.shipping_selection = None
+        self.shipping_addr1 = None
+        self.shipping_addr2 = None
+        self.shipping_city = None
+        self.shipping_state = None
+        self.shipping_zip = None
+        self.shipping_country = None
+        self.shipping_phone = None
 
 
     @property

@@ -21,7 +21,6 @@
               <label for="">Shipping Total</label>
               ${h.text('shipping_total', class_="input-small", value=h.nvl(h.money(order.shipping_total),'0.00'), onblur='customer_order_recalc()')}
             </div>
-            % if comm_packing_slip_id:
             <div class="span2">
               % if order.shipping_note:
               <label for="">Shipping Note</label>
@@ -29,16 +28,25 @@
               % endif
               &nbsp;
             </div>
-            <div class="span2">
-              <a href="javascript:customer_view_packing_slip('${order.order_id}', '${comm_packing_slip_id}')">View Receipt</a>
+
+            <div class="span2 alert alert-success">
+              <b>Ship To:</b><br>
+              % if order.shipping_addr1 and order.shipping_city and order.shipping_state and order.shipping_zip:
+                  ${order.shipping_addr1} ${h.nvl(order.shipping_addr2)}<br>
+                  ${order.shipping_city}, ${order.shipping_state} ${order.shipping_zip}
+              % else:
+                  ${customer.addr1} ${h.nvl(customer.addr2)}<br>
+                  ${customer.city}, ${customer.state} ${customer.zip}
+              % endif
             </div>
-            % endif
+            <!--
             % if order.external_cart_id:
             <div class="span2">
               <label for="">External Cart ID</label>
               ${h.nvl(order.external_cart_id)}
             </div>
             % endif
+            -->
           </div>
 
           <div class="row">
@@ -50,6 +58,11 @@
               <label for="">Created by</label>
               ${order.creator.email if order.user_created else 'Customer'}
             </div>
+            % if comm_packing_slip_id:
+            <div class="span2">
+              <a href="javascript:customer_view_packing_slip('${order.order_id}', '${comm_packing_slip_id}')">View Receipt</a>
+            </div>
+            % endif
           </div>
         </div> <!-- well -->
       </div>
@@ -71,14 +84,14 @@
           <tr id="oi_${oi.order_item_id}">
             % if total_payments_applied > 0:
               <td>
-                <img src="/static/icons/silk/delete.png" title="Delete Item" alt="Delete Item" border="0" 
+                <img src="/static/icons/silk/delete.png" title="Delete Item" alt="Delete Item" border="0"
                      onclick="customer_delete_order_item('${oi.order_item_id}')"  class="img_delete"
                      style="visibility:hidden;">
               </td>
               <td>
                 <a data-toggle="modal" data-target="#dlg_standard"
                    href="/crm/customer/status_dialog/${customer.customer_id}?order_item_id=${oi.order_item_id}&dialog=1">
-                  <img src="/static/icons/silk/comment_add.png" 
+                  <img src="/static/icons/silk/comment_add.png"
                        border="0" title="Status Order" alt="Status Order" onclick="$('#dlg_standard_title').html('Status')"/>
                 </a>
               </td>
@@ -89,14 +102,14 @@
               <td style="text-align:right;" id="oi_total_${oi.order_item_id}">$${h.money(oi.total())}</td>
             % else:
               <td>
-                <img src="/static/icons/silk/delete.png" title="Delete Item" alt="Delete Item" border="0" 
+                <img src="/static/icons/silk/delete.png" title="Delete Item" alt="Delete Item" border="0"
                      onclick="customer_delete_order_item('${oi.order_item_id}')"
                      class="img_delete">
               </td>
               <td>
                 <a data-toggle="modal" data-target="#dlg_standard"
                    href="/crm/customer/status_dialog/${customer.customer_id}?order_item_id=${oi.order_item_id}&dialog=1">
-                  <img src="/static/icons/silk/comment_add.png" 
+                  <img src="/static/icons/silk/comment_add.png"
                      border="0" title="Status Order" alt="Status Order"/>
                 </a>
               </td>
