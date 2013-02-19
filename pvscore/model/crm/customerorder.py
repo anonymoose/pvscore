@@ -37,6 +37,14 @@ class CustomerOrder(ORMBase, BaseModel):
     external_cart_id = Column(String(100))
     third_party_id = Column(String(100))
 
+    shipping_addr1 = Column(String(50))
+    shipping_addr2 = Column(String(50))
+    shipping_city = Column(String(50))
+    shipping_state = Column(String(50))
+    shipping_zip = Column(String(50))
+    shipping_country = Column(String(50))
+    shipping_phone = Column(String(20))
+
     customer = relation('Customer')
     campaign = relation('Campaign')
     creator = relation('Users')

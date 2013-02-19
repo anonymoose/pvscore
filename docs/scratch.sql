@@ -4811,3 +4811,12 @@ select campaign_id from crm_customer where customer_id = 'f1b53812-6414-4e62-b66
 update crm_customer set email = random()||'@test.com', fname = cast(random() as varchar),
        lname = cast(random() as varchar), addr1 = cast(random() as varchar)
        where lower(lname) != 'bedwell';
+
+
+alter table crm_customer_order add column shipping_addr1 varchar(50);
+alter table crm_customer_order add column shipping_addr2 varchar(50);
+alter table crm_customer_order add column shipping_city varchar(50);
+alter table crm_customer_order add column shipping_state varchar(50);
+alter table crm_customer_order add column shipping_zip varchar(50);
+alter table crm_customer_order add column shipping_country varchar(50);
+alter table crm_customer_order add column shipping_phone varchar(20);

@@ -33,8 +33,11 @@ cms.catalog = function() {
                   });
         },
 
-        add_to_cart : function(elem, product_id, on_success, on_fail) {
-            $.get('/ecom/cart/add/' + product_id + '/1',
+        add_to_cart : function(elem, product_id, on_success, on_fail, quantity) {
+            if (!quantity) {
+                quantity = 1;
+            }
+            $.get('/ecom/cart/add/' + product_id + '/'+quantity,
                   function(response) {
                       if (is_true(response)) {
                           if (on_success) {
