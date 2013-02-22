@@ -25,13 +25,14 @@ class Product(ORMBase, BaseModel):
     company_id = Column(GUID, ForeignKey('crm_company.company_id'))
     status_id = Column(GUID, ForeignKey('core_status.status_id'))
     vendor_id = Column(GUID, ForeignKey('crm_vendor.vendor_id'))
-    name = Column(String(200))
+    attr_class = Column(String(50))     # "Size"
+    name = Column(String(200))          # For Attributes: "Blue", "Green", "Magenta"
     detail_description = Column(Text)
     description = Column(Text)
     create_dt = Column(DateTime, server_default=text('now()'))
     delete_dt = Column(DateTime)
     mod_dt = Column(DateTime, server_default=text('now()'))
-    type = Column(String(20), server_default=text('Parent or Child'))
+    type = Column(String(20))    # Parent, Child, Attr
     manufacturer = Column(String(100))
     unit_cost = Column(Float)
     sku = Column(String(20))
@@ -50,7 +51,8 @@ class Product(ORMBase, BaseModel):
     seo_description = Column(String(1000))
     subscription = Column(Boolean, default=False)
     inventory = Column(Integer) # this is derived from InventoryJournal and updated in "create_new"
-    url = Column(String(100))
+    url = Column(String(100))   # launch this URL when they login.  Only applicable in custom apps.
+    render_template = Column(String(100))   # use this template name to render.
 
     company = relation('Company', lazy='joined', backref=backref('products', order_by='Product.name'))
     status = relation('Status')
@@ -58,7 +60,6 @@ class Product(ORMBase, BaseModel):
 
     campaign_prices = relation("ProductPricing", lazy="joined",
                                collection_class=attribute_mapped_collection('campaign_id'))
-
     _pricing = None
     _images = None
 
@@ -265,6 +266,12 @@ class Product(ORMBase, BaseModel):
             invalidate(self, 'Product.WebReady', campaign_id)
             invalidate(self, 'Product.WebReadyUnpriced', campaign_id)
             invalidate(self, 'Product.HasPicture', campaign_id)
+
+
+    def get_product_attributes(self):
+        if self.product_id:
+            return ProductChild.find_attribute_children(self.product_id)
+        else: return []
 
 
     @property
@@ -480,6 +487,10 @@ class Product(ORMBase, BaseModel):
             ProductChild.clear_by_parent(self.product_id)
 
 
+    def has_child(self, other_product_id):
+        return ProductChild.find_child(self.product_id, other_product_id) is not None
+
+
     def add_child(self, other_product_id, other_product_quantity=1):
         return ProductChild.create_new(self.product_id, other_product_id, other_product_quantity)
 
@@ -497,6 +508,44 @@ class Product(ORMBase, BaseModel):
         Session.execute("delete from crm_product where product_id = '%s'" % product_id)
 
 
+"""
+class ProductAttribute(ORMBase, BaseModel):
+   __tablename__ = 'crm_product_attribute'
+   __pk__ = 'attr_id'
+
+   attr_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+   product_id = Column(GUID, ForeignKey('crm_product.product_id'))
+   attr_class = Column(String(50), nullable=False)
+   attr_name = Column(String(50), nullable=False)
+   price_modifier = Column(String(20))
+   handling_modifier = Column(String(20))
+   weight = Column(Float)
+   create_dt = Column(DateTime, server_default=text('now()'))
+   delete_dt = Column(DateTime)
+
+   def modifier(self, unit_price):
+       # KB: [2013-02-20]:
+       # unit_price = 100
+       # mod = '-12.3%'
+       # return float(mod[:-1])/100 * unit_price
+       # -12.3
+
+       # unit_price = 200
+       # mod = '-12.3'
+       # return float(mod)
+       # -12.3
+       mod = self.price_modifier
+       mod_amount = 0.0
+       if not mod or len(mod) == 0:
+           raise Exception("Invalid price modifier %s" % self.attr_id)
+       is_pct = self.price_modifier[-1:] == '%'
+       if is_pct:
+           mod_amount = float(mod[:-1])/100.0 * unit_price
+       else:
+           mod_amount = float(mod)
+       return mod_amount
+"""
+
 class ProductChild(ORMBase, BaseModel):
     __tablename__ = 'crm_product_child'
     __pk__ = 'product_child_id'
@@ -511,10 +560,36 @@ class ProductChild(ORMBase, BaseModel):
 
     @staticmethod
     def find_children(parent_id):
-        return Session.query(ProductChild).options(FromCache('ProductChild.find_children', parent_id)) \
-            .filter(and_(Product.delete_dt == None,
-                         ProductChild.parent_id == parent_id)).all()
+        #.options(FromCache('Product.find_children', parent_id)) 
+        return Session.query(ProductChild) \
+            .join((Product, ProductChild.child_id == Product.product_id)) \
+            .filter(and_(ProductChild.parent_id == parent_id,
+                         Product.delete_dt == None,
+                         Product.enabled == True,
+                         Product.type != 'Attr')) \
+                         .order_by(Product.name) \
+                         .all()
 
+
+    @staticmethod
+    def find_attribute_children(parent_id):
+        #.options(FromCache('Product.find_attribute_children', parent_id)) \
+        return Session.query(Product) \
+            .join((ProductChild, Product.product_id == ProductChild.child_id)) \
+            .filter(and_(ProductChild.parent_id == parent_id,
+                         Product.delete_dt == None,
+                         Product.enabled == True,
+                         Product.type == 'Attr')) \
+                         .order_by(Product.attr_class, Product.name) \
+                         .all()
+
+
+    @staticmethod
+    def find_child(parent_id, child_id):
+        return Session.query(ProductChild) \
+            .filter(and_(ProductChild.parent_id == parent_id,
+                         ProductChild.child_id == child_id)).first()
+        
 
     @staticmethod
     def clear_by_parent(parent_id):

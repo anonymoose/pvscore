@@ -23,6 +23,7 @@ class TestCatalog(TestController):
         prod = self.get_prod()
         camp = cust.campaign
         prod = order.items[0].product
+        """ KB: [2013-02-20]: MOD ATTR TestCatalog.test_misc : Allow for attributes. """
         cart.add_item(prod, cust.campaign)
         assert int(cart.total) == int(prod.get_price(camp))
 
@@ -225,9 +226,10 @@ class TestCatalog(TestController):
         R.mustcontain('Next Day Air Saver')
         # this yields "03" by looking for Ground/03 in the returned string
         ground = [line.split('/')[1] for line in R.body.split("\n") if line.startswith('Ground/')][0]
-        R = self.get('/ecom/cart/set_shipping/%s' % ground)
+        R = self.get('/ecom/cart/save_shipping', {'shipping_code' : ground,
+                                                  'redir' : '/'})
         assert R.status_int == 200
-        assert R.body == 'True'
+
 
 
     def test_alternate_product_search_by_name(self):

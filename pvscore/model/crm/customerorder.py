@@ -81,6 +81,7 @@ class CustomerOrder(ORMBase, BaseModel):
             discount = prd.get_discount_price(campaign)
             retail = cart_item['unit_price'] if 'unit_price' in cart_item else prd.get_unit_price(campaign)
             item.quantity = float(cart_item['quantity'])
+            """ KB: [2013-02-20]: MOD ATTR : CustomerOrder.create_new : Account for attribute price modifiers here. """
             item.unit_price = (discount if discount else retail)
             if campaign.tax_rate and incl_tax:
                 item.tax = (item.unit_price * item.quantity) * campaign.tax_rate
@@ -122,6 +123,7 @@ class CustomerOrder(ORMBase, BaseModel):
         item.creator = user_created
         discount = product.get_discount_price(campaign)
         retail = product.get_price(campaign)
+        """ KB: [2013-02-20]: MOD ATTR CustomerOrder.augment_order : Account for attribute price modifiers here. """
         item.unit_price = (discount if discount else retail)
         item.unit_cost = product.unit_cost
         item.unit_discount_price = (discount if discount else 0.0)

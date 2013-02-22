@@ -264,6 +264,7 @@ class CustomerController(BaseController):
     @view_config(route_name='crm.customer.add_order', renderer='string')
     @authorize(IsLoggedIn())
     def add_order(self):
+        """ KB: [2013-02-20]: MOD ATTR CustomerController.add_order : Modify to allow for attributes to be passed in the post. """
         customer_id = self.request.matchdict.get('customer_id')
         cust = Customer.load(customer_id)
         self.forbid_if(not cust)
@@ -618,6 +619,7 @@ class CustomerController(BaseController):
 
 
     def _add_order_impl(self, customer_id, product_ids, prices, user, discount_id, campaign_id, incl_tax=True):   #pylint: disable-msg=R0913
+        """ KB: [2013-02-20]: MOD ATTR : CustomerController._add_order_impl : modify call to Cart.add_item to allow for selected attributes. """
         cust = Customer.load(customer_id)
         self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
         cart = Cart()
@@ -696,6 +698,7 @@ class CustomerController(BaseController):
 
 
     def _site_purchase(self, cust, cart=None):  #pylint: disable-msg=R0912,R0915
+        """ KB: [2013-02-20]: MOD ATTR CustomerController._site_purchase : Allow for attributes passed in the post """
         bill = Billing.create(cust)
         bill.set_cc_info(self.request.POST.get('bill_cc_num'), self.request.POST.get('bill_cc_cvv'))
         bill.cc_exp = self.request.POST.get('bill_cc_exp')

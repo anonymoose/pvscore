@@ -1649,6 +1649,12 @@ $(document).ready(function() {
     pvs.ui.init_datepickers();
 });
 
+$(document).ready(function() {
+    $('.pvs-help').popover({
+        html: true
+    });
+});
+
 /* KB: [2010-08-16]:
    Append to this to get stuff to run at the end.
    pvs.onload.push(function() { pvs.popup.alert('kenny'); })
@@ -1659,6 +1665,8 @@ $(document).ready(function() {
              pvs.onload[i]();
           }
 });
+
+
 
 
 

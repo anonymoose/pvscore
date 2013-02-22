@@ -33,7 +33,7 @@ smtplib's .sendmail() requires an array to send to multiple addresses. If all ad
 """
 
 UID = 'info@eyefound.it'
-PWD = 'g00df00d'
+PWD = 'g00df00d..5'
 
 def main():
     p = optparse.OptionParser( )

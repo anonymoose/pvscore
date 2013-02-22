@@ -94,6 +94,25 @@ product_show_orders = function() {
 };
 
 pvs.onload.push(function() {
+    $('#frm_discount').validate(
+        pvs.validate.options(
+            {
+                name: 'required',
+                which_item: 'required',
+                percent_off: {
+                    number: true,
+                    min: 0.0
+                },
+                amount_off: {
+                    number: true,
+                    min: 0.0,
+                    max: 100.0
+                }
+            })
+    );
+});
+
+product_validate_product = function() {
     $('#frm_product').validate(
         pvs.validate.options(
             {
@@ -121,24 +140,37 @@ pvs.onload.push(function() {
                 }
             })
     );
+};
 
-    $('#frm_discount').validate(
+product_validate_product_attribute = function() {
+    $('#frm_product').validate(
         pvs.validate.options(
             {
                 name: 'required',
-                which_item: 'required',
-                percent_off: {
+                attr_class: 'required',
+                company_id: 'required',
+                //sku: 'required',
+                unit_cost: {
                     number: true,
                     min: 0.0
                 },
-                amount_off: {
+                handling_price: {
                     number: true,
-                    min: 0.0,
-                    max: 100.0
+                    min: 0.0
+                },
+                weight: {
+                    number: true,
+                    min: 0.0
+                },
+                prod_inventory: {
+                    number: true,
+                },
+                inventory_par: {
+                    number: true,
                 }
             })
     );
-});
+};
 
 
 var lastsel;

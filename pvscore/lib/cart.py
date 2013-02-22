@@ -27,6 +27,7 @@ class Cart(object):
 
 
     def add_item(self, product, campaign, quantity=1, price=None, start_dt=None): #pylint: disable-msg=R0913
+        """ KB: [2013-02-20]: MOD ATTR: pvscore.lib.Cart.add_item : modify to allow attributes to be attached to the product."""
         if not price:
             price = product.get_price(campaign)
         price = float(price)
@@ -66,6 +67,7 @@ class Cart(object):
                 if opt['code'] == self.shipping_selection:
                     return float(opt['charges'])
         return 0.0
+
 
     @property
     def total(self):

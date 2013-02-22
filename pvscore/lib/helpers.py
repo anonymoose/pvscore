@@ -154,6 +154,10 @@ def chkbox(ident, **kwargs):
     return literal('<label class="checkbox">%s</label>' % checkbox(ident, **kwargs))
 
 
+def help(message, title=''):
+    return literal('<a style="cursor:pointer;" data-toggle="popover" title="" data-content="%s" data-original-title="%s" class="pvs-help"><i class="icon-question-sign"></i></a>' % (message, title))
+
+
 # def flt(dbl):
 #     return money(dbl)
 

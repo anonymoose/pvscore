@@ -41,7 +41,9 @@ class OrderItem(ORMBase, BaseModel):
 
     def total(self):
         """ KB: [2012-11-28]: TODO: Change this to where handling_price is an attribute """
-        pretax = (util.nvl(self.product.handling_price, 0.0) + util.nvl(self.unit_price, 0.0)) * util.nvl(self.quantity, 1.0)
+        """ KB: [2013-02-20]: MOD ATTR  OrderItem.total.  Calculate all the modifications to the price (if any) caused by selected attributes. """
+        unit_price = self.unit_price
+        pretax = (util.nvl(self.product.handling_price, 0.0) + util.nvl(unit_price, 0.0)) * util.nvl(self.quantity, 1.0)
         return pretax + self.tax   # self.tax is not the tax rate.  it's the actual tax amount calculated in customerorder
 
 
@@ -49,6 +51,34 @@ class OrderItem(ORMBase, BaseModel):
     def children(self):
         return Session.query(OrderItem).filter(OrderItem.parent_id == self.order_item_id).all()
 
+
+    @property
+    def order_item_attributes(self):
+        """ KB: [2013-02-20]: MOD ATTR  OrderItem.order_item_attributes : Get all the attributes that the customer selected for this order item.
+        Phish T-shirt : {size : Large, color: Blue}
+        """
+        return Session.query(OrderItemAttribute)\
+            .filter(and_(OrderItemAttribute.order_item_id == self.order_item_id,
+                         OrderItemAttribute.delete_dt == None)).all()
+
+
+
+
+""" KB: [2013-02-20]: MOD ATTR: OrderItemAttribute:  Class to capture a selection of an attribute for a given product. 
+class OrderItemAttribute(ORMBase, BaseModel):
+
+    __tablename__ = 'crm_order_item_attribute'
+    __pk__ = 'order_item_attribute_id'
+
+    order_item_attribute_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
+    order_item_id = Column(GUID, ForeignKey('crm_order_item.order_item_id'))
+    product_attribute_id = Column(GUID, ForeignKey('crm_product_attribute.attr_id'))
+    price_modifier = Column(String(20))
+    create_dt = Column(DateTime, server_default=text('now()'))
+    delete_dt = Column(DateTime)
+
+    product_attribute = relation('ProductAttribute', lazy='joined')
+"""
 
 
 class OrderItemTermsAcceptance(ORMBase, BaseModel):

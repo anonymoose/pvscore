@@ -86,14 +86,15 @@ class CatalogController(CatalogBaseController):
     @view_config(route_name='ecom.site.product.named')
     @view_config(route_name='ecom.site.product.default')
     def product(self):
-        # /product/{product_id}/{page}
-        page = self.request.matchdict.get('page', 'product')
         product_id = self.request.matchdict.get('product_id')
         if not util.is_uuid(product_id):
             # it's not really a product ID, but a search string from a bot.
             raise HTTPFound('/ecom/search?search=%s' % product_id)
         prod = Product.load(product_id)
         self.redir_if(not prod or not prod.enabled or not prod.web_visible)
+        
+        page = self.request.matchdict.get('page', util.nvl(prod.render_template, 'product'))   # /product/{product_id}/{page}
+
         self.session['last_product_id'] = product_id
         self.session['back_link'] = '/product/%s' % product_id
         params = self.params()
@@ -114,10 +115,19 @@ class CatalogController(CatalogBaseController):
         params['product'] = prod
         params['products_also_liked'] = SmartCatalog.also_liked_product_list(prod, params['campaign'])
         params['products_related'] = SmartCatalog.related_product_list(prod, params['campaign'])
+        params['product_attributes'] = self._prep_product_attributes(prod.get_product_attributes())
         params['attrs'] = attrs
         params['price'] = SmartPricing.product_price(prod, params['campaign'])
         (params['seo_title'], params['seo_keywords'], params['seo_description']) = SmartSeo.product_seo(prod, self.request.ctx.site)
         return self.render(page, params)
+
+
+    def _prep_product_attributes(self, product_attributes):
+        attr_classes = list(set([pa.attr_class for pa in product_attributes]))
+        ret = {}
+        for cl in attr_classes:
+            ret[cl] = [pa for pa in product_attributes if pa.attr_class == cl]
+        return ret
 
 
     def _add_to_recent_products(self, prod):

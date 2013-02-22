@@ -22,6 +22,7 @@ class CartController(CatalogBaseController):
 
     @view_config(route_name='ecom.site.cart.add', renderer="string")
     def add(self):
+        """ KB: [2013-02-20]: MOD ATTR:  CartController.add : Allow for ajax of adding a simple item (HUS), or post/redir for adding products with attributes. """
         product_id = self.request.matchdict.get('product_id')
         quantity = self.request.matchdict.get('quantity')
         redir = self.request.GET.get('redir')

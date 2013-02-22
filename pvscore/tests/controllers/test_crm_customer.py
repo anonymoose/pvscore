@@ -559,6 +559,7 @@ class TestCrmCustomer(TestController):
         R = self.get('/crm/customer/status_dialog/%s?dialog=1' % customer_id)
         assert R.status_int == 200
         R.mustcontain('Frobdicate')  # our pre-canned test status that changes customer status
+        cust = Customer.load(customer_id, False)
         event = Status.find_event(cust.campaign.company.enterprise_id, cust, 'FROBDICATE')
         f = R.forms['frm_dialog']
         f.set('event_id', event.event_id)
@@ -587,6 +588,7 @@ class TestCrmCustomer(TestController):
         R = self.get('/crm/customer/status_dialog/%s?order_id=%s&dialog=1' % (customer_id, order.order_id))
         assert R.status_int == 200
         R.mustcontain('Foobaz')
+        cust = Customer.load(customer_id, False)
         event = Status.find_event(cust.campaign.company.enterprise_id, order, 'FOOBAZ')
         f = R.forms['frm_dialog']
         self.assertEqual(f['order_id'].value, str(order.order_id))
@@ -617,6 +619,7 @@ class TestCrmCustomer(TestController):
         R = self.get('/crm/customer/status_dialog/%s?order_item_id=%s&dialog=1' % (customer_id, order_item.order_item_id))
         assert R.status_int == 200
         R.mustcontain('Derf')
+        cust = Customer.load(customer_id, False)
         event = Status.find_event(cust.campaign.company.enterprise_id, order_item, 'DERF')
         f = R.forms['frm_dialog']
         self.assertEqual(f['order_item_id'].value, str(order_item.order_item_id))

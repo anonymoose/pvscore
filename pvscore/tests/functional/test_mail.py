@@ -46,7 +46,7 @@ class TestMail(TestController):
         
     def test_gmail_log_handler(self):
         logger = logging.getLogger()
-        gm = GmailLogHandler(("smtp.gmail.com", 587), 'info@eyefound.it', ['kenneth.bedwell@gmail.com'], 'EXCEPTION', ('info@eyefound.it', 'g00df00d'))
+        gm = GmailLogHandler(("smtp.gmail.com", 587), 'info@eyefound.it', ['kenneth.bedwell@gmail.com'], 'EXCEPTION', ('info@eyefound.it', 'g00df00d..5'))
         gm.setLevel(logging.ERROR)
         logger.addHandler(gm)
         try:

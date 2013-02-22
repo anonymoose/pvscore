@@ -4829,3 +4829,23 @@ update crm_product set typex = type;
 alter table crm_product drop column type;
 alter table crm_product rename column typex to type;
 
+alter table crm_product add column short_name varchar(50);
+alter table crm_product add column attr_class varchar(50);
+alter table crm_product add column render_template varchar(50);
+      
+/*
+drop table if exists crm_product_attribute;
+create table crm_product_attribute (
+   attr_id uuid not null,
+   product_id uuid not null,
+   attr_class varchar(50) not null,
+   attr_name varchar(50) not null,
+   price_modifier varchar(20) not null,
+   handling_modifier varchar(20),
+   weight_modifier varchar(20),
+   create_dt timestamp without time zone not null,
+   delete_dt timestamp without time zone,
+   CONSTRAINT crm_product_attribute_pkey PRIMARY KEY (attr_id)
+);
+alter table crm_product_attribute add foreign key (product_id) references crm_product;
+*/

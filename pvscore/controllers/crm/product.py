@@ -69,7 +69,9 @@ class ProductController(BaseController):
             'children' : children,
             'non_children': non_children,
             'other_products' : other_products,
-            'events' : util.select_list(StatusEvent.find_all_applicable(self.enterprise_id, product), 'event_id', 'display_name')
+            'events' : util.select_list(StatusEvent.find_all_applicable(self.enterprise_id, product), 'event_id', 'display_name'),
+            'is_attribute' : self.request.GET.get('is_attribute') == 'True', 
+            'parent_product' : Product.load(self.request.GET.get('parent_id')) if 'parent_id' in self.request.GET else None
             }
 
 
@@ -200,6 +202,14 @@ class ProductController(BaseController):
         prod.save()
         self.db_flush()
 
+        redir_params = ''
+        if 'parent_id' in self.request.POST and self.request.POST['parent_id']:
+            parent = Product.load(self.request.POST['parent_id'])
+            if not parent.has_child(prod.product_id):
+                parent.add_child(prod.product_id)
+                parent.save()
+            redir_params = '?is_attribute=True&parent_id=%s' % parent.product_id
+
         inventory = str(self.request.POST.get('prod_inventory', '0'))
         if inventory and str(round(float(inventory), 2)) != str(round(util.nvl(InventoryJournal.total(prod), 0), 2)):
             InventoryJournal.create_new(prod, 'Inventory Adjust', inventory)
@@ -214,7 +224,8 @@ class ProductController(BaseController):
                 prod.set_attr(attr_name, attr_value)
 
         self.flash('Successfully saved %s.' % prod.name)
-        return HTTPFound('/crm/product/edit/%s' % prod.product_id)
+        
+        return HTTPFound('/crm/product/edit/%s%s' % (prod.product_id, redir_params))
 
 
     @view_config(route_name='crm.product.ac.name', renderer='string')
