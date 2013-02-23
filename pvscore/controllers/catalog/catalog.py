@@ -100,23 +100,11 @@ class CatalogController(CatalogBaseController):
         params = self.params()
         self._add_to_recent_products(prod)
 
-        # KB: [2011-06-09]:  If there are 2 stars at the beginning of the attribute name
-        # then it is a special attribute that can be handled however you like in the templates.
-        # **L-5-Hydroxytryptophan=50 mg,*
-        # **L-5-Hydroxytryptophan=50 mg,20%
-        attrs = prod.get_attrs()
-        # special_attrs = []
-        # for attr in attrs.keys():
-        #     if attr.startswith('**'):
-        #         amounts = attrs[attr].split(',')
-        #         sattr = (attr[2:], amounts[0], amounts[1] if len(amounts) == 2 else '')
-        #         special_attrs.append(sattr)
-        # params['special_attrs'] = special_attrs
         params['product'] = prod
         params['products_also_liked'] = SmartCatalog.also_liked_product_list(prod, params['campaign'])
         params['products_related'] = SmartCatalog.related_product_list(prod, params['campaign'])
         params['product_attributes'] = self._prep_product_attributes(prod.get_product_attributes())
-        params['attrs'] = attrs
+        params['attrs'] = prod.get_attrs()
         params['price'] = SmartPricing.product_price(prod, params['campaign'])
         (params['seo_title'], params['seo_keywords'], params['seo_description']) = SmartSeo.product_seo(prod, self.request.ctx.site)
         return self.render(page, params)
