@@ -88,6 +88,7 @@ class Product(ORMBase, BaseModel):
             .join((Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
                          Product.enabled == True,
+                         Product.type != 'Attr',
                          Company.enterprise_id == enterprise_id
                          )) \
                          .order_by(Product.name) \
@@ -99,6 +100,7 @@ class Product(ORMBase, BaseModel):
         return Session.query(Product) \
             .join((Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
+                         Product.type != 'Attr',
                          Company.enterprise_id == enterprise_id,
                          Product.vendor_id == vendor.vendor_id if vendor else None)) \
                          .order_by(Product.name) \
@@ -123,6 +125,7 @@ class Product(ORMBase, BaseModel):
     def find_all_except(product):
         return Session.query(Product).join((Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
+                         Product.type != 'Attr',
                          Company.enterprise_id == product.company.enterprise_id,
                          Product.product_id != product.product_id)).order_by(Product.name).all()
 
@@ -158,13 +161,14 @@ class Product(ORMBase, BaseModel):
             .options(FromCache("Product.Campaign_new", campaign.campaign_id)) \
             .join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
-                          Product.enabled == True,
-                          Company.enterprise_id == campaign.company.enterprise_id,
-                          ProductPricing.delete_dt == None,
-                          ProductPricing.campaign == campaign,
-                          Product.web_visible == True,
-                          ProductPricing.retail_price != None,
-                          ProductPricing.retail_price > 0)).order_by(Product.create_dt.desc()).offset(offset).limit(limit).all()
+                         Product.enabled == True,
+                         Product.type != 'Attr',
+                         Company.enterprise_id == campaign.company.enterprise_id,
+                         ProductPricing.delete_dt == None,
+                         ProductPricing.campaign == campaign,
+                         Product.web_visible == True,
+                         ProductPricing.retail_price != None,
+                         ProductPricing.retail_price > 0)).order_by(Product.create_dt.desc()).offset(offset).limit(limit).all()
 
 
     @staticmethod
@@ -187,6 +191,7 @@ class Product(ORMBase, BaseModel):
         enterprise_id = campaign.company.enterprise_id
         ckey = 'Product.Campaign'
         clause = and_(Product.delete_dt == None,
+                      Product.type != 'Attr',
                       Product.enabled == True,
                       Company.enterprise_id == enterprise_id,
                       ProductPricing.delete_dt == None,
@@ -230,6 +235,8 @@ class Product(ORMBase, BaseModel):
         res = Session.query(Product)\
             .join((Company, Product.company_id == Company.company_id))\
             .filter(and_(Product.web_visible == True,
+                         Product.delete_dt == None,
+                         Product.type != 'Attr',
                          Company.enterprise_id == enterprise_id,
                          or_(Product.description.ilike(srch),
                              Product.seo_title.ilike(srch),
@@ -285,6 +292,7 @@ class Product(ORMBase, BaseModel):
         return Session.query(Product).join((ProductPricing, ProductPricing.product_id == Product.product_id),(Company, Product.company_id == Company.company_id)) \
             .filter(and_(Product.delete_dt == None,
                          Product.enabled == True,
+                         Product.type != 'Attr',
                          Product.name == name,
                          Company.company_id == campaign.company_id,
                          Company.enterprise_id == enterprise_id,
@@ -297,6 +305,7 @@ class Product(ORMBase, BaseModel):
             .options(FromCache('Product.find_by_sku', '%s/%s' % (sku, enterprise_id))) \
             .filter(and_(Product.delete_dt == None,
                          Product.enabled == True,
+                         Product.type != 'Attr',
                          Product.sku == sku,
                          Company.company_id == campaign.company_id,
                          Company.enterprise_id == campaign.company.enterprise_id,
@@ -642,7 +651,10 @@ class ProductCategory(ORMBase, BaseModel):
             .join((ProductCategoryJoin, Product.product_id == ProductCategoryJoin.product_id),
                   (ProductCategory, ProductCategoryJoin.category_id == ProductCategory.category_id),
                   (Company, ProductCategory.company_id == Company.company_id))\
-                  .filter(ProductCategory.category_id == self.category_id).all()
+                  .filter(and_(ProductCategory.category_id == self.category_id,
+                               Product.enabled == True,
+                               Product.type != 'Attr'
+                               )).all()
 
     @property
     def web_products(self):
@@ -655,7 +667,8 @@ class ProductCategory(ORMBase, BaseModel):
                   (Company, ProductCategory.company_id == Company.company_id))\
                   .filter(and_(ProductCategory.category_id == self.category_id,
                                Product.web_visible == True,
-                               Product.enabled == True
+                               Product.enabled == True,
+                               Product.type != 'Attr'
                                )).all()
 
 

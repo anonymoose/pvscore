@@ -701,7 +701,7 @@ pvs.onload.push(function () {
     }
 });
 
-customer_lname_complete_reference = {}
+customer_lname_complete_reference = {};
 
 pvs.onload.push(function() {
     $('#lname_complete').typeahead({

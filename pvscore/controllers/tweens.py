@@ -28,15 +28,9 @@ def exclog_tween_factory(handler, registry):
         except:
             logger = getLogger('exc_logger')
 
-            ent = None
-            if 'enterprise_id' in request.session:
-                ent = Enterprise.load(request.session['enterprise_id'])
-            cust = None
-            if 'customer_id' in request.session:
-                cust = Customer.load(request.session['customer_id'])
-            user = None
-            if 'user_id' in request.session:
-                user = Users.load(request.session['user_id'])
+            ent = Enterprise.load(request.session['enterprise_id']) if 'enterprise_id' in request.session else None
+            cust = Customer.load(request.session['customer_id']) if 'customer_id' in request.session else None
+            user = Users.load(request.session['user_id']) if 'user_id' in request.session else None
 
             if extra_info:
                 message = dedent("""\n

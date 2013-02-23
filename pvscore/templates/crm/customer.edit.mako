@@ -148,7 +148,7 @@
 
       % if request.ctx.user.priv.edit_customer:
       <div class="row">
-        <div class="span2 offset7">
+        <div class="span3 offset7">
           <input type="submit" name="submit" class="btn btn-primary btn-large" value="Save"/>
           % if customer.customer_id:
           <button class="btn btn-warning btn-large" onclick="customer_delete()">Delete</button>

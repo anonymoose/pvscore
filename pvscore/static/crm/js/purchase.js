@@ -1,7 +1,8 @@
+purchase_product_name_complete_reference = {};
 
 pvs.onload.push(function() {
     $('#prod_complete').typeahead({
-        source: function(typeahead, query) {
+        source: function(query, process) {
             $.ajax({
                 url: "/crm/product/autocomplete_by_name",
                 dataType: "json",
@@ -13,18 +14,22 @@ pvs.onload.push(function() {
                 },
                 success: function(data) {
                     var return_list = [], i = data.length;
-                    while (i--) {
-                        return_list[i] = {id: data[i].product_id, value: data[i].name, cost: data[i].unit_cost};
+                    purchase_product_name_complete_reference = {};
+                    while (i > 0) {
+                        i--;
+                        purchase_product_name_complete_reference[data[i].name] = data[i];
+                        return_list[i] = data[i].name;
                     }
-                    typeahead.process(return_list);
+                    process(return_list);
                 }
             });
         },
-        onselect: function(obj) {
+        updater: function(item) {
+            var obj = purchase_product_name_complete_reference[item];
             $('#quantity').val(1);
-            $('#order_note').val(obj.value);
-            $('#product_id').val(obj.id);
-            var cost = obj.cost;
+            $('#order_note').val(obj.name);
+            $('#product_id').val(obj.product_id);
+            var cost = obj.unit_cost;
             if (cost) {
                 $('#unit_cost').val(parseFloat(cost).toFixed(2));
                 $('#amount').val((parseFloat(cost) * parseFloat(1)).toFixed(2));

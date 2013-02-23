@@ -18,6 +18,25 @@ product_setup_textarea = function(id) {
     pvs.form.init_editors();
 };
 
+product_delete = function() {
+    if ($_('#product_id')) {
+        var answer = confirm("Really Delete Product?")
+        if (answer) {
+            pvs.ajax.call(pvs.ajax.api({root: '/crm/product/delete/'+$_('#product_id')}),
+                      function(response) {
+                          if (pvs.is_true(response)) {
+                              pvs.alert('Product Deleted');
+                              pvs.browser.goto_url('/crm/product/list');
+                          } else {
+                              pvs.alert('Unable to delete:\n'+response);
+                          }
+                      });
+        }
+    } else {
+        pvs.alert('Save product first');
+    }
+};
+
 
 product_picture_delete_image = function(asset_id, do_confirm) {
     if (do_confirm && !confirm('Delete Image?')) {
@@ -58,9 +77,11 @@ pvs.onload.push(function() {
     }
 });
 
+product_name_complete_reference = {};
+
 pvs.onload.push(function() {
     $('#product_search').typeahead({
-        source: function(typeahead, query) {
+        source: function(query, process) {
             $.ajax({
                 url: "/crm/product/autocomplete_by_name",
                 dataType: "json",
@@ -72,15 +93,19 @@ pvs.onload.push(function() {
                 },
                 success: function(data) {
                     var return_list = [], i = data.length;
-                    while (i--) {
-                        return_list[i] = {id: data[i].product_id, value: data[i].name};
+                    product_name_complete_reference = {};
+                    while (i > 0) {
+                        i--;
+                        product_name_complete_reference[data[i].name] = data[i].product_id;
+                        return_list[i] = data[i].name;
                     }
-                    typeahead.process(return_list);
+                    process(return_list);
                 }
             });
         },
-        onselect: function(obj) {
-            pvs.browser.goto_url('/crm/product/edit/'+obj.id);
+        updater: function(item) {
+            var product_id = product_name_complete_reference[item];
+            pvs.browser.goto_url('/crm/product/edit/'+product_id);
         }
     });
 });

@@ -59,6 +59,12 @@ class TestCrmProduct(TestController):
 
 
     @secure
+    def test_create_new_attribute(self):
+        product_id = self._create_new()
+        
+        self._delete_new(product_id)
+
+    @secure
     def test_save_status(self):
         self._test_save_status()
 

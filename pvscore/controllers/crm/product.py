@@ -84,6 +84,19 @@ class ProductController(BaseController):
                     else Product.find_all(self.enterprise_id)}
 
 
+    @view_config(route_name='crm.product.delete', renderer='string')
+    @authorize(IsLoggedIn())
+    def delete(self):
+        product_id = self.request.matchdict.get('product_id')
+        product = Product.load(product_id)
+        self.forbid_if(not product or str(product.company.enterprise_id) != str(self.enterprise_id))
+        product.mod_dt = util.now()
+        product.delete_dt = util.now()
+        Status.add(None, product, StatusEvent.find(self.enterprise_id, 'Product', 'DELETED'), 'Product Deleted')
+        product.invalidate_caches()
+        return 'True'
+
+
     @view_config(route_name='crm.product.inventory_list', renderer='string')
     @authorize(IsLoggedIn())
     def inventory_list(self):

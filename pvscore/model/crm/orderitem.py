@@ -1,6 +1,6 @@
 #pylint: disable-msg=E1101
 from sqlalchemy import Column, ForeignKey, and_
-from sqlalchemy.types import String, DateTime, Float, DateTime
+from sqlalchemy.types import String, DateTime, Float, DateTime, Text
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
@@ -22,6 +22,7 @@ class OrderItem(ORMBase, BaseModel):
     product_id = Column(GUID, ForeignKey('crm_product.product_id'))
     parent_id = Column(GUID, ForeignKey('crm_order_item.order_item_id'))
     name = Column(String(100))
+    note = Column(Text)
     unit_cost = Column(Float)
     unit_price = Column(Float)
     unit_discount_price = Column(Float)

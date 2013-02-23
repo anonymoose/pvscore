@@ -4824,6 +4824,9 @@ alter table crm_customer_order add column shipping_phone varchar(20);
 
 
 ----- product attributes.
+-- psql -U postgres -d retail -c 'create extension "uuid-ossp";'
+-- psql -U postgres -d wm -c 'create extension "uuid-ossp";'
+
 alter table crm_product add column typex varchar(20) default 'Parent';
 update crm_product set typex = type;
 alter table crm_product drop column type;
@@ -4832,7 +4835,16 @@ alter table crm_product rename column typex to type;
 alter table crm_product add column short_name varchar(50);
 alter table crm_product add column attr_class varchar(50);
 alter table crm_product add column render_template varchar(50);
-      
+alter table crm_order_item add column note text;
+
+insert into core_status_event
+(event_id, event_type, short_name, display_name, claim, finalize, is_system, milestone_complete, note_req, dashboard, reason_req, change_status, touch)
+values
+(uuid_generate_v4(), 'Product', 'DELETED', 'Deleted', false, true, true, false, false, false, false, true, false);
+
+
+select short_name from core_status_event where event_type = 'Product';
+
 /*
 drop table if exists crm_product_attribute;
 create table crm_product_attribute (

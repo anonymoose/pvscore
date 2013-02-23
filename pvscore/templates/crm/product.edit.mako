@@ -17,9 +17,12 @@
           <h1>Edit Product&nbsp;&nbsp;<font color="green">${'Status: ' + product.status.event.display_name if product.status else ''}</font></h1>
           % endif
         </div>
-        <div class="span2 offset1">
+        <div class="span3">
           % if request.ctx.user.priv.edit_product:
-          <input type="submit" name="submit1" class="btn btn-primary btn-small" value="Save"/>
+          <input type="submit" name="submit1" class="btn btn-primary" value="Save"/>
+            % if parent_product:
+            <a href="/crm/product/new?is_attribute=True&parent_id=${parent_product.product_id}">New Attribute</a>
+            % endif
           % endif
         </div>
       </div>
@@ -28,29 +31,39 @@
         <div class="span9">
           <div class="well">
             <h3>General Information</h3>
-            <div class="row">
-              <div class="span3">
-                <label for="name">Name
-                  ${h.help("""The name of the product to be displayed on the website and in product lists.<br/>This title is used in links as well to improve search engine placement. """)}
-                </label>
-                ${h.text('name', size=50, value=product.name)}
+            % if parent_product:
+              <div class="row">
+                <div class="span3">
+                  <label for="attr_class">Attribute
+                    ${h.help("""<b>Example:</b>  If the parent product was a 'Shirt' and this attribute concerns which 'Color' the shirt should be, 
+                    you should create a product attribute with the Name = 'Blue' and the Attribute Class = 'Color'.
+                    """)}
+                  </label>
+                  ${h.text('attr_class', class_="input-large", value=product.attr_class)}
+                </div>
+                <div class="span3">
+                  <label for="name">Name
+                    ${h.help("""The name of this instance of the attribute.  If the attribute is 'Color', then the name of this one might be 'Blue'.  Create another attribute for 'Red', etc.""")}
+                  </label>
+                  ${h.text('name', size=50, value=product.name)}
+                </div>
               </div>
-              <div class="span3">
-                % if parent_product:
-                    <label for="attr_class">Attribute Class 
-                      ${h.help("""<b>Example:</b>  If the parent product was a 'Shirt' and this attribute concerns which 'Color' the shirt should be, 
-                                  you should create a product attribute with the Name = 'Blue' and the Attribute Class = 'Color'.
-                                                  """)}
-                    </label>
-                    ${h.text('attr_class', class_="input-large", value=product.attr_class)}
-                % else:
-                    % if len(product_categories) >= 1:
-                        <label for="category_id">Category</label>
-                        ${h.select('category_id', str(product_categories[0].category_id) if len(product_categories) == 1 else None, categories)}
-                    % endif
-                % endif
+            % else:
+              <div class="row">
+                <div class="span3">
+                  <label for="name">Name
+                    ${h.help("""The name of the product to be displayed on the website and in product lists.<br/>This title is used in links as well to improve search engine placement. """)}
+                  </label>
+                  ${h.text('name', size=50, value=product.name)}
+                </div>
+                <div class="span3">
+                  % if len(product_categories) >= 1:
+                  <label for="category_id">Category</label>
+                  ${h.select('category_id', str(product_categories[0].category_id) if len(product_categories) == 1 else None, categories)}
+                  % endif
+                </div>
               </div>
-            </div>
+            % endif
 
             <div class="row">
               <div class="span8">
@@ -163,7 +176,7 @@
                     <label for="url">Renderer Template
                       ${h.help("""Advanced Feature.  Template to use other than 'product' to show the product on the site.""")}
                     </label>
-                    ${h.text('url', size=50, value=product.render_template)}
+                    ${h.text('render_template', size=50, value=product.render_template)}
                   </div>
                 </div>
                 % endif
@@ -382,7 +395,6 @@
             <div class="row">
               <div class="span4">
                 % if product.can_have_children() and other_products and not request.ctx.user.is_vendor_user():
-
                 <div style="overflow: scroll; height: 250px;">
                   <table>
                     <tr><th></th><th>Include?</th><th>Quantity</th></tr>
@@ -410,6 +422,18 @@
         </div>
       </div>
       % endif
+      % if request.ctx.user.priv.edit_product:
+      <div class="row">
+        <div class="span2 offset8">
+          <input type="submit" name="submit2" class="btn btn-primary" value="Save"/>
+          % if product.product_id:
+          <a class="btn btn-warning" href="javascript:product_delete()">Delete</a>
+          % endif
+
+        </div>
+      </div>
+      % endif
+
       <!--div class="row">
         <div class="span9">
           <div class="row">
