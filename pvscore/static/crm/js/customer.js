@@ -184,7 +184,6 @@ customer_apply_payment_submit = function() {
     if ('Credit Card' == $('#pmt_method').val()) {
         // disable the submit button to prevent repeated clicks
         $('#btnSubmit').attr("disabled", "disabled");
-        debugger;
         // createToken returns immediately - the supplied callback submits the form if there are no errors
         Stripe.createToken({
             number: $('#bill_cc_num').val(),

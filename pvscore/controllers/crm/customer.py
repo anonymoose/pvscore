@@ -412,11 +412,12 @@ class CustomerController(BaseController):
             'customer' : customer,
             'order' : order,
             'total_price' : order.total_price(),
-            'payment_methods' : Journal.get_payment_methods(),
+            'payment_methods' : Journal.get_payment_methods(self.request.ctx.enterprise),
             'total_payments_applied' : order.total_payments_applied(),
             'total_discounts_applied' : order.total_discounts_applied(),
             'total_due' : total_due,
             'pre_order_balance' : pre_order_balance,
+            'enterprise' : self.request.ctx.enterprise,
             'total_due_after_balance' : total_due+pre_order_balance if (total_due+pre_order_balance) > 0 else 0
             }
 

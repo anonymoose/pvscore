@@ -49,7 +49,16 @@ import math
           </div>
         </div><!-- well -->
 
+        % if enterprise.is_credit_card_enabled():
         <div class="well" id="credit_card_info" style="display:none;">
+          <div class="row">
+            <div class="span8">
+              <div class="alert">
+                <strong>Note:</strong> This will run the credit card at ${enterprise.billing_method} for $${h.nvl(h.money(total_due))}.
+              </div>
+            </div>
+          </div>
+
           <div class="row">
             <div class="span5">
               <label for="cc_owner">Name on Card</label>
@@ -95,12 +104,13 @@ import math
             </div>
           </div>
           <div class="row">
-          <div class="span3">
-            <label>Card Verification Number</label>
-            ${h.text('bill_cc_cvv', autocomplete='off', class_="secret")}
-          </div>
+            <div class="span3">
+              <label>Card Verification Number</label>
+              ${h.text('bill_cc_cvv', autocomplete='off', class_="secret")}
+            </div>
           </div>
         </div>
+        % endif
 
         <div class="row">
           <div class="offset5 span4">

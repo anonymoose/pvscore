@@ -158,6 +158,10 @@ class Enterprise(ORMBase, BaseModel):
         return ['PayPal', 'Authorize.Net', 'Stripe', 'Invoice', 'Offline']
 
 
+    def is_credit_card_enabled(self):
+        return self.billing_method in ['Authorize.Net', 'Stripe']
+
+
     @property
     def customer(self):
         from pvscore.model.crm.customer import Customer
