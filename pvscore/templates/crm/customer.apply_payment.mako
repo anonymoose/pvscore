@@ -54,7 +54,10 @@ import math
           <div class="row">
             <div class="span8">
               <div class="alert">
-                <strong>Note:</strong> This will run the credit card at ${enterprise.billing_method} for $${h.nvl(h.money(total_due))}.
+                <strong>Note:</strong> This will run the credit card at ${enterprise.billing_method} for $${h.nvl(h.money(total_due))}.  
+                <p>
+                If you are using a credit card machine, select "Credit Card (offline)" above.
+                </p>
               </div>
             </div>
           </div>
