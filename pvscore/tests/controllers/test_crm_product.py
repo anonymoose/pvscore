@@ -53,6 +53,41 @@ class TestCrmProduct(TestController):
         return product_id
 
 
+    def _create_new_attribute(self, parent_product_id):
+        ent = Enterprise.find_by_name('Healthy U Store')
+        comp = Company.find_all(ent.enterprise_id)[0]
+        R = self.get('/crm/product/new?is_attribute&parent_id=%s' % parent_product_id)
+        assert R.status_int == 200
+        R.mustcontain('Edit Attribute for')
+        f = R.forms['frm_product']
+        self.assertEqual(f['product_id'].value, '')
+        f.set('parent_id', parent_product_id)
+        f.set('is_attribute', 'True')
+        f.set('type', 'Attr')
+        f.set('name', 'Test Product')
+        f.set('unit_cost', '10.00')
+        f.set('sku', 'TEST-SKU-123')
+        f.set('manufacturer', 'Test Manufacturer')
+        f.set('attr_name[0]', 'attr0key')
+        f.set('attr_value[0]', 'attr0val')
+        f.set('attr_name[1]', 'attr1key')
+        f.set('attr_value[1]', 'attr1val')
+
+        for camp in Campaign.find_by_company(comp):
+            f.set('campaign_price[%s]' % camp.campaign_id, 20.0)
+            f.set('campaign_discount[%s]' % camp.campaign_id, 10.0)
+
+        R = f.submit('submit')
+        self.assertEqual(R.status_int, 302)
+        R = R.follow()
+        assert R.status_int == 200
+        f = R.forms['frm_product']
+        R.mustcontain('Edit Attribute for')
+        product_id = f['product_id'].value
+        self.assertNotEqual(f['product_id'].value, '')
+        return product_id
+
+
     def _delete_new(self, product_id):
         Product.full_delete(product_id)
         self.commit()
@@ -61,8 +96,11 @@ class TestCrmProduct(TestController):
     @secure
     def test_create_new_attribute(self):
         product_id = self._create_new()
+        product_attribute_id = self._create_new_attribute(product_id)
         
+        self._delete_new(product_attribute_id)
         self._delete_new(product_id)
+        
 
     @secure
     def test_save_status(self):
