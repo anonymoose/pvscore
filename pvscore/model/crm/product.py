@@ -97,6 +97,19 @@ class Product(ORMBase, BaseModel):
 
 
     @staticmethod
+    def find_inventory_tracked(enterprise_id):
+        return Session.query(Product).options(FromCache('Product.find_all', enterprise_id)) \
+            .join((Company, Product.company_id == Company.company_id)) \
+            .filter(and_(Product.delete_dt == None,
+                         Product.enabled == True,
+                         Product.track_inventory == True,
+                         Company.enterprise_id == enterprise_id
+                         )) \
+                         .order_by(Product.name) \
+                         .all()
+
+
+    @staticmethod
     def find_by_vendor(enterprise_id, vendor):
         return Session.query(Product) \
             .join((Company, Product.company_id == Company.company_id)) \

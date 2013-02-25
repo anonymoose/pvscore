@@ -139,7 +139,7 @@ class ProductController(BaseController):
     @authorize(IsLoggedIn())
     def show_inventory(self):
         return {'products' : Product.find_by_vendor(self.enterprise_id, self.request.ctx.user.vendor) \
-                    if self.request.ctx.user.is_vendor_user() else Product.find_all(self.enterprise_id),
+                    if self.request.ctx.user.is_vendor_user() else Product.find_inventory_tracked(self.enterprise_id),
                 'campaigns' : Campaign.find_all(self.enterprise_id)
                 }
 

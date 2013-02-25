@@ -134,6 +134,12 @@ ${self.pre_process()}
 ${self.local_foot()}
 ${self.other_foot()}
 
+<script>
+window.onerror=function(msg){
+    $("body").attr("js_error",msg);
+};
+</script>
+
 </body>
 </html>
 

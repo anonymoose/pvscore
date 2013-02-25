@@ -230,6 +230,8 @@ pvs.onload.push(function() {
 		    se = "<img src='/static/icons/silk/disk.png' alt='Save Changes' title='Save Changes' onclick=\"product_inventory_save('"+cl+"');\"  />";
 		    jQuery("#inventory").jqGrid('setRowData',ids[i],{act:se});
 		}
+                $('#pager_left').hide();
+                $('#pager_center').hide();
 	    },
             onSelectRow: fn,
             ondblClickRow: fn,
