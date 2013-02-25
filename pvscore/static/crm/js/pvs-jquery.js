@@ -1650,9 +1650,12 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $('.pvs-help').popover({
-        html: true
-    });
+    var helpitems = $('.pvs-help');
+    if (helpitems.length > 0) {
+        helpitems.popover({
+            html: true
+        });
+    }
 });
 
 /* KB: [2010-08-16]:
