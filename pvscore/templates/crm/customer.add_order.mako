@@ -30,12 +30,26 @@
           </tr>
           % for p in products:
           <tr>
-            <td nowrap>${h.chkbox('chk_%s' % p.product_id, value=p.product_id, label=p.name, onchange='customer_add_product_oncheck(%d)' % p.product_id, class_='product_chk')}</td>
+            <td nowrap>${h.chkbox('chk_%s' % p.product_id, value=p.product_id, label=p.name, onchange="customer_add_product_oncheck('%s')" % p.product_id, class_='product_chk')}</td>
             <td style="text-align:right;">$${h.money(p.get_price(customer.campaign))}</td>
             <td style="text-align:right;">${h.text('quant_%s' % p.product_id, style="width:40px;")}</td>
-            <td style="text-align:right;">${p.inventory}</td>
+            <td style="text-align:right;">
+              ${p.inventory if p.track_inventory else 'n/a'}
+            </td>
           </tr>
-          % endfor
+            % for attr in p.get_product_attributes():
+              <tr class="attrs_for_${p.product_id}" style="display:none;">
+                <td style="text-align:right;">&nbsp;</td>
+                <td>${h.chkbox('attr_%s' % attr.product_id, value=attr.product_id, label='%s : %s' % (attr.attr_class, attr.name), class_='attribute_chk')}</td>
+                <td style="text-align:right;">
+                  <input type="hidden" id="attribute_parent_${attr.product_id}" value="${p.product_id}"/>
+                </td>
+                <td style="text-align:right;">
+                  ${attr.inventory if attr.track_inventory else 'n/a'}
+                </td>
+              </tr>
+            % endfor
+         % endfor
         </table>
       </div>
     </div>

@@ -38,6 +38,7 @@ class OrderItem(ORMBase, BaseModel):
     creator = relation('Users')
     product = relation('Product', lazy="joined")
     status = relation('Status')
+    children = relation('OrderItem')
 
 
     def total(self):

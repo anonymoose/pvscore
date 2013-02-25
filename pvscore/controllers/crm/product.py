@@ -189,10 +189,10 @@ class ProductController(BaseController):
             prod = Product()
         prod.bind(self.request.POST, True)
         prod.mod_dt = util.now()
-        prod.clear_children()
         prod.save()
         self.db_flush()
 
+        new_children = {}
         for k in self.request.POST.keys():
             if k.startswith('campaign_price'):
                 match = re.search(r'^.*\[(.*)\]', k)
@@ -210,7 +210,17 @@ class ProductController(BaseController):
             if k.startswith('child_incl'):
                 child_product_id = self.request.POST.get(k)
                 child_product_quantity = self.request.POST.get('child_quantity_%s' % child_product_id)
-                prod.add_child(child_product_id, child_product_quantity)
+                new_children[child_product_id] = child_product_quantity
+
+
+        # KB: [2013-02-23]: Clear out old children that were just deselected and add the ones that are still selected.
+        for current_child in prod.get_children():
+            if current_child.child_id not in new_children.keys():
+                prod.clear_child(current_child.child_id)
+                
+        for new_child_product_id in new_children.keys():
+            new_child_product_quantity = new_children[new_child_product_id]
+            prod.add_child(new_child_product_id, new_child_product_quantity)
 
         prod.save()
         self.db_flush()

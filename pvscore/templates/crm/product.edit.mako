@@ -225,6 +225,11 @@
                   </div>
                   <div class="span3">
                     ${h.checkbox('show_negative_inventory', checked=product.show_negative_inventory, label=' Show When Negative Inventory?')}
+                    % if parent_product and not product.product_id:
+                    ${h.checkbox('track_inventory', checked=False, label=' Track Inventory for this product?')}
+                    % else:
+                    ${h.checkbox('track_inventory', checked=product.track_inventory, label=' Track Inventory for this product?')}
+                    % endif
                   </div>
                 </div>
               </div>
@@ -264,7 +269,7 @@
         </div>
       </div>
 
-      % if not is_attribute:
+      % if not is_attribute and product.product_id:
       <div class="row">
         <div class="span9">
           <div class="well">

@@ -46,6 +46,7 @@ class Product(ORMBase, BaseModel):
     web_visible = Column(Boolean, default=True)
     inventory_par = Column(Float)
     show_negative_inventory = Column(Boolean, default=False)
+    track_inventory = Column(Boolean, default=True)
     seo_title = Column(String(512))
     seo_keywords = Column(String(1000))
     seo_description = Column(String(1000))
@@ -252,6 +253,7 @@ class Product(ORMBase, BaseModel):
         invalidate(self, 'Product.find_all', self.company.enterprise_id)
         invalidate(self, 'Product.find_all_for_web', self.company.enterprise_id)
         invalidate(self, 'ProductChild.find_children', self.product_id)
+        invalidate(self, 'ProductChild.find_attribute_children', self.product_id)
         invalidate(self, 'Product.find_by_manufacturer', '%s/%s' % (self.manufacturer, self.company.enterprise_id))
         invalidate(self, 'Product.find_by_sku', '%s/%s' % (self.manufacturer, self.company.enterprise_id))
         if len(self.images) > 0:
@@ -452,7 +454,7 @@ class Product(ORMBase, BaseModel):
         """ KB: [2011-02-02]: Returns the discount price """
         if campaign.campaign_id in self.campaign_prices:
             return self.campaign_prices[campaign.campaign_id].discount_price
-
+    
 
     def set_price(self, campaign, price, discount=None):
         ppri = ProductPricing.find(campaign, self)
@@ -491,9 +493,10 @@ class Product(ORMBase, BaseModel):
         return (self.type and (self.type == 'Top Level' or self.type == 'Parent or Child'))
 
 
-    def clear_children(self):
+
+    def clear_child(self, child_id):
         if self.product_id:
-            ProductChild.clear_by_parent(self.product_id)
+            ProductChild.clear(self.product_id, child_id)
 
 
     def has_child(self, other_product_id):
@@ -501,7 +504,8 @@ class Product(ORMBase, BaseModel):
 
 
     def add_child(self, other_product_id, other_product_quantity=1):
-        return ProductChild.create_new(self.product_id, other_product_id, other_product_quantity)
+        if (not ProductChild.find_child(self.product_id, other_product_id)):
+            return ProductChild.create_new(self.product_id, other_product_id, other_product_quantity)
 
 
     def get_children(self):
@@ -582,8 +586,8 @@ class ProductChild(ORMBase, BaseModel):
 
     @staticmethod
     def find_attribute_children(parent_id):
-        #.options(FromCache('Product.find_attribute_children', parent_id)) \
         return Session.query(Product) \
+            .options(FromCache('Product.find_attribute_children', parent_id)) \
             .join((ProductChild, Product.product_id == ProductChild.child_id)) \
             .filter(and_(ProductChild.parent_id == parent_id,
                          Product.delete_dt == None,
@@ -601,8 +605,15 @@ class ProductChild(ORMBase, BaseModel):
         
 
     @staticmethod
-    def clear_by_parent(parent_id):
-        Session.execute("delete from crm_product_child where parent_id = '%s'" % parent_id)
+    def find_parent_product(child_id):
+        prodchild = Session.query(ProductChild) \
+            .filter(ProductChild.child_id == child_id).first()
+        if prodchild:
+            return prodchild.parent
+
+    @staticmethod
+    def clear(parent_id, child_id):
+        Session.execute("delete from crm_product_child where parent_id = '%s' and child_id = '%s'" % (parent_id, child_id))
         invalidate(ProductChild(), 'ProductChild.find_children', parent_id) # not my finest moment.
 
 

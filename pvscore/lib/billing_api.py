@@ -116,6 +116,8 @@ class StripeBillingApi(BaseBillingApi):
             charge_items_amount = 0.0
             subscription_amount = 0.0
             for oitem in order.active_items:
+                if oitem.parent_id is not None:
+                    continue
                 prod = oitem.product
                 if prod.subscription:
                     # if (self.coupon):

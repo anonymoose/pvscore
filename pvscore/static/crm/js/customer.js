@@ -172,6 +172,48 @@ customer_show_status = function(status_id) {
 Order Management
 */
 
+customer_payment_method_change = function() {
+    if ('Credit Card' == $('#pmt_method').val()) {
+        $('#credit_card_info').show();
+    } else  {
+        $('#credit_card_info').hide();
+    }
+};
+
+customer_apply_payment_submit = function() {
+    if ('Credit Card' == $('#pmt_method').val()) {
+        // disable the submit button to prevent repeated clicks
+        $('#btnSubmit').attr("disabled", "disabled");
+        debugger;
+        // createToken returns immediately - the supplied callback submits the form if there are no errors
+        Stripe.createToken({
+            number: $('#bill_cc_num').val(),
+            cvc: $('#bill_cc_cvv').val(),
+            exp_month: $('#bill_exp_month').val(),
+            exp_year: $('#bill_exp_year').val()
+        }, function(status, response) {
+            if (response.error) {
+                // show the errors on the form
+                $("#payment-errors").html(response.error.message);
+            } else {
+                // ensure we don't send secret stuff to the server.
+                $('.secret').removeAttr('name');
+                // token contains id, last4, and card type
+                var token = response['id'];
+                // insert the token into the form so it gets submitted to the server
+                //$('#frmStep2').append("<input type='hidden' name='bill_cc_token' value='" + token + "' />");
+                $('#bill_cc_token').val(token);
+                // and submit
+                $('#frm_apply_payment').get(0).submit();
+            }
+        });
+    } else {
+        $('#frm_apply_payment').get(0).submit();
+    }
+};
+
+
+
 customer_add_product_oncheck = function(id) {
     if ($('#chk_'+id).attr('checked')) {
         $('#quant_'+id).val('1.0');
@@ -182,7 +224,7 @@ customer_add_product_oncheck = function(id) {
 
 pvs.onload.push(function() {
     $('#prod_complete1').typeahead({
-        source: function(typeahead, query) {
+        source: function(query, process) {
             $.ajax({
                 url: "/crm/product/autocomplete_by_name",
                 dataType: "json",
@@ -194,18 +236,24 @@ pvs.onload.push(function() {
                 },
                 success: function(data) {
                     var return_list = [], i = data.length;
-                    while (i--) {
-                        return_list[i] = {id: data[i].product_id, value: data[i].name};
+                    product_name_complete_reference = {};  // defined in product.js
+                    while (i > 0) {
+                        i--;
+                        product_name_complete_reference[data[i].name] = data[i];
+                        return_list[i] = data[i].name;
                     }
-                    typeahead.process(return_list);
+                    process(return_list);
                 }
             });
         },
-        onselect: function(obj) {
-            var product_id = obj.id;
+        updater: function(item) {
+            var obj = product_name_complete_reference[item];
+            var product_id = obj.product_id;
             $('#chk_'+product_id).attr('checked', true);
-            customer_add_product_oncheck(obj.id);
+            customer_add_product_oncheck(product_id);
             $("#prod_complete1").val('');
+            $(".attrs_for_"+product_id).insertAfter($('#add_product_header'));
+            $(".attrs_for_"+product_id).show();
             $("#chk_"+product_id).parent().parent().parent().parent().insertAfter($('#add_product_header'));
         }
     });
@@ -220,9 +268,13 @@ customer_add_order_submit = function() {
                   });
         return;
     }
-    var obj = {};
+    var product_ids = {};
     $('.product_chk:checked').each(function(i) {
-        obj[this.value] = $('#quant_'+this.value).val();
+        product_ids[this.value] = $('#quant_'+this.value).val();
+    });
+    var attribute_ids = {};
+    $('.attribute_chk:checked').each(function(i) {
+        attribute_ids[this.value] = $('#attribute_parent_'+this.value).val();
     });
     pvs.ajax.post_array(pvs.ajax.api({root: '/crm/customer/add_order/'+$_('#customer_id')}),
                         function(response) {
@@ -234,8 +286,10 @@ customer_add_order_submit = function() {
                                 pvs.alert('Unable to save products:\n'+response);
                             }
                         },
-                        {products: obj}
-                       );
+                        {
+                            products: product_ids,
+                            attributes: attribute_ids
+                        });
 };
 
 
@@ -394,6 +448,7 @@ customer_apply_discount = function(order_id) {
                                 1);
 };
 
+
 pvs.onload.push(function() {
     $('#customer_form').validate(
         pvs.validate.options(
@@ -410,7 +465,7 @@ pvs.onload.push(function() {
 
 pvs.onload.push(function() {
     $('#add_product_complete').typeahead({
-        source: function(typeahead, query) {
+        source: function(query, process) {
             $.ajax({
                 url: "/crm/product/autocomplete_by_name?customer_id="+$('#customer_id').val(),
                 dataType: "json",
@@ -423,19 +478,21 @@ pvs.onload.push(function() {
                 success: function(data) {
                     var return_list = [], i = data.length;
                     while (i--) {
-                        return_list[i] = {id: data[i].product_id,
-                                          value: data[i].name,
-                                          unit_cost: data[i].unit_cost,
-                                          retail_price: data[i].retail_price,
-                                          wholesale_price: data[i].wholesale_price,
-                                          discount_price: data[i].discount_price};
+                        return_list[i] = data[i].name;
+                        product_name_complete_reference[data[i].name] = {product_id: data[i].product_id,
+                                                                         value: data[i].name,
+                                                                         unit_cost: data[i].unit_cost,
+                                                                         retail_price: data[i].retail_price,
+                                                                         wholesale_price: data[i].wholesale_price,
+                                                                         discount_price: data[i].discount_price};
                     }
-                    typeahead.process(return_list);
+                    process(return_list);
                 }
             });
         },
-        onselect: function(obj) {
-            var product_id = obj.id;
+        updater: function(item) {
+            var obj = product_name_complete_reference[item];   // defined in product.js
+            var product_id = obj.product_id;
             var rndid = Math.floor(Math.random()*1000)
             oi_ids[oi_ids.length-1] = rndid+'_';
             oi_ids.push(-1);

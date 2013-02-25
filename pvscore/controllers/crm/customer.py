@@ -268,6 +268,8 @@ class CustomerController(BaseController):
         customer_id = self.request.matchdict.get('customer_id')
         cust = Customer.load(customer_id)
         self.forbid_if(not cust)
+
+        # KB: [2013-02-24]: products are passed as products[$product_id] = quantity
         product_ids = {}
         for key in self.request.POST.keys():
             if key.startswith('products'):
@@ -278,7 +280,20 @@ class CustomerController(BaseController):
                     if pid not in product_ids:
                         product_ids[pid] = 0
                     product_ids[pid] += quant
-        order_id = self._add_order_impl(customer_id, product_ids,
+
+
+        # KB: [2013-02-24]: attributes are passed as attributes[$attribute_id] = $parent_product_id
+        attributes = {}
+        for key in self.request.POST.keys():
+            if key.startswith('attributes'):
+                match = re.search(r'^.*\[(.*)\]', key)
+                if match:
+                    attribute_product_id = match.group(1)
+                    parent_product_id = self.request.POST.get(key)
+                    attributes[attribute_product_id] = { 'parent_product' : Product.load(parent_product_id),
+                                                         'attribute_product' : Product.load(attribute_product_id) }
+
+        order_id = self._add_order_impl(customer_id, product_ids, attributes,
                                         None, self.request.ctx.user,
                                         self.request.POST.get('discount_id'),
                                         self.request.POST.get('campaign_id', self.request.GET.get('campaign_id')),
@@ -359,7 +374,15 @@ class CustomerController(BaseController):
         if order_item.quantity == 0:
             order_item.delete_dt = util.today()
         order_item.save()
-        InventoryJournal.create_new(order_item.product, 'Return', quantity_returned, order_item, None, None, ret)
+        if order_item.product.track_inventory:
+            InventoryJournal.create_new(order_item.product, 'Return', quantity_returned, order_item, None, None, ret)
+
+        for attr_kid in order_item.children:
+            Status.add(customer, attr_kid, Status.find_event(self.enterprise_id, attr_kid, 'RETURN'), status_note)
+            attr_kid_prod = attr_kid.product
+            if attr_kid_prod.track_inventory:
+                InventoryJournal.create_new(attr_kid_prod, 'Return', quantity_returned, attr_kid)
+
         self.flash(status_note)
         if len(order.active_items) == 0:
             # KB: [2012-09-06]: Deleted the one thing out of this
@@ -403,7 +426,13 @@ class CustomerController(BaseController):
     def apply_payment(self):
         customer_id = self.request.matchdict.get('customer_id')
         order_id = self.request.matchdict.get('order_id')
-        self._apply_payment(customer_id, order_id)
+        if 'bill_cc_token' in self.request.POST and self.request.POST['bill_cc_token']:
+            cust = Customer.load(customer_id)
+            order = CustomerOrder.load(order_id)
+            bill = self._create_billing(cust)
+            self._bill_credit_card(cust, order, bill)
+        else:
+            self._apply_payment(customer_id, order_id)
         return HTTPFound('/crm/customer/edit_order_dialog/%s/%s' % (customer_id, order_id))
 
 
@@ -468,8 +497,15 @@ class CustomerController(BaseController):
             oitem = OrderItem.load(oid)
             Status.add(customer, oitem, Status.find_event(self.enterprise_id, oitem, 'DELETED'), 'OrderItem deleted ')
             prod = oitem.product
-            InventoryJournal.create_new(prod, 'Cancelled Item', oitem.quantity, oitem)
-            oitem.soft_delete()
+            if prod.track_inventory:
+                InventoryJournal.create_new(prod, 'Cancelled Item', oitem.quantity, oitem)
+            for attr_kid in oitem.children:
+                Status.add(customer, attr_kid, Status.find_event(self.enterprise_id, attr_kid, 'DELETED'), 'OrderItem deleted ')
+                attr_kid_prod = attr_kid.product
+                if attr_kid_prod.track_inventory:
+                    InventoryJournal.create_new(attr_kid_prod, 'Cancelled Item', oitem.quantity, attr_kid)
+                attr_kid.soft_delete()
+            oitem.soft_delete()                
 
         # extract order_items[27][quantity] to set those properties.
         order_items = {}
@@ -493,7 +529,8 @@ class CustomerController(BaseController):
                         assert oitem.product is not None
                         if 'quantity' == attr:
                             new_val = float(new_val)
-                            InventoryJournal.create_new(order_item_product, 'Sale', new_val, oitem)
+                            if order_item_product.track_inventory:
+                                InventoryJournal.create_new(order_item_product, 'Sale', new_val, oitem)
                         setattr(oitem, attr, new_val)
                         oitem.save()
                     else:
@@ -508,8 +545,9 @@ class CustomerController(BaseController):
                         if 'quantity' == attr:
                             new_val = float(new_val)
                             if not total_payments_applied:
-                                InventoryJournal.cleanup(oitem, 'Sale')
-                                InventoryJournal.create_new(order_item_product, 'Sale', new_val, oitem)
+                                if order_item_product.track_inventory:
+                                    InventoryJournal.cleanup(oitem, 'Sale')
+                                    InventoryJournal.create_new(order_item_product, 'Sale', new_val, oitem)
                         setattr(oitem, attr, new_val)
                         oitem.save()
         Status.add(customer, order, Status.find_event(self.enterprise_id, order, 'MODIFIED'), 'Order modified')
@@ -618,8 +656,11 @@ class CustomerController(BaseController):
             }
 
 
-    def _add_order_impl(self, customer_id, product_ids, prices, user, discount_id, campaign_id, incl_tax=True):   #pylint: disable-msg=R0913
-        """ KB: [2013-02-20]: MOD ATTR : CustomerController._add_order_impl : modify call to Cart.add_item to allow for selected attributes. """
+
+    def _add_order_impl(self, customer_id, product_ids, attributes, prices, user, discount_id, campaign_id, incl_tax=True):   #pylint: disable-msg=R0913
+        """ KB: [2013-02-20]:
+        attributes = [{quantity : 0, product : <Product...>}, {...}]
+        """
         cust = Customer.load(customer_id)
         self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
         cart = Cart()
@@ -628,9 +669,16 @@ class CustomerController(BaseController):
         for pid in product_ids.keys():
             quantity = product_ids[pid]
             price = prices[pid] if prices and pid in prices else None
+
+            attrs = {}
+            for attr in [attr['attribute_product'] for attr in attributes.values() if str(attr['parent_product'].product_id) == pid]:
+                attrs[attr.product_id] = { 'quantity' : 0,
+                                           'product' : attr}
+
             cart.add_item(product=Product.load(pid),
                           campaign=cust.campaign,
                           quantity=quantity,
+                          attributes=attrs,
                           price=price)
         order = cust.add_order(cart, user, self.enterprise_id, cust.campaign, incl_tax)
         order.flush()
@@ -697,8 +745,7 @@ class CustomerController(BaseController):
         return HTTPFound(util.nvl(self.request.POST.get('redir'), '/') + '?customer_id=' + str(cust.customer_id)) #pylint: disable-msg=E1103
 
 
-    def _site_purchase(self, cust, cart=None):  #pylint: disable-msg=R0912,R0915
-        """ KB: [2013-02-20]: MOD ATTR CustomerController._site_purchase : Allow for attributes passed in the post """
+    def _create_billing(self, cust):
         bill = Billing.create(cust)
         bill.set_cc_info(self.request.POST.get('bill_cc_num'), self.request.POST.get('bill_cc_cvv'))
         bill.cc_exp = self.request.POST.get('bill_cc_exp')
@@ -709,6 +756,12 @@ class CustomerController(BaseController):
         cust.billing = bill
         cust.save()
         bill.save()
+        return bill
+
+
+    def _site_purchase(self, cust, cart=None):  #pylint: disable-msg=R0912,R0915
+        """ KB: [2013-02-20]: MOD ATTR CustomerController._site_purchase : Allow for attributes passed in the post """
+        bill = self._create_billing(cust)
         campaign = Campaign.load(cust.campaign_id)
 
         if not cart:
@@ -726,6 +779,10 @@ class CustomerController(BaseController):
                     self.raise_redirect(self.request.referrer)
 
         order = cust.add_order(cart, None, self.enterprise_id, campaign)
+        return self._bill_credit_card(cust, order, bill)
+
+
+    def _bill_credit_card(self, cust, order, bill):
         api = BaseBillingApi.create_api(cust.campaign.company.enterprise)
         api.set_coupon(self.request.POST.get('coupon_code'))
         if api.purchase(order, bill, util.request_ip(self.request)):

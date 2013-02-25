@@ -1,4 +1,5 @@
 import logging
+import re
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.model.crm.product import Product
@@ -25,12 +26,52 @@ class CartController(CatalogBaseController):
         """ KB: [2013-02-20]: MOD ATTR:  CartController.add : Allow for ajax of adding a simple item (HUS), or post/redir for adding products with attributes. """
         product_id = self.request.matchdict.get('product_id')
         quantity = self.request.matchdict.get('quantity')
-        redir = self.request.GET.get('redir')
+        redir = self.request.POST.get('redir')
         cart = self.session['cart']
         product = Product.load(product_id)
         cart.add_item(product, self.request.ctx.campaign, quantity)
         self.session.changed()
         return 'True' if not redir else HTTPFound(redir)
+
+
+    @view_config(route_name='ecom.site.cart.add_attributed_product', renderer="string")
+    def add_attributed_product(self):
+        """ KB: [2013-02-24]:
+            var attributes = {};
+            attributes[$('#color_id').val()] = 0;  // quantity of zero, unless its really something that requires a quantity.
+            attributes[$('#size_id').val()] = 0;
+
+            $.post('/ecom/cart/add_attributed_product',
+                   { product_id : base_product_id,
+                     attributes : attributes,
+                     quantity : $('#qty').val()
+                   },
+                   function(resp) {
+                       if (resp == 'True') {
+                           window.location = '/product/' + base_product_id;
+                       }
+                   });
+        
+        """
+        redir = self.request.POST.get('redir')
+        product_id = self.request.POST.get('product_id')
+        quantity = self.request.POST.get('quantity')
+        cart = self.session['cart']
+        attributes = {}
+        for key in self.request.POST.keys():
+            if key.startswith('attributes'):
+                match = re.search(r'^.*\[(.*)\]', key)
+                if match:
+                    pid = match.group(1)
+                    quant = float(util.nvl(self.request.POST.get(key), '1.0'))
+                    attributes[pid] = { 'quantity' : quant,
+                                        'product' : Product.load(pid) }
+        product = Product.load(product_id)
+        self.forbid_if(not product)
+        cart.add_item(product, self.request.ctx.campaign, quantity, None, None, attributes)
+        self.session.changed()
+        return 'True' if not redir else HTTPFound(redir)
+
 
 
     @view_config(route_name='ecom.site.cart.update', renderer="string")

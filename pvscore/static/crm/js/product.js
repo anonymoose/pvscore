@@ -77,6 +77,7 @@ pvs.onload.push(function() {
     }
 });
 
+/* KB: [2013-02-24]: Also used in customer.js prod_complete1 */
 product_name_complete_reference = {};
 
 pvs.onload.push(function() {

@@ -26,8 +26,8 @@ class Cart(object):
         return len(self.items)
 
 
-    def add_item(self, product, campaign, quantity=1, price=None, start_dt=None): #pylint: disable-msg=R0913
-        """ KB: [2013-02-20]: MOD ATTR: pvscore.lib.Cart.add_item : modify to allow attributes to be attached to the product."""
+    def add_item(self, product, campaign, quantity=1, price=None, start_dt=None, attributes={}): #pylint: disable-msg=R0913
+        """ KB: [2013-02-24]: attribute_ids == {'123abc...' : 3, ...}  where 3 is the quantity """
         if not price:
             price = product.get_price(campaign)
         price = float(price)
@@ -37,6 +37,7 @@ class Cart(object):
         self.items.append({'product': product,
                            'quantity': quantity,
                            'campaign_id': campaign.campaign_id,
+                           'attributes': attributes,
                            'dt': datetime.datetime.date(datetime.datetime.now()),
                            'unit_price':price,
                            'start_dt':util.parse_date_as_date(util.nvl(str(start_dt), util.str_today())),

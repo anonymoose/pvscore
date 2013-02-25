@@ -75,7 +75,6 @@ class SiteController(BaseController):
 
     @view_config(route_name='cms.site.exception')
     def exception_test(self):
-        import pdb; pdb.set_trace()
         raise Exception("This is expected")
 
 

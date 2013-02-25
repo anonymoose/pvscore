@@ -37,7 +37,7 @@ cms.catalog = function() {
             if (!quantity) {
                 quantity = 1;
             }
-            $.get('/ecom/cart/add/' + product_id + '/'+quantity,
+            $.get('/ecom/cart/add/' + product_id + '/' + quantity,
                   function(response) {
                       if (is_true(response)) {
                           if (on_success) {

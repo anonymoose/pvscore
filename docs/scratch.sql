@@ -4835,6 +4835,7 @@ alter table crm_product rename column typex to type;
 alter table crm_product add column short_name varchar(50);
 alter table crm_product add column attr_class varchar(50);
 alter table crm_product add column render_template varchar(50);
+alter table crm_product add column track_inventory boolean default true;
 alter table crm_order_item add column note text;
 
 insert into core_status_event
@@ -4843,7 +4844,6 @@ values
 (uuid_generate_v4(), 'Product', 'DELETED', 'Deleted', false, true, true, false, false, false, false, true, false);
 
 
-select short_name from core_status_event where event_type = 'Product';
 
 /*
 drop table if exists crm_product_attribute;

@@ -8,6 +8,7 @@ import math
 
 <div class="container">
   <form id="frm_apply_payment" method="POST" action="/crm/customer/apply_payment/${customer.customer_id}/${order.order_id}">
+    <input type="hidden" name="bill_cc_token" id="bill_cc_token" value=""/>
     <div class="row">
       <div class="span9">
         <div class="well">
@@ -21,7 +22,7 @@ import math
             </div>
             <div class="span3">
               <label for="">Payment Method</label>
-              ${h.select('pmt_method', 'Apply Balance' if pre_order_balance > 0 else 'Credit Card', payment_methods)}
+              ${h.select('pmt_method', 'Apply Balance' if pre_order_balance > 0 else 'Cash', payment_methods, onchange="customer_payment_method_change()")}
             </div>
           </div>
           % if pre_order_balance > 0:
@@ -48,6 +49,59 @@ import math
           </div>
         </div><!-- well -->
 
+        <div class="well" id="credit_card_info" style="display:none;">
+          <div class="row">
+            <div class="span5">
+              <label for="cc_owner">Name on Card</label>
+              ${h.text('cc_owner', value='%s %s' % (customer.fname, customer.lname), autocomplete='off', class_="input-xxlarge")}
+            </div>
+          </div>
+          <div class="row">
+            <div class="span3">
+              <label for="bill_cc_num">Credit Card Number</label>
+              ${h.text('bill_cc_num', autocomplete='off', class_="secret")}
+            </div>
+            <div class="span3">
+              <label for="ccsave_expiration">Expiration Month</label>
+              <select class="month validate-cc-exp required-entry"
+                      name="bill_exp_month" id="bill_exp_month" autocomplete="off">
+                <option selected="selected" value="">Month</option>
+                <option value="01">January</option>
+                <option value="02">February</option>
+                <option value="03">March</option>
+                <option value="04">April</option>
+                <option value="05">May</option>
+                <option value="06">June</option>
+                <option value="07">July</option>
+                <option value="08">August</option>
+                <option value="09">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+            </div>
+            <div class="span2">
+              <label>Expiration Year</label>
+              <select class="year required-entry" name="bill_exp_year" id="bill_exp_year" autocomplete="off">
+                <option selected="selected" value="">Year</option>
+                % for y in range(h.this_year(), h.this_year() + 10):
+                % if y == h.this_year() + 1:
+                <option value="${str(y)[2:]}" selected>${y}</option>
+                % else:
+                <option value="${str(y)[2:]}">${y}</option>
+                % endif
+                % endfor
+              </select>
+            </div>
+          </div>
+          <div class="row">
+          <div class="span3">
+            <label>Card Verification Number</label>
+            ${h.text('bill_cc_cvv', autocomplete='off', class_="secret")}
+          </div>
+          </div>
+        </div>
+
         <div class="row">
           <div class="offset5 span4">
             <dl class="dl-horizontal" style="text-overflow:clip;">
@@ -69,8 +123,13 @@ import math
       </div>
     </div>
     <div class="row">
-      <div class="span2 offset7">
-        <input type="submit" name="submit" class="btn btn-primary btn-large" value="Save"/>
+      <div class="span3">
+        <span id="payment-errors" style="color:red;"></span>
+      </div>
+    </div>
+    <div class="row">
+      <div class="span3 offset6">
+        <a href="#" class="btn btn-primary btn-large" data-loading-text="Loading..." onclick="customer_apply_payment_submit()">Save</a>
         <a href="/crm/customer/edit_order_dialog/${customer.customer_id}/${order.order_id}" class="btn btn-link btn-large">Cancel</a>
       </div>
     </div>

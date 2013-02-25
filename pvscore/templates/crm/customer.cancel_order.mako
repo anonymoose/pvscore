@@ -11,7 +11,7 @@
           <div class="row">
             <div class="span8">
               <label for="cancel_reason">Why are you cancelling this order?</label>
-              ${h.textarea('cancel_reason', cols=20)}
+              ${h.textarea('cancel_reason', style="width:800px;")}
             </div>
           </div>
         </div>

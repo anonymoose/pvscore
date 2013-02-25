@@ -43,6 +43,7 @@ class CustomerOrder(ORMBase, BaseModel):
     shipping_zip = Column(String(50))
     shipping_country = Column(String(50))
     shipping_phone = Column(String(20))
+
     customer = relation('Customer')
     campaign = relation('Campaign')
     creator = relation('Users')
@@ -78,18 +79,41 @@ class CustomerOrder(ORMBase, BaseModel):
             item.product = prd
             item.creator = user_created
             item.start_dt = cart_item['start_dt']
-            discount = prd.get_discount_price(campaign)
-            retail = cart_item['unit_price'] if 'unit_price' in cart_item else prd.get_unit_price(campaign)
+            item.save()
+            item.flush()  # TODO: KB: [2013-02-24]: Figure out the proper relationship for this.
+
+            attribute_order_items = []
+            for attribute_product_id in cart_item['attributes'].keys():
+                attribute_order_item = OrderItem()
+                attribute_order_item.parent_id = item.order_item_id
+                attribute_order_item.order = cord
+                ao_prd = Product.load(attribute_product_id)
+                attribute_order_item.product = ao_prd
+                attribute_order_item.creator = user_created
+                attribute_order_item.unit_cost = ao_prd.unit_cost
+                attribute_order_item.unit_discount_price = ao_prd.get_discount_price(campaign)
+                attribute_order_item.unit_retail_price = ao_prd.get_retail_price(campaign)
+                attribute_order_item.quantity = cart_item['attributes'][attribute_product_id]['quantity']
+                attribute_order_item.save()
+                attribute_order_items.append(attribute_order_item)
+
+            # KB: [2013-02-24]: Discount is calculated by using the highest price of the discounts for the product and all of its selected attributes
+            discount = max([util.nvl(aois.unit_discount_price) for aois in attribute_order_items] +
+                           [prd.get_discount_price(campaign)])
+            # KB: [2013-02-24]: Retail is calculated by using the highest price of the retail prices for the product and all its selected attributes.
+            retail = max([util.nvl(aois.unit_retail_price, 0.0) for aois in attribute_order_items] +
+                         [cart_item['unit_price'] if 'unit_price' in cart_item else prd.get_retail_price(campaign)])
+
             item.quantity = float(cart_item['quantity'])
-            """ KB: [2013-02-20]: MOD ATTR : CustomerOrder.create_new : Account for attribute price modifiers here. """
             item.unit_price = (discount if discount else retail)
             if campaign.tax_rate and incl_tax:
                 item.tax = (item.unit_price * item.quantity) * campaign.tax_rate
             item.unit_cost = prd.unit_cost
             item.unit_discount_price = (discount if discount else 0.0)
             item.unit_retail_price = retail
-
-            InventoryJournal.create_new(prd, 'Sale', int(item.quantity), item)
+            item.save()
+            if prd.track_inventory:
+                InventoryJournal.create_new(prd, 'Sale', int(item.quantity), item)
             Status.add(customer, item, Status.find_event(enterprise_id, item, 'CREATED'),
                        'Item added to order %s @ $%s' % (prd.name, util.money(item.unit_price)))
             if prd.can_have_children():
@@ -108,7 +132,8 @@ class CustomerOrder(ORMBase, BaseModel):
                         child_item.unit_retail_price = 0.0
                         child_item.unit_cost = prd.unit_cost
                         child_item.quantity = kid.child_quantity
-                        InventoryJournal.create_new(kid.child, 'Sale', child_item.quantity, child_item)
+                        if kid.child.track_inventory:
+                            InventoryJournal.create_new(kid.child, 'Sale', child_item.quantity, child_item)
         Status.add(customer, cord, Status.find_event(enterprise_id, cord, 'CREATED'), 'Order created ')
         cord.save()
         cord.flush()
@@ -132,7 +157,8 @@ class CustomerOrder(ORMBase, BaseModel):
         if campaign.tax_rate and incl_tax:
             item.tax = (item.unit_price * item.quantity) * campaign.tax_rate
         if quantity > 0:
-            InventoryJournal.create_new(product, 'Sale', item.quantity, item)
+            if product.track_inventory:
+                InventoryJournal.create_new(product, 'Sale', item.quantity, item)
         item.save()
         if product.can_have_children():
             item.flush() # we need this to get the parent ID.
@@ -148,7 +174,8 @@ class CustomerOrder(ORMBase, BaseModel):
                     child_item.unit_discount_price = 0.0
                     child_item.unit_cost = product.unit_cost
                     child_item.quantity = kid.child_quantity
-                    InventoryJournal.create_new(kid.child, 'Sale', child_item.quantity, child_item)
+                    if kid.child.track_inventory:
+                        InventoryJournal.create_new(kid.child, 'Sale', child_item.quantity, child_item)
         Status.add(customer, self, Status.find_event(enterprise_id, self, 'MODIFIED'), 'Order Modified ')
         self.save()
         self.flush()
@@ -164,7 +191,8 @@ class CustomerOrder(ORMBase, BaseModel):
 
     @property
     def active_items(self):
-        return [oitem for oitem in self.items if oitem.delete_dt is None]
+        # KB: [2013-02-24]: Every order item that is not an attribute.
+        return [oitem for oitem in self.items if oitem.delete_dt is None and oitem.parent_id is None]
 
 
     @property
@@ -194,7 +222,7 @@ class CustomerOrder(ORMBase, BaseModel):
     def total_item_price(self):
         tot = 0.0
         for oitem in self.active_items:
-            tot += (oitem.unit_price * (oitem.quantity if oitem.quantity else 1))
+            tot += (util.nvl(oitem.unit_price, 0.0) * (util.nvl(oitem.quantity, 1.0)))
         return tot
 
 
@@ -241,21 +269,32 @@ class CustomerOrder(ORMBase, BaseModel):
         ret = '<table cellpadding="0" cellspacing="10" border="0"><tr><td><u>Product</u></td><td><u>Quantity</u></td><td><u>Unit Price</u></td><td><u>Item Total</u></td></tr>'
         for i in self.active_items:
             try:
+                
                 ret += """<tr>
-                            <td nowrap><b>{name}</b></td><td>{quant}</td><td>{price}</td><td align="right">{tot}</td>
+                            <td nowrap><b>{name}</b></td><td>{quant}</td><td>${price}</td><td align="right">${tot}</td>
                           </tr>
                        """.format(name=i.product.name.encode('ascii', 'ignore'), price=util.money(i.unit_price),
                                   quant=int(i.quantity), tot=util.money(i.total()))
+                for attr in i.children:
+                    s = """<tr>
+                                <td align="right">{klass} : {name}</td><td colspan="3">&nbsp;</td>
+                             </tr>
+                          """.format(name=attr.product.name, klass=attr.product.attr_class)
+                    ret += s
+
+                    print s
+                    
+
             except Exception as exc: #pragma: no cover
                 log.debug(exc)
 
         ret += '<tr><td colspan="4"><hr></td></tr>'
-        ret += '<tr><td><i>Sub Total</i></td><td colspan="2">&nbsp;</td><td align="right">%s</td></tr>' % util.money(self.total_item_price(), True)
-        ret += '<tr><td><i>Shipping/Handling</i></td><td colspan="2">&nbsp;</td><td align="right">%s</td></tr>' % util.money((self.total_shipping_price() + self.total_handling_price()), True)
-        ret += '<tr><td><i>Tax</i></td><td colspan="2">&nbsp;</td><td align="right">%s</td></tr>' % util.money(self.total_tax(), True)
-        ret += '<tr><td><i>Total Payments</i></td><td colspan="2">&nbsp;</td><td align="right">%s</td></tr>' % util.money(self.total_payments_applied(), True)
-        ret += '<tr><td><i>Total Discounts</i></td><td colspan="2">&nbsp;</td><td align="right">%s</td></tr>' % util.money(self.total_discounts_applied(), True)
-        ret += '<tr><td><i>Total Due</i></td><td colspan="2">&nbsp;</td><td align="right">%s</td></tr>' % util.money(self.total_payments_due(), True)
+        ret += '<tr><td><i>Sub Total</i></td><td colspan="2">&nbsp;</td><td align="right">$%s</td></tr>' % util.money(self.total_item_price(), True)
+        ret += '<tr><td><i>Shipping/Handling</i></td><td colspan="2">&nbsp;</td><td align="right">$%s</td></tr>' % util.money((self.total_shipping_price() + self.total_handling_price()), True)
+        ret += '<tr><td><i>Tax</i></td><td colspan="2">&nbsp;</td><td align="right">$%s</td></tr>' % util.money(self.total_tax(), True)
+        ret += '<tr><td><i>Total Payments</i></td><td colspan="2">&nbsp;</td><td align="right">$%s</td></tr>' % util.money(self.total_payments_applied(), True)
+        ret += '<tr><td><i>Total Discounts</i></td><td colspan="2">&nbsp;</td><td align="right">$%s</td></tr>' % util.money(self.total_discounts_applied(), True)
+        ret += '<tr><td><i>Total Due</i></td><td colspan="2">&nbsp;</td><td align="right">$%s</td></tr>' % util.money(self.total_payments_due(), True)
         ret += '</table>'
         return ret
 
