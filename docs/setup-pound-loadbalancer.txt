@@ -87,3 +87,7 @@ make install
    configuration file.
 6. bounce and test
 
+
+When renewing, all that changes is the 2nd part, which is in the
+site.com.crt file.  Remove the existing one and replace it with the
+contents of that file.
