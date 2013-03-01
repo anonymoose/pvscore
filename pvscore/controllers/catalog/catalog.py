@@ -195,5 +195,4 @@ class CatalogController(CatalogBaseController):
         params = self.params()
         if params['customer'].customer_id and 'nextlink' in self.request.GET:
             return HTTPFound(self.request.GET['nextlink'])
-        import pdb; pdb.set_trace()
         return self.render(page, params)
