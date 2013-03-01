@@ -4861,3 +4861,20 @@ create table crm_product_attribute (
 );
 alter table crm_product_attribute add foreign key (product_id) references crm_product;
 */
+
+
+
+select count(0) from data;
+select * from thing;
+
+ZACH = 426
+
+
+select d.key from data d, thing t 
+where t.thing_id= 'patient.fname'
+and d.thing_id = t.thing_id
+and lower(d.val_string) = 'zachary';
+
+
+select d.key, d.thing_id, d.event_dt, substring(d.val_text from 0 for 30)
+from data d where d.key = '426' and d.thing_id = 'encnote.mdm_note';

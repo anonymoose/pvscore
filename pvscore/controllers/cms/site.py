@@ -117,7 +117,10 @@ def dynamic_url_lookup(request):
     except TopLevelLookupException as exc:
         log.error(exc)
         return HTTPNotFound()
-
+    except Exception as exc:
+        # KB: [2013-03-01]: This usually happens when googlebot calls /login and it routes to a login.mako page that tries to render
+        # without its required context.  Catch the barf and just route back to root.
+        return HTTPFound('/')
 
 
 
