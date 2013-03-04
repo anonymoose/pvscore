@@ -42,6 +42,7 @@ def country_select_list(selected_country=None):
 
 
 def is_notrack(request):
+    """ KB: [2013-03-04]: See pvscore/controllers/cms/site:notrack() """
     return ('pvs_notrack' in request.session and request.session['pvs_notrack'] == 'notrack')\
         or ('pvs_notrack' in request.cookies.keys() and request.cookies['pvs_notrack'] == 'notrack')
 
