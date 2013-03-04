@@ -80,8 +80,10 @@ class SiteController(BaseController):
 
     @view_config(route_name='cms.site.notrack')
     def notrack(self):
-        self.request.session['pvs.notrack'] = 'notrack'
-        return HTTPFound('/')
+        response = HTTPFound('/')
+        response.set_cookie('pvs_notrack', value='notrack', max_age=31536000) # max_age = year
+        self.request.session['pvs_notrack'] = 'notrack'
+        return response
 
 
 def dynamic_url_lookup(request):

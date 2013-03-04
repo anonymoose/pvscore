@@ -42,7 +42,8 @@ def country_select_list(selected_country=None):
 
 
 def is_notrack(request):
-    return ('pvs.notrack' in request.session and request.session['pvs.notrack'] == 'notrack')
+    return ('pvs_notrack' in request.session and request.session['pvs_notrack'] == 'notrack')\
+        or ('pvs_notrack' in request.cookies.keys() and request.cookies['pvs_notrack'] == 'notrack')
 
 
 def google_analytics(request, script_tags=True):  #pragma: no cover
