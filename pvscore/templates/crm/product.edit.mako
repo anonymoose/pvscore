@@ -57,7 +57,7 @@
                   ${h.text('name', size=50, value=product.name)}
                 </div>
                 <div class="span3">
-                  % if len(product_categories) >= 1:
+                  % if len(categories) >= 1:
                   <label for="category_id">Category</label>
                   ${h.select('category_id', str(product_categories[0].category_id) if len(product_categories) == 1 else None, categories)}
                   % endif
