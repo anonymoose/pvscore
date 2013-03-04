@@ -21,7 +21,7 @@
       <div class="row">
         <div class="span8">
           <label for="description">Description</label>
-          ${h.textarea('description', style="width: 100%;height: 70px;", content=category.description)}
+          ${h.textarea('description', style="width: 100%;height: 300px;", content=category.description)}
         </div>
       </div>
 

@@ -577,6 +577,15 @@ pvs.form = function(){
   	        mode : "textareas",
 	        theme : "advanced",
                 plugins: '',
+
+                convert_urls: false,
+                forced_root_block : false,
+                force_p_newlines : 'false',
+                remove_linebreaks : false,
+                force_br_newlines : true,              //btw, I still get <p> tags if this is false
+                remove_trailing_nbsp : false,
+                verify_html : false,
+
                 theme_advanced_buttons1 : "bold,italic,underline,separator,justifyleft,justifycenter,justifyright, justifyfull,bullist,numlist,undo,redo,link,unlink,separator,code",
                 theme_advanced_buttons2 : "",
                 theme_advanced_buttons3 : "",
