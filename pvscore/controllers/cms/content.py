@@ -76,3 +76,9 @@ class ContentController(BaseController):
         return HTTPFound('/cms/content/edit/%s/%s' % (content.site_id, content.content_id))
 
 
+    @view_config(route_name='cms.content.robots_txt', renderer='string')
+    def robots_txt(self):
+        self.request.response.content_type = 'text/plain'
+        return self.request.ctx.site.robots_txt
+
+

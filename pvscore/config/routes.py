@@ -185,6 +185,7 @@ def crm_routes(config):
     adrt('cms.content.edit', '/cms/content/edit/{site_id}/{content_id}')
     adrt('cms.content.save', '/cms/content/save')
     adrt('cms.content.list', '/cms/content/list/{site_id}')
+    adrt('cms.content.robots_txt', '/robots.txt')
 
     adrt('crm.listing.remove', '/crm/listing/remove/{listing_id}')
     adrt('crm.listing.json.get', '/crm/listing/json_get')
