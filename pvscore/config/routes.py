@@ -180,6 +180,7 @@ def crm_routes(config):
     adrt('cms.site.save', '/cms/site/save')
     adrt('cms.site.list', '/cms/site/list')
     adrt('cms.site.exception', '/cms/site/exception')
+    adrt('cms.site.notrack', '/notrack')
 
     adrt('cms.content.new', '/cms/content/new/{site_id}')
     adrt('cms.content.edit', '/cms/content/edit/{site_id}/{content_id}')

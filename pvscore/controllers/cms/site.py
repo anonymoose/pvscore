@@ -78,6 +78,12 @@ class SiteController(BaseController):
         raise Exception("This is expected")
 
 
+    @view_config(route_name='cms.site.notrack')
+    def notrack(self):
+        self.request.session['pvs.notrack'] = 'notrack'
+        return HTTPFound('/')
+
+
 def dynamic_url_lookup(request):
     """ KB: [2012-09-12]: This will render dynamic content.
     http://stackoverflow.com/questions/6321625/pyramid-is-it-possible-to-render-my-mako-template-as-a-string-within-my-view-c

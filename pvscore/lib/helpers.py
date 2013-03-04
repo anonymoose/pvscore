@@ -41,8 +41,13 @@ def country_select_list(selected_country=None):
     return util.country_select_list(selected_country)
 
 
-def google_analytics(site, script_tags=True):  #pragma: no cover
-    if site and site.google_analytics_id and is_production():
+def is_notrack(request):
+    return ('pvs.notrack' in request.session and request.session['pvs.notrack'] == 'notrack')
+
+
+def google_analytics(request, script_tags=True):  #pragma: no cover
+    site = request.ctx.site
+    if site and site.google_analytics_id and is_production() and not is_notrack(request):
         return literal("""
     {st_start}
       var _gaq = _gaq || [];
@@ -61,8 +66,9 @@ def google_analytics(site, script_tags=True):  #pragma: no cover
     return ''
 
 
-def eyefoundit_analytics(site): #pragma: no cover
-    if site and site.eyefoundit_analytics_id and is_production():
+def eyefoundit_analytics(request): #pragma: no cover
+    site = request.ctx.site
+    if site and site.eyefoundit_analytics_id and is_production() and not is_notrack(request):
         return literal('''
      <!-- Piwik -->
  <script type="text/javascript">
