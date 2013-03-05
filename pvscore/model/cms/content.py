@@ -73,7 +73,7 @@ class Content(ORMBase, BaseModel):
         ret = ''
         if self.data:
             globs = kwargs or {}
-            data = str(self.data) #unicodedata.normalize('NFKD', self.data).encode('ascii','ignore')
+            data = unicodedata.normalize('NFKD', self.data).encode('ascii','ignore')
             ret = util.literal(Template(data).render(**globs))   #pylint: disable-msg=W0142
         return ret
 
