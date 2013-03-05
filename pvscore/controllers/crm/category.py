@@ -1,4 +1,3 @@
-#import pdb
 import logging
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -12,15 +11,18 @@ import pvscore.lib.util as util
 log = logging.getLogger(__name__)
 
 class CategoryController(BaseController):
+
     @view_config(route_name='crm.product.category.new', renderer='/crm/category.edit.mako')
     @authorize(IsLoggedIn())
     def new(self):
         return self._edit_impl()
 
+
     @view_config(route_name='crm.product.category.edit', renderer='/crm/category.edit.mako')
     @authorize(IsLoggedIn())
     def edit(self):
         return self._edit_impl()
+
 
     def _edit_impl(self):
         category_id = self.request.matchdict.get('category_id')

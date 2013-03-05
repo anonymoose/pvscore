@@ -185,8 +185,16 @@ def crm_routes(config):
     adrt('cms.content.new', '/cms/content/new/{site_id}')
     adrt('cms.content.edit', '/cms/content/edit/{site_id}/{content_id}')
     adrt('cms.content.save', '/cms/content/save')
+    adrt('cms.content.save_ajax', '/cms/content/save_ajax')
+    adrt('cms.content.save_dynamic_attribute', '/cms/content/save_dynamic_attribute')
     adrt('cms.content.list', '/cms/content/list/{site_id}')
     adrt('cms.content.robots_txt', '/robots.txt')
+
+    adrt('cms.content.file.upload', '/cms/content/file/upload/{site_id}')
+    adrt('cms.content.file.save', '/cms/content/file/save/{site_id}')
+    adrt('cms.content.file.list', '/cms/content/file/list/{site_id}')
+    adrt('cms.content.file.new', '/cms/content/file/new/{site_id}')
+    adrt('cms.content.file.edit', '/cms/content/file/edit/{site_id}/{asset_id}')
 
     adrt('crm.listing.remove', '/crm/listing/remove/{listing_id}')
     adrt('crm.listing.json.get', '/crm/listing/json_get')

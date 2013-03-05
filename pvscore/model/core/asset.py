@@ -26,7 +26,6 @@ class Asset(ORMBase, BaseModel):
     #fs_path = Column(String(512)) #
     #web_path = Column(String(512)) #
 
-
     status = relation('Status')
 
     @property

@@ -11,6 +11,7 @@ from pvscore.thirdparty.dbcache import FromCache, invalidate
 import pvscore.lib.util as util
 from pvscore.model.core.users import Users
 from pvscore.model.cms.site import Site
+import unicodedata
 
 log = logging.getLogger(__name__)
 
@@ -72,8 +73,8 @@ class Content(ORMBase, BaseModel):
         ret = ''
         if self.data:
             globs = kwargs or {}
-            #globs['c'].catalog = Catalog(self.content.page.site, self.get_campaign(self.content.page.site))
-            ret = util.literal(Template(self.data).render(**globs))   #pylint: disable-msg=W0142
+            data = str(self.data) #unicodedata.normalize('NFKD', self.data).encode('ascii','ignore')
+            ret = util.literal(Template(data).render(**globs))   #pylint: disable-msg=W0142
         return ret
 
 

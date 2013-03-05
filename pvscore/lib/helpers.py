@@ -2,6 +2,7 @@ import random
 from webhelpers.html import literal
 from webhelpers.html.tags import * #pylint: disable-msg=W0614,W0401,W0602,W0622
 import pvscore.lib.util as util
+import unicodedata
 
 
 def nvl(val, default=''):
@@ -15,6 +16,10 @@ def onvl(obj, attr, default=''):
     if obj and hasattr(obj, attr):
         return getattr(obj, attr)
     return default
+
+
+def is_crm_logged_in(request):
+    return ('crm_logged_in' in request.session and request.session['crm_logged_in'] == True)
 
 
 def is_dialog(request):
@@ -179,4 +184,101 @@ def rnd():
 #    from pylons import request
 #    return request.headers['X-Real-Ip']
 
+
+#
+# KB: [2013-03-04]: Functions for managing Aloha self edit capability in the site.
+#
+def aloha_header(request):
+    #return ""
+    if is_crm_logged_in(request):
+        # <script src="/static/js/aloha/v0.23/aloha/lib/vendor/jquery-1.7.2.js"></script>
+        # <script src="/static/js/aloha/v0.23/aloha/lib/require.js"></script>
+
+# <script>
+# Aloha = window.Aloha || {};
+# Aloha.settings = Aloha.settings || {};
+# // Restore the global $ and jQuery variables of your project's jQuery
+# Aloha.settings.jQuery = window.jQuery.noConflict(true);
+# </script>
+
+
+        return literal("""
+        <link rel="stylesheet" href="/static/js/aloha/v0.23/aloha/css/aloha.css" type="text/css">
+        <script src="/static/js/aloha/v0.23/aloha/lib/aloha-full.js"
+                data-aloha-plugins="common/ui,
+common/image,
+common/format,
+common/highlighteditables,
+common/table,
+common/list,
+common/undo,
+common/paste,
+common/commands,
+common/link,
+common/align"></script>
+        <script src="/static/crm/js/pvs-aloha.js" type="text/javascript"></script>
+        """)
+    return ''
+
+
+def aloha_footer(request):
+    #return ""
+    if is_crm_logged_in(request):
+        return literal(""" """)
+    return ""
+
+
+def aloha_editable_attribute(request, obj, attr):
+    val = getattr(obj, attr, '')
+    pk_id = getattr(obj, obj.__pk__, '')
+    if is_crm_logged_in(request):
+        editable_id = '%s%s' % (obj.__pk__, attr)
+        val = unicodedata.normalize('NFKD', val).encode('ascii','ignore') if val else ''
+        html = """
+                <div id="editable_{editable_id}">
+                    {val}
+                </div>
+                <input type="hidden" id="editable_{editable_id}_type" value="attribute"/>
+                <input type="hidden" id="editable_{editable_id}_objtype" value="{objtype}"/>
+                <input type="hidden" id="editable_{editable_id}_module" value="{module}"/>
+                <input type="hidden" id="editable_{editable_id}_attr" value="{attr}"/>
+                <input type="hidden" id="editable_{editable_id}_pk_id" value="{pk_id}"/>
+                <script type="text/javascript">
+                    Aloha.ready( function() {{
+                        Aloha.jQuery('#editable_{editable_id}').aloha();
+                        Aloha.bind('aloha-editable-deactivated', pvs_aloha_onsave);
+                    }} );
+                </script>""".format(editable_id=editable_id,
+                                    pk_id=pk_id,
+                                    module=obj.__module__,
+                                    attr=attr,
+                                    objtype=obj.__class__.__name__,
+                                    val=literal(str(val)))
+    return literal(html)
+
+
+def aloha_editable_content(request, content_name):
+    from pvscore.model.cms.content import Content
+    site = request.ctx.site
+    content = Content.find_by_name(site, content_name, False)
+    if content:
+        editable_id = content_name.replace('.', '_')
+        html = literal("""
+                <div id="editable_{editable_id}">
+                    {val}
+                </div>
+                <input type="hidden" id="editable_{editable_id}_type" value="content"/>
+                <input type="hidden" id="editable_{editable_id}_name" value="{name}"/>
+                <input type="hidden" id="editable_{editable_id}_content_id" value="{content_id}"/>
+                <script type="text/javascript">
+                    Aloha.ready( function() {{
+                        Aloha.jQuery('#editable_{editable_id}').aloha();
+                        Aloha.bind('aloha-editable-deactivated', pvs_aloha_onsave);
+                    }} );
+                </script>""".format(editable_id=editable_id,
+                                    content_id=content.content_id,
+                                    name=content_name,
+                                    val=content.render(request=request) if content else ''))
+    return html
+                
 
