@@ -666,6 +666,13 @@ class ProductCategory(ORMBase, BaseModel):
             ProductCategoryJoin.clear_by_category(self)
 
 
+    @staticmethod
+    def find_by_name(name, company_id):
+        return Session.query(ProductCategory)\
+            .filter(and_(ProductCategory.name == name,
+                         ProductCategory.company_id == company_id)).first()
+
+
     @property
     def products(self):
         if not self.category_id:

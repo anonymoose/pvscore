@@ -25,7 +25,7 @@ pvs_aloha_onsave = function() {
             objtype: objtype,
             module: module,
             attr: attr,
-            data: content_data
+            data: content_data.trim()
         }).done(function(response) {
             if ('True' != response) {
                 alert(response);

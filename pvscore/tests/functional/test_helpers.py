@@ -9,9 +9,9 @@ import datetime
 
 class TestHelpers(TestController):
     def test_google_analytics(self):
-        val = h.google_analytics(self.site)
+        val = h.google_analytics(site=self.site)
         self.assertEqual(val is not None, True)
-        val = h.eyefoundit_analytics(self.site)
+        val = h.eyefoundit_analytics(site=self.site)
         self.assertEqual(val is not None, True)
 
 

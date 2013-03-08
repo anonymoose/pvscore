@@ -52,8 +52,9 @@ def is_notrack(request):
         or ('pvs_notrack' in request.cookies.keys() and request.cookies['pvs_notrack'] == 'notrack')
 
 
-def google_analytics(request, script_tags=True):  #pragma: no cover
-    site = request.ctx.site
+def google_analytics(request=None, site=None, script_tags=True):  #pragma: no cover
+    if not site:
+        site = request.ctx.site
     if site and site.google_analytics_id and is_production() and not is_notrack(request):
         return literal("""
     {st_start}
@@ -73,8 +74,9 @@ def google_analytics(request, script_tags=True):  #pragma: no cover
     return ''
 
 
-def eyefoundit_analytics(request): #pragma: no cover
-    site = request.ctx.site
+def eyefoundit_analytics(request=None, site=None): #pragma: no cover
+    if not site:
+        site = request.ctx.site
     if site and site.eyefoundit_analytics_id and is_production() and not is_notrack(request):
         return literal('''
      <!-- Piwik -->
@@ -234,7 +236,7 @@ def aloha_editable_attribute(request, obj, attr):
     if is_crm_logged_in(request):
         editable_id = '%s%s' % (obj.__pk__, attr)
         val = unicodedata.normalize('NFKD', val).encode('ascii','ignore') if val else ''
-        html = """
+        return literal("""
                 <div id="editable_{editable_id}">
                     {val}
                 </div>
@@ -253,8 +255,9 @@ def aloha_editable_attribute(request, obj, attr):
                                     module=obj.__module__,
                                     attr=attr,
                                     objtype=obj.__class__.__name__,
-                                    val=literal(str(val)))
-    return literal(html)
+                                    val=literal(str(val))))
+    else:
+        return val
 
 
 def aloha_editable_content(request, content_name):

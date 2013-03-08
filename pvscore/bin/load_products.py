@@ -1,16 +1,75 @@
 #pylint: disable-msg=E1101,W0612
-# from pvscore.bin import pyramid_script, log
-# from pvscore.model.crm.product import Product, InventoryJournal
-# from pvscore.model.crm.campaign import Campaign
-# from pvscore.model.crm.company import Company
-# from pvscore.model.core.asset import Asset
-# from pvscore.model.meta import Session
-# from sqlalchemy import and_
-# import os, shutil
-# import pvscore.lib.db as db
-# import logging
+from pvscore.bin import pyramid_script, log
+from pvscore.model.crm.product import Product, ProductCategory
+from pvscore.model.crm.campaign import Campaign
+from pvscore.model.crm.company import Company
+from pvscore.model.core.asset import Asset
+from pvscore.model.meta import Session
+import pvscore.lib.util as util
+from sqlalchemy import and_
+import os, shutil
+import pvscore.lib.db as db
+import logging
 
-# log = logging.getLogger(__name__)
+
+# python -c 'from pvscore.bin.load_products import import_product_list; import_product_list("5f4b3e05-f433-40c0-95ed-4b77133a71e5")' -I development.ini
+# ../pvscore/bin/reload-db-local retail ../backup/production-db01.eyefound.it-retail.sql  ; python -c 'from pvscore.bin.load_products import import_product_list; import_product_list("5f4b3e05-f433-40c0-95ed-4b77133a71e5")' -I development.ini
+@pyramid_script
+def import_product_list(company_id, filename='/tmp/products.csv'):
+    company = Company.load(company_id)
+    default_campaign = company.default_campaign
+    
+    products = []
+    with open(filename) as f:
+        products = f.readlines()
+
+    products = [p.rstrip() for p in products[1:]]
+
+    product_categories = {}
+
+    for pline in products:
+        log(pline)
+        (product_name, category_id, pic) = pline.split(',')
+        pic = pic.strip()
+        key = '%s%s' % (product_name.strip(), category_id.strip())
+        cat = ProductCategory.load(category_id.strip(), False)
+        prod = None
+        if key in product_categories:
+            prod = Product.load(product_categories[key][0], False)
+        else:
+            prod = Product()
+            prod.company = company
+            prod.name = product_name.strip()
+            prod.type = 'Parent or Child'
+            prod.save()
+            prod.flush()
+            product_categories[key] = [str(prod.product_id), str(cat.category_id)]
+
+        ass = Asset()
+        ass.fk_type = 'Product'
+        ass.fk_id = prod.product_id
+        ass.enterprise_id = company.enterprise_id
+        ass.name = os.path.basename(pic)
+        ass.extension = os.path.splitext(pic)[1]
+        ass.save()
+        ass.flush()        
+        storage_root = Asset.get_storage_root()
+        fs_real_dir = "{root}/{reldir}".format(root=storage_root, reldir=ass.relative_dir)
+        util.mkdir_p(fs_real_dir)
+        fs_real_path = "{fs_real_dir}/{assid}{ext}".format(fs_real_dir=fs_real_dir,
+                                                           assid=ass.id,
+                                                           ext=ass.extension)
+        shutil.copyfile(pic, fs_real_path)
+
+    for pc in product_categories:
+        pcat = product_categories[pc]
+        cat = ProductCategory.load(pcat[1], False)
+        cat.add_product(pcat[0])
+
+    db.commit()
+
+
+
 
 # # python -c 'from pvscore.bin.load_products import dump_product_list; dump_product_list(4, "/Users/kbedwell/dev/pydev/wm/extensions/ext_pvs/pvs/sitetemplates/amy/inventory.csv")' -I ../extensions/ext_pvs/pvs/dev.ini
 # @pyramid_script
@@ -36,44 +95,6 @@
 #                               prod.third_party_id if prod.third_party_id else '', 
 #                               str(prod.vendor_id) if prod.vendor_id else '')))
 #             ofile.write('\n')
-
-
-# # python -c 'from pvscore.bin.load_products import import_product_list; import_product_list(4, "/Users/kbedwell/dev/pydev/wm/extensions/ext_pvs/pvs/sitetemplates/amy/inventory.csv")' -I ../extensions/ext_pvs/pvs/dev.ini
-# @pyramid_script
-# def import_product_list(company_id, filename='/tmp/products.csv'):
-#     company = Company.load(company_id)
-#     default_campaign = company.default_campaign
-    
-#     products = []
-#     with open(filename) as f:
-#         products = f.readlines()
-
-#     products = [p.rstrip() for p in products[1:]]
-
-#     for pline in products:
-#         log(pline)
-#         (product_id, name, inventory, unit_price, unit_cost, sku, third_party_id, vendor_id) = pline.split(',')
-#         if product_id:
-#             prod = Product.load(product_id)
-#             if not prod: 
-#                 log("cant find product: %s" % product_id)
-#                 continue
-#             if not prod.company == company:
-#                 log("wrong company for : %s" % product_id)
-#         else:
-#             prod = Product()
-#         prod.company = company
-#         prod.name = name
-#         prod.sku = sku
-#         prod.third_party_id = third_party_id
-#         prod.vendor_id = int(vendor_id) if vendor_id else None
-#         prod.unit_cost = float(unit_cost)
-#         prod.save()
-#         Session.commit()
-#         prod.set_price(default_campaign, float(unit_price))
-#         if inventory and str(round(float(inventory), 2)) != str(round(InventoryJournal.total(prod), 2)):
-#             InventoryJournal.create_new(prod, 'Inventory Adjust', inventory)
-#         Session.commit()
 
 
 
@@ -125,44 +146,3 @@
 #     Session.commit()
 
 
-# # python -c 'from pvscore.bin.load_products import import_images; import_images("pvs/docs/lst", 5, 4)' -I pvs/dev.ini
-# @pyramid_script
-# def import_images(filename, company_id, campaign_id):
-#     company = Company.load(company_id)
-#     campaign = Campaign.load(campaign_id)
-
-#     files = []
-#     with open(filename) as f:
-#         files = f.readlines()
-
-#     #~/dev/pydev/wm/app/pvs/sitetemplates/hus_prod/pics/web-ready/
-
-#     for fil in files:
-#         fil = fil.strip()
-#         sku = fil[0:9].replace('supp', 'SUP').replace('_', '-')
-#         print sku
-#         pid = db.get_value("select product_id from crm_product where sku = '%s'" % sku)
-#         if not pid:
-#             print '    NO'
-#             continue
-
-#         fs_path = os.path.join(
-#             '%s%s' % ('/Users/kbedwell/dev/pydev/wm/app/companies/e4da3b7fbbce2345d7772b0674a318d5/', 'images'),
-#             fil.replace(os.sep, '_')
-#             )
-#         permanent_file = open(fs_path, 'wb')
-#         asset_data_file = open('/Users/kbedwell/dev/pydev/wm/app/pvs/sitetemplates/hus_prod/pics/web-ready/%s' % fil)
-#         shutil.copyfileobj(asset_data_file, permanent_file)
-#         asset_data_file.close()
-#         permanent_file.close()
-#         # at this point everything is saved to disk. Create an asset object in
-#         # the DB to remember it.
-#         ass = Asset.create_new(file, 
-#                                fs_path, 
-#                                '{base}/{f}'.format(base='/companies/e4da3b7fbbce2345d7772b0674a318d5/images', f=file),
-#                                'Pro`duct', pid)
-#         ass.commit()
-
-
-
-        

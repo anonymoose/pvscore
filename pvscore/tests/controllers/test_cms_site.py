@@ -151,13 +151,9 @@ Disallow: /cms/cart/add/*""")
 
 
     def test_customer_not_found(self):
-        try:
-            self.get('/customer?customer_id=%s' % uuid.uuid4())
-        except HTTPForbidden as forbid:
-            log.debug(forbid)
-            return
-        # should never get here.
-        self.assertEqual(True, False)  #pragma: no cover
+        R = self.get('/customer?customer_id=%s' % uuid.uuid4())
+        assert R.status_int == 200
+        R.mustcontain('this is the index')
 
 
 

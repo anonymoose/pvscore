@@ -94,6 +94,10 @@ class StripeBillingApi(BaseBillingApi):
         If it's subscription, then subscribe this customer to the plan.
         Otherwise just hit them up non-recurring.
         """
+        if int(order.total_price()) == 0:
+            self.payment_method = 'Discount'
+            return True   # return that it was successful even though we did nothing.
+
         if not billing.cc_token:
             raise Exception("No stripe cc_token present")  #pragma: no cover
         campaign = order.campaign
@@ -223,6 +227,9 @@ class AuthorizeNetBillingApi(BaseBillingApi):
 
 
     def purchase(self, order, billing, cart, remote_ip=None):
+        if int(order.total_price()) == 0:
+            self.payment_method = 'Discount'
+            return True   # return that it was successful even though we did nothing.
         charge_items_amount = 0.0
         subscription_amount = 0.0
         for oitem in order.active_items:
