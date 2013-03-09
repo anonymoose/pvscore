@@ -15,7 +15,7 @@ import logging
 # python -c 'from pvscore.bin.load_products import import_product_list; import_product_list("5f4b3e05-f433-40c0-95ed-4b77133a71e5")' -I development.ini
 # ../pvscore/bin/reload-db-local retail ../backup/production-db01.eyefound.it-retail.sql  ; python -c 'from pvscore.bin.load_products import import_product_list; import_product_list("5f4b3e05-f433-40c0-95ed-4b77133a71e5")' -I development.ini
 @pyramid_script
-def import_product_list(company_id, filename='/tmp/products.csv'):
+def import_product_list(company_id, filename='/tmp/products/products.csv'):
     company = Company.load(company_id)
     default_campaign = company.default_campaign
     
