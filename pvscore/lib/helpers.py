@@ -257,7 +257,7 @@ def aloha_editable_attribute(request, obj, attr):
                                     objtype=obj.__class__.__name__,
                                     val=literal(str(val))))
     else:
-        return val
+        return literal(val)
 
 
 def aloha_editable_content(request, content_name):

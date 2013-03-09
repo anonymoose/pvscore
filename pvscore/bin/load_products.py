@@ -14,6 +14,7 @@ import logging
 
 # python -c 'from pvscore.bin.load_products import import_product_list; import_product_list("5f4b3e05-f433-40c0-95ed-4b77133a71e5")' -I development.ini
 # ../pvscore/bin/reload-db-local retail ../backup/production-db01.eyefound.it-retail.sql  ; python -c 'from pvscore.bin.load_products import import_product_list; import_product_list("5f4b3e05-f433-40c0-95ed-4b77133a71e5")' -I development.ini
+# python -c 'from pvscore.bin.load_products import import_product_list; import_product_list("5f4b3e05-f433-40c0-95ed-4b77133a71e5")' -I production-verbose.ini
 @pyramid_script
 def import_product_list(company_id, filename='/tmp/products/products.csv'):
     company = Company.load(company_id)
@@ -54,6 +55,8 @@ def import_product_list(company_id, filename='/tmp/products/products.csv'):
         ass.save()
         ass.flush()        
         storage_root = Asset.get_storage_root()
+        if not storage_root:
+            storage_root = '/apps/pvs/storage'
         fs_real_dir = "{root}/{reldir}".format(root=storage_root, reldir=ass.relative_dir)
         util.mkdir_p(fs_real_dir)
         fs_real_path = "{fs_real_dir}/{assid}{ext}".format(fs_real_dir=fs_real_dir,
