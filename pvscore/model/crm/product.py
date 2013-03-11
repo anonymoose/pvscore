@@ -687,18 +687,22 @@ class ProductCategory(ORMBase, BaseModel):
                                Product.type != 'Attr'
                                )).all()
 
-    @property
-    def web_products(self):
+    def get_web_products(self, campaign):
         if not self.category_id:
             return []
         # TODO: Fix Category Caching .options(FromCache("ProductCategory.products", self.category_id))\
         return Session.query(Product)\
             .join((ProductCategoryJoin, Product.product_id == ProductCategoryJoin.product_id),
                   (ProductCategory, ProductCategoryJoin.category_id == ProductCategory.category_id),
-                  (Company, ProductCategory.company_id == Company.company_id))\
+                  (Company, ProductCategory.company_id == Company.company_id),
+                  (ProductPricing, ProductPricing.product_id == Product.product_id))\
                   .filter(and_(ProductCategory.category_id == self.category_id,
+                               ProductPricing.delete_dt == None,
+                               ProductPricing.campaign == campaign,
                                Product.web_visible == True,
                                Product.enabled == True,
+                               ProductPricing.retail_price != None,
+                               ProductPricing.retail_price > 0,
                                Product.type != 'Attr'
                                )).all()
 

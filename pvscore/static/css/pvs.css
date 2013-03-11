@@ -5,6 +5,8 @@
 }
 
 .alert-pvs {
-    padding: 8px 0px 0px 10px;
-    color: #B94A48;
+    /*padding: 8px 0px 0px 10px;*/
+    color: red;
+    font-size: 10px;
+    font-weight: bold;
 }

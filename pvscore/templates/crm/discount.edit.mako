@@ -25,20 +25,20 @@
       </div>
       <div class="row">
         <div class="span2">
-          <label for="">$ Amount Off</label>
+          <label for="">Item $ Amount Off</label>
           ${h.text('amount_off', class_="input-small", value=discount.amount_off)}
         </div>
         <div class="span2">
-          <label for="">% Off</label>
+          <label for="">Item % Off</label>
           ${h.text('percent_off', class_="input-small", value=discount.percent_off)}
         </div>
-        <div class="span2">
-          <label for="">Start Date</label>
-          ${h.text('start_dt', class_="input-small datepicker", autocomplete="off", value=discount.start_dt if discount.start_dt else tomorrow)}
-        </div>
-        <div class="span2">
-          <label for="">End Date</label>
-          ${h.text('end_dt', class_="input-small datepicker", autocomplete="off", value=discount.end_dt if discount.end_dt else plus14)}
+        <div class="span2 cart"
+           % if not discount.cart_discount:
+           style="display:none;"
+           % endif
+             >
+          <label for="">Cart Shipping % Off</label>
+          ${h.text('shipping_percent_off', class_="input-small", value=discount.shipping_percent_off)}
         </div>
       </div>
       <div class="row">
@@ -48,10 +48,31 @@
         <div class="span2">
           ${h.chkbox('store_enabled', checked=discount.store_enabled, label=' Store Enabled?')}    
         </div>
+        <div class="span2">
+          ${h.chkbox('cart_discount', checked=discount.cart_discount, label=' Cart Discount?', onchange="discount_cart_discount_change();")}    
+        </div>
+      </div>
+      <div class="row">
+        <div class="span2">
+          <label for="">Start Date</label>
+          ${h.text('start_dt', class_="input-small datepicker", autocomplete="off", value=discount.start_dt if discount.start_dt else tomorrow)}
+        </div>
+        <div class="span2">
+          <label for="">End Date</label>
+          ${h.text('end_dt', class_="input-small datepicker", autocomplete="off", value=discount.end_dt if discount.end_dt else plus14)}
+        </div>
+        <div class="span2 cart"
+           % if not discount.cart_discount:
+           style="display:none;"
+           % endif
+           >
+          <label for="">Cart Minimum</label>
+          ${h.text('cart_minimum', class_="input-small", value=discount.cart_minimum)}
+        </div>
       </div>
     </div>
 
-    <div class="row">
+    <div class="row included_products">
       <div class="span4">
         <h3>Included Products</h3>
       </div>
@@ -59,7 +80,7 @@
         ${h.help("""Select products effected by this discount.""")}
       </div>
     </div>
-    <div class="row">
+    <div class="row included_products">
       <div class="span4">
         <div style="overflow: scroll; height: 250px;">
           <table>

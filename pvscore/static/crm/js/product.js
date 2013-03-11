@@ -119,25 +119,6 @@ product_show_orders = function() {
     product_show_list_impl('orders');
 };
 
-pvs.onload.push(function() {
-    $('#frm_discount').validate(
-        pvs.validate.options(
-            {
-                name: 'required',
-                which_item: 'required',
-                percent_off: {
-                    number: true,
-                    min: 0.0
-                },
-                amount_off: {
-                    number: true,
-                    min: 0.0,
-                    max: 100.0
-                }
-            })
-    );
-});
-
 product_validate_product = function() {
     $('#frm_product').validate(
         pvs.validate.options(

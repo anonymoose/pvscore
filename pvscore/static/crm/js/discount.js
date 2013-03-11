@@ -18,27 +18,41 @@ discount_delete = function() {
 };
 
 
+discount_cart_discount_change = function() {
+    if ($('#cart_discount').is(':checked')) {
+        $(".included_products").hide();
+        $('.product_chk').attr('checked', false);
+        $('.cart').show();
+    } else {
+        $(".included_products").show();
+        $('.cart').hide();
+    }
+};
+
 pvs.onload.push(function() {
-    $('#frm_discount').validate({
-        rules: {
+    $('#frm_discount').validate(
+        pvs.validate.options({
             name: 'required',
             which_item: 'required',
             percent_off: {
                 number: true,
-                min: 0.0
+                min: 0.0,
+                max: 100.0,
+                required: function(element) {
+                    return $('#amount_off').val().length > 0;
+                }
             },
             amount_off: {
                 number: true,
                 min: 0.0,
-                max: 100.0
+                required: function(element) {
+                    return $('#percent_off').val().length > 0;
+                }
+            },
+            cart_minimum: {
+                number: true,
+                min: 0.0
             }
-        },
-        messages: {
-            name: ' ',
-            type: ' ',
-            //sku: ' ',
-            percent_off: ' ',
-            amount_off: ' '
-        }
-    });
+        })
+    );
 });

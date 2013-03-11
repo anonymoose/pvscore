@@ -23,11 +23,13 @@ class Discount(ORMBase, BaseModel):
     percent_off = Column(Float)
     amount_off = Column(Float)
     shipping_percent_off = Column(Float)
+    cart_minimum = Column(Float)
     which_item = Column(String(30))
     start_dt = Column(DateTime)
     end_dt = Column(DateTime)
     web_enabled = Column(Boolean, default=True)
     store_enabled = Column(Boolean, default=True)
+    cart_discount = Column(Boolean, default=True)
     create_dt = Column(DateTime, server_default=text('now()'))
     delete_dt = Column(DateTime)
 

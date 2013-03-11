@@ -147,7 +147,7 @@ class TestCatalog(TestController):
         categories = ProductCategory.find_by_campaign(campaign)
         assert len(categories) > 0
         category = categories[0]
-        products = category.web_products
+        products = category.get_web_products(campaign)
         R = self.get('/category/%s/%s/catalog_category' % (category.name, category.category_id))
         assert R.status_int == 200
         for prod in products:

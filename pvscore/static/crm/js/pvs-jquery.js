@@ -95,14 +95,15 @@ pvs.validate = function() {
                     //$(element).siblings('label').children('span').remove();
                     //$(element).parent().addClass(errorClass).removeClass(validClass);
                 },
-                unhighlight: function (element, errorClass, validClass) {
-                    //$(element).siblings('label').children('span').remove();
-                    //$(element).parent().addClass(validClass).removeClass(errorClass);
-                },
                 */
+                unhighlight: function (element, errorClass, validClass) {
+                    $(element).siblings('span').remove();
+                    $(element).parent().addClass(validClass).removeClass(errorClass);
+                    $(element).siblings('label').show();
+                },
                 errorPlacement : function(error, element) {
-                    $(element).siblings('label').children('span').remove();
-                    error.appendTo($(element).siblings('label'));
+                    $(element).siblings('label').hide();
+                    $(element).siblings('label').after(error);
                 },
                 //errorLabelContainer: '#hidden',
                 rules : rules,

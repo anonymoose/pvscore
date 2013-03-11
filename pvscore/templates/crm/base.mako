@@ -246,7 +246,7 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
           <a tabindex="-1" href="#">Discount</a>
           <ul class="dropdown-menu">
             <li><a href="/crm/discount/new">Add New Discount</a></li>
-            <li><a href="/crm/company/list">List All Discounts</a></li>
+            <li><a href="/crm/discount/list">List All Discounts</a></li>
           </ul>
         </li>
         % endif
