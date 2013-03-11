@@ -4840,7 +4840,7 @@ alter table crm_order_item add column note text;
 
 insert into core_status_event
 (event_id, event_type, short_name, display_name, claim, finalize, is_system, milestone_complete, note_req, dashboard, reason_req, change_status, touch)
-values
+values<
 (uuid_generate_v4(), 'Product', 'DELETED', 'Deleted', false, true, true, false, false, false, false, true, false);
 
 
@@ -4878,3 +4878,43 @@ and lower(d.val_string) = 'zachary';
 
 select d.key, d.thing_id, d.event_dt, substring(d.val_text from 0 for 30)
 from data d where d.key = '426' and d.thing_id = 'encnote.mdm_note';
+
+
+------ discounts
+drop table if exists crm_discount;
+create table crm_discount (
+    discount_id uuid not null,
+    enterprise_id uuid not null,
+    vendor_id uuid,
+    name varchar(200) not null,
+    code varchar(50),
+    description text,
+    percent_off float,
+    amount_off float,
+    shipping_percent_off float,
+    which_item varchar(30),
+    start_dt date default now(),
+    end_dt date,
+    web_enabled boolean default true,
+    store_enabled boolean default true,
+    mod_dt timestamp without time zone default now(),
+    create_dt timestamp without time zone default now(),
+    delete_dt timestamp without time zone,
+    constraint crm_discount_pk primary key (discount_id)
+);
+alter table crm_discount add foreign key (enterprise_id) references crm_enterprise;
+alter table crm_discount add foreign key (vendor_id) references crm_vendor;
+
+drop table if exists crm_discount_product;
+create table crm_discount_product (
+       discount_product_id uuid not null,
+       discount_id uuid not null,
+       product_id uuid not null,
+       create_dt timestamp without time zone default now(),
+       delete_dt timestamp without time zone,
+       constraint crm_discount_product_pk primary key (discount_product_id)
+);
+alter table crm_discount_product add foreign key (discount_id) references crm_discount;
+alter table crm_discount_product add foreign key (product_id) references crm_product;
+
+

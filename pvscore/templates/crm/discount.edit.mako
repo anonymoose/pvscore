@@ -1,85 +1,93 @@
 
 <%inherit file="product.base.mako"/>\
 
-
-<div id="div_discount">
-  ${h.secure_form(h.url('/crm/discount/save'), id="frm_discount")}
-  ${h.hidden('discount_id', value=c.discount.discount_id)}
-
+<div>
   <h1>Edit Discount</h1>
-  <div class="_50">
-    <label for="">Name</label>
-    ${h.text('name', size=50, value=c.discount.name)}
-  </div>
-  <div class="_50">
-    <label for="">Code</label>
-    ${h.text('code', size=50, value=c.discount.code)}
-  </div>
-  <div class="_50">
-    <label for="">Description</label>
-    ${h.textarea('description', style="width: 100%; height: 100px;", content=c.discount.description)}
-  </div>
-  <div class="_50">
-    <label for="">Which Item</label>
-    ${h.select('which_item', c.discount.which_item, c.which_item_types)}
-  </div>
-  <div class="_25">
-    <label for="">$ Amount Off</label>
-    ${h.text('amount_off', size=10, value=c.discount.amount_off)}
-  </div>
-  <div class="_25">
-    <label for="">% Off</label>
-    ${h.text('percent_off', size=10, value=c.discount.percent_off)}
-  </div>
-  <div class="clear"></div>
-  <div class="_50">
-    ${h.checkbox('web_enabled', checked=c.discount.web_enabled, label='Web Enabled?')}
-    ${h.checkbox('store_enabled', checked=c.discount.store_enabled, label='Store Enabled?')}
-  </div>
-  <div class="_25">
-    <label for="">Start Date</label>
-    ${h.text('start_dt', size=10, value=c.discount.start_dt)}
-  </div>
-  <div class="_25">
-    <label for="">End Date</label>
-    ${h.text('end_dt', size=10, value=c.discount.end_dt)}
-  </div>
-  % if c.current_user.priv.edit_discount:
-  <div class="align-right">
-    ${h.submit('submit', 'Submit', class_="form-button")}&nbsp;
-  </div>
-  % endif
-  ${h.end_form()}
+  <form method="POST" action="/crm/discount/save" id="frm_discount">
+    ${h.hidden('discount_id', value=discount.discount_id)}
+    <div class="well">
+      <h3>General Information</h3>
+      <div class="row">
+        <div class="span6">
+          <label for="">Name</label>
+          ${h.text('name', class_="input-xxlarge", value=discount.name)}
+        </div>
+        <div class="span2">
+          <label for="">Code</label>
+          ${h.text('code', value=discount.code)}
+        </div>
+      </div>
+      <div class="row">
+        <div class="span9">
+          <label for="">Description</label>
+          ${h.textarea('description', discount.description, style="width: 93%; height: 120px;")}
+        </div>
+      </div>
+      <div class="row">
+        <div class="span2">
+          <label for="">$ Amount Off</label>
+          ${h.text('amount_off', class_="input-small", value=discount.amount_off)}
+        </div>
+        <div class="span2">
+          <label for="">% Off</label>
+          ${h.text('percent_off', class_="input-small", value=discount.percent_off)}
+        </div>
+        <div class="span2">
+          <label for="">Start Date</label>
+          ${h.text('start_dt', class_="input-small datepicker", autocomplete="off", value=discount.start_dt if discount.start_dt else tomorrow)}
+        </div>
+        <div class="span2">
+          <label for="">End Date</label>
+          ${h.text('end_dt', class_="input-small datepicker", autocomplete="off", value=discount.end_dt if discount.end_dt else plus14)}
+        </div>
+      </div>
+      <div class="row">
+        <div class="span2">
+          ${h.chkbox('web_enabled', checked=discount.web_enabled, label=' Web Enabled?')}    
+        </div>
+        <div class="span2">
+          ${h.chkbox('store_enabled', checked=discount.store_enabled, label=' Store Enabled?')}    
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="span4">
+        <h3>Included Products</h3>
+      </div>
+      <div class="span1" style="margin-top:20px;">
+        ${h.help("""Select products effected by this discount.""")}
+      </div>
+    </div>
+    <div class="row">
+      <div class="span4">
+        <div style="overflow: scroll; height: 250px;">
+          <table>
+            <tr><th></th><th>Include?</th></tr>
+            % for p in included_products:
+            <tr>
+              <td>${p.product.name}</td>
+              <td nowrap>${h.checkbox('product_incl_%s' % p.product.product_id, checked=True, value=p.product.product_id, class_='product_chk')}</td>
+            </tr>
+            % endfor
+            
+            % for p in not_included_products:
+            <tr>
+              <td>${p.name}</td>
+              <td nowrap>${h.checkbox('product_incl_%s' % p.product_id, value=p.product_id, class_='product_chk')}</td>
+            </tr>
+            % endfor
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="span2 offset8">
+        <input type="submit" name="submit2" class="btn btn-primary" value="Save"/>
+        <a class="btn btn-warning" href="javascript:discount_delete()">Delete</a>
+      </div>
+    </div>
+  </form>
 </div>
 
-<script>
-    $('#frm_discount').validate({
-        rules: {
-            name: 'required',
-            which_item: 'required',
-            percent_off: {
-                number: true,
-                min: 0.0
-            },
-            amount_off: {
-                number: true,
-                min: 0.0,
-                max: 100.0
-            }
-        },
-        messages: {
-            name: ' ',
-            type: ' ',
-            //sku: ' ',
-            percent_off: ' ',
-            amount_off: ' '
-        }
-    });
-
-    if ($('#start_dt')) {
-        pvs.ui.init_datepicker('#start_dt');
-    }
-    if ($('#end_dt')) {
-        pvs.ui.init_datepicker('#end_dt');
-    }
-</script>

@@ -241,6 +241,16 @@ ${h.literal(c.pvs_crm_footer_links) if hasattr(c, 'pvs_crm_footer_links') else '
         </li>
         % endif
 
+        % if request.ctx.user.priv.edit_discount:
+        <li class="dropdown-submenu">
+          <a tabindex="-1" href="#">Discount</a>
+          <ul class="dropdown-menu">
+            <li><a href="/crm/discount/new">Add New Discount</a></li>
+            <li><a href="/crm/company/list">List All Discounts</a></li>
+          </ul>
+        </li>
+        % endif
+
 
         % if request.ctx.user.priv.view_communication or request.ctx.user.priv.edit_communication:
         <li class="dropdown-submenu">

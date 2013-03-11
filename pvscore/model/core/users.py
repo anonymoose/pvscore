@@ -15,7 +15,7 @@ class Users(ORMBase, BaseModel):
     __pk__ = 'user_id'
 
     user_id = Column(GUID(), default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
-    username = Column(String(50), primary_key=True)
+    username = Column(String(50))
     enterprise_id = Column(GUID, ForeignKey('crm_enterprise.enterprise_id'))
     priv_id = Column(GUID, ForeignKey('core_user_priv.priv_id'))
     vendor_id = Column(GUID, ForeignKey('crm_vendor.vendor_id'))

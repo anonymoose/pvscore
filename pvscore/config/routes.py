@@ -67,6 +67,12 @@ def crm_routes(config):
     adrt('crm.product.delete_picture', '/crm/product/delete_picture/{product_id}/{asset_id}')
     adrt('crm.product.upload_picture', '/crm/product/upload_picture/{product_id}')
 
+    adrt('crm.discount.new', '/crm/discount/new')
+    adrt('crm.discount.edit', '/crm/discount/edit/{discount_id}')
+    adrt('crm.discount.save', '/crm/discount/save')
+    adrt('crm.discount.list', '/crm/discount/list')
+    adrt('crm.discount.delete', '/crm/discount/delete/{discount_id}')
+
     adrt('crm.product.category.new', '/crm/product/category/new')
     adrt('crm.product.category.edit', '/crm/product/category/edit/{category_id}')
     adrt('crm.product.category.save', '/crm/product/category/save')
