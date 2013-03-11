@@ -94,7 +94,6 @@ class DiscountController(BaseController):
                 product_id = self.request.POST.get(k)
                 included_products[product_id] = 1
 
-        import pdb; pdb.set_trace()
         for current_prod in discount.get_products():
             if current_prod.product_id not in included_products.keys():
                 discount.clear_product(current_prod.product_id)
