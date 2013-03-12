@@ -69,7 +69,7 @@ class CartController(CatalogBaseController):
                                         'product' : Product.load(pid) }
         product = Product.load(product_id)
         self.forbid_if(not product)
-        cart.add_item(product, self.request.ctx.campaign, quantity, None, None, attributes)
+        cart.add_item(product, self.request.ctx.campaign, quantity, attributes=attributes)
         self.session.changed()
         return 'True' if not redir else HTTPFound(redir)
 

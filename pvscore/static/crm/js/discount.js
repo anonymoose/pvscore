@@ -43,6 +43,7 @@ pvs.onload.push(function() {
     }
 });
 
+
 pvs.onload.push(function() {
     $('#frm_discount').validate(
         pvs.validate.options({

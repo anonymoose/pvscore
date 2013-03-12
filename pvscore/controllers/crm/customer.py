@@ -679,7 +679,7 @@ class CustomerController(BaseController):
                           campaign=cust.campaign,
                           quantity=quantity,
                           attributes=attrs,
-                          price=price)
+                          base_price=price)
         order = cust.add_order(cart, user, self.enterprise_id, cust.campaign, incl_tax)
         order.flush()
         return order.order_id
