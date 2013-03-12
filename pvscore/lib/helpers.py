@@ -164,6 +164,11 @@ def get(obj, attr, default=''):
         return default
     return getattr(obj, attr)
 
+
+def clean(string):
+    return util.clean(string)
+
+
 def chkbox(ident, **kwargs):
     # we wrap this so that bootstrap can format our checkboxes properly
     hlp = ''

@@ -13,6 +13,7 @@ import subprocess
 import uuid
 from xml.dom.minidom import parseString
 import urllib
+import unicodedata
 
 log = logging.getLogger(__name__)
 
@@ -255,6 +256,12 @@ def mkdir_p(path):
     except OSError as exc: # pragma: no cover
         if exc.errno != errno.EEXIST:
             raise
+
+
+def clean(string):
+    # KB: [2013-03-12]: Strip unprintable/unicode characters
+    # http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python
+    return unicodedata.normalize('NFKD', string).encode('ascii','ignore')
 
 
 def float_(flt):

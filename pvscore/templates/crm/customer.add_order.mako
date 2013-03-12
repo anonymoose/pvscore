@@ -30,7 +30,7 @@
           </tr>
           % for p in products:
           <tr>
-            <td nowrap>${h.chkbox('chk_%s' % p.product_id, value=p.product_id, label=p.name, onchange="customer_add_product_oncheck('%s')" % p.product_id, class_='product_chk')}</td>
+            <td nowrap>${h.chkbox('chk_%s' % p.product_id, value=p.product_id, label=h.clean(p.name), onchange="customer_add_product_oncheck('%s')" % p.product_id, class_='product_chk')}</td>
             <td style="text-align:right;">$${h.money(p.get_price(customer.campaign))}</td>
             <td style="text-align:right;">${h.text('quant_%s' % p.product_id, style="width:40px;")}</td>
             <td style="text-align:right;">
