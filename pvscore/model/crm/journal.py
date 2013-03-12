@@ -115,7 +115,7 @@ class Journal(ORMBase, BaseModel):
     def total_balance_for_customer(customer):
         entries = Journal.find_all_by_customer(customer)
         total_entries = sum([ent.amount if ent.type in ('FullPayment', 'PartialPayment', 'CreditIncrease') else -ent.amount
-                             for ent in entries])
+                             for ent in entries if ent.type != 'AutomaticDiscount'])
         total_price = customer.get_total_order_value()
         bal = total_price - total_entries
         return bal if bal == 0.0 else -1*(bal)

@@ -27,6 +27,7 @@ discount_cart_discount_change = function() {
     } else {
         $(".included_products").show();
         $('#shipping_percent_off').val('');
+        $('#automatic').attr('checked', false);
         $('.cart').hide();
     }
 };
@@ -37,6 +38,8 @@ pvs.onload.push(function() {
         $(".included_products").hide();
         $('.product_chk').attr('checked', false);
         $('.cart').show();
+    } else {
+        $('.cart').hide();
     }
 });
 

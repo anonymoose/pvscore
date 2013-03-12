@@ -166,8 +166,17 @@ def get(obj, attr, default=''):
 
 def chkbox(ident, **kwargs):
     # we wrap this so that bootstrap can format our checkboxes properly
-    return literal('<label class="checkbox">%s</label>' % checkbox(ident, **kwargs))
-
+    hlp = ''
+    if 'help' in kwargs:
+        hlp = kwargs['help']
+        del kwargs['help']
+    label = ''
+    if 'label' in kwargs:
+        label = kwargs['label']
+        del kwargs['label']
+    return literal('<label class="checkbox">{chk}{label} {hlp}</label>'.format(chk=checkbox(ident, **kwargs),
+                                                                               label=label,
+                                                                               hlp=hlp))
 
 def help(message, title=''):
     return literal('<a style="cursor:pointer;" data-toggle="popover" title="" data-content="%s" data-original-title="%s" class="pvs-help"><i class="icon-question-sign"></i></a>' % (message, title))

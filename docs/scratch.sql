@@ -4898,6 +4898,7 @@ create table crm_discount (
     web_enabled boolean default true,
     store_enabled boolean default true,
     cart_discount boolean default false,
+    automatic boolean default false,
     mod_dt timestamp without time zone default now(),
     create_dt timestamp without time zone default now(),
     delete_dt timestamp without time zone,

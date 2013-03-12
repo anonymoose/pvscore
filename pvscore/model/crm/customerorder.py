@@ -115,7 +115,7 @@ class CustomerOrder(ORMBase, BaseModel):
             if campaign.tax_rate and incl_tax:
                 item.tax = (item.unit_price * item.quantity) * campaign.tax_rate
             item.unit_cost = prd.unit_cost
-            item.unit_discount_price = (discount if discount else 0.0)
+            item.unit_discount_price = (discount if discount else None)
             item.unit_retail_price = retail
             item.save()
             if prd.track_inventory:
@@ -138,7 +138,7 @@ class CustomerOrder(ORMBase, BaseModel):
                         child_item.creator = user_created
                         child_item.start_dt = cart_item['start_dt']
                         child_item.unit_price = 0.0
-                        child_item.unit_discount_price = 0.0
+                        child_item.unit_discount_price = None
                         child_item.unit_retail_price = 0.0
                         child_item.unit_cost = prd.unit_cost
                         child_item.quantity = kid.child_quantity
@@ -154,7 +154,7 @@ class CustomerOrder(ORMBase, BaseModel):
                 # (9.0 / (1.0-0.1)) = 10.00
                 discount_amount = cart.shipping_discount_total
             if discount_amount and int(discount_amount) > 0:
-                Journal.create_new(discount_amount, customer, cord, None, typ='AutomaticDiscount', attachment=discount)
+                Journal.create_new(discount_amount, customer, cord, None, typ='AutomaticDiscount', attachment=cord.discount)
         cord.save()
         cord.flush()
         return cord

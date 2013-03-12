@@ -27,7 +27,8 @@ class Discount(ORMBase, BaseModel):
     end_dt = Column(DateTime)
     web_enabled = Column(Boolean, default=True)
     store_enabled = Column(Boolean, default=True)
-    cart_discount = Column(Boolean, default=True)
+    cart_discount = Column(Boolean, default=False)
+    automatic = Column(Boolean, default=False)
     create_dt = Column(DateTime, server_default=text('now()'))
     delete_dt = Column(DateTime)
 
@@ -39,10 +40,11 @@ class Discount(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_all_active(enterprise_id):
+    def find_all_active(enterprise_id, web_enabled=True):
         return Session.query(Discount) \
             .filter(and_(Discount.delete_dt == None, 
                          Discount.enterprise_id == enterprise_id,
+                         Discount.web_enabled == web_enabled,
                          or_(Discount.end_dt == None,
                              Discount.end_dt >= util.now())))\
                              .order_by(Discount.name) \
@@ -50,11 +52,13 @@ class Discount(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_all_active_cart_discounts(enterprise_id):
+    def find_all_automatic_cart_discounts(enterprise_id, web_enabled=True):
         return Session.query(Discount) \
             .filter(and_(Discount.delete_dt == None, 
                          Discount.enterprise_id == enterprise_id,
                          Discount.cart_discount == True,
+                         Discount.automatic == True,
+                         Discount.web_enabled == web_enabled,
                          or_(Discount.end_dt == None,
                              Discount.end_dt >= util.now())))\
                              .order_by(Discount.name) \

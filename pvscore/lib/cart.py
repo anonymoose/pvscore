@@ -67,7 +67,7 @@ class Cart(object):
         if self.is_user_discount:
             return
         applicable_total = self.product_total + self.handling_total
-        cart_discounts = sorted([disc for disc in Discount.find_all_active_cart_discounts(enterprise_id) if applicable_total > disc.cart_minimum],
+        cart_discounts = sorted([disc for disc in Discount.find_all_automatic_cart_discounts(enterprise_id) if applicable_total > disc.cart_minimum],
                                 key=operator.attrgetter('percent_off'), reverse=True)
         if len(cart_discounts) > 0:
             self.discount = cart_discounts[0]
