@@ -220,6 +220,7 @@ def crm_routes(config):
     adrt('ecom.site.cart.checkout.default', '/checkout')
     adrt('ecom.site.cart.checkout', '/checkout/{page}')
     adrt('ecom.site.cart.save_shipping', '/ecom/cart/save_shipping')
+    adrt('ecom.site.cart.save_discount', '/ecom/cart/save_discount')
 
 
     adrt('ecom.site.product.default', '/product/{product_id}')

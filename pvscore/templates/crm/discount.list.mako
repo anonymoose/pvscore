@@ -12,8 +12,9 @@
       <tr>
         <th>Name</th>
         <th>Code</th>
-        <th nowrap>$ Off</th>
+        <th>Type</th>
         <th nowrap>% Off</th>
+        <th nowrap>Shipping % Off</th>
         <th nowrap>Start Dt</th>
         <th nowrap>End Dt</th>
       </tr>
@@ -23,8 +24,9 @@
       <tr>
         <td nowrap><a href="/crm/discount/edit/${d.discount_id}">${d.name}</a></td>
         <td>${d.code}</td>
-        <td class="rt" nowrap>${h.money(d.percent_off)}</td>
-        <td class="rt" nowrap>${h.money(d.amount_off)}</td>
+        <td>${'CART' if d.cart_discount else 'PRODUCT'}</td>
+        <td class="rt" nowrap>${'%s%%' % h.money(d.percent_off) if d.percent_off else ''}</td>
+        <td class="rt" nowrap>${'%s%%' % h.money(d.shipping_percent_off) if d.shipping_percent_off else ''}</td>
         <td nowrap>${d.start_dt}</td>
         <td nowrap>${d.end_dt}</td>
       </tr>

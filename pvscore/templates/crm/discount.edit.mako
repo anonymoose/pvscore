@@ -25,14 +25,10 @@
       </div>
       <div class="row">
         <div class="span2">
-          <label for="">Item $ Amount Off</label>
-          ${h.text('amount_off', class_="input-small", value=discount.amount_off)}
-        </div>
-        <div class="span2">
-          <label for="">Item % Off</label>
+          <label for="">% Off</label>
           ${h.text('percent_off', class_="input-small", value=discount.percent_off)}
         </div>
-        <div class="span2 cart"
+        <div class="span2 offset4 cart"
            % if not discount.cart_discount:
            style="display:none;"
            % endif
@@ -48,7 +44,7 @@
         <div class="span2">
           ${h.chkbox('store_enabled', checked=discount.store_enabled, label=' Store Enabled?')}    
         </div>
-        <div class="span2">
+        <div class="span2 offset2">
           ${h.chkbox('cart_discount', checked=discount.cart_discount, label=' Cart Discount?', onchange="discount_cart_discount_change();")}    
         </div>
       </div>
@@ -61,7 +57,7 @@
           <label for="">End Date</label>
           ${h.text('end_dt', class_="input-small datepicker", autocomplete="off", value=discount.end_dt if discount.end_dt else plus14)}
         </div>
-        <div class="span2 cart"
+        <div class="span2 offset2 cart"
            % if not discount.cart_discount:
            style="display:none;"
            % endif
@@ -102,7 +98,6 @@
         </div>
       </div>
     </div>
-    
     <div class="row">
       <div class="span2 offset8">
         <input type="submit" name="submit2" class="btn btn-primary" value="Save"/>

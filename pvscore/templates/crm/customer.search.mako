@@ -59,6 +59,7 @@
         <td>Last</td>
         <td>Phone</td>
         <td>Company</td>
+        <td>Created</td>        
       </tr>
     </thead>
     <tbody>
@@ -69,6 +70,7 @@
         <td>${cust.lname}</td>
         <td>${cust.phone}</td>
         <td>${cust.company_name}</td>
+        <td nowrap>${h.words_date_time(cust.create_dt)}</td>
       </tr>
       % endfor
     </tbody>

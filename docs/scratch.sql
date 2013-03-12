@@ -4890,7 +4890,6 @@ create table crm_discount (
     code varchar(50),
     description text,
     percent_off float,
-    amount_off float,
     shipping_percent_off float,
     cart_minimum float,
     which_item varchar(30),
@@ -4898,14 +4897,12 @@ create table crm_discount (
     end_dt date,
     web_enabled boolean default true,
     store_enabled boolean default true,
-    cart_discount boolean default,
+    cart_discount boolean default false,
     mod_dt timestamp without time zone default now(),
     create_dt timestamp without time zone default now(),
     delete_dt timestamp without time zone,
     constraint crm_discount_pk primary key (discount_id)
 );
-alter table crm_discount add foreign key (enterprise_id) references crm_enterprise;
-alter table crm_discount add foreign key (vendor_id) references crm_vendor;
 
 drop table if exists crm_discount_product;
 create table crm_discount_product (
@@ -4916,7 +4913,15 @@ create table crm_discount_product (
        delete_dt timestamp without time zone,
        constraint crm_discount_product_pk primary key (discount_product_id)
 );
+
+alter table crm_discount add foreign key (enterprise_id) references crm_enterprise;
+alter table crm_discount add foreign key (vendor_id) references crm_vendor;
 alter table crm_discount_product add foreign key (discount_id) references crm_discount;
 alter table crm_discount_product add foreign key (product_id) references crm_product;
-
+alter table crm_journal add column fk_type varchar(50);
+alter table crm_journal add column fk_id uuid;
+alter table crm_customer_order add column discount_id uuid;
+alter table crm_customer_order add column discount_percent_off float;
+alter table crm_customer_order add column discount_shipping_percent_off float;
+alter table crm_customer_order add foreign key (discount_id) references crm_discount;
 

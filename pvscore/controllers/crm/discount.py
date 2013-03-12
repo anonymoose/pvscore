@@ -84,7 +84,7 @@ class DiscountController(BaseController):
             discount.enterprise_id = self.enterprise_id
         else:
             self.forbid_if(discount.enterprise_id != self.enterprise_id)
-        discount.bind(self.request.POST)
+        discount.bind(self.request.POST, True)
         discount.save()
         discount.flush()
 

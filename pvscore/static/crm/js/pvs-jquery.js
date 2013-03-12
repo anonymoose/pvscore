@@ -102,6 +102,8 @@ pvs.validate = function() {
                     $(element).siblings('label').show();
                 },
                 errorPlacement : function(error, element) {
+                    $(element).siblings('span').remove();
+                    //$(element).parent().addClass(validClass).removeClass(errorClass);
                     $(element).siblings('label').hide();
                     $(element).siblings('label').after(error);
                 },

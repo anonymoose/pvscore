@@ -8,6 +8,7 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session, BaseAnalytic
 from pvscore.model.crm.orderitem import OrderItem
 from pvscore.model.crm.product import Product, InventoryJournal
+from pvscore.model.crm.discount import DiscountProduct
 from pvscore.model.core.status import Status
 import pvscore.lib.util as util
 from pvscore.model.crm.journal import Journal
@@ -43,8 +44,12 @@ class CustomerOrder(ORMBase, BaseModel):
     shipping_zip = Column(String(50))
     shipping_country = Column(String(50))
     shipping_phone = Column(String(20))
+    discount_id = Column(GUID, ForeignKey('crm_discount.discount_id'))
+    discount_percent_off = Column(Float)
+    discount_shipping_percent_off = Column(Float)
 
     customer = relation('Customer')
+    discount = relation('Discount')
     campaign = relation('Campaign')
     creator = relation('Users')
     status = relation('Status', lazy="joined")
@@ -70,6 +75,7 @@ class CustomerOrder(ORMBase, BaseModel):
         cord.shipping_zip = cart.shipping_zip
         cord.shipping_country = cart.shipping_country
         cord.shipping_phone = cart.shipping_phone
+        cart.calculate_cart_discount_for_order(cord)
         cord.save()
         cord.flush()
         for cart_item in cart.items:
@@ -102,7 +108,7 @@ class CustomerOrder(ORMBase, BaseModel):
                            [prd.get_discount_price(campaign)])
             # KB: [2013-02-24]: Retail is calculated by using the highest price of the retail prices for the product and all its selected attributes.
             retail = max([util.nvl(aois.unit_retail_price, 0.0) for aois in attribute_order_items] +
-                         [cart_item['unit_price'] if 'unit_price' in cart_item else prd.get_retail_price(campaign)])
+                         [cart_item['base_price'] if 'base_price' in cart_item else prd.get_retail_price(campaign)])
 
             item.quantity = float(cart_item['quantity'])
             item.unit_price = (discount if discount else retail)
@@ -114,6 +120,10 @@ class CustomerOrder(ORMBase, BaseModel):
             item.save()
             if prd.track_inventory:
                 InventoryJournal.create_new(prd, 'Sale', int(item.quantity), item)
+            if item.unit_discount_price is not None:
+                discount = DiscountProduct.find_by_product(prd)
+                Journal.create_new(item.unit_retail_price - item.unit_discount_price,
+                                   customer, cord, None, typ='AutomaticDiscount', attachment=discount)
             Status.add(customer, item, Status.find_event(enterprise_id, item, 'CREATED'),
                        'Item added to order %s @ $%s' % (prd.name, util.money(item.unit_price)))
             if prd.can_have_children():
@@ -135,6 +145,16 @@ class CustomerOrder(ORMBase, BaseModel):
                         if kid.child.track_inventory:
                             InventoryJournal.create_new(kid.child, 'Sale', child_item.quantity, child_item)
         Status.add(customer, cord, Status.find_event(enterprise_id, cord, 'CREATED'), 'Order created ')
+        if cord.discount:
+            discount_amount = None
+            if cord.discount.percent_off:
+                item_price = cord.total_item_price()
+                discount_amount = item_price - (item_price * cord.percent_off)
+            elif cord.discount.shipping_percent_off:
+                # (9.0 / (1.0-0.1)) = 10.00
+                discount_amount = cart.shipping_discount_total
+            if discount_amount and int(discount_amount) > 0:
+                Journal.create_new(discount_amount, customer, cord, None, typ='AutomaticDiscount', attachment=discount)
         cord.save()
         cord.flush()
         return cord
@@ -205,7 +225,7 @@ class CustomerOrder(ORMBase, BaseModel):
 
 
     def total_discounts_applied(self):
-        return Journal.total_discounts(self)
+        return Journal.total_discounts(self) + Journal.total_automatic_discounts(self)
 
 
     def total_payments_due(self):
@@ -238,6 +258,11 @@ class CustomerOrder(ORMBase, BaseModel):
 
 
     def total_shipping_price(self):
+        """ KB: [2013-03-12]: Shipping discounts are handed in the UI and in shipping.py
+        Charges from the shippers are altered prior to the customer seeing them so they know what to pay.
+        Therefore, shipping_total is the shipping total that is actually taken from the customer, and shipper charges may be higher if there
+        is a discount applied.
+        """
         return (self.shipping_total if self.shipping_total else 0.0)
 
 

@@ -1,10 +1,9 @@
 #pylint: disable-msg=E1101
-from sqlalchemy import Column, ForeignKey, and_, or_
+from sqlalchemy import Column, ForeignKey, and_, or_, func
 from sqlalchemy.types import String, DateTime, Text, Float, Boolean, DateTime
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
-from pvscore.model.crm.product import Product
 import pvscore.lib.util as util
 import uuid
 from pvscore.lib.sqla import GUID
@@ -21,7 +20,6 @@ class Discount(ORMBase, BaseModel):
     description = Column(Text)
     mod_dt = Column(DateTime, server_default=text('now()'))
     percent_off = Column(Float)
-    amount_off = Column(Float)
     shipping_percent_off = Column(Float)
     cart_minimum = Column(Float)
     which_item = Column(String(30))
@@ -47,8 +45,20 @@ class Discount(ORMBase, BaseModel):
                          Discount.enterprise_id == enterprise_id,
                          or_(Discount.end_dt == None,
                              Discount.end_dt >= util.now())))\
-                         .order_by(Discount.name) \
-                     .all() 
+                             .order_by(Discount.name) \
+                             .all() 
+
+
+    @staticmethod
+    def find_all_active_cart_discounts(enterprise_id):
+        return Session.query(Discount) \
+            .filter(and_(Discount.delete_dt == None, 
+                         Discount.enterprise_id == enterprise_id,
+                         Discount.cart_discount == True,
+                         or_(Discount.end_dt == None,
+                             Discount.end_dt >= util.now())))\
+                             .order_by(Discount.name) \
+                             .all() 
 
 
     @staticmethod
@@ -58,6 +68,18 @@ class Discount(ORMBase, BaseModel):
                          Discount.enterprise_id == enterprise_id))\
                          .order_by(Discount.name) \
                      .all() 
+
+
+    @staticmethod
+    def find_by_code(enterprise_id, code):
+        return Session.query(Discount)\
+            .filter(and_(Discount.enterprise_id == enterprise_id,
+                         Discount.delete_dt == None,
+                         Discount.code.ilike(code),
+                         or_(Discount.end_dt == None,
+                             Discount.end_dt >= util.now())))\
+                             .order_by(Discount.create_dt) \
+                             .first() 
 
 
     def get_products(self):
@@ -72,6 +94,14 @@ class Discount(ORMBase, BaseModel):
     def clear_product(self, product_id):
         if self.discount_id:
             DiscountProduct.clear(self.discount_id, product_id)
+
+
+    def calculate_product(self, product, campaign):
+        base_price = product.get_price(campaign)
+        if self.percent_off:
+            return max(base_price - (base_price * self.percent_off), 0)
+        raise Exception("Invalid discount: %s" % self.discount_id)
+    
 
 
 class DiscountProduct(ORMBase, BaseModel):
@@ -89,6 +119,7 @@ class DiscountProduct(ORMBase, BaseModel):
 
     @staticmethod
     def find_products(discount_id):
+        from pvscore.model.crm.product import Product
         #.options(FromCache('Product.find_children', parent_id)) 
         return Session.query(DiscountProduct) \
             .join((Product, DiscountProduct.product_id == Product.product_id)) \
@@ -98,6 +129,18 @@ class DiscountProduct(ORMBase, BaseModel):
                          Product.type != 'Attr')) \
                          .order_by(Product.name) \
                          .all()
+
+
+    @staticmethod
+    def find_by_product(product):
+        return Session.query(Discount)\
+            .join((DiscountProduct, DiscountProduct.discount_id == Discount.discount_id))\
+            .filter(and_(DiscountProduct.product == product,
+                         Discount.delete_dt == None,
+                         or_(Discount.end_dt == None,
+                             Discount.end_dt > util.today())))\
+                             .order_by(Discount.create_dt.desc())\
+                             .first()
 
 
     @staticmethod

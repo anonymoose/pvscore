@@ -19,9 +19,11 @@ class UPSShipping(object):
         """
         Post the data and return the XML response
         """
+        log.debug(request)
         conn = urllib2.Request(url=connection, data=request.encode("utf-8"))
         f = urllib2.urlopen(conn)
         all_results = f.read()
+        log.debug(all_results)
         self.raw = all_results
         return fromstring(all_results)
 
@@ -68,6 +70,7 @@ class UPSShipping(object):
                     option = {}
                     option['code'] = code.text
                     option['name'] = shipping_config['timeframe_choices'][code.text]
+                    option['orig_charges'] = charges
                     option['charges'] = charges
                     option['delivery_days'] = util.nvl(delivery_days)
                     options.append(option)
@@ -77,6 +80,9 @@ class UPSShipping(object):
                 log.error("UPS %s Error: Code %s - %s" % (errors[0].text, errors[1].text, errors[2].text))
             except AttributeError:
                 log.error("UPS error - cannot parse response:\n %s" % self.raw)
-        return options
+
+        return cart.filter_shipping_options(options)
+
+
 
 

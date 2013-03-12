@@ -3,6 +3,7 @@ import re
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.model.crm.product import Product
+from pvscore.model.crm.discount import Discount
 from pvscore.controllers.catalog.catalog import CatalogBaseController
 from pvscore.lib.smart.scatalog import SmartCatalog
 from pvscore.lib.shipping.shipping import UPSShipping
@@ -119,6 +120,9 @@ class CartController(CatalogBaseController):
             return HTTPFound('/')   #pragma: no cover
         params = self.params()
         cart = self.session['cart']
+
+        cart.inspect_cart_discounts(self.enterprise_id)
+
         if self.request.ctx.site.config_json and not cart.shipping_options:
             shipper = None
             if self.request.ctx.site.shipping_method == 'UPS':
@@ -127,8 +131,23 @@ class CartController(CatalogBaseController):
                 cart.shipping_options = shipper.get_options(self.request.ctx.customer,
                                                             self.request.ctx.site,
                                                             cart)
-                self.session.changed()
+        self.session.changed()
         return self.render(page, params)
+
+
+    @view_config(route_name='ecom.site.cart.save_discount')
+    def save_discount(self):
+        """ KB: [2013-03-11]: If they entered a discount code apply that one. """
+        if not 'cart' in self.session:
+            return 'True'  #pragma: no cover
+        redir = self.request.GET.get('redir')
+        cart = self.session['cart']
+        discount_code = self.request.POST.get('discount_code')
+        cust = self.request.ctx.customer
+        self.redir_if(not cust or not cart)
+        cart.set_user_discount(Discount.find_by_code(self.enterprise_id, discount_code))
+        self.session.changed()
+        return self.find_redirect()
 
 
     @view_config(route_name='ecom.site.cart.save_shipping')

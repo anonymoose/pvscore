@@ -14,6 +14,7 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 import pvscore.lib.util as util
 import uuid, logging
 from pvscore.lib.sqla import GUID
+from pvscore.model.crm.discount import DiscountProduct
 
 log = logging.getLogger(__name__)
 
@@ -464,10 +465,24 @@ class Product(ORMBase, BaseModel):
 
 
     def get_discount_price(self, campaign):
-        """ KB: [2011-02-02]: Returns the discount price """
+        """ KB: [2013-03-12]: Return the min of campaign discount and product discount.  Seems to be what a customer would expect. """
+        base_price = self.get_retail_price(campaign)
+        campaign_discount_price = product_discount_price = cart_discount_price = None
+
+        # KB: [2013-03-12]: Discounts by campaign discounts form the base price for further discounts.
         if campaign.campaign_id in self.campaign_prices:
-            return self.campaign_prices[campaign.campaign_id].discount_price
-    
+            campaign_discount_price = self.campaign_prices[campaign.campaign_id].discount_price
+
+        # KB: [2013-03-12]: Discounts attached directly to products.
+        product_discount_price = None
+        discount = DiscountProduct.find_by_product(self)
+        if discount:
+            product_discount_price = discount.calculate_product(self, campaign)
+
+        if int(util.nvl(product_discount_price, 0)) + int(util.nvl(product_discount_price, 0)) == 0:
+            return None
+        return max(product_discount_price, campaign_discount_price)
+
 
     def set_price(self, campaign, price, discount=None):
         ppri = ProductPricing.find(campaign, self)

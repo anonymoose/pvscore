@@ -50,7 +50,7 @@
           </div>
 
           <div class="row">
-            <div class="span3">
+            <div class="span2">
               <label for="order_create_dt">Created Dt</label>
               ${h.text('order_create_dt', class_="input-small", value=order.create_dt)}
             </div>
@@ -58,6 +58,14 @@
               <label for="">Created by</label>
               ${order.creator.email if order.user_created else 'Customer'}
             </div>
+            % if order.discount_id:
+            <div class="span2">
+              <label for=""><a href="/crm/discount/edit/${order.discount.discount_id}">Cart Discount</a></label>
+                Product: ${h.money(order.discount_percent_off) if order.discount_percent_off else 0}%<br/> 
+                Shipping: ${h.money(order.discount_shipping_percent_off) if order.discount_shipping_percent_off else 0}% 
+              </a>
+            </div>
+            % endif
             % if comm_packing_slip_id:
             <div class="span2">
               <a href="javascript:customer_view_packing_slip('${order.order_id}', '${comm_packing_slip_id}')">View Receipt</a>
@@ -178,7 +186,13 @@
     </div>
 
     <div class="row">
-      <div class="offset5 span4">
+      <div class="span4">
+        Order Note:
+        <p>
+          ${h.literal(order.note)}
+        </p>
+      </div>
+      <div class="span4">
         <dl class="dl-horizontal" style="text-overflow:clip;">
           <dt>Product Total</dt>
           <dd id="oi_product_total">$${h.money(total_item_price)}</dd>
@@ -207,7 +221,7 @@
         % else:
            <a href="#" id="btn_pay" class="hidden btn btn-success btn-large" data-loading-text="loading..." onclick="customer_edit_order_submit()">Pay</a>
         % endif
-        <a href="/crm/customer/show_orders/${customer.customer_id}" class="btn btn-link btn-large">Cancel</a>
+          <!--a href="/crm/customer/show_orders/${customer.customer_id}" class="btn btn-link btn-large">Cancel</a-->
       </div>
     </div>
   </form>

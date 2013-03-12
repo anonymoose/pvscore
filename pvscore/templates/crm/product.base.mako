@@ -17,7 +17,7 @@ ${next.body()}
       % endif
       <li><hr></li>
       % if request.ctx.user.priv.edit_discount:
-      <li><a href="/crm/discount/new">New Discount</a> </li>
+      <li><a href="/crm/discount/new">Add New Discount</a> </li>
       <li><a href="/crm/discount/list">List Discounts</a> </li>
       % endif
       <li>

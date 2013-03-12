@@ -67,6 +67,8 @@ class Journal(ORMBase, BaseModel):
     note = Column(Text)
     method = Column(String(25))
     amount = Column(Float)
+    fk_type = Column(String(50))
+    fk_id = Column(GUID)
 
     customer = relation('Customer')
     creator = relation('Users')
@@ -78,7 +80,7 @@ class Journal(ORMBase, BaseModel):
 
     @staticmethod
     def get_types():
-        return ['FullPayment', 'PartialPayment', 'Refund', 'CreditIncrease', 'CreditDecrease', 'Discount']
+        return ['FullPayment', 'PartialPayment', 'Refund', 'CreditIncrease', 'CreditDecrease', 'Discount', 'AutomaticDiscount']
 
 
     @staticmethod
@@ -93,7 +95,7 @@ class Journal(ORMBase, BaseModel):
     
 
     @staticmethod
-    def create_new(amount, customer, order, creator, typ='FullPayment', payment_method='Credit Card', note=None):   #pylint: disable-msg=R0913
+    def create_new(amount, customer, order, creator, typ='FullPayment', payment_method='Credit Card', note=None, attachment=None):   #pylint: disable-msg=R0913
         jrnl = Journal()
         jrnl.type = typ
         jrnl.note = note
@@ -102,6 +104,9 @@ class Journal(ORMBase, BaseModel):
         jrnl.order_id = order.order_id
         jrnl.amount = amount
         jrnl.method = payment_method
+        if attachment:
+            jrnl.fk_type = type(attachment).__name__
+            jrnl.fk_id = getattr(attachment, attachment.__pk__)
         jrnl.save()
         return jrnl
 
@@ -109,7 +114,8 @@ class Journal(ORMBase, BaseModel):
     @staticmethod
     def total_balance_for_customer(customer):
         entries = Journal.find_all_by_customer(customer)
-        total_entries = sum([ent.amount if ent.type in ('FullPayment', 'PartialPayment', 'CreditIncrease') else -ent.amount for ent in entries])
+        total_entries = sum([ent.amount if ent.type in ('FullPayment', 'PartialPayment', 'CreditIncrease') else -ent.amount
+                             for ent in entries])
         total_price = customer.get_total_order_value()
         bal = total_price - total_entries
         return bal if bal == 0.0 else -1*(bal)
@@ -133,6 +139,16 @@ class Journal(ORMBase, BaseModel):
     @staticmethod
     def filter_discounts(order):
         return Journal._filter_by_types(order, ['Discount'])
+
+
+    @staticmethod
+    def total_automatic_discounts(order):
+        return sum([ent.amount for ent in Journal.filter_automatic_discounts(order)])
+
+
+    @staticmethod
+    def filter_automatic_discounts(order):
+        return Journal._filter_by_types(order, ['AutomaticDiscount'])
 
 
     @staticmethod

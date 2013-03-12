@@ -657,7 +657,6 @@ class CustomerController(BaseController):
             }
 
 
-
     def _add_order_impl(self, customer_id, product_ids, attributes, prices, user, discount_id, campaign_id, incl_tax=True):   #pylint: disable-msg=R0913
         """ KB: [2013-02-20]:
         attributes = [{quantity : 0, product : <Product...>}, {...}]
@@ -797,7 +796,7 @@ class CustomerController(BaseController):
 
             self._apply_payment(cust.customer_id, order.order_id, order.total_price(), api.payment_method)
             try:
-                campaign.send_post_purchase_comm(order)
+                order.campaign.send_post_purchase_comm(order)
             except Exception as exc:  #pragma: no cover
                 log.exception(exc)
             return cust
