@@ -6,6 +6,10 @@ item_count=cart.item_count
     product_name=${item['product'].name}
 % endfor
 
-total=cart.total
-product_total=cart.product_total
-handling=cart.handling_total
+total=${cart.total}
+product_base_total=${cart.product_base_total}
+product_total=${cart.product_total}
+product_discounts=${cart.product_discount_total}
+handling=${cart.handling_total}
+
+

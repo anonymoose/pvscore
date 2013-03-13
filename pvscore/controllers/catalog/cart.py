@@ -156,7 +156,7 @@ class CartController(CatalogBaseController):
             return 'True'  #pragma: no cover
         redir = self.request.GET.get('redir')
         cart = self.session['cart']
-        shipping_code = self.request.POST.get('shipping_code')
+        shipping_code = self.request.POST.get('shipping_code', self.request.GET.get('shipping_code'))
         cust = self.request.ctx.customer
         self.redir_if(not cust or not cart)
         cart.shipping_selection = shipping_code

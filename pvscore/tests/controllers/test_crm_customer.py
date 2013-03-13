@@ -12,9 +12,6 @@ import pvscore.lib.util as util
 
 # bin/T pvscore.tests.controllers.test_crm_customer
 
-#def find_customer(campaign):
-#    return Customer.find(TEST_CUSTOMER_EMAIL, campaign)
-
 class TestCrmCustomer(TestController):
     def test_misc(self):
         cust = self.get_customer()

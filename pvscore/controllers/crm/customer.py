@@ -690,9 +690,9 @@ class CustomerController(BaseController):
         self.forbid_if(not self.request.ctx.customer or 'cart' not in self.session or not self.session['cart'])
         cust = self.request.ctx.customer
         cart = self.session['cart']
-        self._site_purchase(cust, self.session['cart'])
+        order = self._site_purchase(cust, self.session['cart'])
         cart.remove_all()
-        return self.find_redirect()
+        return self.find_redirect("?order_id=%s" % order.order_id)
 
 
     @view_config(route_name='crm.customer.signup')
@@ -799,7 +799,7 @@ class CustomerController(BaseController):
                 order.campaign.send_post_purchase_comm(order)
             except Exception as exc:  #pragma: no cover
                 log.exception(exc)
-            return cust
+            return order
         else:
             (_, last_note) = api.get_last_status()
             self.flash('Unable to bill credit card: %s' % last_note)

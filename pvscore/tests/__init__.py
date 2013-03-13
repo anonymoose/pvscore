@@ -93,8 +93,8 @@ class TestController(TestCase):
         os.environ['enterprise_id'] = str(self.site.company.enterprise_id)
 
 
-    def logout_customer(self):
-        return self.logout_crm()
+    def logout_customer(self, reset=True):
+        return self.logout_crm(reset)
 
 
     def login_crm(self, username=UID, password=PWD):
@@ -113,16 +113,21 @@ class TestController(TestCase):
         return user
 
 
-    def logout_crm(self):
+    def logout_crm(self, reset=True):
         try:
             R = self.get('/crm/company/enterprise/clearcache')
             R.mustcontain('ok')
             R = self.get('/crm/logout')
-            self.site = None
+            if reset:
+                self.site = None
+                self.app.reset()
         except Exception as exc:
             logger.debug(exc)
-        self.app.reset()
         return True
+
+
+    def logout_crm_soft(self):
+        self.logout_crm(False)
 
 
     def get(self, url, params=None, headers=None):

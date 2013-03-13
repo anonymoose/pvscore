@@ -122,7 +122,7 @@ class CustomerOrder(ORMBase, BaseModel):
                 InventoryJournal.create_new(prd, 'Sale', int(item.quantity), item)
             if item.unit_discount_price is not None:
                 discount = DiscountProduct.find_by_product(prd)
-                Journal.create_new(item.unit_retail_price - item.unit_discount_price,
+                Journal.create_new((item.unit_retail_price - item.unit_discount_price) * int(item.quantity),
                                    customer, cord, None, typ='AutomaticDiscount', attachment=discount)
             Status.add(customer, item, Status.find_event(enterprise_id, item, 'CREATED'),
                        'Item added to order %s @ $%s' % (prd.name, util.money(item.unit_price)))
@@ -149,7 +149,7 @@ class CustomerOrder(ORMBase, BaseModel):
             discount_amount = None
             if cord.discount.percent_off:
                 item_price = cord.total_item_price()
-                discount_amount = item_price - (item_price * cord.percent_off)
+                discount_amount = item_price - (item_price * cord.discount.percent_off)
             elif cord.discount.shipping_percent_off:
                 # (9.0 / (1.0-0.1)) = 10.00
                 discount_amount = cart.shipping_discount_total

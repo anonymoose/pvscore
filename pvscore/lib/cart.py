@@ -44,7 +44,7 @@ class Cart(object):
                            'dt': datetime.datetime.date(datetime.datetime.now()),
                            'base_price':base_price,
                            'unit_price':unit_price,
-                           'discount_amount':base_price-unit_price,
+                           'discount_amount':(base_price-unit_price)*quantity,
                            'regular_price':round(base_price*quantity, 2),
                            'price': round(unit_price*quantity, 2),
                            'start_dt':util.parse_date_as_date(util.nvl(str(start_dt), util.str_today())),
@@ -155,7 +155,7 @@ class Cart(object):
 
 
     @property
-    def discount_total(self):
+    def product_discount_total(self):
         return util.nvl(reduce(lambda x, y: x + y['discount_amount'], self.items, 0.0), 0.0)
 
 

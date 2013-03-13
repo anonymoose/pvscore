@@ -103,7 +103,7 @@ class Discount(ORMBase, BaseModel):
     def calculate_product(self, product, campaign):
         base_price = product.get_price(campaign)
         if self.percent_off:
-            return max(base_price - (base_price * self.percent_off), 0)
+            return max(base_price*(1-(1/self.percent_off)), 0)
         raise Exception("Invalid discount: %s" % self.discount_id)
     
 
