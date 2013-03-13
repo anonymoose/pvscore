@@ -480,7 +480,7 @@ class CustomerController(BaseController):
 
     @view_config(route_name='crm.customer.edit_order', renderer='string')
     @authorize(IsLoggedIn())
-    def edit_order(self):   #pylint: disable-msg=R0915
+    def edit_order(self):   #pylint: disable-msg=R0915,R0912
         customer_id = self.request.matchdict.get('customer_id')
         order_id = self.request.matchdict.get('order_id')
         oids_to_delete = self.request.POST.getall('order_items_to_delete[]')
@@ -669,12 +669,10 @@ class CustomerController(BaseController):
         for pid in product_ids.keys():
             quantity = product_ids[pid]
             price = prices[pid] if prices and pid in prices else None
-
             attrs = {}
             for attr in [attr['attribute_product'] for attr in attributes.values() if str(attr['parent_product'].product_id) == pid]:
                 attrs[attr.product_id] = { 'quantity' : 0,
                                            'product' : attr}
-
             cart.add_item(product=Product.load(pid),
                           campaign=cust.campaign,
                           quantity=quantity,

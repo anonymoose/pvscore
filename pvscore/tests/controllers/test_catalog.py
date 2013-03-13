@@ -1,6 +1,6 @@
 #pylint: disable-msg=C0103
 import logging
-from pvscore.tests.controllers.test_crm_discount import create_new_product_discount, delete_new_product_discount, create_new_cart_discount, delete_new_cart_discount
+from pvscore.tests.controllers.test_crm_discount import create_new_product_discount, delete_new_product_discount, create_new_cart_discount
 from pvscore.tests import TestController, secure, customer_logged_in, PVS_ROOT_UID, PVS_ROOT_PWD
 from pvscore.model.crm.company import Enterprise
 from pvscore.model.crm.product import ProductCategory
@@ -24,7 +24,7 @@ class TestCatalog(TestController):
         prod = self.get_prod()
         camp = cust.campaign
         prod = order.items[0].product
-        """ KB: [2013-02-20]: MOD ATTR TestCatalog.test_misc : Allow for attributes. """
+        # KB: [2013-02-20]: MOD ATTR TestCatalog.test_misc : Allow for attributes.
         cart.add_item(prod, cust.campaign)
         assert int(cart.total) == int(prod.get_price(camp))
 

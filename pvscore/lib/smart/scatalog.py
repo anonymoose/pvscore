@@ -35,19 +35,19 @@ class SmartCatalog(object):
 
 
     @staticmethod
-    def also_liked_product_list(product, campaign, offset=None, limit=None):
+    def also_liked_product_list(product, campaign, offset=None, limit=None): #pylint: disable-msg=W0613
         products = Product.find_ordered_list(campaign, 'specials')
         return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new'), offset, limit)
 
 
     @staticmethod
-    def related_product_list(product, campaign, offset=None, limit=None):
+    def related_product_list(product, campaign, offset=None, limit=None): #pylint: disable-msg=W0613
         products = Product.find_ordered_list(campaign, 'specials')
         return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new'), offset, limit)
 
 
     @staticmethod
-    def related_product_list_cart(cart, campaign, offset=None, limit=None):
+    def related_product_list_cart(cart, campaign, offset=None, limit=None): #pylint: disable-msg=W0613
         products = Product.find_ordered_list(campaign, 'specials')
         return util.page_list(products if len(products) > 0 else Product.find_ordered_list(campaign, 'new'), offset, limit)
 

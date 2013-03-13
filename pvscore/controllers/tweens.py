@@ -11,7 +11,7 @@ from pyramid.httpexceptions import WSGIHTTPException
 from textwrap import dedent
 from pvscore.lib.geoip.geo import Geo
 import pvscore.lib.util as util
-from pprint import pprint, pformat
+from pprint import pformat
 
 log = logging.getLogger(__name__)
 
@@ -19,14 +19,14 @@ def exclog_tween_factory(handler, registry):
     get = registry.settings.get
     ignored = get('exclog.ignore', (WSGIHTTPException,))
     extra_info = get('exclog.extra_info', False)
-    def exclog_tween(request, getLogger=logging.getLogger):
+    def exclog_tween(request, get_logger=logging.getLogger):
         # getLogger injected for testing purposes
         try:
             return handler(request)
         except ignored:
             raise
         except:
-            logger = getLogger('exc_logger')
+            logger = get_logger('exc_logger')
 
             ent = Enterprise.load(request.session['enterprise_id']) if 'enterprise_id' in request.session else None
             cust = Customer.load(request.session['customer_id']) if 'customer_id' in request.session else None

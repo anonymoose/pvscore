@@ -1,13 +1,11 @@
 import logging
-import datetime, calendar
+import datetime
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pvscore.controllers.base import BaseController
 from pvscore.lib.decorators.authorize import authorize
 from pvscore.lib.auth_conditions import IsLoggedIn
 from pvscore.model.crm.discount import Discount
-from pvscore.model.crm.comm import Communication
-from pvscore.model.crm.company import Company
 from pvscore.model.crm.product import Product
 import pvscore.lib.util as util
 

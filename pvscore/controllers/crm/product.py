@@ -181,7 +181,7 @@ class ProductController(BaseController):
     @view_config(route_name='crm.product.save', renderer='/crm/product.edit.mako')
     @authorize(IsLoggedIn())
     @validate((('name', 'required')))
-    def save(self):
+    def save(self):  #pylint: disable-msg=R0912,R0915
         product_id = self.request.POST.get('product_id')
         if product_id:
             prod = Product.load(product_id)

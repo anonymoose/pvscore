@@ -113,8 +113,8 @@ class CatalogController(CatalogBaseController):
     def _prep_product_attributes(self, product_attributes):
         attr_classes = list(set([pa.attr_class for pa in product_attributes]))
         ret = {}
-        for cl in attr_classes:
-            ret[cl] = [pa for pa in product_attributes if pa.attr_class == cl]
+        for acl in attr_classes:
+            ret[acl] = [pa for pa in product_attributes if pa.attr_class == acl]
         return ret
 
 

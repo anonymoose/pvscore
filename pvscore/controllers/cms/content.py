@@ -115,7 +115,7 @@ class ContentController(BaseController):
             instance.flush()
             instance.invalidate_caches()
             return 'True'
-        except Exception as exc:
+        except Exception as exc: #pylint: disable-msg=W0612
             return False
     
 

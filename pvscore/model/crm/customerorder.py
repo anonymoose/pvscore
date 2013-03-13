@@ -1,4 +1,4 @@
-#pylint: disable-msg=E1101,R0913
+#pylint: disable-msg=E1101,R0913,R0912,R0915
 import math
 import datetime
 from sqlalchemy import Column, ForeignKey, and_
@@ -86,7 +86,7 @@ class CustomerOrder(ORMBase, BaseModel):
             item.creator = user_created
             item.start_dt = cart_item['start_dt']
             item.save()
-            item.flush()  # TODO: KB: [2013-02-24]: Figure out the proper relationship for this.
+            item.flush()
 
             attribute_order_items = []
             for attribute_product_id in cart_item['attributes'].keys():
@@ -168,7 +168,6 @@ class CustomerOrder(ORMBase, BaseModel):
         item.creator = user_created
         discount = product.get_discount_price(campaign)
         retail = product.get_price(campaign)
-        """ KB: [2013-02-20]: MOD ATTR CustomerOrder.augment_order : Account for attribute price modifiers here. """
         item.unit_price = (discount if discount else retail)
         item.unit_cost = product.unit_cost
         item.unit_discount_price = (discount if discount else 0.0)
@@ -301,14 +300,11 @@ class CustomerOrder(ORMBase, BaseModel):
                        """.format(name=i.product.name.encode('ascii', 'ignore'), price=util.money(i.unit_price),
                                   quant=int(i.quantity), tot=util.money(i.total()))
                 for attr in i.children:
-                    s = """<tr>
+                    kidstr = """<tr>
                                 <td align="right">{klass} : {name}</td><td colspan="3">&nbsp;</td>
                              </tr>
                           """.format(name=attr.product.name, klass=attr.product.attr_class)
-                    ret += s
-
-                    print s
-                    
+                    ret += kidstr
 
             except Exception as exc: #pragma: no cover
                 log.debug(exc)

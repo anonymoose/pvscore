@@ -183,8 +183,8 @@ def chkbox(ident, **kwargs):
                                                                                label=label,
                                                                                hlp=hlp))
 
-def help(message, title=''):
-    return literal('<a style="cursor:pointer;" data-toggle="popover" title="" data-content="%s" data-original-title="%s" class="pvs-help"><i class="icon-question-sign"></i></a>' % (message, title))
+def help(message, title_=''):  #pylint: disable-msg=W0622
+    return literal('<a style="cursor:pointer;" data-toggle="popover" title="" data-content="%s" data-original-title="%s" class="pvs-help"><i class="icon-question-sign"></i></a>' % (message, title_))
 
 
 def rnd():

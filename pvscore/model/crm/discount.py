@@ -1,5 +1,5 @@
 #pylint: disable-msg=E1101
-from sqlalchemy import Column, ForeignKey, and_, or_, func
+from sqlalchemy import Column, ForeignKey, and_, or_
 from sqlalchemy.types import String, DateTime, Text, Float, Boolean, DateTime
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import text
@@ -52,7 +52,7 @@ class Discount(ORMBase, BaseModel):
 
 
     @staticmethod
-    def find_all_automatic_cart_discounts(enterprise_id, web_enabled=True):
+    def find_all_automatic_cart_discounts(enterprise_id, web_enabled=True): #pylint: disable-msg=C0103
         return Session.query(Discount) \
             .filter(and_(Discount.delete_dt == None, 
                          Discount.enterprise_id == enterprise_id,
@@ -105,7 +105,6 @@ class Discount(ORMBase, BaseModel):
         if self.percent_off:
             return max(base_price*(1-(1/self.percent_off)), 0)
         raise Exception("Invalid discount: %s" % self.discount_id)
-    
 
 
 class DiscountProduct(ORMBase, BaseModel):

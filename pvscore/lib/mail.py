@@ -124,5 +124,5 @@ class GmailLogHandler(logging.handlers.SMTPHandler):
         except:  #pragma: no cover
             self.handleError(record)
 
-    def getSubject(self, record):
+    def getSubject(self, record):  #pylint: disable-msg=C0103
         return 'EXCEPTION %s' % record.asctime

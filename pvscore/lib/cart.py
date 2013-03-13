@@ -9,6 +9,7 @@ class Cart(object):
         self.items = []
         self.site_id = site.site_id if site else None
         self.discount = None
+        self.discount_id = None
         self.is_user_discount = False
         self.shipping_options = None
         self.shipping_selection = None
@@ -26,7 +27,7 @@ class Cart(object):
         return len(self.items)
 
 
-    def add_item(self, product, campaign, quantity=1, base_price=None, start_dt=None, attributes={}): #pylint: disable-msg=R0913
+    def add_item(self, product, campaign, quantity=1, base_price=None, start_dt=None, attributes={}): #pylint: disable-msg=R0913,W0102
         """ KB: [2013-02-24]: attribute_ids == {'123abc...' : 3, ...}  where 3 is the quantity """
         if not base_price:
             base_price = product.get_price(campaign)
@@ -73,7 +74,7 @@ class Cart(object):
             self.discount = cart_discounts[0]
 
 
-    def calculate_cart_discount_shipping_price(self, shipping_charge):
+    def calculate_cart_discount_shipping_price(self, shipping_charge): #pylint: disable-msg=C0103
         """ KB: [2013-03-12]: If there is a discount on shipping then use it.  Otherwise pass through. """
         if self.discount and self.discount.shipping_percent_off:
             return float(shipping_charge) - (float(shipping_charge) * (self.discount.shipping_percent_off/100.0))
@@ -94,7 +95,7 @@ class Cart(object):
         return options
     
 
-    def calculate_cart_discount_for_order(self, order):
+    def calculate_cart_discount_for_order(self, order): #pylint: disable-msg=C0103
         if self.discount and self.discount.cart_discount:
             order.discount_id = self.discount.discount_id
             order.discount_percent_off = self.discount.percent_off

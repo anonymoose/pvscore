@@ -1,6 +1,5 @@
 from pvscore.tests import TestController, secure
 from pvscore.model.cms.site import Site
-from pyramid.httpexceptions import HTTPForbidden
 from pvscore.model.crm.campaign import Campaign
 from pvscore.model.crm.company import Enterprise
 import logging

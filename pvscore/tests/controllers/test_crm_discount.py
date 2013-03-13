@@ -1,3 +1,4 @@
+#pylint: disable-msg=C0103
 from pvscore.tests import TestController, secure
 from pvscore.model.crm.discount import Discount
 

@@ -466,8 +466,7 @@ class Product(ORMBase, BaseModel):
 
     def get_discount_price(self, campaign):
         """ KB: [2013-03-12]: Return the min of campaign discount and product discount.  Seems to be what a customer would expect. """
-        base_price = self.get_retail_price(campaign)
-        campaign_discount_price = product_discount_price = cart_discount_price = None
+        campaign_discount_price = product_discount_price = None
 
         # KB: [2013-03-12]: Discounts by campaign discounts form the base price for further discounts.
         if campaign.campaign_id in self.campaign_prices:
@@ -548,44 +547,6 @@ class Product(ORMBase, BaseModel):
         Session.execute("delete from crm_product_inventory_journal where product_id = '%s'" % product_id)
         Session.execute("delete from crm_product where product_id = '%s'" % product_id)
 
-
-"""
-class ProductAttribute(ORMBase, BaseModel):
-   __tablename__ = 'crm_product_attribute'
-   __pk__ = 'attr_id'
-
-   attr_id = Column(GUID, default=uuid.uuid4, nullable=False, unique=True, primary_key=True)
-   product_id = Column(GUID, ForeignKey('crm_product.product_id'))
-   attr_class = Column(String(50), nullable=False)
-   attr_name = Column(String(50), nullable=False)
-   price_modifier = Column(String(20))
-   handling_modifier = Column(String(20))
-   weight = Column(Float)
-   create_dt = Column(DateTime, server_default=text('now()'))
-   delete_dt = Column(DateTime)
-
-   def modifier(self, unit_price):
-       # KB: [2013-02-20]:
-       # unit_price = 100
-       # mod = '-12.3%'
-       # return float(mod[:-1])/100 * unit_price
-       # -12.3
-
-       # unit_price = 200
-       # mod = '-12.3'
-       # return float(mod)
-       # -12.3
-       mod = self.price_modifier
-       mod_amount = 0.0
-       if not mod or len(mod) == 0:
-           raise Exception("Invalid price modifier %s" % self.attr_id)
-       is_pct = self.price_modifier[-1:] == '%'
-       if is_pct:
-           mod_amount = float(mod[:-1])/100.0 * unit_price
-       else:
-           mod_amount = float(mod)
-       return mod_amount
-"""
 
 class ProductChild(ORMBase, BaseModel):
     __tablename__ = 'crm_product_child'

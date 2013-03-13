@@ -140,7 +140,6 @@ class CartController(CatalogBaseController):
         """ KB: [2013-03-11]: If they entered a discount code apply that one. """
         if not 'cart' in self.session:
             return 'True'  #pragma: no cover
-        redir = self.request.GET.get('redir')
         cart = self.session['cart']
         discount_code = self.request.POST.get('discount_code')
         cust = self.request.ctx.customer
@@ -154,7 +153,6 @@ class CartController(CatalogBaseController):
     def save_shipping(self):
         if not 'cart' in self.session:
             return 'True'  #pragma: no cover
-        redir = self.request.GET.get('redir')
         cart = self.session['cart']
         shipping_code = self.request.POST.get('shipping_code', self.request.GET.get('shipping_code'))
         cust = self.request.ctx.customer

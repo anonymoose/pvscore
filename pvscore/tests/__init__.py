@@ -102,8 +102,8 @@ class TestController(TestCase):
         self.get('/crm')
 
         # this logs us into that site.
-        R = self.post('/crm/login', {'username': username,
-                                     'password': password})
+        self.post('/crm/login', {'username': username,
+                                 'password': password})
         assert self.site
         os.environ['enterprise_id'] = str(self.site.company.enterprise_id)
 
