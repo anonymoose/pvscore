@@ -125,4 +125,4 @@ class GmailLogHandler(logging.handlers.SMTPHandler):
             self.handleError(record)
 
     def getSubject(self, record):  #pylint: disable-msg=C0103
-        return 'EXCEPTION %s' % record.asctime
+        return 'EXCEPTION %s' % record.created

@@ -65,6 +65,10 @@ class Product(ORMBase, BaseModel):
     _pricing = None
     _images = None
 
+    @property
+    def categories(self):
+        return ProductCategory.find_by_product(self)
+
     @staticmethod
     def find_names_by_name(enterprise_id, name, limit):
         sql = """select p.product_id, p.name,
