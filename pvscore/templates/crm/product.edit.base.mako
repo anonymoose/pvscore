@@ -35,9 +35,9 @@ ${next.body()}
       % endif
       <li>
         <form id="frm_product_search" class="form-inline">
-          <input name="product_search" type="text"
+          <input name="product_search" type="text" class="input-medium"
                  placeholder="Product Search" 
-                 id="product_search" data-provide="typeahead" data-source="[]" maxlength="30" autocomplete="off"/>
+                 id="product_search" data-provide="typeahead" data-source="[]" autocomplete="off"/>
         </form>
       </li>
     </ul>

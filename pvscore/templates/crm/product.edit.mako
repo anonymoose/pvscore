@@ -94,7 +94,7 @@
                         web users find relevant results to their searches. The more relevant your keywords are to your product description and name, the better the chances of being found by the search engines.
                         """)}
                       </label>
-                      ${h.text('seo_keywords', class_="input-xlarge", value=product.seo_keywords)}
+                      ${h.text('seo_keywords', class_="input-large", value=product.seo_keywords)}
                     </div>
                     <div class="span4">
                       <label for="seo_title">Title
@@ -102,7 +102,7 @@
                         web users find relevant results to their searches. The more relevant your keywords are to your product description and name, the better the chances of being found by the search engines.
                         """)}
                       </label>
-                      ${h.text('seo_title', class_="input-xlarge", value=product.seo_title)}
+                      ${h.text('seo_title', class_="input-large", value=product.seo_title)}
                     </div>
                     <div class="span4">
                       <label for="seo_description">Description
@@ -110,7 +110,7 @@
                         web users find relevant results to their searches. The more relevant your description is to your product description and name, the better the chances of being found by the search engines.
                         """)}
                       </label>
-                      ${h.text('seo_description', class_="input-xlarge", value=product.seo_description)}
+                      ${h.text('seo_description', class_="input-large", value=product.seo_description)}
                     </div>
                   </div>
                 </div>
@@ -350,9 +350,9 @@
                   </tr>
                   % for cmp in campaigns:
                   <tr>
-                    <td nowrap>${cmp.name}</td>
-                    <td>${h.text('campaign_price[%s]' % cmp.campaign_id, class_="input-small", value=h.money(product.get_retail_price(cmp)))}</td>
-                    <td>${h.text('campaign_discount[%s]' % cmp.campaign_id, class_="input-small", value=h.money(product.get_discount_price(cmp)))}</td>
+                    <td nowrap>${cmp.name[:20]}</td>
+                    <td>${h.text('campaign_price[%s]' % cmp.campaign_id, class_="input-mini", value=h.money(product.get_retail_price(cmp)))}</td>
+                    <td>${h.text('campaign_discount[%s]' % cmp.campaign_id, class_="input-mini", value=h.money(product.get_discount_price(cmp)))}</td>
                   </tr>
                   % endfor
                 </table>
@@ -407,7 +407,7 @@
                     <tr>
                       <td>${p.child.name}</td>
                       <td nowrap>${h.checkbox('child_incl_%s' % p.child.product_id, checked=True, value=p.child.product_id, class_='product_chk')}</td>
-                      <td nowrap>${h.text('child_quantity_%s' % p.child.product_id, value=p.child_quantity, class_="input-small")}</td>
+                      <td nowrap>${h.text('child_quantity_%s' % p.child.product_id, value=p.child_quantity, class_="input-mini")}</td>
                     </tr>
                     % endfor
                     
@@ -415,7 +415,7 @@
                     <tr>
                       <td>${p.name}</td>
                       <td nowrap>${h.checkbox('child_incl_%s' % p.product_id, value=p.product_id, class_='product_chk')}</td>
-                      <td nowrap>${h.text('child_quantity_%s' % p.product_id, class_="input-small")}</td>
+                      <td nowrap>${h.text('child_quantity_%s' % p.product_id, class_="input-mini")}</td>
                     </tr>
                     % endfor
                   </table>

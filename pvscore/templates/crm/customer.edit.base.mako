@@ -27,7 +27,7 @@ ${next.body()}
         % if customer.email:
         <a data-toggle="modal" data-target="#dlg_email"
            href="/crm/communication/send_comm_dialog?customer_id=${customer.customer_id}&dialog=1">
-          ${customer.email}
+          ${customer.email[:23]}
         </a>
         % else:
         No Email
