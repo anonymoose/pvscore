@@ -27,7 +27,7 @@ class Cart(object):
         return len(self.items)
 
 
-    def add_item(self, product, campaign, quantity=1, base_price=None, start_dt=None, attributes={}): #pylint: disable-msg=R0913,W0102
+    def add_item(self, product, campaign, quantity=1, base_price=None, start_dt=None, attributes={}, note=None): #pylint: disable-msg=R0913,W0102
         """ KB: [2013-02-24]: attribute_ids == {'123abc...' : 3, ...}  where 3 is the quantity """
         if not base_price:
             base_price = product.get_price(campaign)
@@ -45,6 +45,7 @@ class Cart(object):
                            'dt': datetime.datetime.date(datetime.datetime.now()),
                            'base_price':base_price,
                            'unit_price':unit_price,
+                           'note' : note,
                            'discount_amount':(base_price-unit_price)*quantity,
                            'regular_price':round(base_price*quantity, 2),
                            'price': round(unit_price*quantity, 2),

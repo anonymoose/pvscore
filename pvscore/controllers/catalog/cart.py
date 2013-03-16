@@ -28,9 +28,10 @@ class CartController(CatalogBaseController):
         product_id = self.request.matchdict.get('product_id')
         quantity = self.request.matchdict.get('quantity')
         redir = self.request.POST.get('redir')
+        note = self.request.POST.get('note')
         cart = self.session['cart']
         product = Product.load(product_id)
-        cart.add_item(product, self.request.ctx.campaign, quantity)
+        cart.add_item(product, self.request.ctx.campaign, quantity, note=note)
         self.session.changed()
         return 'True' if not redir else HTTPFound(redir)
 

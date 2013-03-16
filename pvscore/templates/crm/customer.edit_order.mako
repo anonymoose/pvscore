@@ -52,7 +52,7 @@
           <div class="row">
             <div class="span2">
               <label for="order_create_dt">Created Dt</label>
-              ${h.text('order_create_dt', class_="input-small", value=order.create_dt)}
+              ${h.text('order_create_dt', class_="input-medium", value=h.date_time(order.create_dt))}
             </div>
             <div class="span2">
               <label for="">Created by</label>
@@ -108,7 +108,16 @@
                   <img src="/static/icons/silk/arrow_refresh.png" title="Return Item" alt="Return Item" border="0"/>
               </td>
               <td width="40%">
-                ${oi.product.name}
+                <a href="/crm/product/edit/${oi.product.product_id}" style="vertical-align:top;">${oi.product.name}</a>
+                <a href="/crm/product/edit/${oi.product.product_id}">
+                  <img style="width: 50px; float:right;"
+                       src="${oi.product.primary_image.absolute_path if oi.product.primary_image else 'assets/no-image.jpg'}"/>
+                </a>
+                % if oi.note:
+                <div style="text-align:left;">
+                  ${h.literal(oi.note)}
+                </div>
+                % endif
                 % for attr_child in oi.children:
                 <div style="text-align:right;">
                   ${attr_child.product.attr_class} : ${attr_child.product.name}

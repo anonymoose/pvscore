@@ -85,6 +85,7 @@ class CustomerOrder(ORMBase, BaseModel):
             item.product = prd
             item.creator = user_created
             item.start_dt = cart_item['start_dt']
+            item.note = cart_item['note']
             item.save()
             item.flush()
 
