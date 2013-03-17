@@ -8,11 +8,11 @@
       <label for="comm">Communication</label></td><td>${h.select('comm_id', None, comms)}<td></tr>
     </td>
   </tr>
-<!--
+
   <tr valign="top">
-    <td><label for="comm">Custom Msg</label></td><td>${h.textarea('message', rows=10, style="width: 500px;", class_='content_editor')}</td>
+    <td><label for="comm">Custom Msg</label></td><td>${h.textarea('message', rows=10, style="width: 350px;", class_='content_editor')}</td>
   </tr>
--->
+
 </table>
 % else:
 

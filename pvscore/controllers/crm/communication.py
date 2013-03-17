@@ -94,7 +94,7 @@ class CommunicationController(BaseController):
         comm = Communication.load(comm_id)
         self.forbid_if(not comm or str(comm.enterprise_id) != str(self.enterprise_id))
         sender = cust.campaign.company if cust.campaign != None else self.request.ctx.user
-        return 'True' if comm.send_to_customer(sender, cust, None, self.request.POST.get('msg')) \
+        return 'True' if comm.send_to_customer(sender, cust, order=None, extra_message=self.request.POST.get('msg')) \
             else 'Unable to send email to %s' % cust.email
 
 

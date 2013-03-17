@@ -150,7 +150,7 @@ customer_send_email = function() {
                                 pvs.alert('Unable to send email:\n'+response);
                             }
                         }
-                        //, {msg: msg}
+                        , {msg: $('#message').val()}
                        );
 };
 
