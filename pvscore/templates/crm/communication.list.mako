@@ -8,7 +8,6 @@
   <table class="results sortable table table-striped" width="100%">
     <thead>
       <tr>
-        <td>ID</td>
         <td>Name</td>
         <td>Create Date</td>
       </tr>
@@ -16,9 +15,8 @@
     <tbody>
       % for cmp in comms:
       <tr>
-        <td>${cmp.comm_id}</td>
         <td>${h.link_to(cmp.name, '/crm/communication/edit/%s' % cmp.comm_id)}</td>
-        <td nowrap>${cmp.create_dt}</td>
+        <td nowrap>${h.date_time(cmp.create_dt)}</td>
       </tr>
       % endfor
     </tbody>
