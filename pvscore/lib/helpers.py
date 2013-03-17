@@ -52,24 +52,44 @@ def is_notrack(request):
         or ('pvs_notrack' in request.cookies.keys() and request.cookies['pvs_notrack'] == 'notrack')
 
 
-def add_this_buttons(request=None):
+def add_this_buttons_small(request, style=None):
     site = request.ctx.site
     if site and site.add_this_id:
         return literal("""
 <!-- AddThis Button BEGIN -->
-<div class="addthis_toolbox addthis_default_style">
+<div class="addthis_toolbox addthis_default_style" style="{style}">
 <a class="addthis_button_pinterest"></a>
 <a class="addthis_button_facebook"></a>
 <a class="addthis_button_twitter"></a>
 <a class="addthis_button_email"></a>
 <span class="addthis_separator">|</span>
-<a href="http://www.addthis.com/bookmark.php?v=250&amp;pubid=%s" class="addthis_button_compact">Share</a>
+<a href="http://www.addthis.com/bookmark.php?v=250&amp;pubid={add_this_id}" class="addthis_button_compact">Share</a>
 </div>
-<script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
-<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=%s"></script>
+<script type="text/javascript">var addthis_config = {{ "data_track_clickback":true }};</script>
+<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid={add_this_id}"></script>
 <!-- AddThis Button END -->
-                           """ % (site.add_this_id, site.add_this_id))
+                           """.format(add_this_id=site.add_this_id, style=style))
         
+
+def add_this_buttons_large(request, style=None):
+    site = request.ctx.site
+    if site and site.add_this_id:
+        return literal("""
+<!-- AddThis Button BEGIN -->
+<div class="addthis_toolbox addthis_default_style addthis_32x32_style" style="{style}">
+<a class="addthis_button_pinterest"></a>
+<a class="addthis_button_preferred_2"></a>
+<a class="addthis_button_preferred_3"></a>
+<a class="addthis_button_preferred_4"></a>
+<a class="addthis_button_compact"></a>
+<a class="addthis_counter addthis_bubble_style"></a>
+</div>
+<script type="text/javascript">var addthis_config = {{ "data_track_addressbar":true }};</script>
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid={add_this_id}"></script>
+<!-- AddThis Button END -->
+                           """.format(add_this_id=site.add_this_id, style=style))
+    
+
 def google_analytics(request=None, site=None, script_tags=True):  #pragma: no cover
     if not site:
         site = request.ctx.site
