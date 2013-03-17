@@ -117,8 +117,7 @@ class CartController(CatalogBaseController):
     @view_config(route_name='ecom.site.cart.checkout')
     def checkout(self):
         page = self.request.matchdict.get('page')
-        if 'cart' not in self.session:
-            return HTTPFound('/')   #pragma: no cover
+        self.redir_if(not 'cart' in self.session or not self.request.ctx.customer)
         params = self.params()
         cart = self.session['cart']
 
