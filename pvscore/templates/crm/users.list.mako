@@ -28,5 +28,5 @@
 % endif
 
 <%def name="draw_body()">\
-${self.draw_body_no_right_col()}
+${self.draw_body_no_left_col()}
 </%def>
