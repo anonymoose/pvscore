@@ -4928,7 +4928,6 @@ alter table crm_customer_order add foreign key (discount_id) references crm_disc
 
 
 
-
 select cust.customer_id,
        o.create_dt, cust.email, o.order_id,
   sum(oi.unit_cost*oi.quantity) as "cost",
@@ -4961,13 +4960,13 @@ o.customer_id = cust.customer_id and
 o.order_id = oi.order_id and
 o.campaign_id = cmp.campaign_id and
 cmp.company_id = co.company_id and
-co.enterprise_id = '{enterprise_id}' and
+co.enterprise_id = 'f93aa90b-1ae2-43a8-8ed3-a8aaa5a78589' and
 o.delete_dt is null and
 oi.delete_dt is null and
 o.status_id = cs.status_id and
 cs.event_id = csx.event_id and
-  ('2013-01-01' is null or o.create_dt >= '2013-01-01') and
-  ('2013-04-01' is null or o.create_dt <= '2013-04-01')
+  ('2013-02-14' is null or o.create_dt >= '2013-02-14') and
+  ('2013-03-16' is null or o.create_dt <= '2013-03-16')
 group by o.create_dt, cust.email,
   o.order_id, csx.display_name, cust.customer_id, o.user_created, o.shipping_total, o.handling_total
-
+;
