@@ -152,8 +152,8 @@
                     ${h.text('unit_cost', class_="input-small", value=product.unit_cost)}
                   </div>
                   <div class="span2">
-                    <label for="weight">Weight
-                      ${h.help("""Weight in pounds.  Used in shipping calculations.""")}
+                    <label for="weight">Weight (lbs)
+                      ${h.help("""Weight in pounds.  Example, 0.25 lb = 4 oz Used in shipping calculations.""")}
                     </label>
                     ${h.text('weight', class_="input-small", value=product.weight)}
                   </div>

@@ -5,7 +5,7 @@ from sqlalchemy.sql.expression import text
 from pvscore.model.meta import ORMBase, BaseModel, Session
 from pvscore.model.crm.company import Company
 from pvscore.thirdparty.dbcache import FromCache, invalidate
-from pvscore.lib.mail import MailInfo
+from pvscore.lib.mail import MailInfo, UserMail
 import uuid
 from pvscore.lib.sqla import GUID
 
@@ -88,6 +88,17 @@ class Campaign(ORMBase, BaseModel):
             from pvscore.model.crm.comm import Communication
             comm = Communication.load(comm_id)
             comm.send_to_customer(self, customer, order)
+
+
+    def send_admin_post_sale_comm(self, order):
+        mail_info = self.get_email_info()
+        if mail_info and mail_info.email:
+            mail = UserMail(self)
+            mail.send(mail_info.email, "New Order", """
+            New Order for {entname}<br/><br/><hr/><br/><br/>
+            {summary}
+            """.format(summary=order.summary, entname=order.campaign.company.name))
+        return True
 
 
     def send_post_purchase_comm(self, order):

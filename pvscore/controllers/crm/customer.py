@@ -797,6 +797,10 @@ class CustomerController(BaseController):
                 order.campaign.send_post_purchase_comm(order)
             except Exception as exc:  #pragma: no cover
                 log.exception(exc)
+            try:
+                order.campaign.send_admin_post_sale_comm(order)
+            except Exception as exc:  #pragma: no cover
+                log.exception(exc)
             return order
         else:
             (_, last_note) = api.get_last_status()

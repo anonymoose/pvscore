@@ -15,7 +15,6 @@ import pvscore.lib.util as util
 
 log = logging.getLogger(__name__)
 
-
 class MailInfo(object):
     def __init__(self, target):
         self.email = target.email
@@ -72,19 +71,6 @@ class UserMail(object):
             encode_base64(attachment)
             attachment.add_header('Content-Disposition', 'attachment',   filename=os.path.basename(attachment_path))
             return attachment
-
-
-            #if main_type == 'text':
-            #    attachment = MIMEText(attachment_file.read())
-            #elif main_type == 'message':
-            #    attachment = email.message_from_file(attachment_file)
-            #elif main_type == 'image':
-            #    attachment = MIMEImage(attachment_file.read(), _subType=sub_type)
-            #elif main_type == 'audio':
-            #    attachment = MIMEAudio(attachment_file.read(), _subType=sub_type)
-            #else:
-
-
 
 
 class GmailLogHandler(logging.handlers.SMTPHandler):
