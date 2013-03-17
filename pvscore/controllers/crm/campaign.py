@@ -80,7 +80,9 @@ class CampaignController(BaseController):
             if attr_name and attr_value:
                 cmpn.set_attr(attr_name, attr_value)
 
+        cmpn.save()
         cmpn.flush()
+        cmpn.invalidate_self()
         cmpn.invalidate_caches()
         self.request.session.flash('Successfully saved %s.' % cmpn.name)
         return HTTPFound('/crm/campaign/edit/%s' % cmpn.campaign_id)

@@ -320,7 +320,7 @@ def country_select_list(selected_country=None):
     ret = '\t<option value="US">UNITED STATES</option>'
     for cty in sorted(countries.keys()):
         ret += '\t<option value="{key}" {selected}>{name}</option>\n'.format(key=countries[cty],
-                                                                             selected='selected' if cty == selected_country else '',
+                                                                             selected='selected' if countries[cty] == selected_country else '',
                                                                              name=cty)
     return literal(ret)
 

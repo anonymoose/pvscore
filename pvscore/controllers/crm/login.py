@@ -91,7 +91,8 @@ class LoginController(BaseController):
         uid = self.request.params['username']
         cust = Customer.find_by_company(uid, self.request.ctx.site.company)
         if not cust:
-            raise HTTPFound('/')
+            self.flash('No user %s on file.  Please create a new account.' % uid)
+            raise HTTPFound(self.request.referrer if self.request.referrer else '/')
 
         # reset the customer's password to something random.
         cust.password = '%s%s%s' % (chr(random.randint(65, 90)),
