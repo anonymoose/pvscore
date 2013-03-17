@@ -68,6 +68,7 @@ class ReportController(BaseController):
 
         return {
             'today' : util.today_date(),
+            'tomorrow' : util.tomorrow(),
             'thirty_ago' : util.today_date() - datetime.timedelta(days=30),
             'rpt_end_dt' : self.request.GET.get('rpt_end_dt'),
             'rpt_start_dt' : self.request.GET.get('rpt_start_dt'),

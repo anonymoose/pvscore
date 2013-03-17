@@ -4926,3 +4926,48 @@ alter table crm_customer_order add column discount_percent_off float;
 alter table crm_customer_order add column discount_shipping_percent_off float;
 alter table crm_customer_order add foreign key (discount_id) references crm_discount;
 
+
+
+
+select cust.customer_id,
+       o.create_dt, cust.email, o.order_id,
+  sum(oi.unit_cost*oi.quantity) as "cost",
+  (sum(oi.unit_price*oi.quantity)) as "item_revenue",
+  (coalesce(o.shipping_total, 0)) as "shipping_revenue",
+  (coalesce(o.handling_total, 0)) as "handling_revenue",
+  (sum(oi.unit_price*oi.quantity)+coalesce(o.shipping_total,0)+coalesce(o.handling_total,0)) as "total_revenue",
+  (sum((oi.unit_price-(oi.unit_price-oi.unit_discount_price))*oi.quantity)) as "discount",
+  coalesce(  (select sum(coalesce(amount,0)) from crm_journal
+     where order_id = o.order_id
+    and type in ('CreditIncrease', 'Refund')), 0) as "refunds",
+  coalesce(  (select sum(coalesce(amount,0)) from crm_journal
+     where order_id = o.order_id
+    and type in ('FullPayment', 'PartialPayment')), 0) as "payments",
+   
+  coalesce(  (sum(oi.unit_price*oi.quantity)+coalesce(o.shipping_total,0)+coalesce(o.handling_total,0))
+    -coalesce((select sum(coalesce(amount,0)) from crm_journal
+              where order_id = o.order_id
+              and type in ('FullPayment', 'PartialPayment')), 0), 0) as "due",
+  csx.display_name,
+  CASE WHEN o.user_created is null THEN 'WEB'
+            ELSE 'OFFICE'
+       END as source
+from
+  crm_customer_order o, crm_customer cust,
+  crm_order_item oi, crm_campaign cmp,
+  crm_company co, core_status cs, core_status_event csx
+where
+o.customer_id = cust.customer_id and
+o.order_id = oi.order_id and
+o.campaign_id = cmp.campaign_id and
+cmp.company_id = co.company_id and
+co.enterprise_id = '{enterprise_id}' and
+o.delete_dt is null and
+oi.delete_dt is null and
+o.status_id = cs.status_id and
+cs.event_id = csx.event_id and
+  ('2013-01-01' is null or o.create_dt >= '2013-01-01') and
+  ('2013-04-01' is null or o.create_dt <= '2013-04-01')
+group by o.create_dt, cust.email,
+  o.order_id, csx.display_name, cust.customer_id, o.user_created, o.shipping_total, o.handling_total
+

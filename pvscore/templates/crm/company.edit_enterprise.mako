@@ -117,3 +117,6 @@
 </div>
 
 
+<%def name="draw_body()">\
+${self.draw_body_no_left_col()}
+</%def>

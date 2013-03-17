@@ -28,7 +28,7 @@
               <td>Start</td><td>${h.text('rpt_start_dt', class_="input-small datepicker", value=rpt_start_dt if rpt_start_dt else thirty_ago)}</td>
               % endif
               % if report.show_end_dt:
-              <td>End</td><td>${h.text('rpt_end_dt', class_="input-small datepicker", value=rpt_end_dt if rpt_end_dt else today)}</td>
+              <td>End</td><td>${h.text('rpt_end_dt', class_="input-small datepicker", value=rpt_end_dt if rpt_end_dt else tomorrow)}</td>
               % endif
               % if report.show_campaign_id:
               <td>Campaign</td><td>${h.select('rpt_campaign_id', request.GET.get('rpt_campaign_id'), campaigns)}</td>
