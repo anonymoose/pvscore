@@ -85,11 +85,15 @@
             <div class="row">
               <div class="span3">
                   <label for="">Google Analytics Id</label>
-                  ${h.text('google_analytics_id', value=site.google_analytics_id)}
+                  ${h.text('google_analytics_id', class_="input-medium", value=site.google_analytics_id)}
               </div>
               <div class="span3">
+                  <label for="">Add This Id</label>
+                  ${h.text('add_this_id', class_="input-medium", value=site.add_this_id)}
+              </div>
+              <div class="span2">
                   <label for="">EyeFound.IT Analytics Id</label>
-                  ${h.text('eyefoundit_analytics_id', value=site.eyefoundit_analytics_id)}
+                  ${h.text('eyefoundit_analytics_id', class_="input-medium", value=site.eyefoundit_analytics_id)}
               </div>
             </div>
             <div class="row">

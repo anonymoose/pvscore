@@ -38,6 +38,7 @@ class Site(ORMBase, BaseModel):
     seo_description = Column(String(1000))
     google_analytics_id = Column(String(20))
     eyefoundit_analytics_id = Column(String(20))
+    add_this_id = Column(String(30))
     shipping_method = Column(String(50))
     tax_method = Column(String(50))
     robots_txt = Column(Text)

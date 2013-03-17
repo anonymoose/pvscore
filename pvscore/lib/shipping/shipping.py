@@ -10,6 +10,102 @@ except ImportError:  #pragma: no cover
 
 log = logging.getLogger(__name__)
 
+# class USPSShipping(object):
+#     def get_options(self, customer, site, cart):
+#         if not self.is_intl:
+#             template = 'shipping/usps/request.xml'
+#         else:
+#             template = 'shipping/usps/request_intl.xml'
+#         request = self.render_template(template, cart, contact)
+#         self.is_valid = False
+
+#         if settings.LIVE.value:
+#             connection = settings.CONNECTION.value
+#         else:
+#             connection = settings.CONNECTION_TEST.value
+
+#         cache_key_response = "usps-cart-%s-response" % int(cart.id)
+#         cache_key_request = "usps-cart-%s-request" % int(cart.id)
+#         last_request = cache.get(cache_key_request)
+
+#         tree = cache.get(cache_key_response)
+
+#         if (last_request != request) or tree is None:
+#             self.verbose_log("Requesting from USPS [%s]\n%s", cache_key_request, request)
+#             cache.set(cache_key_request, request, 60)
+#             tree = self._process_request(connection, request)
+#             self.verbose_log("Got from USPS [%s]:\n%s", cache_key_response, self.raw)
+#             needs_cache = True
+#         else:
+#             needs_cache = False
+
+#         errors = tree.getiterator('Error')
+
+#         # if USPS returned no error, return the prices
+#         if errors == None or len(errors) == 0:
+#             # check for domestic results first
+#             all_packages = tree.getiterator('RateV3Response')
+
+#             # if there are none, revert to international results
+#             if len(all_packages) == 0:
+#                 all_packages = tree.getiterator('IntlRateResponse')
+#                 for package in all_packages:
+#                     for service in package.getiterator('Service'):
+#                         #self.verbose_log('%s vs %s' % (service.attrib['ID'], self.service_type_code))
+#                         if service.attrib['ID'] == self.service_type_code and \
+#                             self.service_type_text.startswith('Int`l: '):
+                            
+#                             self.charges = service.find('.//Postage').text
+#                             self.delivery_days = service.find('.//SvcCommitments').text
+#                             #self.verbose_log('%s %s' % (self.charges, self.delivery_days))
+#                             self.is_valid = True
+#                             self._calculated = True
+#                             self.exact_date = True
+
+#                             #if needs_cache:
+#                             #    cache.set(cache_key_response, tree, 60)
+#             else:
+#                 for package in all_packages:
+#                     for postage in package.getiterator('Postage'):
+#                         if postage.attrib['CLASSID'] == self.service_type_code and \
+#                             not self.service_type_text.startswith('Int`l: '):
+#                             self.charges = postage.find('.//Rate').text
+
+#                             # Now try to figure out how long it would take for this delivery
+#                             if self.api:
+#                                 delivery = self.render_template('shipping/usps/delivery.xml', cart, contact)
+#                                 del_tree = self._process_request(connection, delivery, self.api)
+#                                 parent = '%sResponse' % self.api
+#                                 del_iter = del_tree.getiterator(parent)
+
+#                                 if len(del_iter):
+#                                     i = del_iter[0]
+
+#                                     # express mail usually has a date commitment
+#                                     if self.api == 'ExpressMailCommitment':
+#                                         key = './/Date'
+#                                         self.exact_date = True
+#                                     else:
+#                                         key = './/Days'
+#                                     if i.find(key) != None:
+#                                         self.delivery_days = i.find(key).text
+
+#                             self.is_valid = True
+#                             self._calculated = True
+
+#                             #if needs_cache:
+#                             #    cache.set(cache_key_response, tree, 60)
+#         else:
+#             error = errors[0]
+#             err_num = error.find('.//Number').text
+#             source = error.find('.//Source').text
+#             description = error.find('.//Description').text
+#             log.info("USPS Error: Code %s: %s" % (err_num, description))
+
+
+
+
+
 class UPSShipping(object):
     def __init__(self):
         self.raw = None
