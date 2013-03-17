@@ -63,10 +63,10 @@ def add_this_buttons_small(request, style=None):
 <a class="addthis_button_twitter"></a>
 <a class="addthis_button_email"></a>
 <span class="addthis_separator">|</span>
-<a href="http://www.addthis.com/bookmark.php?v=250&amp;pubid={add_this_id}" class="addthis_button_compact">Share</a>
+<a href="https://www.addthis.com/bookmark.php?v=250&amp;pubid={add_this_id}" class="addthis_button_compact">Share</a>
 </div>
 <script type="text/javascript">var addthis_config = {{ "data_track_clickback":true }};</script>
-<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid={add_this_id}"></script>
+<script type="text/javascript" src="https://s7.addthis.com/js/250/addthis_widget.js#pubid={add_this_id}"></script>
 <!-- AddThis Button END -->
                            """.format(add_this_id=site.add_this_id, style=style))
         
@@ -85,7 +85,7 @@ def add_this_buttons_large(request, style=None):
 <a class="addthis_counter addthis_bubble_style"></a>
 </div>
 <script type="text/javascript">var addthis_config = {{ "data_track_addressbar":true }};</script>
-<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid={add_this_id}"></script>
+<script type="text/javascript" src="https://s7.addthis.com/js/300/addthis_widget.js#pubid={add_this_id}"></script>
 <!-- AddThis Button END -->
                            """.format(add_this_id=site.add_this_id, style=style))
     
