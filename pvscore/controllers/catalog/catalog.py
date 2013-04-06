@@ -7,6 +7,7 @@ from pyramid.response import Response
 from pyramid.renderers import render
 from pvscore.lib.cart import Cart
 from pvscore.model.crm.product import Product, ProductCategory
+from pvscore.model.crm.appointment import Appointment
 import pvscore.lib.util as util
 from pvscore.lib.smart.scatalog import SmartCatalog, SmartPricing, SmartSeo
 from pvscore.model.cms.content import Content
@@ -21,6 +22,7 @@ class CatalogBaseController(BaseController):
         if not 'cart' in self.session:
             self.session['cart'] = Cart(site)
         cart = self.session['cart']
+        events = Appointment.find_public(self.enterprise_id)
         return {'site' : site,
                 'base' : '%s/%s/' % (self.request.host_url.replace('http', 'https') if util.is_production() else self.request.host_url , site.namespace),
                 'user' : self.request.ctx.user,
@@ -28,6 +30,7 @@ class CatalogBaseController(BaseController):
                 'products_related' : None,
                 'category' : None,
                 'cart' : cart,
+                'events' : events,
                 'seo_title' : site.seo_title,
                 'seo_keywords' : site.seo_keywords,
                 'seo_description' : site.seo_description,

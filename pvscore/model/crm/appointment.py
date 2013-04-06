@@ -39,6 +39,7 @@ class Appointment(ORMBase, BaseModel):
     phone = Column(String(20))
     data_1 = Column(String(250))
     data_2 = Column(String(250))
+    public = Column(Boolean)
 
     creator = relation('Users', primaryjoin=Users.user_id == user_created)
     completor = relation('Users', primaryjoin=Users.user_id == user_completed)
@@ -70,10 +71,23 @@ class Appointment(ORMBase, BaseModel):
 
 
     @staticmethod
+    def find_public(enterprise_id):
+        return Session.query(Appointment)\
+            .join((Users, Appointment.user_created == Users.user_id))\
+            .filter(and_(Appointment.public == True,
+                         Appointment.delete_dt == None,
+                         #Users.enterprise_id == enterprise_id,
+                         Appointment.start_dt >= util.now()))\
+            .order_by(Appointment.start_dt.desc(), Appointment.start_time.asc()).all()
+
+
+    @staticmethod
     def find_by_user(user):
-        return Session.query(Appointment).filter(or_(Appointment.creator == user,
-                                                     Appointment.assigned == user)).order_by(Appointment.start_dt.asc(),
-                                                                                             Appointment.start_time.asc()).all()
+        return Session.query(Appointment)\
+            .filter(or_(Appointment.creator == user,
+                        Appointment.assigned == user))\
+                        .order_by(Appointment.start_dt.asc(),
+                                  Appointment.start_time.asc()).all()
 
 
     @staticmethod

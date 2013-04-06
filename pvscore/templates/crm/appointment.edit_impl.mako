@@ -8,13 +8,17 @@
         <div class="span9">
           <div class="well">
             <div class="row">
-              <div class="span5">
+              <div class="span3">
                 <label for="title">Title</label>
                 ${h.text('title', class_="input-xlarge", value=appointment.title)}
               </div>
               <div class="span2">
                 <label for="phone">Phone</label>
                 ${h.text('phone', class_="input-small", value=appointment.phone)}
+              </div>
+              <div class="span2">
+                <label for="public">&nbsp;</label>
+                ${h.chkbox('public', checked=appointment.public, label='Show on Website?')}
               </div>
             </div>
             <div class="row">

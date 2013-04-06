@@ -185,6 +185,12 @@ def words_date(d8e):
     return d8e.strftime("%B %d, %Y")
 
 
+def non_military_time(time):
+    if int(time.split(':')[0]) < 12:
+        return '%s am' % time
+    return '%s pm' % time
+
+
 def javascript_link_ex(url, request):
     return javascript_link(url+'?rnd='+str(request.session.get('_creation_time', random.random())))
 

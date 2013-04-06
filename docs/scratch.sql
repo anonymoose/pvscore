@@ -4970,3 +4970,13 @@ cs.event_id = csx.event_id and
 group by o.create_dt, cust.email,
   o.order_id, csx.display_name, cust.customer_id, o.user_created, o.shipping_total, o.handling_total
 ;
+
+
+
+SELECT crm_appointment.title 
+FROM crm_appointment JOIN core_user ON crm_appointment.user_created = core_user.user_id 
+WHERE crm_appointment.public = false AND crm_appointment.delete_dt IS NULL 
+AND core_user.enterprise_id = 'f93aa90b-1ae2-43a8-8ed3-a8aaa5a78589' AND crm_appointment.start_dt >= '2013-04-06' 
+ORDER BY crm_appointment.start_dt DESC, crm_appointment.start_time ASC;
+
+select crm_appointment.title, crm_appointment.user_created from crm_appointment where public = true;
