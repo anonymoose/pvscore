@@ -76,7 +76,7 @@ class Appointment(ORMBase, BaseModel):
             .join((Users, Appointment.user_created == Users.user_id))\
             .filter(and_(Appointment.public == True,
                          Appointment.delete_dt == None,
-                         #Users.enterprise_id == enterprise_id,
+                         Users.enterprise_id == enterprise_id,
                          Appointment.start_dt >= util.now()))\
             .order_by(Appointment.start_dt.desc(), Appointment.start_time.asc()).all()
 
