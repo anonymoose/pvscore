@@ -159,8 +159,9 @@ class Customer(ORMBase, BaseModel):
         return Session.query(Customer).from_statement(sql).all()
 
 
-    def add_order(self, cart, user_created, enterprise_id, campaign, incl_tax=True):     #pylint: disable-msg=R0913
-        return CustomerOrder.create_new(cart, self, enterprise_id, campaign, user_created, incl_tax)
+    def add_order(self, cart, user_created, enterprise_id, campaign, order_note=None, incl_tax=True):     #pylint: disable-msg=R0913
+        return CustomerOrder.create_new(cart, self, enterprise_id, campaign, user_created,
+                                        order_note=order_note, incl_tax=incl_tax)
 
 
     def get_order(self, order_id):

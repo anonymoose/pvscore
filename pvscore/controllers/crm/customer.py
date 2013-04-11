@@ -678,7 +678,7 @@ class CustomerController(BaseController):
                           quantity=quantity,
                           attributes=attrs,
                           base_price=price)
-        order = cust.add_order(cart, user, self.enterprise_id, cust.campaign, incl_tax)
+        order = cust.add_order(cart, user, self.enterprise_id, cust.campaign, incl_tax=incl_tax)
         order.flush()
         return order.order_id
 
@@ -775,8 +775,8 @@ class CustomerController(BaseController):
                 else:
                     self.flash("No such product sku: %s" % sku)
                     self.raise_redirect(self.request.referrer)
-
-        order = cust.add_order(cart, None, self.enterprise_id, campaign)
+        order = cust.add_order(cart, None, self.enterprise_id, campaign,
+                               order_note=self.request.POST.get('order_note'))
         return self._bill_credit_card(cust, order, bill)
 
 
@@ -932,164 +932,3 @@ class CustomerController(BaseController):
         self._site_purchase(cust)
         return self.find_redirect('?customer_id=' + str(cust.customer_id))
 
-
-#    def signup_free(self):
-#        """ KB: [2011-04-26]:
-#        Sign up just like in self.signup.
-#        Add the product ID's to the cart.
-#        Add a real order and save everything
-#        - Products are whatever free thing is being offered.
-#        - Don't create billing because this thing is free.
-#        Send the customer the post_purchase comm as configured for the campaign.
-#        Redirect to POST['redir']
-#        """
-#        if not self._signup():
-#            return HTTPFound(url('{url}?msg=signup_failed'.format(url=self.request.POST.get('url_path'))))
-#
-#        product_ids = self.request.POST.getall('prod_product_id')
-#        cust = Customer.load(self.session['customer_id'])
-#        cart = Cart()
-#        for id in product_ids:
-#            cart.add_item(Product.load(id), cust.campaign_id)
-#
-#        campaign = Campaign.load(cust.campaign_id)
-#        order = cust.add_order(cart,
-#                               None,
-#                               Site.load(self.session['site_id']),
-#                               campaign)
-#        self.db_commit()
-#        campaign.send_post_purchase_comm(order)
-#        return HTTPFound(self.request.POST.get('redir'))
-#
-
-#    def cc_response_handler(self, api, response_dict, history_record, order, billing):
-#        """ KB: [2010-10-20]: Callback for handling the API when it's completed processing. """
-#        if api.is_declined(response_dict):
-#            Status.add(order.customer, order, Status.find_event(self.enterprise_id, order, 'BILLING_DECLINED'),
-#                       'Billing Declined: %s' % history_record.notes).flush()
-#            return False
-#        else:
-#            Status.add(order.customer, order, Status.find_event(self.enterprise_id, order, 'BILLING_SUCCESS'),
-#                       'Billing Succeeded: %s' % history_record.notes).flush()
-#            j = Journal.create_new(order.total_payments_due(), order.customer, order, None,
-#                                   'FullPayment', 'Credit Card', None)
-#            if j:
-#                j.flush()
-#            return True
-
-    # @view_config(route_name='crm.customer.show_summary', renderer='/crm/customer.summary_report.mako')
-    # @authorize(IsLoggedIn())
-    # def show_summary(self):
-    #     customer_id = self.request.matchdict.get('customer_id')
-    #     customer = Customer.load(customer_id)
-    #     self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
-    #     today = util.today()
-    #     start_dt = util.parse_date(self.request.GET.get('start_dt') if self.request.GET.get('start_dt') else '%s-01-01' % today.year)
-    #     end_dt = util.parse_date(self.request.GET.get('end_dt') if self.request.GET.get('end_dt') else util.format_date(today))
-    #     return {
-    #         'start_dt' : start_dt,
-    #         'end_dt' : end_dt,
-    #         'customer' : customer,
-    #         'orders' : CustomerOrder.find_by_customer(customer, None, start_dt, end_dt)
-    #         }
-
-    # @authorize(IsCustomerLoggedIn())
-    # @validate((('password', 'required'),
-    #            ('confirmpassword', 'required')))
-    # def self_change_password(self):
-    #     """ KB: [2012-01-31]: Called from end site customer self-edit section. """
-    #     self.forbid_if('customer_id' not in self.session)
-    #     cust = Customer.load(self.session['customer_id'])
-    #     self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
-
-    #     cust.password = self.request.POST.get('password')
-    #     cust.save()
-    #     self.flash('Password changed.')
-    #     if self.request.POST.get('redir'):
-    #         return HTTPFound(self.request.POST.get('redir'))
-    #     else:
-    #         return HTTPFound(self.request.referrer)
-
-
-
-    # @view_config(route_name='crm.customer.edit_billing_dialog', renderer='/crm/customer.edit_billing.mako')
-    # @authorize(IsLoggedIn())
-    # def edit_billing_dialog(self):
-    #     customer_id = self.request.matchdict.get('customer_id')
-    #     customer = Customer.load(customer_id)
-    #     self.forbid_if(not customer or customer.campaign.company.enterprise_id != self.enterprise_id)
-    #     if not customer.billing:
-    #         customer.billing = Billing.create(customer, False)
-    #     billing_types = Billing.get_billing_types()
-    #     return {
-    #         'customer' : customer,
-    #         'billing_types' : billing_types
-    #         }
-
-
-    # @view_config(route_name='crm.customer.edit_billing', renderer='string')
-    # @authorize(IsLoggedIn())
-    # def edit_billing(self):
-    #     customer_id = self.request.matchdict.get('customer_id')
-    #     cust = Customer.load(customer_id)
-    #     self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
-    #     if not cust.billing:
-    #         cust.billing = Billing.create(cust)
-    #         cust.billing.user_created = self.request.ctx.user
-    #     if self.request.POST.has_key('cc_num'):
-    #         cust.billing._cc_num = self.request.POST.get('cc_num')
-    #     cust.billing.bind(self.request.POST)
-    #     cust.billing.save()
-    #     return 'True'
-
-
-    # @view_config(route_name='crm.customer.cancel_billing', renderer='string')
-    # @authorize(IsLoggedIn())
-    # def cancel_billing(self):
-    #     customer_id = self.request.matchdict.get('customer_id')
-    #     journal_id = self.request.matchdict.get('journal_id')
-    #     cust = Customer.load(customer_id)
-    #     self.forbid_if(not cust or cust.campaign.company.enterprise_id != self.enterprise_id)
-    #     jrnl = Journal.load(journal_id)
-    #     self.forbid_if(not jrnl or jrnl.customer_id != cust.customer_id)
-    #     jrnl.cancel()
-    #     self.flash('Billing record cancelled.')
-    #     return HTTPFound('/crm/customer/show_billings/%s' % cust.customer_id)
-
-
-    # @view_config(route_name='crm.customer.add_order_and_apply', renderer='string')
-    # @authorize(IsLoggedIn())
-    # def add_order_and_apply(self):
-    #     """ KB: [2011-10-21]:
-    #     If an email thats not POS@ was specified, then send them a receipt.
-    #     otherwise, just save it and move on to the next order.
-    #     """
-    #     customer_id = self.request.matchdict.get('customer_id')
-    #     pmt_method = self.request.matchdict.get('pmt_method')
-    #     email = self.request.GET.get('email')
-    #     cust = None
-    #     if email:
-    #         campaign = Campaign.load(self.request.GET.get('campaign_id'))
-    #         cust = Customer.find(email, campaign)
-    #         if not cust:
-    #             cust = Customer()
-    #             cust.campaign = campaign
-    #         cust.email = email
-    #         cust.save()
-    #         cust.flush()
-    #         customer_id = cust.customer_id
-    #     order_id = self.add_order(customer_id, False)
-    #     self.forbid_if(not order_id)
-    #     order = CustomerOrder.load(order_id)
-    #     self.forbid_if(not order)
-    #     ret = self.apply_payment(customer_id, order_id, 'FullPayment', pmt_method, order.total_price())
-    #     if cust:
-    #         cust.campaign.send_post_purchase_comm(order)
-    #     return ret
-
-
-    # @view_config(route_name='crm.customer.add_order_item_dialog', renderer='/crm/customer.add_order_item.mako')
-    # @authorize(IsLoggedIn())
-    # def add_order_item_dialog(self):
-    #     customer_id = self.request.matchdict.get('customer_id')
-    #     return self._prep_add_order_dialog(customer_id)
