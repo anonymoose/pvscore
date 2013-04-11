@@ -4980,3 +4980,8 @@ AND core_user.enterprise_id = 'f93aa90b-1ae2-43a8-8ed3-a8aaa5a78589' AND crm_app
 ORDER BY crm_appointment.start_dt DESC, crm_appointment.start_time ASC;
 
 select crm_appointment.title, crm_appointment.user_created from crm_appointment where public = true;
+
+
+
+select * from crm_product_category where category_id = '0bc941d3-faba-414e-8481-fd7b0773816d';
+

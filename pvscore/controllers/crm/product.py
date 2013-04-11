@@ -246,8 +246,13 @@ class ProductController(BaseController):
             if attr_name and attr_value:
                 prod.set_attr(attr_name, attr_value)
 
+        category_id = self.request.POST.get('category_id')
+        if category_id:
+            category = ProductCategory.load(category_id)
+            self.forbid_if(not category)
+            category.add_product(prod.product_id)
+
         self.flash('Successfully saved %s.' % prod.name)
-        
         return HTTPFound('/crm/product/edit/%s%s' % (prod.product_id, redir_params))
 
 
