@@ -347,10 +347,10 @@ def lightbox(imgsrc, caption=None, lbid=None, style=None):
     return literal("""
     <a href="#{lbid}" data-toggle="lightbox"><img src="{imgsrc}" style="{style}"/></a>
     <div id="{lbid}" class="lightbox hide fade"  tabindex="-1" role="dialog" aria-hidden="true">
-      <div class='lightbox-header'>
+      <div class="lightbox-header">
         <button type="button" class="close" data-dismiss="lightbox" aria-hidden="true">&times;</button>
       </div>
-      <div class='lightbox-content'>
+      <div class="lightbox-content">
         <img src="{imgsrc}"/>
         {caption}
       </div>
