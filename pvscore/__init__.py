@@ -33,6 +33,7 @@ def _config_impl(cfg, settings):
     cfg.add_tween('pvscore.controllers.tweens.request_context_tween_factory')
     cfg.add_tween('pvscore.controllers.tweens.timing_tween_factory')
     cfg.add_tween('pvscore.controllers.tweens.exclog_tween_factory')
+    cfg.add_tween('pvscore.controllers.tweens.header_mod_tween_factory')
     crm_routes(cfg)
     cfg.add_view(context='pyramid.exceptions.NotFound', view=dynamic_url_lookup)
     cfg.scan()

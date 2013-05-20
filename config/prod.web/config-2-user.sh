@@ -12,8 +12,6 @@ git clone git@github.com:anonymoose/pvscore.git
 sudo chown -R kbedwell.web pvscore
 git clone git@github.com:anonymoose/pvs.git
 sudo chown -R kbedwell.web pvs
-git clone git@github.com:anonymoose/wm.git
-sudo chown -R kbedwell.web wm
 git clone git@github.com:anonymoose/stats.git
 sudo chown -R kbedwell.web stats
 export PYTHON_EGG_CACHE=/apps/pvs/.python-eggs
@@ -25,13 +23,12 @@ pip install numpy
 pip install scipy
 pip install matplotlib
 pip install TA-Lib
+pip install --index-url https://code.stripe.com --upgrade stripe
 
 
 cd pvscore
 python setup.py develop
 cd ../pvs
-python setup.py develop
-cd ../wm
 python setup.py develop
 
 
@@ -44,7 +41,5 @@ sudo mount db01-bak.eyefound.it:/apps/pvs/storage /apps/pvs/storage
 sudo systemctl start nginx.service
 sudo systemctl enable pvs.service
 sudo systemctl start pvs.service
-sudo systemctl enable wm.service
-sudo systemctl start wm.service
 sudo systemctl start htttpd
 
