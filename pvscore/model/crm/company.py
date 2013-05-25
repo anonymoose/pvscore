@@ -226,11 +226,11 @@ class Enterprise(ORMBase, BaseModel):
             Session.execute("delete from crm_product_category_join where product_id = '%s'" % product_id)
             Session.execute("delete from crm_product_child where parent_id = '%s'" % product_id)
             Session.execute("delete from crm_product_child where child_id = '%s'" % product_id)
-            Session.execute("delete from crm_product_pricing where product_id = '%d'" % product_id)
-            Session.execute("delete from crm_product_inventory_journal where product_id = '%d'" % product_id)
-            Session.execute("delete from crm_purchase_order_item where product_id = '%d'" % product_id)
-            Session.execute("delete from crm_order_item where product_id = '%d'" % product_id)
-            Session.execute("delete from crm_product where product_id = '%d'" % product_id)
+            Session.execute("delete from crm_product_pricing where product_id = '%s'" % product_id)
+            Session.execute("delete from crm_product_inventory_journal where product_id = '%s'" % product_id)
+            Session.execute("delete from crm_purchase_order_item where product_id = '%s'" % product_id)
+            Session.execute("delete from crm_order_item where product_id = '%s'" % product_id)
+            Session.execute("delete from crm_product where product_id = '%s'" % product_id)
 
         for cid in campaign_ids:
             campaign_id = cid[0]
@@ -247,6 +247,7 @@ class Enterprise(ORMBase, BaseModel):
             Session.execute("delete from crm_campaign where company_id = '%s'" % company_id)
             Session.execute("delete from crm_purchase_order where company_id = '%s'" % company_id)
 
+        Session.execute("delete from core_asset where enterprise_id = '%s'" % enterprise_id)            
         Session.execute("delete from crm_communication where enterprise_id = '%s'" % enterprise_id)
         Session.execute("delete from core_status where event_id in (select event_id from core_status_event where enterprise_id = '%s')" % enterprise_id)
         Session.execute("delete from core_status_event_reason where event_id in (select event_id from core_status_event where enterprise_id = '%s')" % enterprise_id)
@@ -254,7 +255,12 @@ class Enterprise(ORMBase, BaseModel):
         Session.execute("delete from cms_template where enterprise_id = '%s'" % enterprise_id)
         Session.execute("delete from crm_company where enterprise_id = '%s'" % enterprise_id)
         #Session.execute('update core_user set enterprise_id = null where enterprise_id = '%s'" % enterprise_id)
+
+        Session.execute("delete from core_status where username in (select user_id from core_user where enterprise_id = '%s')" % enterprise_id)
+        Session.execute("delete from crm_customer where user_created in (select user_id from core_user where enterprise_id = '%s')" % enterprise_id)
+        Session.execute("delete from crm_customer where user_assigned in (select user_id from core_user where enterprise_id = '%s')" % enterprise_id)
         Session.execute("delete from core_user where enterprise_id = '%s'" % enterprise_id)
+        Session.execute("delete from crm_discount where enterprise_id = '%s'" % enterprise_id)
         Session.execute("delete from crm_vendor where enterprise_id = '%s'" % enterprise_id)
         Session.execute("delete from crm_enterprise where enterprise_id = '%s'" % enterprise_id)
 

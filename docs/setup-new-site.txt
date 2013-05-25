@@ -43,6 +43,6 @@ edit setup.py
 
 python setup.py develop
 
-# setup __init__.py to look like wm's
-# setup directory structure as empty, but like wm's
+# setup __init__.py to look like pvs's
+# setup directory structure as empty, but like pvs's
 # ensure that the scan in __init__.py is right for your new app

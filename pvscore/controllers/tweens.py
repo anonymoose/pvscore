@@ -22,7 +22,6 @@ def header_mod_tween_factory(handler, registry):
             response = handler(request)
         finally:
             response.headers['X-Frame-Options'] = 'Deny'
-            import pdb; pdb.set_trace()
         return response
     return header_mod_tween
 

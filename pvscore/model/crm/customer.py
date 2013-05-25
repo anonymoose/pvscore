@@ -231,6 +231,7 @@ class Customer(ORMBase, BaseModel):
         Session.execute("update crm_customer set status_id = null where customer_id = '%s'" % customer_id)
         Session.execute("delete from core_status where customer_id = '%s'" % customer_id)
         Session.execute("delete from crm_billing_history where customer_id = '%s'" % customer_id)
+        Session.execute("delete from crm_appointment where customer_id = '%s'" % customer_id)
         #Session.execute("delete from wm_portfolio where customer_id = '%s'" % customer_id)
         #Session.execute("delete from wm_customer_holding where customer_id = '%s'" % customer_id)
         #Session.execute("delete from wm_ireport_view_log where customer_id = '%s'" % customer_id)
