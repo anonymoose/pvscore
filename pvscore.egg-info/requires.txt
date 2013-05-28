@@ -7,7 +7,7 @@ pyramid_mailer
 pyramid_exclog
 zope.sqlalchemy
 waitress
-psycopg2
+psycopg2ct
 redis
 html5lib
 lxml
@@ -27,7 +27,6 @@ nose
 nose-exclude
 pylint
 pyflakes
-feedparser
 selenium
 stripe
 PyRSS2Gen
@@ -39,6 +38,3 @@ restkit
 oauth2
 certifi
 beautifulsoup4
-pandas
-numexpr
-Cython

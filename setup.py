@@ -15,7 +15,8 @@ requires = [
     'pyramid_exclog',
     'zope.sqlalchemy',
     'waitress',
-    'psycopg2',
+    #'psycopg2',
+    'psycopg2ct',
     'redis',
     'html5lib',
     'lxml',
@@ -35,7 +36,7 @@ requires = [
     'nose-exclude',
     'pylint',
     'pyflakes',
-    'feedparser',
+    #'feedparser',
     'selenium',
     'stripe',
     'PyRSS2Gen',
@@ -46,10 +47,10 @@ requires = [
     'restkit',
     'oauth2',
     'certifi',
-    'beautifulsoup4',
-    'pandas',
-    'numexpr',
-    'Cython'
+    'beautifulsoup4'
+    #'pandas',
+    #'numexpr',
+    #'Cython'
     #'requests==0.8.8'
     ]
 

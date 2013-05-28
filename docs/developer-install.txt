@@ -10,6 +10,7 @@ brew install python --framework --universal --with-brewed-openssl
 cd /System/Library/Frameworks/Python.framework/Versions
 sudo rm -rf Current
 sudo ln -s /usr/local/Cellar/python/2.7.3/Frameworks/Python.framework/Versions/Current
+brew install pypy
 
 # add the following to your .profile
 export PATH=$PATH:/usr/local/share/python
@@ -25,42 +26,63 @@ cd ~/dev/pydev
 mkdir pvs
 cd pvs
 
+pip install virtualenv
+pip install virtualenvwrapper
+
 mkdir .python-eggs
 mkdir -p storage/enterprise
 mkdir -p storage/wm/pdf
 
-wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
-
-python virtualenv.py --no-site-packages .
-source bin/activate
-pip install pyramid
 git clone git@github.com:anonymoose/pvscore.git
 git clone git@github.com:anonymoose/pvs.git
 git clone git@github.com:anonymoose/wm.git
 git clone git@github.com:anonymoose/stats.git
-
 chmod g+wx pvs
 
-brew install pyqt
-pip install numpy
-pip install -e git+https://github.com/scipy/scipy#egg=scipy-dev
-pip install git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib-dev
-pip install ipython
-brew install hdf5
-pip install numexpr
-pip install Cython
-pip install -e git+https://github.com/PyTables/PyTables.git@v.2.4.0#egg=tables
-brew install ta-lib
-pip install TA-Lib
+#
+# set up cython based setup for apps with numpy
+#
+    virtualenv --no-site-packages python
+    
+    source python/bin/activate
+    pip install pyramid
+    pip install ipython
+    
+    # optional for math/finance apps...
+        brew install pyqt
+        pip install numpy
+        pip install Cython
+        pip install -e git+https://github.com/scipy/scipy#egg=scipy-dev
+        pip install git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib-dev
+        brew install hdf5
+        pip install numexpr
+        pip install -e git+https://github.com/PyTables/PyTables.git@v.2.4.0#egg=tables
+        brew install ta-lib
+        pip install TA-Lib
+    
+    
+    cd pvscore
+    python setup.py develop
+    cd ../pvs
+    python setup.py develop
+    cd ../kalance
+    python setup.py develop
+    
+deactivate
 
-cd pvscore
-python setup.py develop
-cd ../pvs
-python setup.py develop
-cd ../wm
-python setup.py develop
+#
+#  set up pypy for plain webapps.  numpy, scipy, matplotlib don't work
+#  with pypy
+#
 
+    virtualenv -p /usr/local/bin/pypy --no-site-packages pypy
+    source pypy/bin/activate
+    pip install pyramid
+    pip install ipython
 
-
-
-
+    cd pvscore
+    python setup.py develop
+    cd ../pvs
+    python setup.py develop
+    cd ../kalance
+    python setup.py develop

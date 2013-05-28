@@ -1,6 +1,10 @@
 import logging
 from pvscore.model.meta import Session
 import pvscore.lib.util as util
+#import psycopg2.extras
+
+from psycopg2ct import compat
+compat.register()
 import psycopg2.extras
 
 log = logging.getLogger(__name__)
