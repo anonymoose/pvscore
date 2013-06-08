@@ -18,10 +18,8 @@ log = logging.getLogger(__name__)
 def header_mod_tween_factory(handler, registry):
     """ KB: [2013-05-16]: Add headers that for security or whatever else. """
     def header_mod_tween(request):
-        try:
-            response = handler(request)
-        finally:
-            response.headers['X-Frame-Options'] = 'Deny'
+        response = handler(request)
+        response.headers['X-Frame-Options'] = 'Deny'
         return response
     return header_mod_tween
 

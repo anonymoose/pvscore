@@ -56,7 +56,7 @@ class TestCatalog(TestController):
         R = self.get('/ecom/content/%s/catalog_content?content_name=%s' % (cnt.name, cnt.name))
         assert R.status_int == 200
         R.mustcontain(cnt.name)
-        R.mustcontain(self.site.site_id)
+        R.mustcontain(str(self.site.site_id))
         content_delete_new(content_id)
 
 
