@@ -122,11 +122,11 @@ cd ~
 
 ########################################################################
 # NFS
-rm -f /etc/sysconfig/nfs /etc/exports
-cp /apps/pvs/pvscore/config/prod.db/etc/sysconfig/nfs /etc/sysconfig/nfs
-cp /apps/pvs/pvscore/config/prod.db/etc/exports /etc
-systemctl enable nfs-server
-systemctl start nfs-server
+#rm -f /etc/sysconfig/nfs /etc/exports
+#cp /apps/pvs/pvscore/config/prod.db/etc/sysconfig/nfs /etc/sysconfig/nfs
+#cp /apps/pvs/pvscore/config/prod.db/etc/exports /etc
+#systemctl enable nfs-server
+#systemctl start nfs-server
 
 ########################################################################
 # nagios

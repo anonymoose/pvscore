@@ -35,8 +35,8 @@ python setup.py develop
 
 ########################################################################
 # nfs
-su -c "echo db01-bak.eyefound.it:/apps/pvs/storage /apps/pvs/storage  nfs   rw,noatime    0   0 >> /etc/fstab"
-sudo mount db01-bak.eyefound.it:/apps/pvs/storage /apps/pvs/storage
+#su -c "echo db01-bak.eyefound.it:/apps/pvs/storage /apps/pvs/storage  nfs   rw,noatime    0   0 >> /etc/fstab"
+#sudo mount db01-bak.eyefound.it:/apps/pvs/storage /apps/pvs/storage
 
 sudo systemctl start nginx.service
 sudo systemctl enable pvs.service
