@@ -502,8 +502,6 @@ class AuthorizeNetBillingApi(BaseBillingApi):
         data['shipping_country'] = response[31]
         data['card_code_response'] = response[38]
         return data
-
-
 # """
 # Gateway run by Matt Piruvil (mpirvul@eaccounts.net)
 # API documentation : https://admin.eaccounts.net/apiconf.php

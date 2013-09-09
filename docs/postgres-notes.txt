@@ -82,6 +82,15 @@ select pg_class.relname,pg_locks.* from pg_class,pg_locks where pg_class.relfile
      outer join pg_class on (pg_locks.relation = pg_class.oid)
    where pg_locks.pid=pg_stat_activity.procpid order by query_start;
 
+# lock detection 2.a
+ select
+        pg_stat_activity.current_query, pg_stat_activity.query_start,
+     age(now(),pg_stat_activity.query_start) as "age", pg_stat_activity.procpid
+   from pg_stat_activity,pg_locks left
+     outer join pg_class on (pg_locks.relation = pg_class.oid)
+   where pg_locks.pid=pg_stat_activity.procpid order by query_start;
+
+
 # lock detection 3
  select
      pg_stat_activity.datname,pg_class.relname,pg_locks.mode,substr(pg_stat_activity.current_query,1,50),

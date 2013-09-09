@@ -46,7 +46,6 @@ class Listing(ORMBase, BaseModel):
     status = relation('Status')
     site = relation("Site")
 
-
     @property
     def hash(self):
         salt = 'derf'
