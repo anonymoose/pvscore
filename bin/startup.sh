@@ -35,4 +35,4 @@ OPTIONS=" $CONFIG \
 echo -n "Starting $DESC: "
 cd $APP_PATH
 $PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_1 --log-file=$LOG_FILE_1 http_port=$PORT1 &
-$PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_2 --log-file=$LOG_FILE_2 http_port=$PORT2 &
+#$PYTHON $PASTER $OPTIONS --pid-file=$PID_FILE_2 --log-file=$LOG_FILE_2 http_port=$PORT2 &
