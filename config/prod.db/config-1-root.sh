@@ -47,7 +47,7 @@ yum -y update
 yum -y groupinstall 'Development Tools'
 yum -y install python-devel python-setuptools dos2unix readline-devel zlib-devel emacs-nox mlocate lapack.x86_64 lapack-devel.x86_64 atlas.x86_64 atlas.x86_64 blas.x86_64 blas-devel.x86_64 freetype freetype-devel libpng libpng-devel memcached at openssl pam_mysql fprintd-pam xslt libxml libxml-devel libxslt libxslt-devel fail2ban redis postgresql91-server postgresql91-contrib postgresql91-devel python-psycopg2 nrpe nagios-plugins-all openssl-devel xinetd ntpdate htmldoc libcurl-devel yasm yasm-devel
 yum -y install nagios nagios-common nagios-devel nagios-plugins-all nrpe nagios-plugins-nrpe
-yum -y install mysql mysql-server
+#yum -y install mysql mysql-server
 updatedb
 
 ########################################################################
@@ -67,9 +67,9 @@ systemctl start atd.service
 
 ################################################################
 ## mysql
-systemctl enable mysqld.service
-systemctl start mysqld.service
-mysqladmin -u root password $2
+#systemctl enable mysqld.service
+#systemctl start mysqld.service
+#mysqladmin -u root password $2
 
 ################################################################
 ## Prep kernel for postgres memory usage.
@@ -95,6 +95,9 @@ systemctl start redis.service
 echo postgres | passwd --stdin postgres
 usermod -a -G wheel postgres
 
+################################################################
+# bootstrap setup tools
+sudo wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py -O - | python
 
 ########################################################################
 # TA-LIB

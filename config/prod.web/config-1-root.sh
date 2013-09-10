@@ -93,6 +93,10 @@ systemctl start redis.service
 echo postgres | passwd --stdin postgres
 usermod -a -G wheel postgres
 
+################################################################
+# bootstrap setup tools
+sudo wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py -O - | python
+
 ########################################################################
 # TA-LIB
 cd ~

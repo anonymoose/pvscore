@@ -15,15 +15,16 @@ sudo chown -R kbedwell.web pvs
 #git clone git@github.com:anonymoose/stats.git
 #sudo chown -R kbedwell.web stats
 export PYTHON_EGG_CACHE=/apps/pvs/.python-eggs
+
+easy_install pip
 wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
 python virtualenv.py --no-site-packages .
+
 source bin/activate
 easy_install pyramid
 pip install numpy
 pip install scipy
-pip install matplotlib
-pip install TA-Lib
-pip install --index-url https://code.stripe.com --upgrade stripe
+pip install matplotlib ; pip install TA-Lib ; pip install --index-url https://code.stripe.com --upgrade stripe
 
 
 cd pvscore
