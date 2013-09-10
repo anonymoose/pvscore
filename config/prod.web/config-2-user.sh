@@ -16,15 +16,20 @@ sudo chown -R kbedwell.web pvs
 #sudo chown -R kbedwell.web stats
 export PYTHON_EGG_CACHE=/apps/pvs/.python-eggs
 
-easy_install pip
+sudo easy_install pip
 wget 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
 python virtualenv.py --no-site-packages .
 
 source bin/activate
+wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py -O - | python
+easy_install pip
 easy_install pyramid
 pip install numpy
 pip install scipy
-pip install matplotlib ; pip install TA-Lib ; pip install --index-url https://code.stripe.com --upgrade stripe
+pip install cython
+pip install matplotlib 
+pip install TA-Lib  
+pip install --index-url https://code.stripe.com --upgrade stripe
 
 
 cd pvscore
