@@ -24,7 +24,8 @@ class CatalogBaseController(BaseController):
         cart = self.session['cart']
         events = Appointment.find_public(self.enterprise_id)
         return {'site' : site,
-                'base' : '%s/%s/' % (self.request.host_url.replace('http', 'https') if util.is_production() else self.request.host_url , site.namespace),
+                #'base' : '%s/%s/' % (self.request.host_url.replace('http', 'https') if util.is_production() else self.request.host_url , site.namespace),
+                'base' : '%s/%s/' % (self.request.host_url, site.namespace),
                 'user' : self.request.ctx.user,
                 'product' : None,
                 'products_related' : None,

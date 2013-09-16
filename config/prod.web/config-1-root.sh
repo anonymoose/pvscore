@@ -119,7 +119,7 @@ ln -s /usr/lib/systemd/system/wm.service /etc/systemd/system/multi-user.target.w
 systemctl daemon-reload
 
 ########################################################################
-# nagios
+# Nagios
 useradd nagios
 echo nagios | passwd --stdin nagios
 groupadd nagcmd

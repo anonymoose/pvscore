@@ -27,5 +27,16 @@ LOG_FILE_2=$ROOT_DIR/log/$DESC.$PORT2.log
 PID_FILE_1=$ROOT_DIR/$DESC.$PORT1.pid
 PID_FILE_2=$ROOT_DIR/$DESC.$PORT2.pid
 
-cat $PID_FILE_1 | xargs kill
-cat $PID_FILE_2 | xargs kill
+if [ -f $PID_FILE_1 ]
+then
+    kill `cat $PID_FILE_1`
+    rm -f $PID_FILE_1
+fi 
+
+if [ -f $PID_FILE_2 ]
+then
+    kill `cat $PID_FILE_2`
+    rm -f $PID_FILE_2
+fi
+
+exit 0
