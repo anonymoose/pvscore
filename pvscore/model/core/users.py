@@ -79,7 +79,7 @@ class Users(ORMBase, BaseModel):
 
     @staticmethod
     def encode_password(password):
-        return md5(password).hexdigest()
+        return password #md5(password).hexdigest()
 
 
     @staticmethod
